@@ -38,23 +38,6 @@ Required: [Node](https://nodejs.org/) plus [npm](https://docs.npmjs.com/) and [G
    ```bash
    git checkout -b ZP-B01/Feat/swagger docs
    ```
-7. Commit your changes with a descriptive commit message
-
-   ```bash
-   git commit -m "your commit message"
-   ```
-
-8. To make sure there are no conflicts, run
-   ```bash
-   git pull origin dev
-   ```
-9. Push changes to your new branch, run
-
-   ```bash
-   git push -u origin ZP-B01/Feat/swagger docs
-   ```
-
-10. Create a pull request to the `dev` branch and not `main`.
 
 
 ## Running Locally
@@ -71,15 +54,22 @@ npm run start:dev
 
 ## Pushing your code
 
-```bash
-# add and commit your changes
+1. Commit your changes with a descriptive commit message, run:
+   ```bash
+   git commit -m "your commit message"
+   ```
+2. To make sure there are no conflicts, run:
+   ```bash
+   git pull origin dev
+   ```
+3. Push changes to your new branch, e.g `git push origin <your_branch_name>
+` run
 
-git pull upstream dev
+   ```bash
+   git push -u origin ZP-B01/Feat/swagger docs
+   ```
 
-git push origin <your_branch_name>
-
-# go and make a pull request to the dev branch
-```
+4. Create a pull request to the `dev` branch and not `main`.
 
 ## Folder Structure
 
