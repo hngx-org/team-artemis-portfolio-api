@@ -4,21 +4,41 @@
 
 Required: [Node](https://nodejs.org/) plus [npm](https://docs.npmjs.com/) and [Git](https://git-scm.com/downloads)
 
-```text
-Fork the repo https://github.com/hngx-org/team-artemis-portfolio-api
-```
+1. Fork the repo
 
-```bash
-git clone https://github.com/<your_github_username>/team-artemis-portfolio-api
+   ```bash
+   https://github.com/hngx-org/team-artemis-portfolio-api
+   ```
 
-cd team-artemis-portfolio-api
+2. clone the repo
 
-git remote add upstream https://github.com/hngx-org/team-artemis-portfolio-api.git
+   ```bash
+   git clone https://github.com/<your_github_username>/team-artemis-portfolio-api
+   ```
 
-git pull upstream dev
+3. Change directory
 
-git checkout <your_branch_name>
-```
+   ```bash
+   cd team-artemis-portfolio-api
+   ```
+
+4. Set the 'upstream' remote repository to track changes from the original repository
+
+    ```bash
+    git remote add upstream https://github.com/hngx-org/team-artemis-portfolio-api.git
+    ```
+
+5. Pull the latest changes from the 'upstream' remote's 'dev' branch into your local branch
+
+   ```bash
+   git pull upstream dev
+   ```
+
+6. Create a new branch for the task you were assigned to, eg `TicketNumber/(Feat/Bug/Fix/Chore)/Ticket-title` :
+   ```bash
+   git checkout -b ZP-B01/Feat/swagger docs
+   ```
+
 
 ## Running Locally
 
@@ -34,15 +54,22 @@ npm run start:dev
 
 ## Pushing your code
 
-```bash
-# add and commit your changes
+1. Commit your changes with a descriptive commit message, run:
+   ```bash
+   git commit -m "your commit message"
+   ```
+2. To make sure there are no conflicts, run:
+   ```bash
+   git pull origin dev
+   ```
+3. Push changes to your new branch, e.g `git push origin <your_branch_name>
+` run
 
-git pull upstream dev
+   ```bash
+   git push -u origin ZP-B01/Feat/swagger docs
+   ```
 
-git push origin <your_branch_name>
-
-# go and make a pull request to the dev branch
-```
+4. Create a pull request to the `dev` branch and not `main`.
 
 ## Folder Structure
 
