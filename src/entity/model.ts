@@ -7,7 +7,6 @@ import {
   PrimaryColumn,
 } from "typeorm";
 
-// Define ENUMs
 enum STATUS {
   PENDING = "pending",
   COMPLETE = "complete",
@@ -16,9 +15,9 @@ enum STATUS {
 
 enum ADMIN_STATUS {
   PENDING = "pending",
-  REVIEW = "review",
+  REVIEW = "reviewed",
   APPROVED = "approved",
-  BLACKLIST = "blacklist",
+  BLACKLIST = "blacklisted",
 }
 
 enum BADGES {
@@ -47,58 +46,378 @@ export class MailLog {
   email: string;
 
   @Column({ type: "json", nullable: true })
-  messageData: JSON;
+  messageData: any;
 
-  @Column({ type: "int", nullable: true })
+  @Column({ type: "int", nullable: true, name: "message_type_id" })
   messageType: number;
 
-  @Column({ type: "enum", enum: STATUS, default: STATUS.PENDING })
-  status: STATUS;
+  @Column({
+    type: "enum",
+    enum: ["pending", "complete", "failed"],
+    default: "pending",
+    nullable: true,
+  })
+  status: string;
 
-  @CreateDateColumn({ type: "timestamp" })
+  @CreateDateColumn({
+    type: "timestamp",
+    default: () => "CURRENT_TIMESTAMP",
+    name: "created_at",
+  })
   createdAt: Date;
 
-  @UpdateDateColumn({ type: "timestamp" })
+  @CreateDateColumn({
+    type: "timestamp",
+    default: () => "CURRENT_TIMESTAMP",
+    name: "updated_at",
+  })
   updatedAt: Date;
 
-  @Column({ type: "varchar", length: 225, nullable: true })
+  @Column({
+    type: "varchar",
+    length: 225,
+    nullable: true,
+    name: "request_origin",
+  })
   requestOrigin: string;
 }
-
 @Entity({ name: "user_assessment_progress" })
 export class UserAssessmentProgress {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: "int", nullable: true })
+  @Column({ type: "int", nullable: true, name: "user_assessment_id" })
   userAssessmentId: number;
 
-  @Column({ type: "int", nullable: true })
+  @Column({ type: "int", nullable: true, name: "question_id" })
   questionId: number;
 
-  @Column({ type: "enum", enum: STATUS, default: STATUS.PENDING })
-  status: STATUS;
+  @Column({
+    type: "enum",
+    enum: ["pending", "complete", "failed"],
+    default: "pending",
+    nullable: true,
+  })
+  status: string;
 }
-
 @Entity({ name: "user_assessment" })
 export class UserAssessment {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: "uuid", nullable: true })
+  @Column({ type: "uuid", nullable: true, name: "user_id" })
   userId: string;
 
-  @Column({ type: "int", nullable: true })
+  @Column({ type: "int", nullable: true, name: "assessment_id" })
   assessmentId: number;
 
   @Column({ type: "numeric", precision: 10, scale: 2, nullable: true })
   score: number;
 
-  @Column({ type: "enum", enum: STATUS, default: STATUS.PENDING })
-  status: STATUS;
+  @Column({
+    type: "enum",
+    enum: ["pending", "complete", "failed"],
+    default: "pending",
+    nullable: true,
+  })
+  status: string;
 
-  @CreateDateColumn({ type: "timestamp", nullable: true })
+  @Column({ type: "timestamp", nullable: true, name: "submission_date" })
   submissionDate: Date;
+
+  @CreateDateColumn({
+    type: "timestamp",
+    default: () => "CURRENT_TIMESTAMP",
+    name: "created_at",
+  })
+  createdAt: Date;
+}
+@Entity({ name: "transaction" })
+export class Transaction {
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column({ type: "uuid", nullable: true, name: "order_id" })
+  orderId: string;
+
+  @Column({ type: "int", nullable: true, name: "app_id" })
+  appId: number;
+
+  @Column({
+    type: "enum",
+    enum: ["pending", "complete", "failed"],
+    default: "pending",
+    nullable: true,
+  })
+  status: string;
+
+  @Column({ type: "numeric", precision: 10, scale: 2, nullable: true })
+  amount: number;
+
+  @Column({ type: "varchar", length: 255, nullable: true })
+  currency: string;
+
+  @Column({
+    type: "varchar",
+    length: 255,
+    nullable: true,
+    name: "provider_ref",
+  })
+  providerRef: string;
+
+  @Column({ type: "varchar", length: 255, nullable: true, name: "in_app_ref" })
+  inAppRef: string;
+
+  @Column({ type: "varchar", length: 255, nullable: true })
+  provider: string;
+
+  @CreateDateColumn({
+    type: "timestamp",
+    default: () => "CURRENT_TIMESTAMP",
+    name: "created_at",
+  })
+  createdAt: Date;
+
+  @CreateDateColumn({
+    type: "timestamp",
+    default: () => "CURRENT_TIMESTAMP",
+    name: "updated_at",
+  })
+  updatedAt: Date;
+}
+@Entity({ name: "order" })
+export class Order {
+  @PrimaryGeneratedColumn("uuid")
+  id: string;
+
+  @Column({ type: "varchar", length: 255, nullable: true })
+  type: string;
+
+  @Column({ type: "bigint", nullable: true })
+  quantity: number;
+
+  @Column({ type: "numeric", precision: 10, scale: 2, nullable: true })
+  amount: number;
+
+  @Column({
+    type: "numeric",
+    precision: 10,
+    scale: 2,
+    nullable: true,
+    name: "subtotal",
+  })
+  VAT: number;
+
+  @Column({
+    type: "numeric",
+    precision: 10,
+    scale: 2,
+    nullable: true,
+    name: "VAT",
+  })
+  subtotal: number;
+
+  @Column({ type: "uuid", nullable: true, name: "product_id" })
+  productId: string;
+
+  @Column({ type: "uuid", nullable: true, name: "merchant_id" })
+  merchantId: string;
+
+  @Column({ type: "uuid", nullable: true, name: "customer_id" })
+  customerId: string;
+
+  @Column({ type: "int", nullable: true, name: "promo" })
+  promo: number;
+
+  @Column({
+    type: "enum",
+    enum: ["pending", "complete", "failed"],
+    default: "pending",
+    nullable: true,
+  })
+  status: string;
+
+  @CreateDateColumn({
+    type: "timestamp",
+    default: () => "CURRENT_TIMESTAMP",
+    name: "created_at",
+  })
+  createdAt: Date;
+
+  @CreateDateColumn({
+    type: "timestamp",
+    default: () => "CURRENT_TIMESTAMP",
+    name: "updated_at",
+  })
+  updatedAt: Date;
+}
+@Entity({ name: "product_category" })
+export class ProductCategory {
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column({ type: "varchar", length: 225, nullable: true })
+  name: string;
+
+  @Column({ type: "int", nullable: true, name: "parent_category_id" })
+  parentCategoryId: number;
+
+  @Column({
+    type: "enum",
+    enum: ["pending", "complete", "failed"],
+    default: "pending",
+    nullable: true,
+  })
+  status: string;
+}
+@Entity({ name: "assessment" })
+export class Assessment {
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column({ type: "int", nullable: true, name: "skill_id" })
+  skillId: number;
+
+  @Column({ type: "varchar", length: 255, nullable: true })
+  title: string;
+
+  @Column({ type: "text", nullable: true })
+  description: string;
+
+  @Column({ type: "timestamp", nullable: true, name: "start_date" })
+  startDate: Date;
+
+  @Column({ type: "timestamp", nullable: true, name: "end_date" })
+  endDate: Date;
+
+  @Column({ type: "int", nullable: true, name: "duration_minutes" })
+  durationMinutes: number;
+
+  @Column({
+    type: "numeric",
+    precision: 10,
+    scale: 2,
+    nullable: true,
+    name: "pass_score",
+  })
+  passScore: number;
+
+  @Column({
+    type: "enum",
+    enum: ["pending", "complete", "failed"],
+    default: "pending",
+    nullable: true,
+  })
+  status: string;
+}
+@Entity({ name: "skill_badge" })
+export class SkillBadge {
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column({ type: "int", nullable: true, name: "skill_id" })
+  skillId: number;
+
+  @Column({
+    type: "enum",
+    enum: ["Beginner", "Intermediate", "Expert"],
+    nullable: true,
+  })
+  name: string;
+
+  @Column({ type: "text", nullable: true, name: "badge_image" })
+  badgeImage: string;
+
+  @Column({
+    type: "numeric",
+    precision: 10,
+    scale: 2,
+    nullable: true,
+    name: "min_score",
+  })
+  minScore: number;
+
+  @Column({
+    type: "numeric",
+    precision: 10,
+    scale: 2,
+    nullable: true,
+    name: "max_score",
+  })
+  maxScore: number;
+
+  @CreateDateColumn({
+    type: "timestamp",
+    default: () => "CURRENT_TIMESTAMP",
+    name: "created_at",
+  })
+  createdAt: Date;
+
+  @CreateDateColumn({
+    type: "timestamp",
+    default: () => "CURRENT_TIMESTAMP",
+    name: "updated_at",
+  })
+  updatedAt: Date;
+}
+@Entity({ name: "promotion" })
+export class Promotion {
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column({ type: "uuid", nullable: true, name: "user_id" })
+  userId: string;
+
+  @Column({ type: "varchar", length: 255, nullable: true })
+  code: string;
+
+  @Column({
+    type: "varchar",
+    length: 255,
+    nullable: true,
+    name: "promotion_type",
+  })
+  promotionType: string;
+
+  @Column({
+    type: "enum",
+    enum: ["Percentage", "Fixed"],
+    nullable: true,
+    name: "discount_type",
+  })
+  discountType: string;
+
+  @Column({ type: "bigint", nullable: true })
+  quantity: number;
+
+  @Column({ type: "numeric", precision: 10, scale: 2, nullable: true })
+  amount: number;
+
+  @Column({ type: "uuid", nullable: true, name: "product_id" })
+  productId: string;
+
+  @Column({ type: "timestamp", nullable: true, name: "valid_from" })
+  validFrom: Date;
+
+  @Column({ type: "timestamp", nullable: true, name: "valid_to" })
+  validTo: Date;
+
+  @Column({ type: "bigint", nullable: true, name: "min_cart_price" })
+  minCartPrice: number;
+
+  @CreateDateColumn({
+    type: "timestamp",
+    default: () => "CURRENT_TIMESTAMP",
+    name: "created_at",
+  })
+  createdAt: Date;
+
+  @CreateDateColumn({
+    type: "timestamp",
+    default: () => "CURRENT_TIMESTAMP",
+    name: "updated_at",
+  })
+  updatedAt: Date;
 }
 
 @Entity({ name: "shop" })
@@ -106,133 +425,388 @@ export class Shop {
   @PrimaryGeneratedColumn("uuid")
   id: string;
 
-  @Column("uuid", { nullable: true })
+  @Column({ type: "uuid", nullable: true, name: "merchant_id" })
   merchantId: string;
 
-  @Column("uuid", { nullable: true })
+  @Column({ type: "uuid", nullable: true, name: "product_id" })
   productId: string;
 
   @Column({ type: "varchar", length: 255, nullable: true })
   name: string;
 
-  @Column({ type: "boolean", default: false })
+  @Column({ type: "boolean", nullable: true, name: "policy_confirmation" })
   policyConfirmation: boolean;
 
-  @Column({ type: "enum", enum: RESTRICTED, default: RESTRICTED.NO })
-  restricted: RESTRICTED;
+  @Column({
+    type: "enum",
+    enum: ["no", "temporary", "permanent"],
+    default: "no",
+    nullable: true,
+  })
+  restricted: string;
 
-  @Column({ type: "enum", enum: ADMIN_STATUS, default: ADMIN_STATUS.PENDING })
-  adminStatus: ADMIN_STATUS;
+  @Column({
+    type: "enum",
+    enum: ["pending", "reviewed", "approved", "suspended", "blacklisted"],
+    default: "pending",
+    nullable: true,
+    name: "admin_status",
+  })
+  adminStatus: string;
 
-  @Column({ type: "boolean", default: false })
+  @Column({ type: "boolean", nullable: true })
   reviewed: boolean;
 
   @Column({ type: "numeric", precision: 10, scale: 2, nullable: true })
   rating: number;
 
-  @CreateDateColumn({ type: "timestamp" })
+  @CreateDateColumn({
+    type: "timestamp",
+    default: () => "CURRENT_TIMESTAMP",
+    name: "created_at",
+  })
   createdAt: Date;
 
-  @UpdateDateColumn({ type: "timestamp" })
+  @CreateDateColumn({
+    type: "timestamp",
+    default: () => "CURRENT_TIMESTAMP",
+    name: "updated_at",
+  })
   updatedAt: Date;
 }
-
 @Entity({ name: "product_image" })
 export class ProductImage {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column("uuid", { nullable: true })
+  @Column({ type: "uuid", nullable: true, name: "product_id" })
   productId: string;
 
-  @Column({ type: "varchar", length: 255, nullable: false })
+  @Column({ type: "varchar", length: 255, nullable: true })
   url: string;
 }
-
 @Entity({ name: "revenue" })
 export class Revenue {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column("uuid", { nullable: true })
+  @Column({ type: "uuid", nullable: true, name: "user_id" })
   userId: string;
 
-  @Column({ type: "int", nullable: true })
+  @Column({ type: "int", nullable: true, name: "app_id" })
   appId: number;
 
-  @Column({ type: "numeric", precision: 10, scale: 2, nullable: false })
+  @Column({ type: "numeric", precision: 10, scale: 2, nullable: true })
   amount: number;
 
-  @CreateDateColumn({ type: "timestamp" })
+  @CreateDateColumn({
+    type: "timestamp",
+    default: () => "CURRENT_TIMESTAMP",
+    name: "created_at",
+  })
   createdAt: Date;
 }
-
 @Entity({ name: "product" })
 export class Product {
   @PrimaryGeneratedColumn("uuid")
   id: string;
 
-  @Column("uuid", { nullable: true })
+  @Column({ type: "uuid", nullable: true, name: "user_id" })
   userId: string;
 
-  @Column("uuid", { nullable: true })
+  @Column({ type: "uuid", nullable: true, name: "shop_id" })
   shopId: string;
 
-  @Column({ type: "varchar", length: 255, nullable: false })
+  @Column({ type: "varchar", length: 255, nullable: true })
   name: string;
 
-  @Column({ type: "varchar", length: 255, nullable: false })
+  @Column({ type: "varchar", length: 255, nullable: true })
   description: string;
 
-  @Column({ type: "bigint", nullable: false })
+  @Column({ type: "bigint", nullable: true })
   quantity: number;
 
-  @Column({ type: "int", nullable: true })
-  category: number;
+  @Column({ type: "int", nullable: true, name: "category_id" })
+  categoryId: number;
 
-  @Column({ type: "int", nullable: true })
+  @Column({ type: "int", nullable: true, name: "image_id" })
   imageId: number;
 
-  @Column({ type: "numeric", precision: 10, scale: 2, nullable: false })
+  @Column({ type: "numeric", precision: 10, scale: 2, nullable: true })
   price: number;
 
-  @Column({ type: "numeric", precision: 10, scale: 2, nullable: false })
+  @Column({
+    type: "numeric",
+    precision: 10,
+    scale: 2,
+    nullable: true,
+    name: "discount_price",
+  })
   discountPrice: number;
 
-  @Column({ type: "numeric", precision: 10, scale: 2, nullable: false })
+  @Column({ type: "numeric", precision: 10, scale: 2, nullable: true })
   tax: number;
 
-  @Column({ type: "enum", enum: ADMIN_STATUS, default: ADMIN_STATUS.PENDING })
-  adminStatus: ADMIN_STATUS;
+  @Column({
+    type: "enum",
+    enum: ["pending", "reviewed", "approved", "suspended", "blacklisted"],
+    default: "pending",
+    nullable: true,
+    name: "admin_status",
+  })
+  adminStatus: string;
 
-  @Column({ type: "int", nullable: true })
+  @Column({ type: "int", nullable: true, name: "rating_id" })
   ratingId: number;
 
-  @Column({ type: "boolean", default: false })
+  @Column({
+    type: "boolean",
+    nullable: true,
+    name: "is_published",
+    default: false,
+  })
   isPublished: boolean;
 
-  @Column({ type: "varchar", length: 10, nullable: false })
+  @Column({ type: "varchar", length: 10, nullable: true })
   currency: string;
 
-  @CreateDateColumn({ type: "timestamp" })
+  @CreateDateColumn({
+    type: "timestamp",
+    default: () => "CURRENT_TIMESTAMP",
+    name: "created_at",
+  })
   createdAt: Date;
 
-  @UpdateDateColumn({ type: "timestamp" })
+  @CreateDateColumn({
+    type: "timestamp",
+    default: () => "CURRENT_TIMESTAMP",
+    name: "updated_at",
+  })
   updatedAt: Date;
 }
+@Entity({ name: "user_product_rating" })
+export class UserProductRating {
+  @PrimaryGeneratedColumn()
+  id: number;
 
+  @Column({ type: "uuid", nullable: true, name: "user_id" })
+  userId: string;
+
+  @Column({ type: "uuid", nullable: true, name: "product_id" })
+  productId: string;
+
+  @Column({ type: "numeric", precision: 5, scale: 2, nullable: true })
+  rating: number;
+}
+@Entity({ name: "track_promotion" })
+export class TrackPromotion {
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column({ type: "uuid", nullable: true, name: "product_id" })
+  productId: string;
+
+  @Column({ type: "uuid", nullable: true, name: "user_id" })
+  userId: string;
+
+  @Column({ type: "bigint", nullable: true })
+  code: number;
+
+  @Column({ type: "varchar", length: 255, nullable: true })
+  type: string;
+
+  @CreateDateColumn({
+    type: "timestamp",
+    default: () => "CURRENT_TIMESTAMP",
+    name: "created_at",
+  })
+  createdAt: Date;
+}
+@Entity({ name: "store_traffic" })
+export class StoreTraffic {
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column({ type: "uuid", nullable: true, name: "user_id" })
+  userId: string;
+
+  @CreateDateColumn({
+    type: "timestamp",
+    default: () => "CURRENT_TIMESTAMP",
+    name: "created_at",
+  })
+  createdAt: Date;
+}
+@Entity({ name: "user" })
+export class User {
+  @PrimaryGeneratedColumn("uuid")
+  id: string;
+
+  @Column({ type: "varchar", length: 255, nullable: true })
+  username: string;
+
+  @Column({ type: "varchar", length: 255, nullable: true, name: "first_name" })
+  firstName: string;
+
+  @Column({ type: "varchar", length: 255, nullable: true, name: "last_name" })
+  lastName: string;
+
+  @Column({ type: "varchar", length: 255, nullable: true })
+  email: string;
+
+  @Column({ type: "text", nullable: true, name: "section_order" })
+  sectionOrder: string;
+
+  @Column({ type: "varchar", length: 255, nullable: true })
+  password: string;
+
+  @Column({ type: "varchar", length: 255, nullable: true })
+  provider: string;
+
+  @Column({
+    type: "boolean",
+    nullable: true,
+    name: "is_verified",
+    default: false,
+  })
+  isVerified: boolean;
+
+  @Column({ type: "boolean", nullable: true, name: "2fa", default: false })
+  twoFactorAuth: boolean;
+
+  @Column({ type: "text", nullable: true, name: "profile_pic" })
+  profilePic: string;
+
+  @Column({
+    type: "varchar",
+    length: 255,
+    nullable: true,
+    name: "refresh_token",
+  })
+  refreshToken: string;
+
+  @CreateDateColumn({
+    type: "timestamp",
+    default: () => "CURRENT_TIMESTAMP",
+    name: "created_at",
+  })
+  createdAt: Date;
+}
+@Entity({ name: "promo_product" })
+export class PromoProduct {
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column({ type: "uuid", nullable: true, name: "product_id" })
+  productId: string;
+
+  @Column({ type: "int", nullable: true, name: "promo_id" })
+  promoId: number;
+
+  @Column({ type: "uuid", nullable: true, name: "user_id" })
+  userId: string;
+}
+@Entity({ name: "activity" })
+export class Activity {
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column({ type: "text", nullable: true })
+  action: string;
+
+  @Column({ type: "uuid", nullable: true, name: "user_id" })
+  userId: string;
+
+  @Column({ type: "varchar", length: 255, nullable: true })
+  title: string;
+
+  @Column({ type: "varchar", length: 255, nullable: true })
+  description: string;
+
+  @CreateDateColumn({
+    type: "timestamp",
+    default: () => "CURRENT_TIMESTAMP",
+    name: "created_at",
+  })
+  createdAt: Date;
+}
+@Entity({ name: "sales_report" })
+export class SalesReport {
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column({ type: "uuid", nullable: true, name: "user_id" })
+  userId: string;
+
+  @Column({ type: "bigint", nullable: true })
+  sales: number;
+
+  @CreateDateColumn({
+    type: "timestamp",
+    default: () => "CURRENT_TIMESTAMP",
+    name: "created_at",
+  })
+  createdAt: Date;
+}
+@Entity({ name: "email_verification" })
+export class EmailVerification {
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column({ type: "uuid", nullable: true, name: "user_id" })
+  userId: string;
+
+  @Column({ type: "varchar", length: 255, nullable: true })
+  email: string;
+
+  @Column({ type: "varchar", nullable: true })
+  token: string;
+
+  @Column({ type: "timestamp", nullable: true, name: "expiration_date" })
+  expirationDate: Date;
+
+  @CreateDateColumn({ type: "timestamp", nullable: true, name: "created_at" })
+  createdAt: Date;
+
+  @CreateDateColumn({ type: "timestamp", nullable: true, name: "updated_at" })
+  updatedAt: Date;
+}
+@Entity({ name: "skill" })
+export class Skill {
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column({
+    type: "varchar",
+    length: 100,
+    nullable: true,
+    name: "category_name",
+  })
+  categoryName: string;
+
+  @Column({ type: "text", nullable: true })
+  description: string;
+
+  @Column({ type: "int", nullable: true, name: "parent_skill_id" })
+  parentSkillId: number;
+}
 @Entity({ name: "question" })
 export class Question {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: "int", nullable: true })
+  @Column({ type: "int", nullable: true, name: "assessment_id" })
   assessmentId: number;
 
-  @Column({ type: "text", nullable: true })
+  @Column({ type: "text", nullable: true, name: "question_text" })
   questionText: string;
 
-  @Column({ type: "varchar", length: 20, nullable: true })
+  @Column({
+    type: "varchar",
+    length: 20,
+    nullable: true,
+    name: "question_type",
+  })
   questionType: string;
 }
 
@@ -241,32 +815,42 @@ export class Answer {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: "int", nullable: true })
+  @Column({ type: "int", nullable: true, name: "question_id" })
   questionId: number;
 
-  @Column({ type: "text", nullable: true })
+  @Column({ type: "text", nullable: true, name: "answer_text" })
   answerText: string;
 
-  @Column({ type: "boolean", nullable: true })
+  @Column({ type: "boolean", nullable: true, name: "is_correct" })
   isCorrect: boolean;
 }
-
-@Entity({ name: "user_response" })
-export class UserResponse {
+@Entity({ name: "user_badge" })
+export class UserBadge {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: "int", nullable: true })
-  userAssessmentId: number;
+  @Column({ type: "int", nullable: true, name: "assessment_id" })
+  assessmentId: number;
 
-  @Column({ type: "int", nullable: true })
-  questionId: number;
+  @Column({ type: "uuid", nullable: true, name: "user_id" })
+  userId: string;
 
-  @Column({ type: "text", nullable: true })
-  responseText: string;
+  @Column({ type: "int", nullable: true, name: "badge_id" })
+  badgeId: number;
 
-  @Column({ type: "boolean", nullable: true })
-  isCorrect: boolean;
+  @CreateDateColumn({
+    type: "timestamp",
+    default: () => "CURRENT_TIMESTAMP",
+    name: "created_at",
+  })
+  createdAt: Date;
+
+  @CreateDateColumn({
+    type: "timestamp",
+    default: () => "CURRENT_TIMESTAMP",
+    name: "updated_at",
+  })
+  updatedAt: Date;
 }
 
 @Entity({ name: "assessment_category" })
@@ -274,32 +858,11 @@ export class AssessmentCategory {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: "int", nullable: true })
+  @Column({ type: "int", nullable: true, name: "assessment_id" })
   assessmentId: number;
 
-  @Column({ type: "int", nullable: true })
+  @Column({ type: "int", nullable: true, name: "skill_id" })
   skillId: number;
-}
-
-@Entity({ name: "user_badge" })
-export class UserBadge {
-  @PrimaryGeneratedColumn()
-  id: number;
-
-  @Column({ type: "int", nullable: true })
-  assessmentId: number;
-
-  @Column("uuid", { nullable: true })
-  userId: string;
-
-  @Column({ type: "int", nullable: true })
-  badgeId: number;
-
-  @CreateDateColumn({ type: "timestamp", nullable: true })
-  createdAt: Date;
-
-  @UpdateDateColumn({ type: "timestamp", nullable: true })
-  updatedAt: Date;
 }
 
 @Entity({ name: "roles" })
@@ -316,13 +879,13 @@ export class UserRoles {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: "int", nullable: true })
+  @Column("int")
   roleId: number;
 
-  @Column("uuid", { nullable: true })
+  @Column("uuid")
   userId: string;
 
-  @CreateDateColumn({ type: "timestamp", nullable: true })
+  @CreateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
   createdAt: Date;
 }
 
@@ -331,55 +894,55 @@ export class Permissions {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: "varchar", length: 225, nullable: true })
+  @Column({ type: "varchar", length: 225 })
   name: string;
-}
 
+  @CreateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
+  createdAt: Date;
+}
 @Entity({ name: "user_permissions" })
 export class UserPermissions {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column("uuid", { nullable: true })
+  @Column("uuid")
   userId: string;
 
-  @Column({ type: "int", nullable: true })
+  @Column("int")
   permissionId: number;
 
-  @CreateDateColumn({ type: "timestamp", nullable: true })
+  @CreateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
   createdAt: Date;
 }
-
 @Entity({ name: "roles_permissions" })
 export class RolesPermissions {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: "int", nullable: true })
+  @Column("int")
   roleId: number;
 
-  @Column({ type: "int", nullable: true })
+  @Column("int")
   permissionId: number;
 
-  @CreateDateColumn({ type: "timestamp", nullable: true })
+  @CreateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
   createdAt: Date;
 }
-
 @Entity({ name: "app" })
 export class App {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: "text", nullable: true })
+  @Column("text", { nullable: true })
   url: string;
 
-  @Column({ type: "text", nullable: true })
+  @Column("text", { nullable: true })
   description: string;
 
-  @Column({ type: "varchar", length: 225, nullable: true })
+  @Column({ type: "varchar", length: 225 })
   name: string;
 
-  @CreateDateColumn({ type: "timestamp" })
+  @CreateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
   createdAt: Date;
 
   @Column("uuid", { nullable: true })
@@ -391,17 +954,23 @@ export class UserAnalytics {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: "int", nullable: true })
+  @Column("int")
   appId: number;
 
-  @Column({ type: "timestamp", nullable: true })
-  timestamp: Date;
+  @Column("int", { nullable: true })
+  metricTotalNumberUsers: number;
 
-  @Column({ type: "varchar", length: 225, nullable: true })
-  metricTotalNumberUser: string;
+  @Column("int", { nullable: true })
+  metricTotalNumberDailyUsers: number;
 
-  @Column({ type: "varchar", length: 225, nullable: true })
-  metricTotalNumberDailyUser: string;
+  @Column("int", { nullable: true })
+  metricTotalNumberOfUserVisitationOnProduct: number;
+
+  @CreateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
+  createdAt: Date;
+
+  @UpdateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
+  updatedAt: Date;
 }
 
 @Entity({ name: "sales_analytics" })
@@ -409,41 +978,49 @@ export class SalesAnalytics {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: "int", nullable: true })
+  @Column("int")
   appId: number;
 
-  @Column({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
-  timestamp: Date;
+  @Column("numeric", { precision: 10, scale: 2, nullable: true })
+  metricAmountGoodsSold: number;
 
-  @Column({ type: "varchar", length: 225, nullable: true })
-  metricAmountGoodsSold: string;
+  @Column("numeric", { precision: 10, scale: 2, nullable: true })
+  metricAverageSales: number;
 
-  @Column({ type: "varchar", length: 225, nullable: true })
-  metricAverageSales: string;
+  @Column("numeric", { precision: 10, scale: 2, nullable: true })
+  metricOverallRevenue: number;
 
-  @Column({ type: "varchar", length: 225, nullable: true })
-  metricOverallRevenue: string;
+  @Column("numeric", { precision: 10, scale: 2, nullable: true })
+  metricRevenuePerCategory: number;
 
-  @Column({ type: "varchar", length: 225, nullable: true })
-  metricRevenuePerCategory: string;
+  @Column("numeric", { precision: 10, scale: 2, nullable: true })
+  metricProductPopularity: number;
 
-  @Column({ type: "varchar", length: 225, nullable: true })
-  metricProductPopularity: string;
+  @Column("int", { nullable: true })
+  metricTotalOrders: number;
+
+  @CreateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
+  createdAt: Date;
+
+  @UpdateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
+  updatedAt: Date;
 }
-
 @Entity({ name: "portfolios_analytics" })
 export class PortfoliosAnalytics {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: "int", nullable: true })
+  @Column("int")
   appId: number;
 
-  @Column({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
-  timestamp: Date;
-
-  @Column({ type: "varchar", length: 225, nullable: true })
+  @Column("varchar", { length: 225, nullable: true })
   metricAmountPortfolios: string;
+
+  @CreateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
+  createdAt: Date;
+
+  @UpdateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
+  updatedAt: Date;
 }
 
 @Entity({ name: "report" })
@@ -451,14 +1028,62 @@ export class Report {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: "varchar", length: 225, nullable: true })
+  @Column("varchar", { length: 225 })
   reportType: string;
 
-  @Column({ type: "text", nullable: true })
+  @Column("text", { nullable: true })
   data: string;
 
-  @CreateDateColumn({ type: "timestamp" })
+  @CreateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
   createdAt: Date;
+
+  @UpdateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
+  updatedAt: Date;
+}
+
+@Entity({ name: "complaint" })
+export class Complaint {
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column("uuid")
+  userId: string;
+
+  @Column("uuid")
+  productId: string;
+
+  @Column("text")
+  complaintText: string;
+
+  @Column({ type: "varchar", length: 225, default: "pending" })
+  status: string;
+
+  @CreateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
+  createdAt: Date;
+
+  @UpdateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
+  updatedAt: Date;
+}
+
+@Entity({ name: "complaint_comment" })
+export class ComplaintComment {
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column("int")
+  complaintId: number;
+
+  @Column("text")
+  comment: string;
+
+  @Column("uuid")
+  userId: string;
+
+  @CreateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
+  createdAt: Date;
+
+  @UpdateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
+  updatedAt: Date;
 }
 
 @Entity({ name: "mail_type" })
@@ -466,7 +1091,7 @@ export class MailType {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: "varchar", length: 225, nullable: true })
+  @Column({ type: "varchar", length: 225 })
   name: string;
 }
 
@@ -475,13 +1100,13 @@ export class Section {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: "varchar", nullable: true })
+  @Column("varchar")
   name: string;
 
-  @Column({ type: "text", nullable: true })
+  @Column("text", { nullable: true })
   description: string;
 
-  @Column({ type: "text", nullable: true })
+  @Column("text", { nullable: true })
   meta: string;
 }
 
@@ -490,7 +1115,7 @@ export class Tracks {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: "varchar", nullable: true })
+  @Column("varchar")
   track: string;
 }
 
@@ -499,7 +1124,7 @@ export class Images {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: "varchar", nullable: true })
+  @Column("varchar")
   url: string;
 }
 
@@ -508,38 +1133,41 @@ export class WorkExperienceDetail {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: "varchar", nullable: true })
+  @Column("varchar")
   role: string;
 
-  @Column({ type: "varchar", nullable: true })
+  @Column("varchar")
   company: string;
 
-  @Column({ type: "text", nullable: true })
+  @Column("text", { nullable: true })
   description: string;
 
-  @Column({ type: "varchar", nullable: true })
+  @Column("varchar", { nullable: true })
   startMonth: string;
 
-  @Column({ type: "varchar", nullable: true })
+  @Column("varchar", { nullable: true })
   startYear: string;
 
-  @Column({ type: "varchar", nullable: true })
+  @Column("varchar", { nullable: true })
   endMonth: string;
 
-  @Column({ type: "varchar", nullable: true })
+  @Column("varchar", { nullable: true })
   endYear: string;
 
-  @Column({ type: "boolean", nullable: true })
+  @Column("bool", { nullable: true })
   isEmployee: boolean;
 
-  @Column("uuid", { nullable: true })
+  @Column("uuid")
   userId: string;
 
-  @Column({ type: "int", nullable: true })
+  @Column("int")
   sectionId: number;
 
-  @CreateDateColumn({ type: "timestamp", nullable: true })
+  @CreateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
   createdAt: Date;
+
+  @UpdateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
+  updatedAt: Date;
 }
 
 @Entity({ name: "project" })
@@ -547,65 +1175,70 @@ export class Project {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: "varchar", nullable: true })
+  @Column("varchar")
   title: string;
 
-  @Column({ type: "varchar", nullable: true })
+  @Column("varchar")
   year: string;
 
-  @Column({ type: "varchar", nullable: true })
+  @Column("varchar", { nullable: true })
   url: string;
 
-  @Column({ type: "text", nullable: true })
+  @Column("text", { nullable: true })
   tags: string;
 
-  @Column({ type: "text", nullable: true })
+  @Column("text", { nullable: true })
   description: string;
 
-  @Column({ type: "int", nullable: true })
+  @Column("int", { nullable: true })
   thumbnail: number;
 
-  @Column("uuid", { nullable: true })
+  @Column("uuid")
   userId: string;
 
-  @Column({ type: "int", nullable: true })
+  @Column("int")
   sectionId: number;
 
-  @CreateDateColumn({ type: "timestamp", nullable: true })
+  @CreateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
   createdAt: Date;
-}
 
+  @UpdateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
+  updatedAt: Date;
+}
 @Entity({ name: "education_detail" })
 export class EducationDetail {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: "int", nullable: true })
+  @Column("int")
   degreeId: number;
 
-  @Column({ type: "varchar", nullable: true })
+  @Column("varchar")
   fieldOfStudy: string;
 
-  @Column({ type: "varchar", nullable: true })
+  @Column("varchar")
   school: string;
 
-  @Column({ type: "varchar", nullable: true })
+  @Column("varchar")
   from: string;
 
-  @Column({ type: "text", nullable: true })
+  @Column("text", { nullable: true })
   description: string;
 
-  @Column({ type: "varchar", nullable: true })
+  @Column("varchar")
   to: string;
 
-  @Column("uuid", { nullable: true })
+  @Column("uuid")
   userId: string;
 
-  @Column({ type: "int", nullable: true })
+  @Column("int")
   sectionId: number;
 
-  @CreateDateColumn({ type: "timestamp", nullable: true })
+  @CreateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
   createdAt: Date;
+
+  @UpdateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
+  updatedAt: Date;
 }
 
 @Entity({ name: "degree" })
@@ -613,22 +1246,21 @@ export class Degree {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: "varchar", nullable: true })
+  @Column("varchar")
   type: string;
 }
-
 @Entity({ name: "about_detail" })
 export class AboutDetail {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: "text", nullable: true })
+  @Column("text", { nullable: true })
   bio: string;
 
-  @Column("uuid", { nullable: true })
+  @Column("uuid")
   userId: string;
 
-  @Column({ type: "int", nullable: true })
+  @Column("int")
   sectionId: number;
 }
 
@@ -637,13 +1269,13 @@ export class SkillsDetail {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: "text", nullable: true })
+  @Column("text", { nullable: true })
   skills: string;
 
-  @Column("uuid", { nullable: true })
+  @Column("uuid")
   userId: string;
 
-  @Column({ type: "int", nullable: true })
+  @Column("int")
   sectionId: number;
 }
 
@@ -652,13 +1284,13 @@ export class InterestDetail {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: "text", nullable: true })
+  @Column("text", { nullable: true })
   interest: string;
 
-  @Column("uuid", { nullable: true })
+  @Column("uuid")
   userId: string;
 
-  @Column({ type: "int", nullable: true })
+  @Column("int")
   sectionId: number;
 }
 
@@ -667,7 +1299,7 @@ export class SocialMedia {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: "text", nullable: true })
+  @Column("text")
   name: string;
 }
 
@@ -676,13 +1308,13 @@ export class SocialUser {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column("uuid", { nullable: true })
+  @Column("uuid")
   userId: string;
 
-  @Column({ type: "int", nullable: true })
+  @Column("int")
   socialMediaId: number;
 
-  @Column({ type: "text", nullable: true })
+  @Column("text")
   url: string;
 }
 
@@ -691,10 +1323,10 @@ export class CustomUserSection {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column("uuid", { nullable: true })
+  @Column("uuid")
   userId: string;
 
-  @Column({ type: "int", nullable: true })
+  @Column("int")
   sectionId: number;
 }
 
@@ -703,16 +1335,16 @@ export class CustomField {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: "varchar", nullable: true })
+  @Column("varchar")
   fieldType: string;
 
-  @Column({ type: "varchar", nullable: true })
+  @Column("varchar")
   fieldName: string;
 
-  @Column({ type: "int", nullable: true })
+  @Column("int")
   customSectionId: number;
 
-  @Column({ type: "text", nullable: true })
+  @Column("text", { nullable: true })
   value: string;
 }
 
@@ -721,43 +1353,42 @@ export class NotificationSetting {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: "boolean", nullable: true })
+  @Column("bool", { nullable: true })
   emailSummary: boolean;
 
-  @Column({ type: "boolean", nullable: true })
+  @Column("bool", { nullable: true })
   specialOffers: boolean;
 
-  @Column({ type: "boolean", nullable: true })
+  @Column("bool", { nullable: true })
   communityUpdate: boolean;
 
-  @Column({ type: "boolean", nullable: true })
+  @Column("bool", { nullable: true })
   followUpdate: boolean;
 
-  @Column({ type: "boolean", nullable: true })
+  @Column("bool", { nullable: true })
   newMessages: boolean;
 
-  @Column("uuid", { nullable: true })
+  @Column("uuid")
   userId: string;
 }
 
 @Entity({ name: "projects_image" })
 export class ProjectsImage {
-  @Column({ type: "int", nullable: true, primary: true })
+  @PrimaryColumn()
   projectId: number;
 
-  @Column({ type: "int", nullable: true, primary: true })
+  @Column("int")
   imageId: number;
 }
-
 @Entity({ name: "cart" })
 export class Cart {
   @PrimaryColumn("uuid")
   id: string;
 
-  @Column("uuid", { nullable: true })
+  @Column("uuid")
   userId: string;
 
-  @Column("uuid", { nullable: true })
+  @Column("uuid")
   productId: string;
 }
 
@@ -766,57 +1397,55 @@ export class OrderItem {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column("uuid", { nullable: true })
+  @Column("uuid")
   orderId: string;
 
-  @Column("uuid", { nullable: true })
+  @Column("uuid")
   productId: string;
 }
-
 @Entity({ name: "product_review" })
 export class ProductReview {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column("uuid", { nullable: true })
+  @Column("uuid")
   productId: string;
 
-  @Column("uuid", { nullable: true })
+  @Column("uuid")
   userId: string;
 
-  @Column({ type: "text", nullable: true })
+  @Column("text")
   comment: string;
 
-  @Column({ type: "int", nullable: true })
+  @Column("int", { nullable: true })
   replyId: number;
 
   @CreateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
   createdAt: Date;
 }
-
 @Entity({ name: "coupon" })
 export class Coupon {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column("uuid", { nullable: true })
+  @Column("uuid")
   merchantId: string;
 
-  @Column("uuid", { nullable: true })
+  @Column("uuid")
   shopId: string;
 
-  @Column({ type: "int", nullable: true })
+  @Column("int")
   transactionId: number;
 
-  @Column({ type: "int", nullable: true })
+  @Column("int")
   couponLimit: number;
 
-  @Column({ type: "numeric", precision: 10, scale: 2, nullable: true })
+  @Column("numeric", { precision: 10, scale: 2 })
   percentage: number;
 
-  @Column({ type: "varchar", length: 20, nullable: true })
+  @Column("varchar", { length: 20 })
   couponCode: string;
 
-  @CreateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
+  @Column("timestamp", { default: () => "CURRENT_TIMESTAMP" })
   expiryDate: Date;
 }
