@@ -4,40 +4,53 @@ const app = require('../src/server');
 const request = supertest(app);
 
 describe('Skill API endpoints', () => {
-  let sectionId: number;
+  let skillId: number;
   // Endpoint to Create Skill section
-  describe('POST /sections', () => {
+  describe('POST api/skills', () => {
     it('should create Skill section', async () => {
       const res = await request
-        .post('/sections')
-        .send({ name: 'Skill', description: 'This is skill section' });
+        .post('api/skills')
+        .send({ categoryName: 'Test category', description: 'Test skill description' });
       expect(res.status).to.equal(201);
       expect(res.body).to.be.an('object');
-      sectionId = res.body.id; // Store section ID for later tests
+      skillId = res.body.id;
+    });
+  });
+
+    // Endpoint to fetch Skill section
+  describe('Get api/skills', () => {
+    it('should fetch Skill section', async () => {
+      const res = await request
+        .get('api/skills');
+      expect(res.status).to.equal(200);
+      expect(res.body).to.be.an('object');
     });
   });
 
   // Endpoint to update Skill section
-  describe('PUT /sections/:sectionId', () => {
+  describe('PUT api/skills/:skillId', () => {
     it('should update Skill section', async () => {
       const res = await request
-        .put(`/sections/${sectionId}`) 
-        .send({ description: 'Another skill description' });
+        .put(`api/skills/${skillId}`) 
+        .send({
+          categoryName: 'Another category name',
+          description: 'Another skill description'
+        });
       expect(res.status).to.equal(200);
       expect(res.body).to.be.an('object');
     });
   });
 
   // Endpoint to Delete Skill section
-  describe('DELETE /sections/:sectionId', () => {
+  describe('DELETE api/skills/:skillId', () => {
     it('should delete Skill section', async () => {
-      const initialSections = await request.get('/sections');
+      const initialSkills = await request.get('api/skills');
       const res = await request
-        .delete(`/sections/${sectionId}`);
+        .delete(`api/skills/${skillId}`);
       expect(res.status).to.equal(204);
       // Verify that the section is deleted in the database
-      const updatedSections = await request.get('/sections');
-      expect(updatedSections.body.length).to.equal(initialSections.body.length - 1);
+      const updatedSkills = await request.get('api/skills');
+      expect(updatedSkills.body.length).to.equal(initialSkills.body.length - 1);
     });
   });
 });

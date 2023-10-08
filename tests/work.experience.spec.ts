@@ -4,40 +4,59 @@ const app = require('../src/server');
 const request = supertest(app);
 
 describe('Work experience API endpoints', () => {
-    let sectionId: number;
+  let workId: number;
   // Endpoint to Create Work Experience section
-  describe('POST /sections', () => {
+  describe('POST api/work-experience', () => {
     it('should create Work Experience section', async () => {
       const res = await request
-        .post('/sections')
-        .send({ name: 'Work Experience', description: 'This is work experience' });
+        .post('api/work-experience')
+        .send({
+          role: 'test role',
+          company: 'First company',
+          description: 'Test description',
+          startMonth: 'January',
+          startYear: 2018,
+          endMonth: 'June',
+          endYear: 2020,
+          isEmployee: true,
+        });
       expect(res.status).to.equal(201);
       expect(res.body).to.be.an('object');
-      sectionId = res.body.id; // Store section ID for later tests
+      workId = res.body.id;
+    });
+  });
+
+  // Endpoint to fetch Work Experience section
+  describe('Get api/work-experience', () => {
+    it('should fetch Work Experience section', async () => {
+      const res = await request
+        .get('api/work-experience');
+      expect(res.status).to.equal(200);
+      expect(res.body).to.be.an('object');
     });
   });
 
   // Endpoint to update Work Experience section
-  describe('PUT /sections/:sectionId', () => {
+  describe('PUT api/work-experience/:workId', () => {
     it('should update Work Experience section', async () => {
       const res = await request
-        .put(`/sections/${sectionId}`) 
-        .send({ description: 'Another description' });
+        .put(`api/work-experience/${workId}`) 
+        .send({ company: 'new company', description: 'Another description' });
       expect(res.status).to.equal(200);
       expect(res.body).to.be.an('object');
     });
   });
 
   // Endpoint to Delete Work Experience section
-  describe('DELETE /sections/:sectionId', () => {
+  describe('DELETE api/work-experience/:sectionId', () => {
     it('should delete Work Experience section', async () => {
-      const initialSections = await request.get('/sections');
+      const initialWork = await request.get('api/work-experience');
       const res = await request
-        .delete(`/sections/${sectionId}`);
+        .delete(`api/work-experience/${workId}`);
       expect(res.status).to.equal(204);
       // Verify that the section is deleted in the database
-      const updatedSections = await request.get('/sections');
-      expect(updatedSections.body.length).to.equal(initialSections.body.length - 1);
+      const updatedWork = await request.get('api/work-experience');
+      expect(updatedWork.body.length).to.equal(initialWork.body.length - 1);
     });
   });
 });
