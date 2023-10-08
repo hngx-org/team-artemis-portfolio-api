@@ -5,7 +5,11 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   PrimaryColumn,
+  ManyToOne,
+  OneToMany,
+  JoinColumn,
 } from "typeorm";
+import { User } from "./user";
 
 enum STATUS {
   PENDING = "pending",
@@ -80,6 +84,40 @@ export class MailLog {
     name: "request_origin",
   })
   requestOrigin: string;
+}
+@Entity({ name: "user_track" })
+export class UserTrack {
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column("varchar")
+  userId: string;
+
+  @Column("int")
+  trackId: number;
+
+  @ManyToOne(() => User, (user) => user.id)
+  user: User;
+
+  @ManyToOne(() => Tracks, (track) => track.id)
+  track: Tracks;
+}
+@Entity({ name: "portfolio_details" })
+export class PortfolioDetails {
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column("varchar", { nullable: true })
+  city: string;
+
+  @Column("varchar", { nullable: true })
+  country: string;
+
+  @Column("varchar")
+  userId: string;
+
+  @ManyToOne(() => User, (user) => user.id)
+  user: User;
 }
 @Entity({ name: "user_assessment_progress" })
 export class UserAssessmentProgress {
@@ -1262,6 +1300,20 @@ export class SocialUser {
 
   @Column("text")
   url: string;
+
+  @ManyToOne(() => User, (user) => user.socialUsers, {
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
+  })
+  @JoinColumn({ name: "user_id" })
+  user: User;
+
+  @ManyToOne(() => SocialMedia, (socialMedia) => socialMedia.id, {
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
+  })
+  @JoinColumn({ name: "social_media_id" })
+  socialMedia: SocialMedia;
 }
 
 @Entity({ name: "custom_user_section" })
