@@ -4,13 +4,12 @@ import multer from "multer";
 const storage = multer.memoryStorage();
 const uploads = multer({ storage }).array("images", 10);
 
-
 import {
-    getAllProjects,
-    getProjectById,
-    createProject,
-    updateProjectById,
-    deleteProjectById,
+  getAllProjects,
+  getProjectById,
+  createProject,
+  updateProjectById,
+  deleteProjectById,
 } from "../controllers/projects.controller";
 
 /**
@@ -43,8 +42,8 @@ import {
  *                   type: string
  *               description:
  *                    type: string
- *               userId: 
- *                     
+ *               userId:
+ *
  *     responses:
  *       200:
  *         description: Successful response
@@ -68,7 +67,7 @@ import {
  *       - Education
  */
 
-router.get("/projects", getAllProjects)
+router.get("/projects", getAllProjects);
 router.get("/projects/:id", getProjectById);
 router.post("/projects", uploads, createProject);
 router.put("/projects/:id", updateProjectById);
