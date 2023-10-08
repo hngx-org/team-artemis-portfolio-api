@@ -9,15 +9,15 @@ export const updateProjectController: RequestHandler = async (
     req: Request,
     res: Response
 ) => {
-    const { id } = req.params;
+    const id = req.params.project_id;
     const data = req.body;
     const images = req.files as Express.Multer.File[];
 
-    if (!images){
+    if (!images) {
         return error(res, "You need to upload an image");
     }
 
-    if (images.length > 10){
+    if (images.length > 10) {
         return error(res, "You can only upload a maximum of 10 images at a time");
     }
 
@@ -31,10 +31,12 @@ export const updateProjectController: RequestHandler = async (
     // const imageIds = urls.map(url => ({}));
 
     try {
+        console.log(id);
         const updatedProject = await updateProjectService(parseInt(id), data, images);
         return success(res, updatedProject, `Project with id: ${id} updated successfully`);
     } catch (error) {
-        return error(res, (error as Error).message);
+        console.log(error)
+        return error(res, "Project update failed");
     }
 
 }

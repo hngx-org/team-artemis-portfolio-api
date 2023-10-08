@@ -12,12 +12,15 @@ export const updateProjectService = async (
     const projectRepository = connectionSource.getRepository(Project);
     const projectsImageRepository = connectionSource.getRepository(ProjectsImage);
     const imagesRepository = connectionSource.getRepository(Images);
-    const projectToUpdate = await projectRepository.findOneBy({id: id});
+    const projectToUpdate = await projectRepository.findOneBy({ id: id });
 
-    if (!projectToUpdate) throw new Error("Project not found");
+    if (!projectToUpdate) {
+        console.log("Project not found");
+        throw new Error("Project not found");
+    }
 
     await projectRepository.update(id, data);
-    const updatedProject = await projectRepository.findOneBy({id: id});
+    const updatedProject = await projectRepository.findOneBy({ id: id });
 
     // handle image upload
     if (images.length > 0) {
