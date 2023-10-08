@@ -8,25 +8,17 @@ export const createSkills: RequestHandler = async (
 ) => {
   try {
     const authorizationHeader = _req.header('Authorization');    
-    const skillData = _req.body
-    const requiredData: string[] = ["skills", "userId", "sectionId"]
-    // if (!authorizationHeader) {
-    //     const errorMessage = `unauthorized`;
-    //       return error(res, errorMessage, 401);
-    //   }
+    const { skills, sectionId, userId } = _req.body;
 
-    // const token = authorizationHeader.split(" ")[1]  
-
-    for (const field of requiredData) {
-        if (!(field in skillData)) {
-          const errorMessage = `Missing required field: ${field}`;
-          return error(res, errorMessage, 400);
-        }
-      }
+    const skillData = []
+    for (const skill of skills) {
+      skillData.push({skills: skill, sectionId, userId})
+    }
     
-    const data = createSkillsService(skillData);
+    const data =await createSkillsService(skillData);
     success(res, data);
   } catch (err) {
     error(res, (err as Error).message); // Use type assertion to cast 'err' to 'Error' type
   }
 };
+

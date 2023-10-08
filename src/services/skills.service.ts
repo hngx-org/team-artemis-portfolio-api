@@ -1,12 +1,18 @@
 import { Skill } from "../interfaces";
-import { SkillsDetail } from "../entity/model";
-import { AppDataSource } from "../data-source";
-
+import { SkillsDetail } from "../database/entity/model";
+import { connectionSource } from "../database/data-source";
 export const createSkillsService = async (
-  skillData: Skill
-): Promise<SkillsDetail> => {
-  const skillsDetailRepository = AppDataSource.getRepository(SkillsDetail);
-  const newSkill = skillsDetailRepository.create(skillData);
+  skillData: Skill[]
+): Promise<{ successful: boolean; message: string }> => {
+  const skillsDetailRepository = connectionSource.getRepository(SkillsDetail);
+  const skills = [];
 
-  return await skillsDetailRepository.save(newSkill);
+  for (const data of skillData) {
+    const newSkill = skillsDetailRepository.create(data);
+    skills.push(newSkill);
+  }
+
+  const savedskill = await skillsDetailRepository.save(skills);
+
+  return { successful: true, message: "skills successfully saved" };
 };

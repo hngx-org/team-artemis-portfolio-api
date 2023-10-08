@@ -1,2 +1,3 @@
 export * from "./greeting.controller";
-export * from "./skills.controller";
+export * from "./image-upload.controller";
+export * from "./profile.controller";
