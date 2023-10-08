@@ -54,6 +54,7 @@ export const createProject: RequestHandler = async (
     res: Response
 ) => {
     try {
+        console.log(req.body.jsondata)
         const { title, year, url, tags, description, userId, sectionId } = JSON.parse(req.body.jsondata);
 
 
@@ -73,13 +74,15 @@ export const createProject: RequestHandler = async (
         const data = await projectRepository.save(project);
         const projectId = data.id;
 
-        const files = req.files as any;
 
-        if (!files) return error(res, "Add thumbnail image", 400);
+        const files = req.files as any;
+        if (!files) {
+            return error(res, "Add thumbnail image", 400);
+        }
+
         const imagesRes = await cloudinaryService(files, req.body.service);
 
-
-        imagesRes.urls.forEach(async (url) => {
+        const imagePromises = imagesRes.urls.map(async (url) => {
             const image = new Images() as Images;
             image.url = url;
             const imageResponse = await imageRepository.save(image);
@@ -87,17 +90,25 @@ export const createProject: RequestHandler = async (
             const projectImage = new ProjectsImage() as ProjectsImage;
             projectImage.projectId = projectId;
             projectImage.imageId = imageResponse.id;
-            console.log(projectImage)
             await projectImageRepository.save(projectImage);
-        })
+        });
+
+        await Promise.all(imagePromises);
 
         const allThumbnails = await projectImageRepository.findBy({ projectId: projectId });
 
-        if (allThumbnails.length >= 1) {
-            const thumbnail = await imageRepository.findOneBy({ id: allThumbnails[0].imageId });
+        if (allThumbnails.length === 0) {
+            return success(res, data, "Created without thumbnail");
+        }
+
+        const thumbnail = await imageRepository.findOneBy({ id: allThumbnails[0].imageId });
+
+
+        if (thumbnail) {
+            const thumbnailId = thumbnail.id
             const projectUpdate = await projectRepository.findOneBy({ id: projectId });
-            const data = await projectRepository.update({ id: projectUpdate.id }, { thumbnail: thumbnail.id });
-            const updatedProject = await projectRepository.findOneBy({ id: projectId });
+            const data = await projectRepository.update({ id: +projectId }, { thumbnail: +thumbnailId });
+            const updatedProject = await projectRepository.findOneBy({ id: +projectId });
             success(res, updatedProject, "Successfully created");
         } else {
             success(res, data, "Created without thumbnail");
