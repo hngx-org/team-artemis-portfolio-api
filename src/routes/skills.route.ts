@@ -19,18 +19,18 @@ const router = express.Router();
  *       - in: header
  *         name: Authorization
  *         type: string
- *         description: Optional authorization header
+ *         description: authorization header
  *       - in: body
  *         name: skillData
  *         description: The data for the skills to be created.
  *         required: true
  *         schema:
- *           type: array
- *           items:
- *             type: object
- *             properties:
+ *           type: object
+ *           properties:
  *               skills:
- *                 type: string
+ *                 type: array
+ *                 items:
+ *                   type: string 
  *               sectionId:
  *                 type: number
  *               userId:
