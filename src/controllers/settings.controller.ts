@@ -219,7 +219,11 @@ export const updateUser = async (req: Request, res: Response) => {
     const user = await userModel.findOneBy({ id: userId });
 
     if (!user) {
-      return error(res, "User does not exist. Please provide a valid User ID", 400);
+      return error(
+        res,
+        "User does not exist. Please provide a valid User ID",
+        400
+      );
     }
 
     if (user.email === email) {
@@ -233,9 +237,7 @@ export const updateUser = async (req: Request, res: Response) => {
     user.email = email;
     user.password = password;
 
-    console.log("Before Query");
     const updatedUser = await userModel.update(userId, user);
-    console.log("After Query");
 
     if (!updatedUser) {
       return error(res, "Error updating user", 400);
