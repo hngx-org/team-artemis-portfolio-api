@@ -2,6 +2,7 @@ import { connectionSource } from "./database/data-source";
 import express from "express";
 import greetingRoute from "./routes/greeting.route";
 import profileRoute from "./routes/profile.route";
+import updateeducationRoute from "./routes/updateeducation.route";
 
 const app = express();
 
@@ -17,8 +18,9 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // route setup
-app.use("/", greetingRoute);
+
 app.use("/profile", profileRoute);
+app.use("/", updateeducationRoute);
 
 const port = process.env.PORT || 3000;
 
