@@ -5,7 +5,11 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   PrimaryColumn,
+  ManyToOne,
+  OneToMany,
+  JoinColumn,
 } from "typeorm";
+import { User } from "./user";
 
 enum STATUS {
   PENDING = "pending",
@@ -91,6 +95,12 @@ export class UserTrack {
 
   @Column("int")
   trackId: number;
+
+  @ManyToOne(() => User, (user) => user.id)
+  user: User;
+
+  @ManyToOne(() => Tracks, (track) => track.id)
+  track: Tracks;
 }
 @Entity({ name: "portfolio_details" })
 export class PortfolioDetails {
@@ -105,6 +115,9 @@ export class PortfolioDetails {
 
   @Column("varchar")
   userId: string;
+
+  @ManyToOne(() => User, (user) => user.id)
+  user: User;
 }
 @Entity({ name: "user_assessment_progress" })
 export class UserAssessmentProgress {
@@ -1287,6 +1300,20 @@ export class SocialUser {
 
   @Column("text")
   url: string;
+
+  @ManyToOne(() => User, (user) => user.socialUsers, {
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
+  })
+  @JoinColumn({ name: "user_id" })
+  user: User;
+
+  @ManyToOne(() => SocialMedia, (socialMedia) => socialMedia.id, {
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
+  })
+  @JoinColumn({ name: "social_media_id" })
+  socialMedia: SocialMedia;
 }
 
 @Entity({ name: "custom_user_section" })
