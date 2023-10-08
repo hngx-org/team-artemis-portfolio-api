@@ -1,5 +1,5 @@
 import express, { Router } from "express";
-import { updateEducationDetail } from "../controllers/updateeducation.controller"; // Replace with the actual path to your controller function
+import { updateEducationDetail } from "../controllers/education.controller"; // Replace with the actual path to your controller function
 
 const router: Router = express.Router();
 
