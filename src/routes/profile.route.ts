@@ -1,7 +1,7 @@
 // this is an example file
 import express from "express";
 import multer from "multer";
-import { uploadProfileImageController } from "../controllers";
+import { uploadProfileImageController,updatePortfolioDetails  } from "../controllers";
 
 const storage = multer.memoryStorage();
 const uploads = multer({ storage }).array("images", 1);
@@ -47,5 +47,8 @@ const router = express.Router();
  *     multipart: true
  */
 router.post("/profile/image/upload", uploads, uploadProfileImageController);
+
+// Update portfolio details
+router.put("/profile-details/:id", updatePortfolioDetails);
 
 module.exports = router;
