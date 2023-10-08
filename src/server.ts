@@ -1,6 +1,7 @@
 import { AppDataSource } from "./data-source";
 import express from "express";
 import greetingRoute from "./routes/greeting.route";
+import createSkills from "./routes/skills.route"
 
 AppDataSource.initialize()
   .then(async () => {
@@ -12,6 +13,7 @@ AppDataSource.initialize()
 
     // route setup
     app.use("/", greetingRoute);
+    app.use("/skills", createSkills);
 
     const port = process.env.PORT || 3000;
 
