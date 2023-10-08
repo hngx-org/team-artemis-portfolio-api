@@ -1,9 +1,9 @@
-import { WorkExperienceDetail } from "../entity/model";
-import { AppDataSource } from "../data-source";
+import { WorkExperienceDetail } from "../database/entity/model";
+import { connectionSource } from "../database/data-source";
 
 export const deleteWorkExperienceServise = async (id: number) => {
   const workExperienceRepository =
-    AppDataSource.getRepository(WorkExperienceDetail);
+    connectionSource.getRepository(WorkExperienceDetail);
 
   const workExperienceToRemove = await workExperienceRepository.findOneBy({
     id: id,
@@ -13,5 +13,9 @@ export const deleteWorkExperienceServise = async (id: number) => {
     throw new Error("Work Experience not found");
   }
 
-  await workExperienceRepository.remove(workExperienceToRemove);
+  const deletedWorkExperience = await workExperienceRepository.remove(
+    workExperienceToRemove
+  );
+
+  return deletedWorkExperience;
 };

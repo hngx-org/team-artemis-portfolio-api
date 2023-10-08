@@ -1,6 +1,8 @@
-import { Router } from "express";
+import express from "express";
 import { deleteWorkExperience } from "../controllers/work-experience.controller";
 
-export const workExperienceRoutes = Router();
+export const router = express.Router();
 
-workExperienceRoutes.delete("/work-experience/:id", deleteWorkExperience);
+router.delete("/work-experience/:id", deleteWorkExperience);
+
+module.exports = router;
