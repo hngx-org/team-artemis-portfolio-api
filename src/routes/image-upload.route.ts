@@ -11,4 +11,4 @@ const router = express.Router();
 
 router.get("/upload", uploads, uploadImageController);
 
-export default router;
+module.exports = router;
