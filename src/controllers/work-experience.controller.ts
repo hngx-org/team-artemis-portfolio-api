@@ -89,14 +89,9 @@ export const deleteWorkExperience: RequestHandler = async (req, res, next) => {
     error(res, (err as Error).message);
   }
 };
-import * as entities from "../database/entity/model" 
-import { Request, Response } from 'express';
 
-
-
-class WorkExperienceController {
-    static async getWorkExperience(req: Request, res: Response) {
-      try {
+export const workExperienceController: RequestHandler = async(req, res, next)=>{
+    try {
         const workExperienceRepository = connectionSource.getRepository(WorkExperienceDetail);
         const workExperiences = await workExperienceRepository.find();
         res.json({ workExperiences });
@@ -104,8 +99,4 @@ class WorkExperienceController {
         console.log(error);
         res.status(500).json({ error: 'Internal server error' });
       }
-    }
-  }
-
-
-export default WorkExperienceController;
+}
