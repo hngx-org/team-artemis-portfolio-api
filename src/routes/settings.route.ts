@@ -1,19 +1,13 @@
 // this is an example file
 import express from "express";
 import {
-  addNotification,
-  createUser,
-  updateNotification,
+  updateNotificationSettings,
   updateUser,
 } from "../controllers/settings.controller";
 
 const router = express.Router();
 
-router.post("/settings", createUser);
-
-router.patch("/:id", updateUser);
-
-router.post("/notification", addNotification);
-router.patch("/notification/:id", updateNotification);
+router.patch("/settings/:id", updateUser);
+router.patch("/settings/notification/:id", updateNotificationSettings);
 
 module.exports = router;

@@ -4,47 +4,6 @@ import { User } from "../database/entity/user";
 import { error, success } from "../utils";
 import { NotificationSetting } from "../database/entity/model";
 
-export const createUser = async (req: Request, res: Response) => {
-  const {
-    username,
-    firstName,
-    lastName,
-    email,
-    sectionOrder,
-    password,
-    provider,
-    isVerified,
-  } = req.body;
-  try {
-    const userModel = connectionSource.getRepository(User);
-    const foundUser = await userModel.findOneBy({ email });
-
-    if (foundUser) {
-      return res
-        .status(400)
-        .json({ status: "error", message: "User already exists" });
-    }
-
-    const user = new User();
-
-    user.username = username;
-    user.firstName = firstName;
-    user.lastName = lastName;
-    user.email = email;
-    user.sectionOrder = sectionOrder;
-    user.password = password;
-    user.provider = provider;
-    user.isVerified = isVerified;
-
-    const savedUser = await userModel.save(user);
-
-    return success(res, savedUser, "User created successfully");
-  } catch (error) {
-    console.log("error", error.message);
-    return error(res, error.message);
-  }
-};
-
 export const updateUser = async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body;
@@ -75,36 +34,10 @@ export const updateUser = async (req: Request, res: Response) => {
   }
 };
 
-export const addNotification = async (req: Request, res: Response) => {
-  try {
-    const {
-      emailSummary,
-      specialOffers,
-      communityUpdate,
-      followUpdate,
-      newMessages,
-      userId,
-    } = req.body;
-    const notificationModel =
-      connectionSource.getRepository(NotificationSetting);
-
-    const notification = new NotificationSetting();
-    notification.emailSummary = emailSummary;
-    notification.specialOffers = specialOffers;
-    notification.communityUpdate = communityUpdate;
-    notification.followUpdate = followUpdate;
-    notification.newMessages = newMessages;
-    notification.userId = userId;
-
-    const savedNotification = await notificationModel.save(notification);
-    return success(res, savedNotification, "Notification added successfully");
-  } catch (error) {
-    console.log("error", error.message);
-    return error(res, error.message);
-  }
-};
-
-export const updateNotification = async (req: Request, res: Response) => {
+export const updateNotificationSettings = async (
+  req: Request,
+  res: Response
+) => {
   try {
     const {
       emailSummary,
