@@ -25,7 +25,7 @@ export const createContacts = async (req:Request, res:Response)=>{
 
 // GET ALL CONTACTS OF A USER USING THE USER ID as request parameter
 export const getContacts = async (req:Request, res:Response)=>{
-        const {user_id} = req.query
+        const {user_id} = req.params;
       const contactsRepo = dataSource.getRepository(SocialUser)
      
      try{
