@@ -86,8 +86,8 @@ export class UserTrack {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column("int")
-  userId: number;
+  @Column("varchar")
+  userId: string;
 
   @Column("int")
   trackId: number;
@@ -103,8 +103,8 @@ export class PortfolioDetails {
   @Column("varchar", { nullable: true })
   country: string;
 
-  @Column("int")
-  userId: number;
+  @Column("varchar")
+  userId: string;
 }
 @Entity({ name: "user_assessment_progress" })
 export class UserAssessmentProgress {
