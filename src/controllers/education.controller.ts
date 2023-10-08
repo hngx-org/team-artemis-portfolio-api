@@ -15,6 +15,10 @@ const fetchEducationSection: RequestHandler = async (req, res) => {
       relations: ["degree", "section", "user"],
     });
 
+    if (educationDetails.length === 0) {
+      return res.status(404).json("No user education information");
+    }
+
     res.status(200).json(educationDetails);
   } catch (error) {
     res.status(500).json({ error: error.message });
