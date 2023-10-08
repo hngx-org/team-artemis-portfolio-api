@@ -10,8 +10,8 @@ const router = express.Router();
 /**
  * @swagger
  * /updateUser/{id}:
- *   put:
- *     summary: Update user information
+ *   patch:
+ *     summary: Update User Information
  *     description: Update user email and password.
  *     parameters:
  *       - in: path
@@ -21,8 +21,9 @@ const router = express.Router();
  *         schema:
  *           type: string
  *           format: uuid
+ *   
  *     requestBody:
- *       description: New User detail data
+ *       description: New user detail data
  *       required: true
  *       content:
  *         application/json:
@@ -52,15 +53,18 @@ const router = express.Router();
  *               properties:
  *                 error:
  *                   type: string
+ *     tags:
+ *       - Update User
  */
+
 
 router.patch("/settings/:id", updateUser);
 
 /**
  * @swagger
  * /updateNotificationSettings/{id}:
- *   put:
- *     summary: Update notification settings
+ *   patch:
+ *     summary: Update Notification Settings
  *     description: Update user notification settings.
  *     parameters:
  *       - in: path
@@ -69,7 +73,7 @@ router.patch("/settings/:id", updateUser);
  *         description: The ID of the notification settings to update.
  *         schema:
  *           type: integer
- *     requestBody:
+ *     request:
  *       description: New notification settings data
  *       required: true
  *       content:
@@ -106,7 +110,7 @@ router.patch("/settings/:id", updateUser);
  *                 message:
  *                   type: string
  *       400:
- *         description: Bad request. Notification does not exist.
+ *         description: Bad request. Notification settings do not exist.
  *         content:
  *           application/json:
  *             schema:
@@ -114,7 +118,10 @@ router.patch("/settings/:id", updateUser);
  *               properties:
  *                 error:
  *                   type: string
+ *     tags:
+ *       - Update Notification Settings
  */
+
 router.patch("/settings/notification/:id", updateNotificationSettings);
 
 module.exports = router;
