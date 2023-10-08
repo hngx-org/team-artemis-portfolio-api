@@ -1,7 +1,8 @@
 import { connectionSource } from "./database/data-source";
 import express from "express";
-import greetingRoute from "./routes/greeting.route";
-import profileRoute from "./routes/profile.route";
+import * as entities from "./database/entity/model";
+import { readdirSync } from "fs";
+import {sayHelloController} from "./controllers/greeting.controller";
 
 const app = express();
 
@@ -16,12 +17,18 @@ connectionSource
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// route setup
-app.use("/", greetingRoute);
-app.use("/profile", profileRoute);
+//serve all routes dynamically using readdirsync
+readdirSync("./src/routes").map((path) =>
+  app.use("/api", require(`./routes/${path}`))
+);
+
+app.get("/", sayHelloController);
 
 const port = process.env.PORT || 3000;
 
 app.listen(port, () => {
+  // console.log(entities);
   console.log(`Server is running on port ${port}`);
 });
+
+module.exports = app;
