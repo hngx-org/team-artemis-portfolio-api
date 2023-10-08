@@ -2,7 +2,8 @@ import express from "express";
 import {
   createSkills,
   updateSkills,
- getSkillsDetails, deleteSkills,
+  getSkillsDetails,
+  deleteSkills,
 } from "../controllers/skills.controller";
 
 const router = express.Router();
@@ -72,7 +73,6 @@ const router = express.Router();
 router.post("/create-skills", createSkills);
 
 router.get("/skills-details", getSkillsDetails);
-
 
 /**
  * @swagger
