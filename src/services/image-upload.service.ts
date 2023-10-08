@@ -1,22 +1,22 @@
 const path = require("path");
 const cloudinary = require("cloudinary");
 const DataUri = require("datauri/parser");
-const {
-  ListObjectsV2Command,
-  S3Client,
-  GetObjectCommand,
-  PutObjectCommand,
-} = require("@aws-sdk/client-s3");
+// const {
+//   ListObjectsV2Command,
+//   S3Client,
+//   GetObjectCommand,
+//   PutObjectCommand,
+// } = require("@aws-sdk/client-s3");
 
-const fetchConfig = {
-  credentials: {
-    accessKeyId: "",
-    secretAccessKey: "",
-  },
-  region: "",
-};
+// const fetchConfig = {
+//   credentials: {
+//     accessKeyId: "",
+//     secretAccessKey: "",
+//   },
+//   region: "",
+// };
 
-const s3 = new S3Client(fetchConfig);
+// const s3 = new S3Client(fetchConfig);
 
 export const cloudinaryService = async (
   files: any,
@@ -45,6 +45,7 @@ export const cloudinaryService = async (
 
       urls.push(image.secure_url);
     }
+    console.log(urls);
 
     return { successful: true, message: "files uploaded successfully", urls };
   } catch (error) {
@@ -52,29 +53,29 @@ export const cloudinaryService = async (
   }
 };
 
-export const AWSService = async (
-  files: any,
-  service: any
-): Promise<{ successful: boolean; message: string; urls: any[] }> => {
-  try {
-    const urls = [];
+// export const AWSService = async (
+//   files: any,
+//   service: any
+// ): Promise<{ successful: boolean; message: string; urls: any[] }> => {
+//   try {
+//     const urls = [];
 
-    const dtauri = new DataUri();
+//     const dtauri = new DataUri();
 
-    for (const file of files) {
-      const putCommand = new PutObjectCommand({
-        Bucket: "bucketName",
-        Key: file.originalname,
-        Body: file.buffer,
-      });
+//     for (const file of files) {
+//       const putCommand = new PutObjectCommand({
+//         Bucket: "bucketName",
+//         Key: file.originalname,
+//         Body: file.buffer,
+//       });
 
-      const img = await s3.send(putCommand);
+//       const img = await s3.send(putCommand);
 
-      urls.push(img.secure_url);
-    }
+//       urls.push(img.secure_url);
+//     }
 
-    return { successful: true, message: "files uploaded successfully", urls };
-  } catch (error) {
-    return { successful: false, message: (error as Error).message, urls: [] };
-  }
-};
+//     return { successful: true, message: "files uploaded successfully", urls };
+//   } catch (error) {
+//     return { successful: false, message: (error as Error).message, urls: [] };
+//   }
+// };

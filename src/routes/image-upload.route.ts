@@ -9,6 +9,6 @@ import { uploadImageController } from "../controllers";
 
 const router = express.Router();
 
-router.get("/image/upload", uploads, uploadImageController);
+router.get("/upload", uploads, uploadImageController);
 
 export default router;
