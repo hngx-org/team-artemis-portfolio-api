@@ -1305,7 +1305,15 @@ export class SocialUser {
     onDelete: "CASCADE",
     onUpdate: "CASCADE",
   })
+  @JoinColumn({ name: "user_id" })
   user: User;
+
+  @ManyToOne(() => SocialMedia, (socialMedia) => socialMedia.id, {
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
+  })
+  @JoinColumn({ name: "social_media_id" })
+  socialMedia: SocialMedia;
 }
 
 @Entity({ name: "custom_user_section" })
