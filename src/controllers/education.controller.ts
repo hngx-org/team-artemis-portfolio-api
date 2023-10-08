@@ -16,10 +16,10 @@ const fetchEducationSection: RequestHandler = async (req, res) => {
     });
 
     if (educationDetails.length === 0) {
-      return res.status(404).json("No user education information");
+      return res.status(404).json({ error: "No user education information" });
     }
 
-    res.status(200).json(educationDetails);
+    res.status(200).json({ educationDetails });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
