@@ -28,7 +28,7 @@ const router = express.Router();
  *           type: integer
  *       responses:
  *         204:
- *           description: No Content
+ *           description: deleted project info
  *         404:
  *           description: Project not found
  *           schema:

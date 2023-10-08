@@ -16,12 +16,12 @@ const deleteProjectSection = async (req: Request, res: Response) => {
     if (!project) {
       return res.status(404).json({ message: 'Project not found' });
     }
-
-    const deletedProjectInfo = { ...project };
+    
+    const deletedProjectInfo = project
     // Perform the deletion
     await projectRepository.remove(project);
 
-    return res.status(204).json({ message: 'Project deleted successfully', deletedProjectInfo });
+    return res.status(200).json({ message: 'Project deleted successfully', deletedProjectInfo });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: 'Internal server error' });
