@@ -13,6 +13,10 @@ export const updateProjectController: RequestHandler = async (
     const data = req.body;
     const images = req.files as Express.Multer.File[];
 
+    if (!images){
+        return error(res, "You need to upload an image");
+    }
+
     if (images.length > 10){
         return error(res, "You can only upload a maximum of 10 images at a time");
     }
