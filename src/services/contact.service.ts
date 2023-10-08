@@ -1,7 +1,7 @@
 import { connectionSource } from "../database/data-source";
 import { SocialUser } from "../database/entity/model";
-import { error } from "../utils/response.util";
 import { User } from "../database/entity/user";
+import { UpdateResult, DeleteResult } from "typeorm"; // Import TypeORM's Result types
 
 export const findUser = async (userId: string) => {
   const userRepository = connectionSource.getRepository(User);
@@ -12,7 +12,6 @@ export const findUser = async (userId: string) => {
   return user;
 };
 
-// Check if the resource exists and the user has permission
 const checkResourceAndPermission = async (socialId: number, userId: string) => {
   const socialRepository = connectionSource.getRepository(SocialUser);
   const findSocial = await socialRepository.findOne({
@@ -20,21 +19,16 @@ const checkResourceAndPermission = async (socialId: number, userId: string) => {
   });
 
   if (!findSocial) {
-    return error({
-      message: "Resource not found",
-      statusCode: 404, // Use 404 for "Resource not found" errors
-    });
+    throw new Error("Resource not found");
   }
 
   if (findSocial.userId !== userId) {
-    return error({
-      message:
-        "Unauthorized access: You do not have permission to access this social contact.",
-      statusCode: 403, // 403 for unauthorized access
-    });
+    throw new Error(
+      "Unauthorized access: You do not have permission to access this social contact."
+    );
   }
 
-  return findSocial; // Return the found social contact for further processing
+  return findSocial; // Return null when there are no errors
 };
 
 export const updateContact = async (
@@ -45,44 +39,52 @@ export const updateContact = async (
 ) => {
   const socialRepository = connectionSource.getRepository(SocialUser);
 
-  const findSocial = await checkResourceAndPermission(socialId, userId);
-
-  // Return the error response
-  if (findSocial.statusCode) {
-    return findSocial; // Return the error response
-  }
+  const errorResponse = await checkResourceAndPermission(socialId, userId);
 
   // Update the social contact
-  const updateSocial = await socialRepository
-    .createQueryBuilder()
-    .update(SocialUser)
-    .set({
-      socialMediaId,
-      url: url,
-    })
-    .where("id = : socialId", { id: socialId })
-    .execute();
-  if (updateSocial.affected >= 1) {
-    // Retrieve the updated social contact
-    const updatedResult = await socialRepository.findOne({
-      where: { id: socialId },
-    });
-    return updatedResult;
-  } else {
-    return null;
+  try {
+    const updateResult: UpdateResult = await socialRepository
+      .createQueryBuilder()
+      .update(SocialUser)
+      .set({
+        socialMediaId,
+        url: url,
+      })
+      .where("id = :socialId", { id: socialId })
+      .execute();
+
+    if (updateResult.affected >= 1) {
+      // Retrieve the updated social contact
+      const updatedResult = await socialRepository.findOne({
+        where: { id: socialId },
+      });
+      return updatedResult;
+    } else {
+      return null;
+    }
+  } catch (error) {
+    throw new Error("Error updating contact: " + error.message);
   }
 };
 
 export const deleteContact = async (socialId: number, userId: string) => {
   const socialRepository = connectionSource.getRepository(SocialUser);
-  const findSocial = await checkResourceAndPermission(socialId, userId);
 
-  // Return the error response
-  if (findSocial.statusCode) {
-    return findSocial; // Return the error response
+  const errorResponse = await checkResourceAndPermission(socialId, userId);
+  if (errorResponse) {
+    return errorResponse; // Return the error response
   }
 
-  const deleteContact = await socialRepository.delete(socialId);
+  try {
+    // Use delete method from TypeORM
+    const deleteResult: DeleteResult = await socialRepository.delete(socialId);
 
-  return deleteContact;
+    if (deleteResult.affected && deleteResult.affected >= 1) {
+      return "Contact deleted successfully";
+    } else {
+      return null;
+    }
+  } catch (error) {
+    throw new Error("Error deleting contact: " + error.message);
+  }
 };

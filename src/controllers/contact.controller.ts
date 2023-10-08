@@ -1,11 +1,12 @@
 import { updateContact, deleteContact, findUser } from "../services";
 import { error, success } from "../utils/response.util";
 import { ContactBody } from "../interfaces";
-import { Request, Response, RequestHandler } from "express";
+import { Request, Response, RequestHandler, NextFunction } from "express";
 
 export const updateContactController: RequestHandler = async (
   req: Request,
-  res: Response
+  res: Response,
+  next: NextFunction
 ) => {
   try {
     const { socialMediaId, url, userId }: ContactBody = req.body;
@@ -23,7 +24,7 @@ export const updateContactController: RequestHandler = async (
 
     const contact = await updateContact(socialMediaId, url, socialId, userId);
 
-    if (contact === null) {
+    if (!contact) {
       return error(
         res,
         "Contact not updated: The requested contact could not be updated.",
@@ -33,13 +34,14 @@ export const updateContactController: RequestHandler = async (
 
     return success(res, contact, "Contact updated successfully");
   } catch (error) {
-    error(res, (error as Error).message);
+    next(error(res, (error as Error).message));
   }
 };
 
 export const deleteContactController: RequestHandler = async (
   req: Request,
-  res: Response
+  res: Response,
+  next: NextFunction
 ) => {
   const { userId }: ContactBody = req.body;
   const socialId: number = Number(req.params.Id);
@@ -52,7 +54,20 @@ export const deleteContactController: RequestHandler = async (
       404
     );
   }
-  const contact = await deleteContact(socialId, userId);
 
-  return success(res, "sucessfull");
+  try {
+    const contact = await deleteContact(socialId, userId);
+
+    if (!contact) {
+      return error(
+        res,
+        "Contact not deleted: The requested contact could not be deleted.",
+        500
+      );
+    }
+
+    return success(res, "Contact deleted successfully");
+  } catch (error) {
+    next(error(res, (error as Error).message));
+  }
 };

@@ -1,8 +1,7 @@
 import { connectionSource } from "./database/data-source";
 import express from "express";
 import greetingRoute from "./routes/greeting.route";
-import profileRoute from "./routes/profile.route";
-import contactRoute from "./routes/contact.route";
+import { readdirSync } from "fs";
 
 const app = express();
 
@@ -17,10 +16,13 @@ connectionSource
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+//serve all routes dynamically using readdirsync
+readdirSync("./src/routes").map((path) =>
+  app.use("/api", require(`./routes/${path}`))
+);
+
 // route setup
 app.use("/", greetingRoute);
-app.use("/profile", profileRoute);
-app.use("/api", contactRoute);
 
 const port = process.env.PORT || 3000;
 
