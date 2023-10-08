@@ -2,7 +2,7 @@ import express from "express";
 import {
   createSkills,
   updateSkills,
-  deleteSkills,
+ getSkillsDetails, deleteSkills,
 } from "../controllers/skills.controller";
 
 const router = express.Router();
@@ -70,6 +70,8 @@ const router = express.Router();
  *                   type: null
  */
 router.post("/create-skills", createSkills);
+
+router.get("/skills-details", getSkillsDetails);
 
 
 /**
