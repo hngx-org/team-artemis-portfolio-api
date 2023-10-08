@@ -5,8 +5,6 @@ import { readdirSync } from "fs";
 import { sayHelloController } from "./controllers/greeting.controller";
 const swaggerUi = require("swagger-ui-express");
 const swaggerOptions = require("./swagger");
-import greetingRoute from "./routes/greeting.route";
-import { readdirSync } from "fs";
 
 const app = express();
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerOptions));
