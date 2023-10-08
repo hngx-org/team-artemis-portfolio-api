@@ -1,6 +1,8 @@
 import express from "express";
-import { createWorkExperience, deleteWorkExperience } from "../controllers/work-experience.controller";
-
+import {
+  createWorkExperience,
+  deleteWorkExperience,
+} from "../controllers/work-experience.controller";
 
 const router = express.Router();
 
@@ -10,10 +12,12 @@ const router = express.Router();
  *   post:
  *     summary: Create a new work experience.
  *     requestBody:
- *         required: true
- *         description: This will contain all the information that will be added to the new work experience.
- *         schema:
- *           type: object
+ *       required: true
+ *       description: This will contain all the information that will be added to the new work experience.
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
  *             properties:
  *               company:
  *                 type: string
@@ -22,21 +26,19 @@ const router = express.Router();
  *               startMonth:
  *                 type: string
  *               startYear:
- *                  type: string 
+ *                 type: string
  *               endMonth:
- *                  type: string
+ *                 type: string
  *               endYear:
- *                  type: string
+ *                 type: string
  *               description:
- *                  type: string
+ *                 type: string
  *               isEmployee:
- *                  type: boolean
+ *                 type: boolean
  *               userId:
- *                  type: uuid
+ *                 type: string  # Change 'uuid' to 'string' for consistency
  *               sectionId:
- *                  type: number
-
-
+ *                 type: integer  # Change 'number' to 'integer'
  *     responses:
  *       200:
  *         description: Added Work Experience Successfully
@@ -48,7 +50,7 @@ const router = express.Router();
  *                 message:
  *                   type: string
  *                 data:
- *                    type: object
+ *                   type: object
  *       400:
  *         description: Bad request
  *         content:
@@ -58,8 +60,7 @@ const router = express.Router();
  *               properties:
  *                 message:
  *                   type: string
- * 
-*       500:
+ *       500:
  *         description: Internal Server Error
  *         content:
  *           application/json:
@@ -68,12 +69,11 @@ const router = express.Router();
  *               properties:
  *                 message:
  *                   type: string
-
  *     tags:
  *       - Work Experience
  */
-router.post("/create-work-experience", createWorkExperience);
 
+router.post("/create-work-experience", createWorkExperience);
 
 /**
  * @swagger
