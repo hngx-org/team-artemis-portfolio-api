@@ -9,7 +9,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /api/create-skills:
+ * /create-skills:
  *   post:
  *     summary: Create new skills
  *     description: Create one or more skills for a user.
@@ -158,7 +158,7 @@ router.put("/update-skills/:id", updateSkills);
 
 /**
  * @swagger
- * /api/delete-skills/{id}:
+ * /delete-skills/{id}:
  *   delete:
  *     summary: Delete a skill by ID
  *     description: Delete a skill by providing its ID.
