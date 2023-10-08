@@ -12,9 +12,9 @@ export const connectionSource = new DataSource({
   username: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
-  synchronize: true,
+  synchronize: false,
   logging: false,
-  entities: [User, ...Object.keys(entities)],
+  entities: [User, ...Object.values(entities)],
   migrations: [],
   subscribers: [],
 });
