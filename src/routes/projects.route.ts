@@ -64,13 +64,15 @@ import {
  *                 error:
  *                   type: string
  *     tags:
- *       - Education
+ *       - Project
  */
 
 router.get("/projects", getAllProjects);
 router.get("/projects/:id", getProjectById);
-router.post("/projects", uploads, createProject);
-router.put("/projects/:id", updateProjectById);
+// router.post("/projects", uploads, createProject);
+// router.put("/projects/:id", updateProjectById);
 router.delete("/projects/:id", deleteProjectById);
+// Update Project section (/api/update-project/:project_id)
+router.put("/update-project/:project_id", uploads, updateProjectById);
 
 module.exports = router;
