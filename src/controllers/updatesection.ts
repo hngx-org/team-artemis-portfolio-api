@@ -1,18 +1,15 @@
 import express, { Request, Response } from 'express';
 import { Section, CustomField } from '../database/entity/model';
-import { connectionSource } from "../database/data-source"; // Import connectionSource
+import { connectionSource } from "../database/data-source";
 
 const updateCustomSection = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const { name, customFields } = req.body;
 
-    // Get the database connection from the connectionSource
-    const connection = await connectionSource.getConnection();
-
     // Get the repositories using the connection
-    const sectionRepository = connection.getRepository(Section);
-    const customFieldRepository = connection.getRepository(CustomField);
+    const sectionRepository = connectionSource.getRepository(Section);
+    const customFieldRepository = connectionSource.getRepository(CustomField);
 
     // Find the custom section by ID with associated custom fields
     const customSection = await sectionRepository.findOne(id, { relations: ['customFields'] });
