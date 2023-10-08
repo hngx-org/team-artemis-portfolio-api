@@ -29,9 +29,9 @@ export const updateUser = async (req: Request, res: Response) => {
     user.email = email;
     user.password = password;
 
-    const updatedUser = await userModel.update(userId, user);
+    const updateUser = await userModel.update(userId, user);
 
-    if (!updatedUser) {
+    if (!updateUser) {
       return error(res, "Error updating user", 400);
     }
     const userInfo = await userModel.findOneBy({ id: userId });
@@ -79,12 +79,12 @@ export const updateNotificationSettings = async (
     notification.newMessages = newMessages;
     notification.userId = userId;
 
-    const savedNotification = await notificationModel.update(
+    const updateNotification = await notificationModel.update(
       notificationId,
       notification
     );
 
-    if (!savedNotification) {
+    if (!updateNotification) {
       return error(res, "Error updating notification", 400);
     }
     const notificationInfo = await notificationModel.findOneBy({
