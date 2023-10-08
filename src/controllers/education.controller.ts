@@ -1,7 +1,25 @@
-import { Request, Response } from "express";
+import { Request, RequestHandler, Response } from "express";
 import { connectionSource } from "../database/data-source";
 import { EducationDetail } from "../database/entity/model";
 import { createEducationDetail } from "../services/education.service";
+
+// Endpoint to fetch the education section
+const fetchEducationSection: RequestHandler = async (req, res) => {
+  try {
+    const userId = req.params.userId;
+
+    const educationRepository = connectionSource.getRepository(EducationDetail);
+
+    const educationDetails = await educationRepository.find({
+      where: { userId },
+      relations: ["degree", "section", "user"],
+    });
+
+    res.status(200).json(educationDetails);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
 
 // Define a Data Transfer Object (DTO) for updating EducationDetail
 export interface UpdateEducationDetailDTO {
@@ -134,4 +152,8 @@ const updateEducationDetail = async (req: Request, res: Response) => {
   }
 };
 
-export { createEducationDetailController, updateEducationDetail };
+export {
+  createEducationDetailController,
+  updateEducationDetail,
+  fetchEducationSection,
+};
