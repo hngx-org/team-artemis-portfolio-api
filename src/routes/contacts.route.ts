@@ -7,4 +7,4 @@ const router = express.Router();
 router.get("/contacts/:user_id", getContacts);
 router.post("/contacts/", createContacts);
 
-export default router;
+module.exports = router;
