@@ -1,8 +1,7 @@
-import { getAllUsers, getUserById } from "../controllers/portfolio"
+import { getAllUsers, getUserById } from "../controllers/portfolio";
 import { Router } from "express";
 
-const router = Router();   // Create a new router
-
+const router = Router(); // Create a new router
 
 router.get("/portfolio", getAllUsers);
 
@@ -29,4 +28,4 @@ router.get("/portfolio", getAllUsers);
  */
 router.get("/portfolio/:id", getUserById);
 
-module.exports = router;  // Export the router
+module.exports = router; // Export the router

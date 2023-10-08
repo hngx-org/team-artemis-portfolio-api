@@ -1,11 +1,8 @@
-import express from 'express'
-import {
-  createEducationDetailController,
-} from '../controllers/education.controller'
+import express from "express";
+import { createEducationDetailController } from "../controllers/education.controller";
 
-const router = express.Router()
+const router = express.Router();
 
+router.post("/education/", createEducationDetailController);
 
-router.post('/education/', createEducationDetailController)
-
-module.exports = router
+module.exports = router;
