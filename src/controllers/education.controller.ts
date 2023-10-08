@@ -5,14 +5,14 @@ import { createEducationDetail } from "../services/education.service";
 
 // Endpoint to fetch the education section
 const fetchEducationSection: RequestHandler = async (req, res) => {
-  try {
-    const userId = req.params.userId;
+  const educationRepository = connectionSource.getRepository(EducationDetail);
 
-    const educationRepository = connectionSource.getRepository(EducationDetail);
+  try {
+    const id = req.params.id;
 
     const educationDetails = await educationRepository.find({
-      where: { userId },
-      relations: ["degree", "section", "user"],
+      where: { userId: id },
+      // relations: ["degree", "section", "user"],
     });
 
     if (educationDetails.length === 0) {

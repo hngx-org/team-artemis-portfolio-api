@@ -6,7 +6,7 @@ import {
 
 const router = express.Router();
 
-router.get("/education/", fetchEducationSection);
+router.get("/education/:id", fetchEducationSection);
 
 router.post("/education/", createEducationDetailController);
 
