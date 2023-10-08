@@ -64,16 +64,6 @@ const createCustomField = async (req: Request, res: Response) => {
   }
 };
 
-const findAllCustomField = async (req: Request, res: Response) => {
-  try {
-    const records = await customFieldRepository.find({});
-    return res.status(200).json(records);
-    // return success(res, records, "Success");
-  } catch (err) {
-    console.log(err);
-  }
-};
-
 const findOneCustomField = async (req: Request, res: Response) => {
   const { id } = req.params;
   try {
@@ -132,7 +122,6 @@ export {
   findAll,
   findOne,
   createCustomField,
-  findAllCustomField,
   findOneCustomField,
   validateSchema,
   customUserSectionSchema,

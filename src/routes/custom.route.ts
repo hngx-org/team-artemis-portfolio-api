@@ -1,14 +1,10 @@
-import express, { Request, Response, NextFunction } from "express";
+import express from "express";
 import {
   create,
   findAll,
   findOne,
   createCustomField,
-  findAllCustomField,
   findOneCustomField,
-  validateSchema,
-  customUserSectionSchema,
-  customFieldSchema,
 } from "../controllers/custom.controller";
 
 const router = express.Router();
@@ -149,7 +145,6 @@ router.get("/custom/:id", findOne);
  *       - custom
  */
 router.post("/custom/field", createCustomField);
-// router.get("/custom/field", findAllCustomField);
 
 /**
  * @swagger
