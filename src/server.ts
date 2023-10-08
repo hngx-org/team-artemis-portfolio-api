@@ -3,8 +3,11 @@ import express from "express";
 import * as entities from "./database/entity/model";
 import { readdirSync } from "fs";
 import { sayHelloController } from "./controllers/greeting.controller";
+const swaggerUi = require("swagger-ui-express");
+const swaggerOptions = require("./swagger");
 
 const app = express();
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerOptions));
 
 connectionSource
   .initialize()
