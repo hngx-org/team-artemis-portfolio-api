@@ -69,8 +69,8 @@ import {
 
 router.get("/projects", getAllProjects);
 router.get("/projects/:id", getProjectById);
-router.post("/projects", uploads, createProject);
-router.put("/projects/:id", updateProjectById);
+// router.post("/projects", uploads, createProject);
+// router.put("/projects/:id", updateProjectById);
 router.delete("/projects/:id", deleteProjectById);
 
 module.exports = router;

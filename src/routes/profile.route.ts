@@ -1,7 +1,11 @@
 // this is an example file
 import express from "express";
 import multer from "multer";
-import { uploadProfileImageController } from "../controllers";
+import {
+  createProfileController,
+  updatePortfolioDetails,
+  uploadProfileImageController,
+} from "../controllers";
 
 const storage = multer.memoryStorage();
 const uploads = multer({ storage }).array("images", 1);
@@ -47,5 +51,65 @@ const router = express.Router();
  *     multipart: true
  */
 router.post("/profile/image/upload", uploads, uploadProfileImageController);
+
+// Update portfolio details
+router.put("/profile-details/:id", updatePortfolioDetails);
+
+/**
+ * @swagger
+ * /profile/{userId}:
+ *   post:
+ *     summary: Create Portfolio profile
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         description: The id of the user.
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       description: New profile detail data
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - name
+ *               - trackId
+ *               - city
+ *               - country
+ *             properties:
+ *               name:
+ *                 type: string
+ *               trackId:
+ *                 type: number
+ *               city:
+ *                 type: string
+ *               country:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Successful response
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *       400:
+ *         description: Bad request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *     tags:
+ *       - Profile
+ */
+router.post("/profile/:userId", createProfileController);
 
 module.exports = router;
