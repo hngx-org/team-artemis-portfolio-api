@@ -12,6 +12,7 @@ const fetchEducationSection: RequestHandler = async (req, res) => {
 
     const educationDetails = await educationRepository.find({
       where: { userId: id },
+      // Relationship has not been modelled yet... Uncomment the code once the relationship between education detail and degree, section and user table have been established
       // relations: ["degree", "section", "user"],
     });
 
