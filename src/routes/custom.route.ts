@@ -13,11 +13,11 @@ import {
 
 const router = express.Router();
 
-router.post("/", validateSchema(customUserSectionSchema), create);
-router.get("/", findAll);
-router.post("/:id", findOne);
-router.post("/", validateSchema(customFieldSchema), createCustomField);
-router.get("/", findAllCustomField);
-router.post("/:id", findOneCustomField);
+router.post("/custom", create);
+router.get("/custom", findAll);
+router.get("/custom/:id", findOne);
+router.post("/custom/field", createCustomField);
+// router.get("/custom/field", findAllCustomField);
+router.get("/custom/field/:id", findOneCustomField);
 // don't forget to add the route that fetches all the custom field in in a customUserSectionSchema
 module.exports = router;
