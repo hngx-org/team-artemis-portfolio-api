@@ -7,27 +7,35 @@ import { NotificationSetting } from "../database/entity/model";
 export const updateUser = async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body;
+    const userId = req.params.id;
     const userModel = connectionSource.getRepository(User);
-    const user = await userModel.findOneBy({ id: req.params.id });
+    const user = await userModel.findOneBy({ id: userId });
 
     if (!user) {
-      return res
-        .status(400)
-        .json({ status: "error", message: "User does not exist" });
+      return error(
+        res,
+        "User does not exist. Please provide a valid user ID.",
+        400
+      );
     }
 
     if (user.email === email) {
-      return res.status(400).json({
-        status: "error",
-        message:
-          "The email you provided is the same as your current email address. Please choose a different email address.",
-      });
+      return error(
+        res,
+        "The email you provided is the same as your current email address. Please choose a different email address.",
+        400
+      );
     }
     user.email = email;
     user.password = password;
 
-    const updatedUser = await userModel.update(req.params.id, user);
-    return success(res, updatedUser, "User updated successfully");
+    const updateUser = await userModel.update(userId, user);
+
+    if (!updateUser) {
+      return error(res, "Error updating user", 400);
+    }
+    const userInfo = await userModel.findOneBy({ id: userId });
+    return success(res, userInfo, "User updated successfully");
   } catch (err) {
     console.log("error", err?.message);
     return error(res, err?.message);
@@ -52,12 +60,16 @@ export const updateNotificationSettings = async (
 
     const notificationId = Number(req.params.id);
 
-    const notification = await notificationModel.findOneBy({id: notificationId});
+    const notification = await notificationModel.findOneBy({
+      id: notificationId,
+    });
 
     if (!notification) {
-      return res
-        .status(400)
-        .json({ status: "error", message: "Notification does not exist" });
+      return error(
+        res,
+        "Cannot find notification. Please provide a valid Notification ID",
+        400
+      );
     }
 
     notification.emailSummary = emailSummary;
@@ -67,11 +79,18 @@ export const updateNotificationSettings = async (
     notification.newMessages = newMessages;
     notification.userId = userId;
 
-    const savedNotification = await notificationModel.update(
+    const updateNotification = await notificationModel.update(
       notificationId,
       notification
     );
-    return success(res, savedNotification, "Notification updated successfully");
+
+    if (!updateNotification) {
+      return error(res, "Error updating notification", 400);
+    }
+    const notificationInfo = await notificationModel.findOneBy({
+      id: notificationId,
+    });
+    return success(res, notificationInfo, "Notification updated successfully");
   } catch (err) {
     console.log("error", err?.message);
     return error(res, err?.message);
