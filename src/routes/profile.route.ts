@@ -57,7 +57,7 @@ router.post("/profile/image/upload", uploads, uploadProfileImageController);
  *       - in: path
  *         name: userId
  *         required: true
- *         description: The userId.
+ *         description: The id of the user.
  *         schema:
  *           type: string
  *     requestBody:
@@ -68,10 +68,14 @@ router.post("/profile/image/upload", uploads, uploadProfileImageController);
  *           schema:
  *             type: object
  *             properties:
- *               field1:
+ *               name:
  *                 type: string
- *               field2:
+ *               trackId:
  *                 type: number
+ *               city:
+ *                 type: string
+ *               country:
+ *                 type: string
  *     responses:
  *       200:
  *         description: Successful response
