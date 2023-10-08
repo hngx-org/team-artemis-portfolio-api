@@ -8,6 +8,6 @@ const uploads = multer({ storage }).array("images", 1);
 
 const router = express.Router();
 
-router.post("/image/upload", uploads, uploadProfileImageController);
+router.post("/profile/image/upload", uploads, uploadProfileImageController);
 
-export default router;
+module.exports = router;
