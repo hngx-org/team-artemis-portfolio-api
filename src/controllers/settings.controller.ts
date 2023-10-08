@@ -17,9 +17,7 @@ export const createUser = async (req: Request, res: Response) => {
   } = req.body;
   try {
     const userModel = connectionSource.getRepository(User);
-
     const foundUser = await userModel.findOneBy({ email });
-    console.log("user", foundUser);
 
     if (foundUser) {
       return res
@@ -40,7 +38,6 @@ export const createUser = async (req: Request, res: Response) => {
 
     const savedUser = await userModel.save(user);
 
-    console.log("Hello World", savedUser);
     return success(res, savedUser, "User created successfully");
   } catch (error) {
     console.log("error", error.message);
