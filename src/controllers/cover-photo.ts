@@ -15,11 +15,8 @@ export const coverphoto: RequestHandler = async (
     const userRepository = connectionSource.getRepository(Images);
 
     const images = new Images();
-    images.url = data.urls;
+    images.url = String(data.urls);
     await userRepository.save(images);
-    const allUsers = await userRepository.find();
-
-    console.log(allUsers);
 
     return success(res, data.urls, data.message);
   } catch (err) {
