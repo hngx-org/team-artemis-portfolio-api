@@ -1,8 +1,11 @@
 import { Request, RequestHandler, Response } from 'express';
 import { connectionSource } from '../database/data-source';
 import { WorkExperienceDetail } from '../database/entity/model';
-//import { error, success } from '../utils';
+import { error, success } from "../utils";
 
+// Get the repository for the WorkExperienceDetail entity
+const workExperienceRepository =
+  connectionSource.getRepository(WorkExperienceDetail);
 
 
 export const createWorkExperience: RequestHandler = async (req: Request, res: Response) => {
@@ -35,7 +38,6 @@ export const createWorkExperience: RequestHandler = async (req: Request, res: Re
     }
     
     try {
-        const workExperienceRepository = connectionSource.getRepository(WorkExperienceDetail);
         const workExperience = new WorkExperienceDetail();
         workExperience.company = company;
         workExperience.role = role;
@@ -54,4 +56,29 @@ export const createWorkExperience: RequestHandler = async (req: Request, res: Re
         res.statusCode = 500;
         res.json({ error: err, message: (err as Error).message })
     }
-};
+}
+
+export const deleteWorkExperience: RequestHandler = async (req, res, next) => {
+  try {
+    // Convert the ID to a number
+    const id = parseInt(req.params.id);
+
+    // Find the existing work experience detail by ID
+    const workExperienceToRemove = await workExperienceRepository.findOneBy({
+      id: id,
+    });
+
+    // If the work experience detail doesn't exist, return a 404 Not Found
+    if (!workExperienceToRemove) {
+      return error(res, "Work Experience not found", 404);
+    }
+
+    // Delete the work experience detail
+    const data = await workExperienceRepository.remove(workExperienceToRemove);
+
+    success(res, data, "Work Experience Deleted");
+  } catch (err) {
+    console.log(err);
+    error(res, (err as Error).message);
+  }
+}
