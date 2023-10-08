@@ -5,9 +5,9 @@ const request = supertest(app);
 
 describe('Reference API endpoints', () => {
   let sectionId: number;
-  // Endpoint to Create Sections (Work Experience, Projects, etc.)
+  // Endpoint to Create Reference section
   describe('POST /sections', () => {
-    it('should create a new section', async () => {
+    it('should create Reference section', async () => {
       const res = await request
         .post('/sections')
         .send({ name: 'Reference', description: 'This is reference section' });
@@ -17,9 +17,9 @@ describe('Reference API endpoints', () => {
     });
   });
 
-  // Endpoint to Edit Sections (Work Experience, Projects, etc.)
+  // Endpoint to update Reference section
   describe('PUT /sections/:sectionId', () => {
-    it('should edit an existing section', async () => {
+    it('should update Reference section', async () => {
       const res = await request
         .put(`/sections/${sectionId}`) 
         .send({ description: 'Another reference description' });
@@ -28,9 +28,9 @@ describe('Reference API endpoints', () => {
     });
   });
 
-  // Endpoint to Delete Sections (Work Experience, Projects, etc.)
+  // Endpoint to Delete Reference section
   describe('DELETE /sections/:sectionId', () => {
-    it('should delete an existing section', async () => {
+    it('should delete Reference section', async () => {
       const initialSections = await request.get('/sections');
       const res = await request
         .delete(`/sections/${sectionId}`);

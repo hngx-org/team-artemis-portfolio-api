@@ -5,9 +5,9 @@ const request = supertest(app);
 
 describe('Language API endpoints', () => {
   let sectionId: number;
-  // Endpoint to Create Sections (Work Experience, Projects, etc.)
+  // Endpoint to Create Language section
   describe('POST /sections', () => {
-    it('should create a new section', async () => {
+    it('should create Language section', async () => {
       const res = await request
         .post('/sections')
         .send({ name: 'Language', description: 'This is the language section' });
@@ -17,9 +17,9 @@ describe('Language API endpoints', () => {
     });
   });
 
-  // Endpoint to Edit Sections (Work Experience, Projects, etc.)
+  // Endpoint to update Language section
   describe('PUT /sections/:sectionId', () => {
-    it('should edit an existing section', async () => {
+    it('should update Language section', async () => {
       const res = await request
         .put(`/sections/${sectionId}`) 
         .send({ description: 'Another language description' });
@@ -28,9 +28,9 @@ describe('Language API endpoints', () => {
     });
   });
 
-  // Endpoint to Delete Sections (Work Experience, Projects, etc.)
+  // Endpoint to Delete Language section
   describe('DELETE /sections/:sectionId', () => {
-    it('should delete an existing section', async () => {
+    it('should delete Language section', async () => {
       const initialSections = await request.get('/sections');
       const res = await request
         .delete(`/sections/${sectionId}`);

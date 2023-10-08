@@ -5,7 +5,7 @@ const request = supertest(app);
 
 describe('Education API endpoints', () => {
   let sectionId: number;
-  // Endpoint to Create Sections (Work Experience, Projects, etc.)
+  // Endpoint to Create Education section
   describe('POST /sections', () => {
     it('should create a new section', async () => {
       const res = await request
@@ -17,20 +17,20 @@ describe('Education API endpoints', () => {
     });
   });
 
-  // Endpoint to Edit Sections (Work Experience, Projects, etc.)
-  describe('PUT /sections/:sectionId', () => {
-    it('should edit an existing section', async () => {
+  // Endpoint to update education details
+  describe('PUT /updateEducationDetail/:sectionId', () => {
+    it('should update Education section', async () => {
       const res = await request
-        .put(`/sections/${sectionId}`) 
+        .put(`/updateEducationDetail/${sectionId}`) 
         .send({ description: 'Another education description' });
       expect(res.status).to.equal(200);
       expect(res.body).to.be.an('object');
     });
   });
 
-  // Endpoint to Delete Sections (Work Experience, Projects, etc.)
+  // Endpoint to Delete education section
   describe('DELETE /sections/:sectionId', () => {
-    it('should delete an existing section', async () => {
+    it('should delete Education section', async () => {
       const initialSections = await request.get('/sections');
       const res = await request
         .delete(`/sections/${sectionId}`);

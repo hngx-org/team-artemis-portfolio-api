@@ -5,9 +5,9 @@ const request = supertest(app);
 
 describe('Work experience API endpoints', () => {
     let sectionId: number;
-  // Endpoint to Create Sections (Work Experience, Projects, etc.)
+  // Endpoint to Create Work Experience section
   describe('POST /sections', () => {
-    it('should create a new section', async () => {
+    it('should create Work Experience section', async () => {
       const res = await request
         .post('/sections')
         .send({ name: 'Work Experience', description: 'This is work experience' });
@@ -17,9 +17,9 @@ describe('Work experience API endpoints', () => {
     });
   });
 
-  // Endpoint to Edit Sections (Work Experience, Projects, etc.)
+  // Endpoint to update Work Experience section
   describe('PUT /sections/:sectionId', () => {
-    it('should edit an existing section', async () => {
+    it('should update Work Experience section', async () => {
       const res = await request
         .put(`/sections/${sectionId}`) 
         .send({ description: 'Another description' });
@@ -28,9 +28,9 @@ describe('Work experience API endpoints', () => {
     });
   });
 
-  // Endpoint to Delete Sections (Work Experience, Projects, etc.)
+  // Endpoint to Delete Work Experience section
   describe('DELETE /sections/:sectionId', () => {
-    it('should delete an existing section', async () => {
+    it('should delete Work Experience section', async () => {
       const initialSections = await request.get('/sections');
       const res = await request
         .delete(`/sections/${sectionId}`);

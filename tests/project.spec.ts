@@ -5,9 +5,9 @@ const request = supertest(app);
 
 describe('Project API endpoints', () => {
   let sectionId: number;
-  // Endpoint to Create Sections (Work Experience, Projects, etc.)
+  // Endpoint to Create Project section
   describe('POST /sections', () => {
-    it('should create a new section', async () => {
+    it('should create Project section', async () => {
       const res = await request
         .post('/sections')
         .send({ name: 'Project', description: 'This is the project section' });
@@ -17,9 +17,9 @@ describe('Project API endpoints', () => {
     });
   });
 
-  // Endpoint to Edit Sections (Work Experience, Projects, etc.)
+  // Endpoint to update Project section
   describe('PUT /sections/:sectionId', () => {
-    it('should edit an existing section', async () => {
+    it('should update Project section', async () => {
       const res = await request
         .put(`/sections/${sectionId}`) 
         .send({ description: 'Another project description' });
@@ -28,9 +28,9 @@ describe('Project API endpoints', () => {
     });
   });
 
-  // Endpoint to Delete Sections (Work Experience, Projects, etc.)
+  // Endpoint to Delete Project section
   describe('DELETE /sections/:sectionId', () => {
-    it('should delete an existing section', async () => {
+    it('should delete Project section', async () => {
       const initialSections = await request.get('/sections');
       const res = await request
         .delete(`/sections/${sectionId}`);
