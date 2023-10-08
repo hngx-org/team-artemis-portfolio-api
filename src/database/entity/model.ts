@@ -1199,7 +1199,7 @@ export class EducationDetail {
 
   @Column("varchar")
   fieldOfStudy: string;
-
+ield
   @Column("varchar")
   school: string;
 
