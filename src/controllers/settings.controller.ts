@@ -1,14 +1,16 @@
 import { Request, Response, NextFunction } from "express";
 import { success } from "../utils";
-import { NotificationSetting } from "../entity/model";
-import { AppDataSource } from "../data-source";
-import { User } from "../entity/model";
-import { accountSettingSchema } from "../utils/validation";
-import { hashPassword } from "../utils/helper";
+import { NotificationSetting } from "../database/entity/model";
+import { connectionSource } from "../database/data-source";
+import { User } from "../database/entity/user";
+import {
+  accountSettingSchema,
+  hashPassword,
+} from "../services/settings.service";
 
-const userRespository = AppDataSource.getRepository(User);
+const userRespository = connectionSource.getRepository(User);
 
-export const resetAccountSettingController = async (
+export const createAccountSettingController = async (
   req: Request,
   res: Response,
   next: NextFunction
@@ -35,7 +37,7 @@ export const resetAccountSettingController = async (
     const user = await userRespository.findOne({ where: { email: email } });
 
     if (!user) {
-      res.status(404).json({
+      return res.status(404).json({
         status: `error`,
         message: `User not found`,
         success: false,
@@ -43,36 +45,47 @@ export const resetAccountSettingController = async (
     }
 
     if (currentPassword !== user.password) {
-      res.status(400).json({
+      return res.status(400).json({
         status: `error`,
-        message: `incorrect user email or password input`,
+        message: `Incorrect user email or password input`,
         success: false,
       });
     }
 
     const hashedPassword = await hashPassword(newPassword);
 
-    const updateUser = AppDataSource.createQueryBuilder()
-      .update(User)
-      .set({ password: hashedPassword })
-      .where("email = :email", { email: email })
-      .execute();
+    try {
+      // Wait for the update operation to complete
+      const updateUser = await connectionSource
+        .createQueryBuilder()
+        .update(User)
+        .set({ password: hashedPassword })
+        .where("email = :email", { email: email })
+        .execute();
 
-    if (!updateUser) {
-      res.status(404).json({
+      if (updateUser.affected === 0) {
+        return res.status(404).json({
+          status: `error`,
+          message: `User password not updated`,
+          success: false,
+        });
+      }
+
+      return success(res, updateUser, `User password updated successfully`);
+    } catch (error) {
+      console.error(error); // Log the error for debugging
+      return res.status(500).json({
         status: `error`,
-        message: `User password not updated`,
+        message: `Failed to update user password`,
         success: false,
       });
     }
-
-    success(res, updateUser, `User password updated successfully`);
   } catch (error) {
-    res.status(500).json({
+    console.error(error); // Log the error for debugging
+    return res.status(500).json({
       status: `error`,
       message: `Internet error`,
       success: false,
-      data: console.log(error),
     });
   }
 };
@@ -84,28 +97,34 @@ export const createNotificationSettingController = async (
 ) => {
   try {
     const { userId } = req.params;
-
+    const {
+      communityUpdate,
+      emailSummary,
+      newMessages,
+      followUpdate,
+      specialOffers,
+    } = req.body;
     const notificationSettingRepository =
-      AppDataSource.getRepository(NotificationSetting);
+      connectionSource.getRepository(NotificationSetting);
 
     const isExistingUser = await notificationSettingRepository.findOne({
       where: { userId },
     });
 
     if (!isExistingUser) {
-      res.status(404).json({
+      return res.status(404).json({
         status: `error`,
         message: `User does not exist`,
-        successful: false,
+        success: false,
       });
     }
 
     const notificationSetting = new NotificationSetting();
-    notificationSetting.communityUpdate = false;
-    notificationSetting.emailSummary = false;
-    notificationSetting.newMessages = false;
-    notificationSetting.followUpdate = false;
-    notificationSetting.specialOffers = false;
+    notificationSetting.communityUpdate = communityUpdate || false;
+    notificationSetting.emailSummary = emailSummary || false;
+    notificationSetting.newMessages = newMessages || false;
+    notificationSetting.followUpdate = followUpdate || false;
+    notificationSetting.specialOffers = specialOffers || false;
     notificationSetting.userId = userId;
 
     const notificationInfo = await notificationSettingRepository.save(
@@ -122,12 +141,12 @@ export const createNotificationSettingController = async (
 
     success(res, notificationInfo, `activated notification`);
   } catch (error) {
-    res.status(500).json({
-      status: `error`,
-      message: `Internet error`,
-      success: false,
-      data: console.log(error),
-    });
+    console.log(error),
+      res.status(500).json({
+        status: `error`,
+        message: `Internet error`,
+        success: false,
+      });
   }
 };
 
@@ -144,39 +163,50 @@ export const deleteUserAccount = async (
     });
 
     if (!isExistingUser) {
-      res.status(404).json({
+      return res.status(404).json({
         status: `error`,
         message: `User does not exist`,
-        successful: false,
+        success: false,
       });
     }
 
-    const destroyAccount = AppDataSource.createQueryBuilder()
-      .delete()
-      .from(User)
-      .where("id = :id", { id: userId })
-      .execute();
+    try {
+      // Wait for the delete operation to complete
+      const destroyAccount = await connectionSource
+        .createQueryBuilder()
+        .delete()
+        .from(User)
+        .where("id = :id", { id: userId })
+        .execute();
 
-    if (!destroyAccount) {
-      res.status(404).json({
+      if (destroyAccount.affected === 0) {
+        return res.status(404).json({
+          status: `error`,
+          message: `Account not deleted`,
+          success: false,
+        });
+      }
+
+      return res.status(200).json({
+        status: `success`,
+        message: `Account deleted successfully`,
+        data: destroyAccount,
+        success: true,
+      });
+    } catch (error) {
+      console.error(error); // Log the error for debugging
+      return res.status(500).json({
         status: `error`,
-        message: `account not deleted`,
-        successful: false,
+        message: `Failed to delete account`,
+        success: false,
       });
     }
-
-    res.status(200).json({
-      status: `success`,
-      message: `Account deleted successfully`,
-      data: destroyAccount,
-      success: true,
-    });
   } catch (error) {
-    res.status(500).json({
+    console.error(error); // Log the error for debugging
+    return res.status(500).json({
       status: `error`,
       message: `Internet error`,
       success: false,
-      data: console.log(error),
     });
   }
 };
