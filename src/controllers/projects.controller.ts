@@ -3,6 +3,8 @@ import { connectionSource } from "../database/data-source";
 import express, { Request, RequestHandler, Response } from "express";
 import { error, success } from "../utils";
 import { cloudinaryService } from "../services/image-upload.service";
+import { updateProjectService } from "../services/project.service";
+
 
 const projectRepository = connectionSource.getRepository(Project);
 const imageRepository = connectionSource.getRepository(Images);
@@ -130,53 +132,53 @@ export const createProject: RequestHandler = async (
   }
 };
 
-export const updateProjectById: RequestHandler = async (
-  req: Request,
-  res: Response
-) => {
-  try {
-    const { id } = req.params;
-    const { title, year, url, tags, description, userId, sectionId } = req.body;
-    const updatedProject = await projectRepository.findOneBy({ id: +id });
+// export const updateProjectById: RequestHandler = async (
+//   req: Request,
+//   res: Response
+// ) => {
+//   try {
+//     const { id } = req.params;
+//     const { title, year, url, tags, description, userId, sectionId } = req.body;
+//     const updatedProject = await projectRepository.findOneBy({ id: +id });
 
-    if (!updatedProject) {
-      throw new Error("Project not found");
-    }
+//     if (!updatedProject) {
+//       throw new Error("Project not found");
+//     }
 
-    if (title) {
-      updatedProject.title = title as string;
-    }
+//     if (title) {
+//       updatedProject.title = title as string;
+//     }
 
-    if (year) {
-      updatedProject.year = year as string;
-    }
+//     if (year) {
+//       updatedProject.year = year as string;
+//     }
 
-    if (url) {
-      updatedProject.url = url as string;
-    }
+//     if (url) {
+//       updatedProject.url = url as string;
+//     }
 
-    if (tags) {
-      updatedProject.tags = tags as string;
-    }
+//     if (tags) {
+//       updatedProject.tags = tags as string;
+//     }
 
-    if (description) {
-      updatedProject.description = description as string;
-    }
+//     if (description) {
+//       updatedProject.description = description as string;
+//     }
 
-    if (userId) {
-      updatedProject.userId = userId as string;
-    }
+//     if (userId) {
+//       updatedProject.userId = userId as string;
+//     }
 
-    if (sectionId) {
-      updatedProject.sectionId = sectionId as number;
-    }
+//     if (sectionId) {
+//       updatedProject.sectionId = sectionId as number;
+//     }
 
-    const data = await projectRepository.save(updatedProject);
-    success(res, data, "Project Updated Successfully");
-  } catch (err) {
-    error(res, (err as Error).message);
-  }
-};
+//     const data = await projectRepository.save(updatedProject);
+//     success(res, data, "Project Updated Successfully");
+//   } catch (err) {
+//     error(res, (err as Error).message);
+//   }
+// };
 export const deleteProjectById: RequestHandler = async (
   req: Request,
   res: Response
@@ -195,3 +197,42 @@ export const deleteProjectById: RequestHandler = async (
     error(res, (err as Error).message);
   }
 };
+
+
+
+// update project section
+export const updateProjectById: RequestHandler = async (
+  req: Request,
+  res: Response
+) => {
+  const id = req.params.project_id;
+  const data = req.body;
+  const images = req.files as Express.Multer.File[];
+
+  if (!images) {
+      return error(res, "You need to upload an image");
+  }
+
+  if (images.length > 10) {
+      return error(res, "You can only upload a maximum of 10 images at a time");
+  }
+
+  // // Upload images and get image IDs
+  // const { successful, message, urls } = await cloudinaryService(files, 'project')
+  // if (!successful) {
+  //     return error(res, message);
+  // }
+
+  // // Get image IDs from URLs
+  // const imageIds = urls.map(url => ({}));
+
+  try {
+      console.log(id);
+      const updatedProject = await updateProjectService(parseInt(id), data, images);
+      return success(res, updatedProject, `Project with id: ${id} updated successfully`);
+  } catch (error) {
+      console.log(error)
+      return error(res, "Project update failed");
+  }
+
+}
