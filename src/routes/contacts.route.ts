@@ -4,7 +4,7 @@ import { createContacts, getContacts } from '../controllers/contacts.controller'
 
 const router = express.Router();
 
-router.get("api/contacts/:user_id", getContacts);
-router.post("api/contacts/", createContacts);
+router.get("/contacts/:user_id", getContacts);
+router.post("/contacts/", createContacts);
 
 export default router;

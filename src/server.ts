@@ -3,6 +3,7 @@ import express from "express";
 import * as entities from "./database/entity/model";
 import { readdirSync } from "fs";
 import {sayHelloController} from "./controllers/greeting.controller";
+import contactsRoute from "./routes/contacts.route";
 
 const app = express();
 
@@ -23,6 +24,7 @@ readdirSync("./src/routes").map((path) =>
 );
 
 app.get("/", sayHelloController);
+app.use("/", contactsRoute);
 
 const port = process.env.PORT || 3000;
 

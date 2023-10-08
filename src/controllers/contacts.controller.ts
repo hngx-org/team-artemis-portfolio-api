@@ -1,6 +1,6 @@
 import {Request, Response} from 'express';
-import {AppDataSource as dataSource} from '../data-source';
-import { SocialUser } from '../entity/model';
+import {connectionSource as dataSource} from '../database/data-source';
+import { SocialUser } from '../database/entity/model';
 
 
 //CREATES A NEW CONTACTS SECTION USING SOCIAL HANDLES
@@ -33,7 +33,7 @@ export const getContacts = async (req:Request, res:Response)=>{
         return   res.status(200).json(contacts)
      }catch(err){   
         console.log(err);
-        return    res.sendStatus(409)
+        return    res.json({status:409, message:'OOps! an error occured' })
      }
 }
 
