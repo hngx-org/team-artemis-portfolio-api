@@ -1,7 +1,12 @@
 import express from "express";
-import { createEducationDetailController } from "../controllers/education.controller";
+import {
+  createEducationDetailController,
+  fetchEducationSection,
+} from "../controllers/education.controller";
 
 const router = express.Router();
+
+router.get("/education/:id", fetchEducationSection);
 
 /**
  * @swagger
@@ -40,7 +45,7 @@ const router = express.Router();
  *                 type: string
  *               to:
  *                 type: string
- *               
+ *
  *     responses:
  *       200:
  *         description: Skills successfully created.
