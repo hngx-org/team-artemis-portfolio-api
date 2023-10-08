@@ -6,6 +6,7 @@ import {
   OneToMany,
 } from "typeorm";
 
+import { SocialUser } from "./model";
 @Entity({ name: "user" })
 export class User {
   @PrimaryGeneratedColumn("uuid")
@@ -59,5 +60,7 @@ export class User {
     default: () => "CURRENT_TIMESTAMP",
     name: "created_at",
   })
+  @OneToMany(() => SocialUser, (socialUser) => socialUser.userId)
+  socialUsers: SocialUser[];
   createdAt: Date;
 }
