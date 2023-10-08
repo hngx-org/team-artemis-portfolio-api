@@ -1,4 +1,4 @@
-import express, { Request, RequestHandler, Response } from "express";
+import { Request, Response } from "express";
 import { connectionSource } from "../database/data-source";
 import { User } from "../database/entity/user";
 import { error, success } from "../utils";
@@ -28,9 +28,9 @@ export const updateUser = async (req: Request, res: Response) => {
 
     const updatedUser = await userModel.update(req.params.id, user);
     return success(res, updatedUser, "User updated successfully");
-  } catch (error) {
-    console.log("error", error.message);
-    return error(res, error.message);
+  } catch (err) {
+    console.log("error", err?.message);
+    return error(res, err?.message);
   }
 };
 
@@ -52,11 +52,7 @@ export const updateNotificationSettings = async (
 
     const notificationId = Number(req.params.id);
 
-    const notification = await notificationModel.findOne({
-      where: {
-        id: notificationId,
-      },
-    });
+    const notification = await notificationModel.findOneBy({id: notificationId});
 
     if (!notification) {
       return res
@@ -76,8 +72,8 @@ export const updateNotificationSettings = async (
       notification
     );
     return success(res, savedNotification, "Notification updated successfully");
-  } catch (error) {
-    console.log("error", error.message);
-    return error(res, error.message);
+  } catch (err) {
+    console.log("error", err?.message);
+    return error(res, err?.message);
   }
 };
