@@ -81,11 +81,11 @@ team-artemis-portfolio-api/
 │   │   ├── greeting.controller.ts
 │   │   └── ...
 │   │
-│   ├── models/
+│   ├── database/
 │   │   ├── greeting.model.ts
 │   │   └── ...
 │   │
-│   ├── routes/
+│   ├── interfaces/
 │   │   ├── greeting.route.ts
 │   │   └── ...
 │   │
@@ -93,7 +93,7 @@ team-artemis-portfolio-api/
 │   │   ├── index.ts
 │   │   └── ...
 │   │
-│   ├── configs/
+│   ├── routes/
 │   │   ├── database.config.ts
 │   │   └── ...
 │   │
@@ -105,7 +105,7 @@ team-artemis-portfolio-api/
 │   │   ├── helpers.ts
 │   │   └── ...
 │   │
-│   ├── app.ts
+│   ├── swagger.ts
 │   ├── server.ts
 │   └── ...
 │

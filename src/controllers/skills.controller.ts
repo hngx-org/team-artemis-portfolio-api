@@ -15,10 +15,10 @@ export const createSkills: RequestHandler = async (
     const authorizationHeader = _req.header("Authorization");
     const { skills, sectionId, userId } = _req.body;
 
-    if (!Array.isArray(skills)) return error(res, "skills should be an array", 403)
+    if (!Array.isArray(skills))
+      return error(res, "skills should be an array", 403);
 
-    
-    const skillData = []
+    const skillData = [];
     for (const skill of skills) {
       skillData.push({ skills: skill, sectionId, userId });
     }

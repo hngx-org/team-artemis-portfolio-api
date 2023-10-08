@@ -91,6 +91,22 @@ export const deleteWorkExperience: RequestHandler = async (req, res, next) => {
 };
 
 
+export const workExperienceController: RequestHandler = async (
+  req,
+  res,
+  next
+) => {
+  try {
+    const workExperienceRepository =
+      connectionSource.getRepository(WorkExperienceDetail);
+    const workExperiences = await workExperienceRepository.find();
+    res.json({ workExperiences });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
 export const updateWorkExperience: RequestHandler = async (
   req: Request,
   res: Response

@@ -1,52 +1,38 @@
 import express from "express";
-const router = express.Router();
 import multer from "multer";
+import { updateProjectController } from "../controllers/project.controller";
+
 const storage = multer.memoryStorage();
 const uploads = multer({ storage }).array("images", 10);
 
-import {
-  getAllProjects,
-  getProjectById,
-  createProject,
-  updateProjectById,
-  deleteProjectById,
-} from "../controllers/projects.controller";
+const router = express.Router();
 
 /**
  * @swagger
- * /projects/{id}:
+ * /updat-project/project_id:
  *   put:
- *     summary: Update project by ID
+ *     summary: Update project detail by ID using PUT
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
- *         description: The ID of the project for update.
+ *         description: The ID of the project detail to update.
  *         schema:
  *           type: string
  *     requestBody:
- *       description: Update details for the project
- *       required: true
+ *       description: New project detail data
  *       content:
  *         application/json:
  *           schema:
  *             type: object
  *             properties:
- *               title:
+ *               field1:
  *                 type: string
- *               year:
+ *               field2:
  *                 type: number
- *               url:
- *                  type: string
- *               tags:
- *                   type: string
- *               description:
- *                    type: string
- *               userId:
- *
  *     responses:
  *       200:
- *         description: Successful response
+ *         description: Project updated successfully
  *         content:
  *           application/json:
  *             schema:
@@ -63,16 +49,21 @@ import {
  *               properties:
  *                 error:
  *                   type: string
+ *       404:
+ *         description: Project not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
  *     tags:
  *       - Project
  */
 
-router.get("/projects", getAllProjects);
-router.get("/projects/:id", getProjectById);
-// router.post("/projects", uploads, createProject);
-// router.put("/projects/:id", updateProjectById);
-router.delete("/projects/:id", deleteProjectById);
+
 // Update Project section (/api/update-project/:project_id)
-router.put("/update-project/:project_id", uploads, updateProjectById);
+router.put("/update-project/:project_id", uploads, updateProjectController);
 
 module.exports = router;
