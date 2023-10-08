@@ -3,7 +3,7 @@ import express from "express";
 import {
   updateNotificationSettings,
   updateUser,
-} from "../controllers/settings.controller";
+} from "../controllers";
 
 const router = express.Router();
 
