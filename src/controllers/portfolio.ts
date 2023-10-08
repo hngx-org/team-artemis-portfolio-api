@@ -16,7 +16,8 @@ const getUserById = async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
         const user = await userRepository.findOne({ where: { id } });
-        res.status(200).json(user);
+        const portfolio = await portfolioRepository.findOne({ where: { userId: id } });
+        res.status(200).json({ user, portfolio });
     } catch (error) {
         res.status(404).json({ message: "User not found" });
     }
