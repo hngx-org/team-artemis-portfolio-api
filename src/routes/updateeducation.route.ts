@@ -1,7 +1,7 @@
-import express, { Router } from "express";
-import { updateEducationDetail } from "../controllers/updateeducation.controller"; // Replace with the actual path to your controller function
+import express, { Router } from 'express'
+import { updateEducationDetail } from '../controllers/education.controller' // Replace with the actual path to your controller function
 
-const router: Router = express.Router();
+const router: Router = express.Router()
 
 /**
  * @swagger
@@ -49,6 +49,6 @@ const router: Router = express.Router();
  *     tags:
  *       - Education
  */
-router.put("/updateEducationDetail/:id", updateEducationDetail);
+router.put('/updateEducationDetail/:id', updateEducationDetail)
 
-module.exports = router;
+module.exports = router
