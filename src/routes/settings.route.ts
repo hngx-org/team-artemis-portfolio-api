@@ -1,29 +1,19 @@
-// this is an example file
-import express from "express";
+import { Router } from "express";
 import {
-  updateNotificationSettings,
-  updateUser,
-} from "../controllers";
+  createNotificationSettingController,
+  deleteUserAccount,
+  createAccountSettingController,
+} from "../controllers/settings.controller";
 
-const router = express.Router();
+const router = Router();
 
 /**
  * @swagger
- * /updateUser/{id}:
- *   patch:
- *     summary: Update User Information
- *     description: Update user email and password.
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         description: The ID of the user to update.
- *         schema:
- *           type: string
- *           format: uuid
- *   
+ * /createAccountSetting:
+ *   put:
+ *     summary: Create account settings
  *     requestBody:
- *       description: New user detail data
+ *       description: New account settings
  *       required: true
  *       content:
  *         application/json:
@@ -32,11 +22,15 @@ const router = express.Router();
  *             properties:
  *               email:
  *                 type: string
- *               password:
+ *               currentPassword:
+ *                 type: string
+ *               newPassword:
+ *                 type: string
+ *               confirmNewPassword:
  *                 type: string
  *     responses:
  *       200:
- *         description: User updated successfully.
+ *         description: Successful response
  *         content:
  *           application/json:
  *             schema:
@@ -45,7 +39,7 @@ const router = express.Router();
  *                 message:
  *                   type: string
  *       400:
- *         description: Bad request. User does not exist or email is the same as the current one.
+ *         description: Bad request
  *         content:
  *           application/json:
  *             schema:
@@ -54,54 +48,44 @@ const router = express.Router();
  *                 error:
  *                   type: string
  *     tags:
- *       - Update User
+ *       - User
  */
 
-
-router.patch("/settings/:id", updateUser);
+router.put("/createAccountSetting", createAccountSettingController);
 
 /**
  * @swagger
- * /updateNotificationSettings/{id}:
- *   patch:
- *     summary: Update Notification Settings
- *     description: Update user notification settings.
+ * /setNotificationDetails/{id}:
+ *   post:
+ *     summary: Create notification settings by ID
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
- *         description: The ID of the notification settings to update.
+ *         description: The unique ID of the user detail to create its settings.
  *         schema:
- *           type: integer
- *     request:
- *       description: New notification settings data
+ *           type: string
+ *     requestBody:
+ *       description: Notification settings detail data
  *       required: true
  *       content:
  *         application/json:
  *           schema:
  *             type: object
  *             properties:
- *               emailSummary:
- *                 type: boolean
- *                 description: Indicates whether email summary notifications are enabled.
- *               specialOffers:
- *                 type: boolean
- *                 description: Indicates whether special offers notifications are enabled.
  *               communityUpdate:
  *                 type: boolean
- *                 description: Indicates whether community update notifications are enabled.
- *               followUpdate:
+ *               emailSummary:
  *                 type: boolean
- *                 description: Indicates whether follow update notifications are enabled.
  *               newMessages:
  *                 type: boolean
- *                 description: Indicates whether new message notifications are enabled.
- *               userId:
- *                 type: string
- *                 description: The ID of the user for whom the notification settings are being updated.
+ *               followUpdate:
+ *                 type: boolean
+ *               specialOffers:
+ *                 type: boolean
  *     responses:
  *       200:
- *         description: Notification settings updated successfully.
+ *         description: Successful response
  *         content:
  *           application/json:
  *             schema:
@@ -110,7 +94,7 @@ router.patch("/settings/:id", updateUser);
  *                 message:
  *                   type: string
  *       400:
- *         description: Bad request. Notification settings do not exist.
+ *         description: Bad request
  *         content:
  *           application/json:
  *             schema:
@@ -119,9 +103,45 @@ router.patch("/settings/:id", updateUser);
  *                 error:
  *                   type: string
  *     tags:
- *       - Update Notification Settings
+ *       - NotificationSetting
  */
 
-router.patch("/settings/notification/:id", updateNotificationSettings);
+router.post("/setNotificationDetails/:id", createNotificationSettingController);
+
+/**
+ * @swagger
+ * /deleteAccountDetails/{id}:
+ *   delete:
+ *     summary: Delete user account detail by ID
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: The unique ID of the user to delete.
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Successful response
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *       400:
+ *         description: Bad request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *     tags:
+ *       - User
+ */
+router.delete("/deleteAccountDetails/:id", deleteUserAccount);
 
 module.exports = router;
