@@ -16,8 +16,6 @@ export const createSkillsService = async (
 
   return { successful: true, message: "skills successfully saved" };
 };
-
-
 export const getSkillsService = async (userId: string
 ): Promise<Skill[]> => {
   const skillsDetailRepository = connectionSource.getRepository(SkillsDetail);
