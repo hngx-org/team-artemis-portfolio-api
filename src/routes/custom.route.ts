@@ -18,13 +18,16 @@ const router = express.Router();
  * /custom:
  *   post:
  *     summary: Add custom section
- *     description: Add a custom section for auser
- *     consumes:
- *       - application/json
+ *     description: Add a custom section for a user
  *     parameters:
- *       - in: json
- *         userId: string
- *         sectionId: number
+ *       - in: formData
+ *         name: userId
+ *         type: string
+ *         description: must be a uuid
+ *       - in: formData
+ *         name: sectionId
+ *         type:  number
+ *         description: must be a number
  *     responses:
  *       200:
  *         description: Success
@@ -73,10 +76,16 @@ router.post("/custom", create);
 router.get("/custom", findAll);
 /**
  * @swagger
- * /custom/:id:
+ * /custom/{id}:
  *   get:
  *     summary: Get single custom record
- *     description: Get single custom field
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: The ID of the custom filed detail to get
+ *         schema:
+ *           type: string
  *     responses:
  *       200:
  *         description: Success
@@ -97,15 +106,24 @@ router.get("/custom/:id", findOne);
  * /custom/field:
  *   post:
  *     summary: Add custom field section
- *     description: Add a custom field in a section using the id
- *     consumes:
- *       - application/json
+ *     description: Add a custom field in a section usin
  *     parameters:
- *       - in: json
- *         fieldType: string
- *         customSectionId: number
- *         value: string
- *         fieldName: string
+ *       - in: formData
+ *         name: fieldType
+ *         type: string
+ *         description: must be a string
+ *       - in: formData
+ *         name: customSectionId
+ *         type:  number
+ *         description: must be a number
+ *       - in: formData
+ *         name: fieldName
+ *         type:  string
+ *         description: must be a string
+ *       - in: formData
+ *         name: value
+ *         type:  string
+ *         description: must be a string
  *     responses:
  *       200:
  *         description: Success
@@ -135,9 +153,16 @@ router.post("/custom/field", createCustomField);
 
 /**
  * @swagger
- * /custom/field:id:
+ * /custom/field/{id}:
  *   get:
  *     summary: Get single custom field record
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: The ID of the custom filed detail to get
+ *         schema:
+ *           type: string
  *     description: Get single custom field
  *     responses:
  *       200:
