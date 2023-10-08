@@ -1,5 +1,6 @@
 import { Project, Images, ProjectsImage } from "../database/entity/model";
 import { connectionSource } from "../database/data-source";
+import { getProjectService } from "../services/project.service";
 import express, { Request, RequestHandler, Response } from "express";
 import { error, success } from "../utils";
 import { cloudinaryService } from "../services/image-upload.service";
@@ -24,8 +25,9 @@ export const getAllProjects: RequestHandler = async (
   res: Response
 ) => {
   try {
-    const Projects = await projectRepository.find();
-    success(res, Projects);
+    const { userId } = _req.body;
+    const data = await getProjectService(userId);
+    success(res, data);
   } catch (err) {
     error(res, (err as Error).message);
   }
@@ -43,7 +45,6 @@ export const getProjectById: RequestHandler = async (
     error(res, (err as Error).message);
   }
 };
-
 
 export const deleteProjectById: RequestHandler = async (
   req: Request,
