@@ -3,6 +3,19 @@ import { connectionSource } from "../database/data-source";
 import { WorkExperienceDetail } from "../database/entity/model";
 import { error, success } from "../utils";
 
+interface CreateWorkExperienceDTO {
+  role: string;
+  company: string;
+  description: string;
+  startMonth: string;
+  startYear: string;
+  endMonth: string;
+  endYear: string;
+  isEmployee: boolean;
+  userId: string;
+  sectionId: number;
+}
+
 // Get the repository for the WorkExperienceDetail entity
 const workExperienceRepository =
   connectionSource.getRepository(WorkExperienceDetail);
@@ -87,5 +100,27 @@ export const deleteWorkExperience: RequestHandler = async (req, res, next) => {
   } catch (err) {
     console.log(err);
     error(res, (err as Error).message);
+  }
+};
+
+export const updateWorkExperience: RequestHandler = async (req, res, next) => {
+  try {
+    const id = parseInt(req.params.id);
+    const updateData = req.body as CreateWorkExperienceDTO;
+
+    // Find the existing work experience detail by ID
+    await workExperienceRepository.update(id, updateData);
+    const updatedWorkExperience = await workExperienceRepository.findOneBy({
+      id: id,
+    });
+
+    if (!updatedWorkExperience) {
+      return error(res, "Work Experience not found", 404);
+    }
+
+    success(res, updatedWorkExperience, "Work Experience Updated");
+  } catch (err) {
+    console.error("Error updating work experience detail:", err);
+    error(res, (err as Error).message, 500);
   }
 };
