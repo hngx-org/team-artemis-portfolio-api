@@ -37,7 +37,7 @@ export const createProfileController = async (req: Request, res: Response) => {
       userRepository.update(user.id, { lastName: name });
     }
 
-    const userTrack = userTrackRepository.findOne({ where: { trackId: trackId, userId } });
+    const userTrack = await userTrackRepository.findOne({ where: { trackId: trackId, userId } });
 
     if (!userTrack) {
       const newUser = userTrackRepository.create({ trackId: trackId, userId });
@@ -49,7 +49,11 @@ export const createProfileController = async (req: Request, res: Response) => {
 
     await portfolioDetailsRepository.save(portfolio);
 
-    return success(res, portfolio, "Successfully Created Portfolio profile");
+    return success(
+      res,
+      { portfolio: portfolio, user: user },
+      "Successfully Created Portfolio profile"
+    );
   } catch (err) {
     return error(res, err.message, 500);
   }

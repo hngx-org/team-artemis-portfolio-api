@@ -51,7 +51,7 @@ router.post("/profile/image/upload", uploads, uploadProfileImageController);
 /**
  * @swagger
  * /profile/{userId}:
- *   put:
+ *   post:
  *     summary: Create Portfolio profile
  *     parameters:
  *       - in: path
@@ -67,6 +67,11 @@ router.post("/profile/image/upload", uploads, uploadProfileImageController);
  *         application/json:
  *           schema:
  *             type: object
+ *             required:
+ *               - name
+ *               - trackId
+ *               - city
+ *               - country
  *             properties:
  *               name:
  *                 type: string
@@ -96,7 +101,7 @@ router.post("/profile/image/upload", uploads, uploadProfileImageController);
  *                 error:
  *                   type: string
  *     tags:
- *       - Education
+ *       - Profile
  */
 router.post("/profile/:userId", createProfileController);
 
