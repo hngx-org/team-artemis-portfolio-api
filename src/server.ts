@@ -24,7 +24,6 @@ readdirSync("./src/routes").map((path) =>
 );
 
 app.get("/", sayHelloController);
-app.use("/", contactsRoute);
 
 const port = process.env.PORT || 3000;
 
