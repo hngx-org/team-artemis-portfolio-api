@@ -25,30 +25,4 @@ const getUserById = async (req: Request, res: Response) => {
   }
 };
 
-// deleting portfolio by id endpoint
-
-const deletePortfolio: RequestHandler = async (req: Request, res: Response) => {
-  try {
-    // convert the id to number
-    const id = parseInt(req.params.id);
-
-    // find the porfolio by id
-    const portfolioToRemove = await portfolioRepository.findOneBy({ id: id });
-
-    // return error if porfolio is not found
-    if (!portfolioToRemove) {
-      return res.status(404).json({ error: "Portfolio not found!" });
-    }
-
-    // delete the porfolio
-
-    const portfolio = await portfolioRepository.remove(portfolioToRemove);
-    res
-      .status(200)
-      .json({ message: "Portfolio deleted successfully", portfolio });
-  } catch (error) {
-    res.status(500).json(error as Error);
-  }
-};
-
-export { getAllUsers, getUserById, deletePortfolio };
+export { getAllUsers, getUserById };
