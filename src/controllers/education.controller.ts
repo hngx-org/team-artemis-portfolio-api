@@ -1,6 +1,26 @@
-import { Request, Response } from "express";
+import { Request, RequestHandler, Response } from "express";
 import { connectionSource } from "../database/data-source";
 import { EducationDetail } from "../database/entity/model";
+import { createEducationDetail } from "../services/education.service";
+
+// Endpoint to fetch the education section
+const fetchEducationSection: RequestHandler = async (req, res) => {
+  const educationRepository = connectionSource.getRepository(EducationDetail);
+
+  try {
+    const id = req.params.id;
+
+    const educationDetails = await educationRepository.find({
+      where: { userId: id },
+      // Relationship has not been modelled yet... Uncomment the code once the relationship between education detail and degree, section and user table have been established
+      // relations: ["degree", "section", "user"],
+    });
+
+    res.status(200).json({ educationDetails });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
 
 // Define a Data Transfer Object (DTO) for updating EducationDetail
 export interface UpdateEducationDetailDTO {
@@ -18,7 +38,62 @@ export interface UpdateEducationDetailDTO {
 const educationDetailRepository =
   connectionSource.getRepository(EducationDetail);
 
-export const updateEducationDetail = async (req: Request, res: Response) => {
+const createEducationDetailController = async (req: Request, res: Response) => {
+  try {
+    const {
+      degreeId,
+      fieldOfStudy,
+      school,
+      from,
+      description,
+      to,
+      userId,
+      sectionId,
+    } = req.body;
+
+    // Define an array of required fields
+    const requiredFields = [
+      "degreeId",
+      "fieldOfStudy",
+      "school",
+      "from",
+      "description",
+      "to",
+      "userId",
+      "sectionId",
+    ];
+    // Add more fields as needed
+
+    // Check for missing fields
+    const missingFields = requiredFields.filter((field) => !req.body[field]);
+
+    if (missingFields.length > 0) {
+      return res.status(400).json({
+        error: `The following fields are missing: ${missingFields.join(", ")}`,
+      });
+    }
+
+    // Call the service function to create an education detail
+    const educationDetail = await createEducationDetail({
+      degreeId,
+      fieldOfStudy,
+      school,
+      from,
+      description,
+      to,
+      userId,
+      sectionId,
+    });
+
+    // Return the created education detail as a JSON response
+    res.status(201).json({ educationDetail });
+  } catch (error) {
+    console.error("Error creating education detail:", error.message);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+const updateEducationDetail = async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id);
     console.log("starting");
@@ -76,4 +151,10 @@ export const updateEducationDetail = async (req: Request, res: Response) => {
 
     res.status(500).json({ message: "Internal server error" });
   }
+};
+
+export {
+  createEducationDetailController,
+  updateEducationDetail,
+  fetchEducationSection,
 };

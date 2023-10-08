@@ -1092,6 +1092,12 @@ export class Section {
 
   @Column("text", { nullable: true })
   meta: string;
+
+  @OneToMany(
+    () => CustomUserSection,
+    (customUserSection) => customUserSection.section
+  )
+  customUserSections: CustomUserSection[];
 }
 
 @Entity({ name: "tracks" })
@@ -1326,6 +1332,12 @@ export class CustomUserSection {
 
   @Column("int")
   sectionId: number;
+
+  @ManyToOne(() => Section, (section) => section.customUserSections)
+  section: Section;
+
+  @OneToMany(() => CustomField, (customField) => customField.customUserSection)
+  customFields: CustomField[];
 }
 
 @Entity({ name: "custom_field" })
@@ -1344,6 +1356,12 @@ export class CustomField {
 
   @Column("text", { nullable: true })
   value: string;
+
+  @ManyToOne(
+    () => CustomUserSection,
+    (customUserSection) => customUserSection.customFields
+  )
+  customUserSection: CustomUserSection;
 }
 
 @Entity({ name: "notification_setting" })
