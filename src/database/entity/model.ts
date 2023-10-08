@@ -81,6 +81,31 @@ export class MailLog {
   })
   requestOrigin: string;
 }
+@Entity({ name: "user_track" })
+export class UserTrack {
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column("int")
+  userId: number;
+
+  @Column("int")
+  trackId: number;
+}
+@Entity({ name: "portfolio_details" })
+export class PortfolioDetails {
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column("varchar", { nullable: true })
+  city: string;
+
+  @Column("varchar", { nullable: true })
+  country: string;
+
+  @Column("int")
+  userId: number;
+}
 @Entity({ name: "user_assessment_progress" })
 export class UserAssessmentProgress {
   @PrimaryGeneratedColumn()
