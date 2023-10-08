@@ -1,9 +1,8 @@
 import { Request, RequestHandler, Response } from 'express';
 import { connectionSource } from '../database/data-source';
 import { WorkExperienceDetail } from '../database/entity/model';
-import { error, success } from '../utils';
+//import { error, success } from '../utils';
 
-const workExperienceRepository = connectionSource.getRepository(WorkExperienceDetail);
 
 
 export const createWorkExperience: RequestHandler = async (req: Request, res: Response) => {
@@ -19,23 +18,40 @@ export const createWorkExperience: RequestHandler = async (req: Request, res: Re
         userId, 
         sectionId
     } = req.body;
+    
+    if(!userId) {
+        res.statusCode = 400;
+        return res.json({ message: "userId is missing from request body" })
+    }
 
-    const workExperience = new WorkExperienceDetail();
-    workExperience.company = company;
-    workExperience.role = role;
-    workExperience.startMonth = startMonth;
-    workExperience.startYear = startYear;
-    workExperience.endMonth = endMonth;
-    workExperience.endYear = endYear;
-    workExperience.description = description;
-    workExperience.isEmployee = isEmployee;
-    workExperience.userId = userId;
-    workExperience.sectionId = sectionId;
+    if (sectionId === undefined) {
+        res.statusCode = 400;
+        return res.json({ message: "sectionId is missing from request body" })
+    }
 
+    if (!company || !role) {
+        res.statusCode = 400;
+        return res.json({ message: "company or role is missing from request body" })
+    }
+    
     try {
+        const workExperienceRepository = connectionSource.getRepository(WorkExperienceDetail);
+        const workExperience = new WorkExperienceDetail();
+        workExperience.company = company;
+        workExperience.role = role;
+        workExperience.startMonth = startMonth;
+        workExperience.startYear = startYear;
+        workExperience.endMonth = endMonth;
+        workExperience.endYear = endYear;
+        workExperience.description = description;
+        workExperience.isEmployee = isEmployee;
+        workExperience.userId = userId;
+        workExperience.sectionId = sectionId;
+
         await workExperienceRepository.save(workExperience);
-        return success(res, workExperience, "Added Work Experience Successfully")
+        return res.json({ message: "Added Work Experience Successfully", data: workExperience })
     } catch (err) {
-        error(err, (err as Error).message)
+        res.statusCode = 500;
+        res.json({ error: err, message: (err as Error).message })
     }
 };
