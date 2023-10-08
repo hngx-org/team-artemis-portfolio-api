@@ -32,7 +32,9 @@ export const updateContactController: RequestHandler = async (
       );
     }
 
-    return success(res, contact, "Contact updated successfully");
+    return res.status(200).json({
+      message: "new contact updated"
+    });
   } catch (error) {
     next(error(res, (error as Error).message));
   }
@@ -66,7 +68,9 @@ export const deleteContactController: RequestHandler = async (
       );
     }
 
-    return success(res, "Contact deleted successfully");
+    return res.status(200).json({
+      messsage: "contact deleted"
+    });
   } catch (error) {
     next(error(res, (error as Error).message));
   }
