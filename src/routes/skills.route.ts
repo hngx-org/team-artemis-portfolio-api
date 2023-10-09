@@ -27,7 +27,9 @@ const router = express.Router();
  *           type: object
  *           properties:
  *             skills:
- *               type: string
+ *               type: array
+ *               items:
+ *                  type: string
  *             sectionId:
  *               type: number
  *             userId:
