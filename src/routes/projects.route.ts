@@ -74,17 +74,17 @@ router.get("/projects/:id", getProjectById);
  *   post:
  *     summary: Create a new project
  *     description: Create a new project with images and project details.
+ *     consumes:
+ *       - multipart/form-data
  *     parameters:
  *       - in: formData
  *         name: images
- *         required: true
- *         description: Images for the project, including the thumbnail. You can upload multiple images.
  *         type: file
+ *         description: The images to upload (up to 10 files).
  *       - in: formData
  *         name: jsondata
- *         required: true
- *         description: JSON data containing project details.
  *         type: string
+ *         description: JSON data containing project details.
  *     responses:
  *       '201':
  *         description: Successfully created a new project
@@ -104,32 +104,6 @@ router.get("/projects/:id", getProjectById);
  *               properties:
  *                 error:
  *                   type: string
- *     requestBody:
- *       required: true
- *       content:
- *         multipart/form-data:
- *           schema:
- *             type: object
- *             properties:
- *               images:
- *                 type: array
- *                 items:
- *                   type: string
- *                   format: binary
- *                 description: Images for the project, including the thumbnail. You can upload multiple images.
- *               jsondata:
- *                 type: string
- *                 format: binary
- *                 description: JSON data containing project details.
- *                 example: |
- *                   {
- *                     "title": "New Project",
- *                     "year": "2023",
- *                     "url": "https://example.com",
- *                     "tags": "tag1, tag2, tag3",
- *                     "description": "This is a new project",
- *                     "userId": "ddc5eec2-65be-11ee-8c99-0242ac120002"
- *                   }
  *     tags:
  *       - Project
  */

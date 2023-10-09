@@ -2,6 +2,7 @@ import { Request, RequestHandler, Response } from "express";
 import { connectionSource } from "../database/data-source";
 import { EducationDetail } from "../database/entity/model";
 import { createEducationDetail } from "../services/education.service";
+import { EducationDetailData } from "../interfaces/education.interface";
 
 // Endpoint to fetch the education section
 const fetchEducationDetail: RequestHandler = async (req, res) => {
@@ -21,7 +22,6 @@ const fetchEducationDetail: RequestHandler = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
-import { EducationDetailData } from "../interfaces/education.interface";
 
 // Get the repository for the EducationDetail entity
 const educationDetailRepository =
@@ -52,6 +52,7 @@ const createEducationDetailController = async (req: Request, res: Response) => {
       "sectionId",
     ];
     // Add more fields as needed
+    console.log("start");
 
     // Check for missing fields
     const missingFields = requiredFields.filter((field) => !req.body[field]);

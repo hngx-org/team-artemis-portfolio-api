@@ -149,7 +149,7 @@ router.get("/education/:id", fetchEducationDetail);
  *                 data:
  *                   type: null
  */
-router.post("/api/education", createEducationDetailController);
+router.post("/education", createEducationDetailController);
 
 /**
  * @swagger
@@ -194,11 +194,11 @@ router.post("/api/education", createEducationDetailController);
  *                 message:
  *                   type: string
  */
-router.get("/api/education/:id", getEducationDetailById);
+router.get("/education/:id", getEducationDetailById);
 
 /**
  * @swagger
- * /api/education/{id}:
+ * /api/updateEducationDetail/{id}:
  *   put:
  *     summary: Update education detail by ID
  *     description: Update education details for a user by its ID.
@@ -297,7 +297,7 @@ router.put("/updateEducationDetail/:id", updateEducationDetail);
  *                 message:
  *                   type: string
  */
-router.get("/api/education/user/:userId", getAllEducationDetails);
+router.get("/education/user/:userId", getAllEducationDetails);
 
 /**
  * @swagger
@@ -335,6 +335,6 @@ router.get("/api/education/user/:userId", getAllEducationDetails);
  *                 message:
  *                   type: string
  */
-router.delete("/api/education/:id", deleteEducationDetail);
+router.delete("/education/:id", deleteEducationDetail);
 
 module.exports = router;

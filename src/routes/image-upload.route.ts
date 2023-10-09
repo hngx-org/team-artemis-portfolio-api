@@ -42,7 +42,7 @@ const router = express.Router();
  *                   type: string
  *                   description: An error message.
  */
-router.post("/api/upload", uploads, uploadImageController);
+router.post("/upload", uploads, uploadImageController);
 
 /**
  * @swagger
@@ -78,6 +78,6 @@ router.post("/api/upload", uploads, uploadImageController);
  *                   type: string
  *                   description: An error message.
  */
-router.post("/api/cover/photo", uploads, coverphoto);
+router.post("/cover/photo", uploads, coverphoto);
 
 module.exports = router;

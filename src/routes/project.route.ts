@@ -64,6 +64,6 @@ const router = express.Router();
  */
 
 // Update Project section (/api/update-project/:project_id)
-router.put("/api/update-project/:project_id", uploads, updateProjectController);
+router.put("/update-project/:project_id", uploads, updateProjectController);
 
 module.exports = router;
