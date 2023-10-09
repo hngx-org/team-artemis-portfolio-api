@@ -1,8 +1,8 @@
 import express from "express";
 import {
   createEducationDetailController,
-  fetchEducationDetail,
-  updateEducationDetail,
+  fetchEducationDetail, 
+  updateEducationDetail
 } from "../controllers/education.controller";
 
 const router = express.Router();
@@ -118,7 +118,7 @@ router.get("/education/:id", fetchEducationDetail);
  *                 type: string
  *               to:
  *                 type: string
- *
+ *               
  *     responses:
  *       200:
  *         description: Skills successfully created.
@@ -202,6 +202,6 @@ router.post("/education/:id", createEducationDetailController);
  *     tags:
  *       - Education
  */
-router.put("/updateEducationDetail/:id", updateEducationDetail);
+router.put('/updateEducationDetail/:id', updateEducationDetail)
 
 module.exports = router;
