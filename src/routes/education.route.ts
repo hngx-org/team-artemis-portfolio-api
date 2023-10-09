@@ -1,7 +1,82 @@
 import express from "express";
-import { createEducationDetailController, updateEducationDetail } from "../controllers/education.controller";
+import {
+  createEducationDetailController,
+  fetchEducationDetail,
+  updateEducationDetail,
+} from "../controllers/education.controller";
 
-const router = express.Router()
+const router = express.Router();
+
+/**
+ * @swagger
+ * /api/education/:id:
+ *   get:
+ *     summary: Get education details
+ *     description: Get education details for a user.
+ *     tags: [Education]
+ *     parameters:
+ *       - in: header
+ *         name: Authorization
+ *         type: string
+ *         description: Optional authorization header
+ *         schema:
+ *           type: array
+ *           items:
+ *             type: object
+ *             properties:
+ *               userId:
+ *                 type: string
+ *               sectionId:
+ *                 type: number
+ *               degreeId:
+ *                 type: number
+ *               fieldOfStudy:
+ *                 type: string
+ *               school:
+ *                 type: string
+ *               description:
+ *                 type: string
+ *               from:
+ *                 type: string
+ *               to:
+ *                 type: string
+ *
+ *     responses:
+ *       200:
+ *         educationDetails: Array of user education detail(s).
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 successful:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     successful:
+ *                       type: boolean
+ *                     message:
+ *                       type: string
+ *       500:
+ *         description: Failed to fetch education detail(s).
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 successful:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "invalid input syntax for type integer: \"\""
+ *                 data:
+ *                   type: null
+ */
+router.get("/education/:id", fetchEducationDetail);
 
 /**
  * @swagger
@@ -40,7 +115,7 @@ const router = express.Router()
  *                 type: string
  *               to:
  *                 type: string
- *               
+ *
  *     responses:
  *       200:
  *         description: Skills successfully created.
@@ -76,7 +151,7 @@ const router = express.Router()
  *                 data:
  *                   type: null
  */
-router.post('/education/', createEducationDetailController)
+router.post("/education/", createEducationDetailController);
 
 /**
  * @swagger
@@ -124,6 +199,6 @@ router.post('/education/', createEducationDetailController)
  *     tags:
  *       - Education
  */
-router.put('/updateEducationDetail/:id', updateEducationDetail)
+router.put("/updateEducationDetail/:id", updateEducationDetail);
 
 module.exports = router;
