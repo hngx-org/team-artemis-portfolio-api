@@ -160,7 +160,10 @@ export const deletePortfolioDetails: RequestHandler = async (
     );
     res
       .status(200)
-      .json({ message: "Portfolio deleted successfully", portfolio });
+      .json({
+        message: "Portfolio profile details deleted successfully",
+        portfolio,
+      });
   } catch (error) {
     res.status(500).json(error as Error);
   }
