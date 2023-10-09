@@ -32,6 +32,8 @@ const router = express.Router();
  *             properties:
  *               message:
  *                 type: string
+ *     tags:
+ *       - Project
  */
 // Define the route for deleting a project section
 router.delete("/projects/delete/:id", ProjectController.deleteProjectSection);

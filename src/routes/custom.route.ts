@@ -182,7 +182,6 @@ router.get("/custom/field/:id", findOneCustomField);
  *   delete:
  *     summary: Delete a custom section by ID
  *     description: Delete a custom section by providing its ID.
- *     tags: [Skills]
  *     parameters:
  *       - in: path
  *         name: id
@@ -242,6 +241,8 @@ router.get("/custom/field/:id", findOneCustomField);
  *                   example: "Error deleting Custom Section"
  *                 data:
  *                   type: null
+ *     tags:
+ *       - custom
  */
 router.delete("/custom-section/:id", deleteCustomSection);
 
