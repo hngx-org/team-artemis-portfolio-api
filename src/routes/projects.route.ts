@@ -69,7 +69,7 @@ import {
 
 router.get("/projects", getAllProjects);
 router.get("/projects/:id", getProjectById);
-// router.post("/projects", uploads, createProject);
+router.post("/projects", uploads, createProject);
 // router.put("/projects/:id", updateProjectById);
 router.delete("/projects/:id", deleteProjectById);
 // Update Project section (/api/update-project/:project_id)
