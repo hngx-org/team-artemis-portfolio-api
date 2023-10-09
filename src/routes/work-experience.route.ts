@@ -154,7 +154,7 @@ router.get("/work-experience", workExperienceController);
  *         required: true
  *         description: The ID of the work experience section to update.
  *         schema:
- *           type: string
+ *           type: integer
  *     requestBody:
  *       description: New work experience data
  *       required: true
@@ -181,6 +181,8 @@ router.get("/work-experience", workExperienceController);
  *                 type: boolean
  *               userId:
  *                 type: string
+ *               sectionId:
+ *                 type: integer
  *     responses:
  *       200:
  *         description: Successful response
@@ -191,6 +193,8 @@ router.get("/work-experience", workExperienceController);
  *               properties:
  *                 message:
  *                   type: string
+ *                 data:
+ *                   type: object
  *       400:
  *         description: Bad request
  *         content:
@@ -198,11 +202,32 @@ router.get("/work-experience", workExperienceController);
  *             schema:
  *               type: object
  *               properties:
+ *                 message:
+ *                   type: string
+ *       404:
+ *         description: Not Found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *       500:
+ *         description: Internal Server Error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
  *                 error:
+ *                   type: string
+ *                 message:
  *                   type: string
  *     tags:
  *       - Work Experience
  */
+
 router.put("/work-experience/:workId", updateWorkExperience);
 
 module.exports = router;
