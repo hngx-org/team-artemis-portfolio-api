@@ -174,4 +174,8 @@ router.post("/custom/field", createCustomField);
  *       - custom
  */
 router.get("/custom/field/:id", findOneCustomField);
+
+
+
+router.delete("/custom/:id", deleteCustomSection)
 module.exports = router;

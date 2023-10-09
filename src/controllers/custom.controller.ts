@@ -5,9 +5,30 @@ import { z } from "zod";
 import { CustomUserSection, CustomField } from "../database/entity/model";
 import { success, error } from "../utils/response.util";
 import { v4 as isUUIDv4 } from "uuid";
+import { deleteCustomSectionService } from "../services/custom.service";
 
 const customRepository = connectionSource.getRepository(CustomUserSection);
 const customFieldRepository = connectionSource.getRepository(CustomField);
+
+export const deleteCustomSection = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const sectionId = req.params.id
+    if (!sectionId) {
+      return res.status(400).json({
+        success: false, 
+        message: "Please input section ID"
+      })
+    }
+
+    await deleteCustomSectionService(sectionId)
+    res.status(201).json({ success: true, message: "Section deleted" })
+  } catch (error: any) {
+    return error(res, error.message)
+  }
+}
 
 const create = async (req: Request, res: Response) => {
   try {
