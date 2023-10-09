@@ -13,7 +13,7 @@ const router = express.Router();
  * @swagger
  * /api/education/:id:
  *   get:
- *     summary: Get education detail(s) by ID
+ *     summary: Get education detail(s) for a user who's id is in the params and returns an array of objects containing a user education details.
  *     description: Get education detail(s) for a user who's id is in the params and returns an array of objects containing a user education details.
  *     tags: [Education]
  *     parameters:
@@ -84,7 +84,7 @@ router.get("/education/:id", fetchUserEducationDetail);
  * @swagger
  * /api/education/{id}:
  *   post:
- *     summary: Create education details
+ *     summary: Create education detail(s) for a user who's id is in the params and returns an array of objects containing a user education details.
  *     description: Create education details for a user.
  *     tags: [Education]
  *     parameters:
@@ -157,7 +157,7 @@ router.post("/education:id", createEducationDetailController);
  * @swagger
  * /api/education/{id}:
  *   get:
- *     summary: Get education detail by ID
+ *     summary: Get a single education detail by ID
  *     description: Get an education detail by its ID.
  *     tags: [Education]
  *     parameters:
@@ -202,7 +202,7 @@ router.get("/education/:id", getEducationDetailById);
  * @swagger
  * /api/updateEducationDetail/{id}:
  *   put:
- *     summary: Update education detail by ID
+ *     summary: Update education details for a user by its ID.
  *     description: Update education details for a user by its ID.
  *     tags: [Education]
  *     parameters:
@@ -258,7 +258,7 @@ router.put("/updateEducationDetail/:id", updateEducationDetail);
  * @swagger
  * /api/educationDetail/{id}:
  *  get:
- *   summary: Get education detail by ID
+ *   summary: Get education detail by its ID
  *   description: Retrieve an education detail by its ID.
  *   tags: [Education]
  *   parameters:
