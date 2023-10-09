@@ -11,8 +11,8 @@ import {
   Section,
   SkillsDetail,
   WorkExperienceDetail,
-} from '../database/entity/model'
-import { error, success } from '../utils'
+} from "../database/entity/model";
+import { error, success } from "../utils";
 
 const userRepository = connectionSource.getRepository(User);
 const portfolioRepository = connectionSource.getRepository(PortfolioDetails);
@@ -41,33 +41,33 @@ const retrievePortfolioController: RequestHandler = async (
   res: Response
 ) => {
   try {
-    const userId = req.params.userId
+    const userId = req.params.userId;
     const workExperience = await connectionSource.manager.find(
       WorkExperienceDetail,
       { where: { userId } }
-    )
+    );
 
     const education = await connectionSource.manager.find(EducationDetail, {
       where: { userId },
-    })
+    });
 
     const skills = await connectionSource.manager.find(SkillsDetail, {
       where: { userId },
-    })
+    });
 
     const interests = await connectionSource.manager.find(InterestDetail, {
       where: { userId },
-    })
+    });
 
     const aboutMe = await connectionSource.manager.find(AboutDetail, {
       where: { userId },
-    })
+    });
 
     const projects = await connectionSource.manager.find(Project, {
       where: { userId },
-    })
+    });
 
-    const sections = await connectionSource.manager.find(Section)
+    const sections = await connectionSource.manager.find(Section);
 
     return success(res, {
       workExperience,
@@ -77,11 +77,10 @@ const retrievePortfolioController: RequestHandler = async (
       interests,
       aboutMe,
       sections,
-    })
+    });
   } catch (err) {
-    return error(res, (err as Error).message)
+    return error(res, (err as Error).message);
   }
-}
+};
 
-
-export { getAllUsers, getUserById, retrievePortfolioController }
+export { getAllUsers, getUserById, retrievePortfolioController };

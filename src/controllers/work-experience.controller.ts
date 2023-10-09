@@ -90,7 +90,6 @@ export const deleteWorkExperience: RequestHandler = async (req, res, next) => {
   }
 };
 
-
 export const workExperienceController: RequestHandler = async (
   req,
   res,
@@ -149,7 +148,9 @@ export const updateWorkExperience: RequestHandler = async (
   }
 
   try {
-    const workExperienceToUpdate = await workExperienceRepository.findOneBy({ id: workId});
+    const workExperienceToUpdate = await workExperienceRepository.findOneBy({
+      id: workId,
+    });
 
     if (!workExperienceToUpdate) {
       res.statusCode = 404;

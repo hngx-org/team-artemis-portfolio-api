@@ -9,29 +9,26 @@ import { deleteCustomSectionService } from "../services/custom.service";
 const customRepository = connectionSource.getRepository(CustomUserSection);
 const customFieldRepository = connectionSource.getRepository(CustomField);
 
-export const deleteCustomSection = async (
-  req: Request,
-  res: Response
-) => {
+export const deleteCustomSection = async (req: Request, res: Response) => {
   try {
-    const id = parseInt(req.params.id)
+    const id = parseInt(req.params.id);
     if (!id) {
       return (res as any).status(400).json({
-        success: false, 
-        message: "Please input section ID"
-      })
+        success: false,
+        message: "Please input section ID",
+      });
     }
 
-    const data = await deleteCustomSectionService(id)
+    const data = await deleteCustomSectionService(id);
     if (data.successful) {
-      success(res, data)
+      success(res, data);
     } else {
       error(res, data.message);
     }
   } catch (error: any) {
-    return error(res, error.message)
+    return error(res, error.message);
   }
-}
+};
 
 const create = async (req: Request, res: Response) => {
   try {
@@ -121,8 +118,7 @@ const customFieldSchema = z.object({
 });
 
 const validateSchema =
-  (schema: AnyZodObject) =>
-  async (req: Request, res: Response, next: any) => {
+  (schema: AnyZodObject) => async (req: Request, res: Response, next: any) => {
     try {
       console.log(req.body);
       await schema.parseAsync(req.body);

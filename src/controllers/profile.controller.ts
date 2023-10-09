@@ -158,12 +158,10 @@ export const deletePortfolioDetails: RequestHandler = async (
     const portfolio = await portfolioDetailsRepository.remove(
       portfolioToRemove
     );
-    res
-      .status(200)
-      .json({
-        message: "Portfolio profile details deleted successfully",
-        portfolio,
-      });
+    res.status(200).json({
+      message: "Portfolio profile details deleted successfully",
+      portfolio,
+    });
   } catch (error) {
     res.status(500).json(error as Error);
   }
