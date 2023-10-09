@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { Request, RequestHandler, Response } from "express";
 import { connectionSource } from "../database/data-source";
 import { User } from "../database/entity/user";
 import { UserTrack, PortfolioDetails } from "../database/entity/model";

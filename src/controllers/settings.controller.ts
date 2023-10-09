@@ -7,7 +7,6 @@ import {
   accountSettingSchema,
   hashPassword,
 } from "../services/settings.service";
-import { v4 } from "uuid";
 const userRespository = connectionSource.getRepository(User);
 
 export const createAccountSettingController = async (

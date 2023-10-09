@@ -1,4 +1,4 @@
-import express, { Request, Response } from "express";
+import express, { Request, RequestHandler, Response } from "express";
 import { connectionSource } from "../database/data-source";
 import { PortfolioDetails, UserTrack } from "../database/entity/model";
 import { User } from "../database/entity/user";
@@ -131,5 +131,40 @@ export const createProfileController = async (req: Request, res: Response) => {
     );
   } catch (err) {
     return error(res, err.message, 500);
+  }
+};
+
+// delete Portfolio Profile details
+export const deletePortfolioDetails: RequestHandler = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    // convert the id to number
+    const id = parseInt(req.params.id);
+
+    // find the porfolio by id
+    const portfolioToRemove = await portfolioDetailsRepository.findOneBy({
+      id: id,
+    });
+
+    // return error if porfolio is not found
+    if (!portfolioToRemove) {
+      return res.status(404).json({ error: "Portfolio Details not found!" });
+    }
+
+    // delete the porfolio
+
+    const portfolio = await portfolioDetailsRepository.remove(
+      portfolioToRemove
+    );
+    res
+      .status(200)
+      .json({
+        message: "Portfolio profile details deleted successfully",
+        portfolio,
+      });
+  } catch (error) {
+    res.status(500).json(error as Error);
   }
 };
