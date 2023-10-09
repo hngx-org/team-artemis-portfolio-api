@@ -3,13 +3,9 @@ import {
   createEducationDetailController,
   updateEducationDetail,
   getEducationDetailById,
+  fetchEducationDetail,
   getAllEducationDetails,
   deleteEducationDetail,
-} from "../controllers/education.controller";
-import {
-  createEducationDetailController,
-  fetchEducationDetail,
-  updateEducationDetail,
 } from "../controllers/education.controller";
 
 const router = express.Router();
@@ -254,8 +250,7 @@ router.get("/api/education/:id", getEducationDetailById);
  *             error:
  *               type: string
  */
-
-router.patch("/api/education/:id", updateEducationDetail);
+router.put("/updateEducationDetail/:id", updateEducationDetail);
 
 /**
  * @swagger
@@ -340,7 +335,6 @@ router.get("/api/education/user/:userId", getAllEducationDetails);
  *                 message:
  *                   type: string
  */
-router.put("/updateEducationDetail/:id", updateEducationDetail);
 router.delete("/api/education/:id", deleteEducationDetail);
 
 module.exports = router;
