@@ -5,7 +5,6 @@ import { error, success } from "../utils";
 import { cloudinaryService } from "../services/image-upload.service";
 import { updateProjectService } from "../services/project.service";
 
-
 const projectRepository = connectionSource.getRepository(Project);
 const imageRepository = connectionSource.getRepository(Images);
 const projectImageRepository = connectionSource.getRepository(ProjectsImage);
@@ -198,8 +197,6 @@ export const deleteProjectById: RequestHandler = async (
   }
 };
 
-
-
 // update project section
 export const updateProjectById: RequestHandler = async (
   req: Request,
@@ -210,11 +207,11 @@ export const updateProjectById: RequestHandler = async (
   const images = req.files as Express.Multer.File[];
 
   if (!images) {
-      return error(res, "You need to upload an image");
+    return error(res, "You need to upload an image");
   }
 
   if (images.length > 10) {
-      return error(res, "You can only upload a maximum of 10 images at a time");
+    return error(res, "You can only upload a maximum of 10 images at a time");
   }
 
   // // Upload images and get image IDs
@@ -227,12 +224,19 @@ export const updateProjectById: RequestHandler = async (
   // const imageIds = urls.map(url => ({}));
 
   try {
-      console.log(id);
-      const updatedProject = await updateProjectService(parseInt(id), data, images);
-      return success(res, updatedProject, `Project with id: ${id} updated successfully`);
+    console.log(id);
+    const updatedProject = await updateProjectService(
+      parseInt(id),
+      data,
+      images
+    );
+    return success(
+      res,
+      updatedProject,
+      `Project with id: ${id} updated successfully`
+    );
   } catch (error) {
-      console.log(error)
-      return error(res, "Project update failed");
+    console.log(error);
+    return error(res, "Project update failed");
   }
-
-}
+};

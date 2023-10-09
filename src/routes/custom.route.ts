@@ -176,7 +176,6 @@ router.post("/custom/field", createCustomField);
  */
 router.get("/custom/field/:id", findOneCustomField);
 
-
 /**
  * @swagger
  * /custom-section/{id}:
@@ -244,6 +243,6 @@ router.get("/custom/field/:id", findOneCustomField);
  *                 data:
  *                   type: null
  */
-router.delete("/custom-section/:id", deleteCustomSection)
+router.delete("/custom-section/:id", deleteCustomSection);
 
 module.exports = router;
