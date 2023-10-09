@@ -9,18 +9,21 @@ const router = express.Router();
 
 /**
  * @swagger
- * /updat-project/project_id:
+ * /api/update-project/{project_id}:
  *   put:
  *     summary: Update project detail by ID using PUT
+ *     description: Update an existing project detail by its ID.
+ *     tags: [Project]
  *     parameters:
  *       - in: path
- *         name: id
+ *         name: project_id
  *         required: true
  *         description: The ID of the project detail to update.
  *         schema:
  *           type: string
  *     requestBody:
  *       description: New project detail data
+ *       required: true
  *       content:
  *         application/json:
  *           schema:
@@ -31,7 +34,7 @@ const router = express.Router();
  *               field2:
  *                 type: number
  *     responses:
- *       200:
+ *       '200':
  *         description: Project updated successfully
  *         content:
  *           application/json:
@@ -40,7 +43,7 @@ const router = express.Router();
  *               properties:
  *                 message:
  *                   type: string
- *       400:
+ *       '400':
  *         description: Bad request
  *         content:
  *           application/json:
@@ -49,7 +52,7 @@ const router = express.Router();
  *               properties:
  *                 error:
  *                   type: string
- *       404:
+ *       '404':
  *         description: Project not found
  *         content:
  *           application/json:
@@ -58,10 +61,7 @@ const router = express.Router();
  *               properties:
  *                 error:
  *                   type: string
- *     tags:
- *       - Project
  */
-
 
 // Update Project section (/api/update-project/:project_id)
 router.put("/update-project/:project_id", uploads, updateProjectController);

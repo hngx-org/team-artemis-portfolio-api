@@ -1,5 +1,11 @@
 import express from "express";
-import { createEducationDetailController, updateEducationDetail } from "../controllers/education.controller";
+import {
+  createEducationDetailController,
+  updateEducationDetail,
+  getEducationDetailById,
+  fetchUserEducationDetail,
+  deleteEducationDetail,
+} from "../controllers/education.controller";
 
 const router = express.Router();
 
@@ -72,7 +78,7 @@ const router = express.Router();
  *                 data:
  *                   type: null
  */
-router.get("/education/:id", fetchEducationDetail);
+router.get("/education/:id", fetchUserEducationDetail);
 
 /**
  * @swagger
@@ -93,7 +99,7 @@ router.get("/education/:id", fetchEducationDetail);
  *         description: Optional authorization header
  *       - in: body
  *         name: educationDetails
- *         description: The data for the skills to be created.
+ *         description: The data for the education details to be created.
  *         required: true
  *         schema:
  *           type: array
@@ -114,10 +120,10 @@ router.get("/education/:id", fetchEducationDetail);
  *                 type: string
  *               to:
  *                 type: string
- *               
+ *
  *     responses:
- *       200:
- *         description: Skills successfully created.
+ *       201:
+ *         description: Education details successfully created.
  *         content:
  *           application/json:
  *             schema:
@@ -129,13 +135,8 @@ router.get("/education/:id", fetchEducationDetail);
  *                   type: string
  *                 data:
  *                   type: object
- *                   properties:
- *                     successful:
- *                       type: boolean
- *                     message:
- *                       type: string
  *       500:
- *         description: Failed to create skills.
+ *         description: Failed to create education details.
  *         content:
  *           application/json:
  *             schema:
@@ -150,35 +151,34 @@ router.get("/education/:id", fetchEducationDetail);
  *                 data:
  *                   type: null
  */
-router.post("/education/:id", createEducationDetailController);
+router.post("/education:id", createEducationDetailController);
 
 /**
  * @swagger
- * /updateEducationDetail/{id}:
- *   put:
- *     summary: Update education detail by ID
+ * /api/education/{id}:
+ *   get:
+ *     summary: Get education detail by ID
+ *     description: Get an education detail by its ID.
+ *     tags: [Education]
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
- *         description: The ID of the education detail to update.
+ *         description: The ID of the education detail to retrieve.
  *         schema:
- *           type: string
- *     requestBody:
- *       description: New education detail data
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               field1:
- *                 type: string
- *               field2:
- *                 type: number
+ *           type: integer
  *     responses:
  *       200:
- *         description: Successful response
+ *         description: Education detail retrieved successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 educationDetail:
+ *                   type: object
+ *       404:
+ *         description: Education detail not found
  *         content:
  *           application/json:
  *             schema:
@@ -186,18 +186,181 @@ router.post("/education/:id", createEducationDetailController);
  *               properties:
  *                 message:
  *                   type: string
- *       400:
- *         description: Bad request
+ *       500:
+ *         description: Internal server error
  *         content:
  *           application/json:
  *             schema:
  *               type: object
  *               properties:
- *                 error:
+ *                 message:
  *                   type: string
- *     tags:
- *       - Education
  */
-router.put('/updateEducationDetail/:id', updateEducationDetail)
+router.get("/education/:id", getEducationDetailById);
+
+/**
+ * @swagger
+ * /api/updateEducationDetail/{id}:
+ *   put:
+ *     summary: Update education detail by ID
+ *     description: Update education details for a user by its ID.
+ *     tags: [Education]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: The ID of the education detail to update.
+ *         type: integer
+ *       - in: body
+ *         name: educationDetails
+ *         description: New education detail data
+ *         required: true
+ *         schema:
+ *           type: object
+ *           properties:
+ *             userId:
+ *               type: string
+ *             sectionId:
+ *               type: number
+ *             degreeId:
+ *               type: number
+ *             fieldOfStudy:
+ *               type: string
+ *             school:
+ *               type: string
+ *             description:
+ *               type: string
+ *             from:
+ *               type: string
+ *             to:
+ *               type: string
+ *     responses:
+ *       200:
+ *         description: Education details successfully updated.
+ *         schema:
+ *           type: object
+ *           properties:
+ *             successful:
+ *               type: boolean
+ *             message:
+ *               type: string
+ *       400:
+ *         description: Bad request
+ *         schema:
+ *           type: object
+ *           properties:
+ *             error:
+ *               type: string
+ */
+router.put("/updateEducationDetail/:id", updateEducationDetail);
+
+/**
+ * @swagger
+ * /api/educationDetail/{id}:
+ *  get:
+ *   summary: Get education detail by ID
+ *   description: Retrieve an education detail by its ID.
+ *   tags: [Education]
+ *   parameters:
+ *     - in: path
+ *       name: id
+ *       required: true
+ *       description: The ID of the education detail to retrieve.
+ *       schema:
+ *         type: integer
+ *   responses:
+ *     200:
+ *       description: Education detail retrieved successfully.
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               successful:
+ *                 type: boolean
+ *               message:
+ *                 type: string
+ *               data:
+ *                 type: object
+ *                 properties:
+ *                   educationDetail:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: integer
+ *                       sectionId:
+ *                         type: number
+ *                       degreeId:
+ *                         type: number
+ *                       fieldOfStudy:
+ *                         type: string
+ *                       school:
+ *                         type: string
+ *                       description:
+ *                         type: string
+ *                       from:
+ *                         type: string
+ *                       to:
+ *                         type: string
+ *                       userId:
+ *                         type: string
+ *     404:
+ *       description: Education detail not found.
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               message:
+ *                 type: string
+ *     500:
+ *       description: Internal server error.
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               message:
+ *                 type: string
+ */
+router.get("/educationDetail/:id", getEducationDetailById);
+
+/**
+ * @swagger
+ * /api/education/{id}:
+ *   delete:
+ *     summary: Delete education detail by ID
+ *     description: Delete an education detail by its ID.
+ *     tags: [Education]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: The ID of the education detail to delete.
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       204:
+ *         description: Education detail deleted successfully.
+ *       404:
+ *         description: Education detail not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ */
+router.delete("/education/:id", deleteEducationDetail);
 
 module.exports = router;

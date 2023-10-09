@@ -5,13 +5,14 @@ import {
   findOne,
   createCustomField,
   findOneCustomField,
+  deleteCustomSection,
 } from "../controllers/custom.controller";
 
 const router = express.Router();
 
 /**
  * @swagger
- * /custom:
+ * /api/custom:
  *   post:
  *     summary: Add custom section
  *     description: Add a custom section for a user
@@ -51,7 +52,7 @@ const router = express.Router();
 router.post("/custom", create);
 /**
  * @swagger
- * /custom:
+ * /api/custom:
  *   get:
  *     summary: Get all Custom records for  user
  *     description: Get custom fields
@@ -72,7 +73,7 @@ router.post("/custom", create);
 router.get("/custom", findAll);
 /**
  * @swagger
- * /custom/{id}:
+ * /api/custom/{id}:
  *   get:
  *     summary: Get single custom record
  *     parameters:
@@ -99,7 +100,7 @@ router.get("/custom", findAll);
 router.get("/custom/:id", findOne);
 /**
  * @swagger
- * /custom/field:
+ * /api/custom/field:
  *   post:
  *     summary: Add custom field section
  *     description: Add a custom field in a section usin
@@ -148,14 +149,14 @@ router.post("/custom/field", createCustomField);
 
 /**
  * @swagger
- * /custom/field/{id}:
+ * /api/custom/field/{id}:
  *   get:
  *     summary: Get single custom field record
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
- *         description: The ID of the custom filed detail to get
+ *         description: The ID of the custom field detail to get
  *         schema:
  *           type: string
  *     description: Get single custom field
@@ -174,4 +175,75 @@ router.post("/custom/field", createCustomField);
  *       - custom
  */
 router.get("/custom/field/:id", findOneCustomField);
+
+
+/**
+ * @swagger
+ * /custom-section/{id}:
+ *   delete:
+ *     summary: Delete a custom section by ID
+ *     description: Delete a custom section by providing its ID.
+ *     tags: [Skills]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         description: The ID of the custom section to delete.
+ *         required: true
+ *         type: integer
+ *     responses:
+ *       200:
+ *         description: Custom Section deleted successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 successful:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Success"
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     successful:
+ *                       type: boolean
+ *                       example: true
+ *                     message:
+ *                       type: string
+ *                       example: "Custom Section deleted successfully"
+ *       404:
+ *         description: Custom Section not found.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 successful:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Custom Section not found"
+ *                 data:
+ *                   type: null
+ *       500:
+ *         description: Error deleting Custom Section.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 successful:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Error deleting Custom Section"
+ *                 data:
+ *                   type: null
+ */
+router.delete("/custom-section/:id", deleteCustomSection)
+
 module.exports = router;

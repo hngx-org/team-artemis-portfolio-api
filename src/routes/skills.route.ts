@@ -14,7 +14,6 @@ const router = express.Router();
  *   post:
  *     summary: Create new skills
  *     description: Create one or more skills for a user.
- *     tags: [Skills]
  *     parameters:
  *       - in: header
  *         name: Authorization
@@ -66,7 +65,7 @@ const router = express.Router();
  *                   example: false
  *                 message:
  *                   type: string
- *                   example: "invalid input syntax for type integer: \"\""
+ *                   example: "Failed to create skills"
  *                 data:
  *                   type: null
  */
@@ -76,57 +75,29 @@ router.post("/create-skills", createSkills);
  * @swagger
  * /api/skills-details:
  *   get:
- *     summary: Fetch skills for a logged-in user.
- *     description: Retrieve skills for a logged-in user based on their user ID.
- *     parameters:
- *       - in: header
- *         name: Authorization
- *         description: JWT token for authentication.
- *         required: false
- *         type: string
- *       - in: query
- *         name: userId
- *         description: The user ID for which to fetch skills.
- *         required: true
- *         type: string
+ *     summary: Get skills details
+ *     description: Get details of all skills.
  *     responses:
  *       200:
- *         description: Successful response containing skills data.
- *         schema:
- *           type: object
- *           properties:
- *             successful:
- *               type: boolean
- *               description: Indicates whether the request was successful.
- *             message:
- *               type: string
- *               description: A message describing the result (e.g., "Skills").
- *             data:
- *               type: array
- *               description: An array of skill objects.
- *               items:
- *                 type: object
- *                 properties:
- *                   id:
- *                     type: integer
- *                     description: The unique identifier of the skill.
- *                   skills:
- *                     type: string
- *                     description: The skill name.
- *                   userId:
- *                     type: string
- *                     description: The user ID associated with the skill.
- *                   sectionId:
- *                     type: integer
- *                     description: The section ID associated with the skill.
- *       400:
- *         description: Bad request. Invalid or missing parameters.
- *       401:
- *         description: Unauthorized. Authentication failed or token is missing.
- *       404:
- *         description: User not found or no skills found for the specified user.
+ *         description: Skills details retrieved successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 skillsDetails:
+ *                   type: array
+ *                   items:
+ *                     type: object
  *       500:
- *         description: Internal server error.
+ *         description: Internal Server Error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
  *     tags:
  *       - Skills
  */
@@ -138,7 +109,6 @@ router.get("/skills-details", getSkillsDetails);
  *   put:
  *     summary: Update a skill by ID.
  *     description: Update a skill's information by providing its ID.
- *     tags: [Skills]
  *     parameters:
  *       - in: path
  *         name: id
@@ -171,16 +141,7 @@ router.get("/skills-details", getSkillsDetails);
  *                   example: true
  *                 message:
  *                   type: string
- *                   example: "Success"
- *                 data:
- *                   type: object
- *                   properties:
- *                     successful:
- *                       type: boolean
- *                       example: true
- *                     message:
- *                       type: string
- *                       example: "skill updated successfully"
+ *                   example: "Skill updated successfully"
  *       404:
  *         description: Skill not found.
  *         content:
@@ -193,9 +154,7 @@ router.get("/skills-details", getSkillsDetails);
  *                   example: false
  *                 message:
  *                   type: string
- *                   example: "skill not found"
- *                 data:
- *                   type: null
+ *                   example: "Skill not found"
  *       500:
  *         description: Failed to update skill.
  *         content:
@@ -220,7 +179,6 @@ router.put("/update-skills/:id", updateSkills);
  *   delete:
  *     summary: Delete a skill by ID
  *     description: Delete a skill by providing its ID.
- *     tags: [Skills]
  *     parameters:
  *       - in: path
  *         name: id
@@ -240,16 +198,7 @@ router.put("/update-skills/:id", updateSkills);
  *                   example: true
  *                 message:
  *                   type: string
- *                   example: "Success"
- *                 data:
- *                   type: object
- *                   properties:
- *                     successful:
- *                       type: boolean
- *                       example: true
- *                     message:
- *                       type: string
- *                       example: "Skill deleted successfully"
+ *                   example: "Skill deleted successfully"
  *       404:
  *         description: Skill not found.
  *         content:
@@ -263,8 +212,6 @@ router.put("/update-skills/:id", updateSkills);
  *                 message:
  *                   type: string
  *                   example: "Skill not found"
- *                 data:
- *                   type: null
  *       500:
  *         description: Failed to delete skill.
  *         content:
@@ -280,6 +227,8 @@ router.put("/update-skills/:id", updateSkills);
  *                   example: "Failed to delete skill"
  *                 data:
  *                   type: null
+ *     tags:
+ *       - Skills
  */
 router.delete("/delete-skills/:id", deleteSkills);
 
