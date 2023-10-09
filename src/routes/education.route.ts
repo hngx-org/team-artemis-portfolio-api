@@ -151,7 +151,7 @@ router.get("/education/:id", fetchUserEducationDetail);
  *                 data:
  *                   type: null
  */
-router.post("/education:id", createEducationDetailController);
+router.post("/education/:id", createEducationDetailController);
 
 /**
  * @swagger
