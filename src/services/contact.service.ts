@@ -50,7 +50,7 @@ export const updateContact = async (
         socialMediaId,
         url: url,
       })
-      .where("id = :socialId", { id: socialId })
+      .where("id = :socialId", { socialId })
       .execute();
 
     if (updateResult.affected >= 1) {
@@ -63,7 +63,7 @@ export const updateContact = async (
       return null;
     }
   } catch (error) {
-    throw new Error("Error updating contact: " + error.message);
+    throw new Error("Error updating contact: " + error);
   }
 };
 
