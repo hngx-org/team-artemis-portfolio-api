@@ -138,7 +138,6 @@ router.post("/projects", uploads, createProject);
  *     tags:
  *       - Project
  */
-
 router.delete("/projects/:id", deleteProjectById);
 
 /**
@@ -201,7 +200,6 @@ router.delete("/projects/:id", deleteProjectById);
  *     tags:
  *       - Project
  */
-
 router.put("/update-project/:project_id", uploads, updateProjectById);
 
 module.exports = router;
