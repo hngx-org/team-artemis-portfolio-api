@@ -3,9 +3,10 @@ import { connectionSource } from "../database/data-source";
 import { EducationDetail } from "../database/entity/model";
 import { createEducationDetail } from "../services/education.service";
 import { EducationDetailData } from "../interfaces/education.interface";
+import { User } from "../database/entity/user";
 
 // Endpoint to fetch the education section
-const fetchEducationDetail: RequestHandler = async (req, res) => {
+const fetchUserEducationDetail: RequestHandler = async (req, res) => {
   const educationRepository = connectionSource.getRepository(EducationDetail);
 
   try {
@@ -92,48 +93,23 @@ const createEducationDetailController = async (req: Request, res: Response) => {
   }
 };
 
-const updateEducationDetail = async (req: Request, res: Response) => {
+// get education detail by id
+const getEducationDetailById = async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id);
-    console.log("starting");
 
-    // Find the education detail in the database
+    // Find the education detail by ID
     const educationDetail = await educationDetailRepository.findOne({
       where: { id },
     });
-    console.log("almost found");
 
     if (!educationDetail) {
       return res.status(404).json({ message: "Education not found" });
     }
 
-    // Return the education detail as a JSON object
     res.status(200).json({ educationDetail });
   } catch (error) {
     console.error("Error fetching education detail:", error);
-    res.status(500).json({ message: "Internal server error" });
-  }
-};
-
-// Get all education details attached to a user
-const getAllEducationDetails = async (req: Request, res: Response) => {
-  try {
-    const { userId } = req.params;
-    // Find all education details in the database
-    const educationDetails = await educationDetailRepository.find({
-      where: { userId },
-    });
-
-    if (!educationDetails) {
-      return res
-        .status(404)
-        .json({ message: "This user has no Educational Details" });
-    }
-
-    // Return the education details as a JSON array
-    res.status(200).json({ educationDetails });
-  } catch (error) {
-    console.error("Error fetching education details:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 };
@@ -232,7 +208,6 @@ export {
   createEducationDetailController,
   updateEducationDetail,
   getEducationDetailById,
-  getAllEducationDetails,
   deleteEducationDetail,
-  fetchEducationDetail,
+  fetchUserEducationDetail,
 };
