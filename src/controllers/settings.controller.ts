@@ -7,7 +7,7 @@ import {
   accountSettingSchema,
   hashPassword,
 } from "../services/settings.service";
-
+import { v4 } from "uuid";
 const userRespository = connectionSource.getRepository(User);
 
 export const createAccountSettingController = async (
@@ -97,6 +97,7 @@ export const createNotificationSettingController = async (
 ) => {
   try {
     const { userId } = req.params;
+    console.log("userId 1", userId);
     const {
       communityUpdate,
       emailSummary,
@@ -107,8 +108,8 @@ export const createNotificationSettingController = async (
     const notificationSettingRepository =
       connectionSource.getRepository(NotificationSetting);
 
-    const isExistingUser = await notificationSettingRepository.findOne({
-      where: { userId },
+    const isExistingUser = await userRespository.findOneBy({
+      id: userId,
     });
 
     if (!isExistingUser) {
@@ -118,14 +119,14 @@ export const createNotificationSettingController = async (
         success: false,
       });
     }
-
+    console.log("userId ", userId);
     const notificationSetting = new NotificationSetting();
+    notificationSetting.userId = userId;
     notificationSetting.communityUpdate = communityUpdate || false;
     notificationSetting.emailSummary = emailSummary || false;
     notificationSetting.newMessages = newMessages || false;
     notificationSetting.followUpdate = followUpdate || false;
     notificationSetting.specialOffers = specialOffers || false;
-    notificationSetting.userId = userId;
 
     const notificationInfo = await notificationSettingRepository.save(
       notificationSetting
@@ -178,7 +179,7 @@ export const deleteUserAccount = async (
         .from(User)
         .where("id = :id", { id: userId })
         .execute();
-
+      console.log("destroyAccount", destroyAccount);
       if (destroyAccount.affected === 0) {
         return res.status(404).json({
           status: `error`,
