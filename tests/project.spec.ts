@@ -8,8 +8,10 @@ describe('Project API endpoints', () => {
   // Endpoint to Create Project section
   describe('POST api/projects', () => {
     it('should create Project section', async () => {
+      const users = await request.get('https://hng6-r5y3.onrender.com/api/portfolio');
+      const userId = users.body[0].id;
       const res = await request
-        .post('api/projects')
+        .post('https://hng6-r5y3.onrender.com/api/projects')
         .send({
           title: 'test project',
           year: 2019,
@@ -17,8 +19,9 @@ describe('Project API endpoints', () => {
           tags: 'tag1 tag2',
           description: 'test description',
           thumbnail: 1,
+          userId
         });
-      expect(res.status).to.equal(201);
+      expect(res.status).to.equal(200);
       expect(res.body).to.be.an('object');
       projectId = res.body.id;
     });
@@ -28,9 +31,9 @@ describe('Project API endpoints', () => {
   describe('Get api/projects', () => {
     it('should fetch project section', async () => {
       const res = await request
-        .get('api/projects');
+        .get('https://hng6-r5y3.onrender.com/api/projects');
       expect(res.status).to.equal(200);
-      expect(res.body).to.be.an('object');
+      expect(res.body).to.be.an('array');
     });
   });
 
@@ -38,7 +41,7 @@ describe('Project API endpoints', () => {
   describe('PUT api/projects/:projectId', () => {
     it('should update Project section', async () => {
       const res = await request
-        .put(`api/projects/${projectId}`) 
+        .put(`https://hng6-r5y3.onrender.com/api/update-project/${projectId}`) 
         .send({
           title: 'new title',
           description: 'Another project description'
@@ -51,12 +54,12 @@ describe('Project API endpoints', () => {
   // Endpoint to Delete Project section
   describe('DELETE api/projects/:projectId', () => {
     it('should delete Project section', async () => {
-      const initialProjects = await request.get('api/projects');
+      const initialProjects = await request.get('https://hng6-r5y3.onrender.com/api/projects');
       const res = await request
-        .delete(`api/projects/${projectId}`);
-      expect(res.status).to.equal(204);
+        .delete(`https://hng6-r5y3.onrender.com/api/projects/${projectId}`);
+      expect(res.status).to.equal(200);
       // Verify that the section is deleted in the database
-      const updatedProjects = await request.get('api/projects');
+      const updatedProjects = await request.get('https://hng6-r5y3.onrender.com/api/projects');
       expect(updatedProjects.body.length).to.equal(initialProjects.body.length - 1);
     });
   });

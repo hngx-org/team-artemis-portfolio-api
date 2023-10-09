@@ -3,6 +3,7 @@ import express from "express";
 import multer from "multer";
 import {
   createProfileController,
+  deletePortfolioDetails,
   updatePortfolioDetails,
   uploadProfileImageController,
 } from "../controllers";
@@ -111,5 +112,53 @@ router.put("/profile-details/:id", updatePortfolioDetails);
  *       - Profile
  */
 router.post("/profile/:userId", createProfileController);
+
+// delete portfolio details
+
+router.delete("/profile-details/:id", deletePortfolioDetails);
+
+/**
+ * @swagger
+ * /profile-details/:id:
+ *   delete:
+ *     summary: Delete a Portfolio Profile details.
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: The ID of Portfolio to delete.
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Successful response
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *       404:
+ *         description: Not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *       500:
+ *         description: Internal error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *     tags:
+ *       - Portfolio
+ */
 
 module.exports = router;
