@@ -52,50 +52,60 @@ const router = express.Router();
 router.post("/profile/image/upload", uploads, uploadProfileImageController);
 
 /**
- * @swagger
- * /api/profile-details/{id}:
- *   put:
- *     summary: Update portfolio details by ID
- *     description: Update a user's portfolio details by providing its ID.
- *     tags: [Profile]
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         description: The ID of the portfolio details to update.
- *         schema:
- *           type: string
- *     requestBody:
- *       description: Updated portfolio detail data
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               field1:
- *                 type: string
- *               field2:
- *                 type: number
- *     responses:
- *       200:
- *         description: Portfolio details updated successfully.
- *         content:
- *           application/json:
- *             schema:
+* @swagger
+paths:
+* api/profile-details/{Id}:
+*    put:
+*      summary: Updates the profile details .
+*      tags:
+*        - Profile
+*      parameters:
+*        - name: Id
+*          in: path
+*          required: true
+*          schema:
+*            type: integer
+*      requestBody:
+*        description: New profile detail data
+*        required: true
+*        content:
+*           application/json:
+*            schema:
+*              type: object
+*              required:
+*                - name
+*                - trackId
+*                - city
+*                - country
+*              properties:
+*                name:
+*                  type: string
+*                trackId:
+*                  type: integer
+*                city:
+*                  type: string
+*                country:
+*                  type: string
+*      responses:
+*        '200':
+*          description: Successful response
+*          content:
+*            application/json:
+**              schema:
+*                type: object
+*                properties:
+*                  message:
+*                    type: string
+*        '400':
+*          description: Bad request
+*          content:
+*            application/json:
+*              schema:
  *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *       404:
- *         description: Portfolio details not found.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 error:
- *                   type: string
+*                properties:
+*                error:
+*                   type: string
+*
  */
 router.put("/profile-details/:id", updatePortfolioDetails);
 
