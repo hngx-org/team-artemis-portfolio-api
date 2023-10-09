@@ -8,3 +8,14 @@ export interface EducationDetailData {
   userId: string
   sectionId: number
 }
+
+export interface UpdateEducationDetailDTO {
+  fieldOfStudy?: string
+  school?: string
+  from?: string
+  to?: string
+  description?: string
+  degreeId?: number
+  userId?: string
+  sectionId?: number
+}
