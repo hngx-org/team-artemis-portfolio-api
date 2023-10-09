@@ -5,51 +5,56 @@ const request = supertest(app);
 
 describe('Skill API endpoints', () => {
   let skillId: number;
-  // Endpoint to Create Skill section
-  describe('POST api/skills', () => {
-    it('should create Skill section', async () => {
+  // Endpoint to Create skills
+  describe('POST api/create-skills', () => {
+    it('should create skills', async () => {
+      const users = await request.get('https://hng6-r5y3.onrender.com/api/portfolio');
+      const userId = users.body[0].id;
       const res = await request
-        .post('api/skills')
-        .send({ categoryName: 'Test category', description: 'Test skill description' });
-      expect(res.status).to.equal(201);
+        .post('https://hng6-r5y3.onrender.com/api/create-skills')
+        .send({
+          skills: 'test skill',
+          sectionId: 1,
+          userId
+        });
+      expect(res.status).to.equal(200);
       expect(res.body).to.be.an('object');
       skillId = res.body.id;
     });
   });
 
-    // Endpoint to fetch Skill section
-  describe('Get api/skills', () => {
-    it('should fetch Skill section', async () => {
+    // Endpoint to fetch skills
+  describe('Get api/skills-details', () => {
+    it('should fetch skills', async () => {
       const res = await request
-        .get('api/skills');
+        .get('https://hng6-r5y3.onrender.com/api/skills-details');
       expect(res.status).to.equal(200);
-      expect(res.body).to.be.an('object');
+      expect(res.body).to.be.an('array');
     });
   });
 
-  // Endpoint to update Skill section
-  describe('PUT api/skills/:skillId', () => {
-    it('should update Skill section', async () => {
+  // Endpoint to update skills
+  describe('PUT api/update-skills/:skillId', () => {
+    it('should update skills', async () => {
       const res = await request
-        .put(`api/skills/${skillId}`) 
+        .put(`https://hng6-r5y3.onrender.com/api/update-skills/${skillId}`) 
         .send({
-          categoryName: 'Another category name',
-          description: 'Another skill description'
+          skills: 'Another test skill'
         });
       expect(res.status).to.equal(200);
       expect(res.body).to.be.an('object');
     });
   });
 
-  // Endpoint to Delete Skill section
-  describe('DELETE api/skills/:skillId', () => {
-    it('should delete Skill section', async () => {
-      const initialSkills = await request.get('api/skills');
+  // Endpoint to Delete skills
+  describe('DELETE api/delete-skills/:skillId', () => {
+    it('should delete skills', async () => {
+      const initialSkills = await request.get('https://hng6-r5y3.onrender.com/api/skills-details');
       const res = await request
-        .delete(`api/skills/${skillId}`);
-      expect(res.status).to.equal(204);
+        .delete(`https://hng6-r5y3.onrender.com/api/delete-skills/${skillId}`);
+      expect(res.status).to.equal(200);
       // Verify that the section is deleted in the database
-      const updatedSkills = await request.get('api/skills');
+      const updatedSkills = await request.get('https://hng6-r5y3.onrender.com/api/skills-details');
       expect(updatedSkills.body.length).to.equal(initialSkills.body.length - 1);
     });
   });

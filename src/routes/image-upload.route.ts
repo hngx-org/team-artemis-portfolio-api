@@ -12,7 +12,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /upload:
+ * /api/upload:
  *   post:
  *     summary: Upload images
  *     description: Upload multiple images using a GET request.
@@ -48,7 +48,7 @@ const router = express.Router();
 router.get("/upload", uploads, uploadImageController);
 /**
  * @swagger
- * /cover/photo:
+ * /api/cover/photo:
  *   post:
  *     summary: Upload images
  *     description: Upload multiple images using a GET request.

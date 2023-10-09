@@ -108,7 +108,45 @@ router.put("/createAccountSetting", createAccountSettingController);
  *       - NotificationSetting
  */
 
-router.post("/setNotificationDetails/:id", createNotificationSettingController);
+router.post(
+  "/setNotificationDetails/:userId",
+  createNotificationSettingController
+);
+
+/**
+ * @swagger
+ * /deleteAccountDetails/{id}:
+ *   post:
+ *     summary: delete account by ID
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: The unique ID of the user detail to delete its account.
+ *     responses:
+ *       200:
+ *         description: Successful response
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *       400:
+ *         description: Bad request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *     tags:
+ *       - User
+ */
+
+router.delete("/deleteAccountDetails/:userId", deleteUserAccount);
 
 /**
  * @swagger
@@ -225,4 +263,5 @@ router.patch("/settings/:id", updateUser);
  */
 
 router.patch("/settings/notification/:id", updateNotificationSettings);
+
 module.exports = router;
