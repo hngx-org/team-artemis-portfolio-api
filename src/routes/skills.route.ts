@@ -10,11 +10,10 @@ const router = express.Router();
 
 /**
  * @swagger
- * /create-skills:
+ * /api/create-skills:
  *   post:
  *     summary: Create new skills
  *     description: Create one or more skills for a user.
- *     tags: [Skills]
  *     parameters:
  *       - in: header
  *         name: Authorization
@@ -66,21 +65,50 @@ const router = express.Router();
  *                   example: false
  *                 message:
  *                   type: string
- *                   example: "invalid input syntax for type integer: \"\""
+ *                   example: "Failed to create skills"
  *                 data:
  *                   type: null
  */
 router.post("/create-skills", createSkills);
 
+/**
+ * @swagger
+ * /api/skills-details:
+ *   get:
+ *     summary: Get skills details
+ *     description: Get details of all skills.
+ *     responses:
+ *       200:
+ *         description: Skills details retrieved successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 skillsDetails:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *       500:
+ *         description: Internal Server Error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *     tags:
+ *       - Skills
+ */
 router.get("/skills-details", getSkillsDetails);
 
 /**
  * @swagger
- * /update-skills/{id}:
+ * /api/update-skills/{id}:
  *   put:
  *     summary: Update a skill by ID.
  *     description: Update a skill's information by providing its ID.
- *     tags: [Skills]
  *     parameters:
  *       - in: path
  *         name: id
@@ -113,16 +141,7 @@ router.get("/skills-details", getSkillsDetails);
  *                   example: true
  *                 message:
  *                   type: string
- *                   example: "Success"
- *                 data:
- *                   type: object
- *                   properties:
- *                     successful:
- *                       type: boolean
- *                       example: true
- *                     message:
- *                       type: string
- *                       example: "skill updated successfully"
+ *                   example: "Skill updated successfully"
  *       404:
  *         description: Skill not found.
  *         content:
@@ -135,9 +154,7 @@ router.get("/skills-details", getSkillsDetails);
  *                   example: false
  *                 message:
  *                   type: string
- *                   example: "skill not found"
- *                 data:
- *                   type: null
+ *                   example: "Skill not found"
  *       500:
  *         description: Failed to update skill.
  *         content:
@@ -158,11 +175,10 @@ router.put("/update-skills/:id", updateSkills);
 
 /**
  * @swagger
- * /delete-skills/{id}:
+ * /api/delete-skills/{id}:
  *   delete:
  *     summary: Delete a skill by ID
  *     description: Delete a skill by providing its ID.
- *     tags: [Skills]
  *     parameters:
  *       - in: path
  *         name: id
@@ -182,16 +198,7 @@ router.put("/update-skills/:id", updateSkills);
  *                   example: true
  *                 message:
  *                   type: string
- *                   example: "Success"
- *                 data:
- *                   type: object
- *                   properties:
- *                     successful:
- *                       type: boolean
- *                       example: true
- *                     message:
- *                       type: string
- *                       example: "Skill deleted successfully"
+ *                   example: "Skill deleted successfully"
  *       404:
  *         description: Skill not found.
  *         content:
@@ -205,8 +212,6 @@ router.put("/update-skills/:id", updateSkills);
  *                 message:
  *                   type: string
  *                   example: "Skill not found"
- *                 data:
- *                   type: null
  *       500:
  *         description: Failed to delete skill.
  *         content:
@@ -222,6 +227,8 @@ router.put("/update-skills/:id", updateSkills);
  *                   example: "Failed to delete skill"
  *                 data:
  *                   type: null
+ *     tags:
+ *       - Skills
  */
 router.delete("/delete-skills/:id", deleteSkills);
 

@@ -23,7 +23,7 @@ const router = express.Router();
  *         description: Optional authorization header
  *       - in: body
  *         name: educationDetails
- *         description: The data for the skills to be created.
+ *         description: The data for the education details to be created.
  *         required: true
  *         schema:
  *           type: array
@@ -46,10 +46,9 @@ const router = express.Router();
  *                 type: string
  *               to:
  *                 type: string
- *
  *     responses:
- *       200:
- *         description: Skills successfully created.
+ *       201:
+ *         description: Education details successfully created.
  *         content:
  *           application/json:
  *             schema:
@@ -61,13 +60,8 @@ const router = express.Router();
  *                   type: string
  *                 data:
  *                   type: object
- *                   properties:
- *                     successful:
- *                       type: boolean
- *                     message:
- *                       type: string
  *       500:
- *         description: Failed to create skills.
+ *         description: Failed to create education details.
  *         content:
  *           application/json:
  *             schema:
@@ -82,7 +76,7 @@ const router = express.Router();
  *                 data:
  *                   type: null
  */
-router.post("/education/", createEducationDetailController);
+router.post("/api/education", createEducationDetailController);
 
 /**
  * @swagger
@@ -131,65 +125,60 @@ router.get("/api/education/:id", getEducationDetailById);
 
 /**
  * @swagger
- * /updateEducationDetail/{id}:
+ * /api/education/{id}:
  *   put:
  *     summary: Update education detail by ID
+ *     description: Update education details for a user by its ID.
+ *     tags: [Education]
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
  *         description: The ID of the education detail to update.
+ *         type: integer
+ *       - in: body
+ *         name: educationDetails
+ *         description: New education detail data
+ *         required: true
  *         schema:
- *           type: string
- *     requestBody:
- *       description: New education detail data
- *       required: true
- *       content:
- *         application/json:
- *            *         schema:
- *           type: array
- *           items:
- *             type: object
- *             properties:
- *               userId:
- *                 type: string
- *               sectionId:
- *                 type: number
- *               degreeId:
- *                 type: number
- *               fieldOfStudy:
- *                 type: string
- *               school:
- *                 type: string
- *               description:
- *                 type: string
- *               from:
- *                 type: string
- *               to:
- *                 type: string
+ *           type: object
+ *           properties:
+ *             userId:
+ *               type: string
+ *             sectionId:
+ *               type: number
+ *             degreeId:
+ *               type: number
+ *             fieldOfStudy:
+ *               type: string
+ *             school:
+ *               type: string
+ *             description:
+ *               type: string
+ *             from:
+ *               type: string
+ *             to:
+ *               type: string
  *     responses:
  *       200:
- *         description: Successful response
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
+ *         description: Education details successfully updated.
+ *         schema:
+ *           type: object
+ *           properties:
+ *             successful:
+ *               type: boolean
+ *             message:
+ *               type: string
  *       400:
  *         description: Bad request
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 error:
- *                   type: string
- *     tags:
- *       - Education
+ *         schema:
+ *           type: object
+ *           properties:
+ *             error:
+ *               type: string
  */
-router.put("/updateEducationDetail/:id", updateEducationDetail);
+
+router.patch("/api/education/:id", updateEducationDetail);
 
 /**
  * @swagger
@@ -238,7 +227,8 @@ router.put("/updateEducationDetail/:id", updateEducationDetail);
  */
 router.get("/api/education/user/:userId", getAllEducationDetails);
 
-/** @swagger
+/**
+ * @swagger
  * /api/education/{id}:
  *   delete:
  *     summary: Delete education detail by ID
