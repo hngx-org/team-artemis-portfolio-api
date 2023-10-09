@@ -80,12 +80,17 @@ router.get("/education/:id", fetchEducationDetail);
 
 /**
  * @swagger
- * /api/education:
+ * /api/education/{id}:
  *   post:
  *     summary: Create education details
  *     description: Create education details for a user.
  *     tags: [Education]
  *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         type: string
+ *         description: The ID of the education detail to create.
  *       - in: header
  *         name: Authorization
  *         type: string
@@ -99,8 +104,6 @@ router.get("/education/:id", fetchEducationDetail);
  *           items:
  *             type: object
  *             properties:
- *               userId:
- *                 type: string
  *               sectionId:
  *                 type: number
  *               degreeId:
@@ -151,7 +154,7 @@ router.get("/education/:id", fetchEducationDetail);
  *                 data:
  *                   type: null
  */
-router.post("/education/", createEducationDetailController);
+router.post("/education/:id", createEducationDetailController);
 
 /**
  * @swagger
