@@ -156,7 +156,7 @@ router.post("/custom/field", createCustomField);
  *       - in: path
  *         name: id
  *         required: true
- *         description: The ID of the custom filed detail to get
+ *         description: The ID of the custom field detail to get
  *         schema:
  *           type: string
  *     description: Get single custom field
@@ -177,6 +177,72 @@ router.post("/custom/field", createCustomField);
 router.get("/custom/field/:id", findOneCustomField);
 
 
-
-router.delete("/custom/:id", deleteCustomSection)
+/**
+ * @swagger
+ * /custom-section/{id}:
+ *   delete:
+ *     summary: Delete a custom section by ID
+ *     description: Delete a custom section by providing its ID.
+ *     tags: [Skills]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         description: The ID of the custom section to delete.
+ *         required: true
+ *         type: integer
+ *     responses:
+ *       200:
+ *         description: Custom Section deleted successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 successful:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Success"
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     successful:
+ *                       type: boolean
+ *                       example: true
+ *                     message:
+ *                       type: string
+ *                       example: "Custom Section deleted successfully"
+ *       404:
+ *         description: Custom Section not found.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 successful:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Custom Section not found"
+ *                 data:
+ *                   type: null
+ *       500:
+ *         description: Error deleting Custom Section.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 successful:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Error deleting Custom Section"
+ *                 data:
+ *                   type: null
+ */
+router.delete("/custom-section/:id", deleteCustomSection)
 module.exports = router;

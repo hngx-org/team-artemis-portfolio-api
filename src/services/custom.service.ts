@@ -14,10 +14,10 @@ export const deleteCustomSectionService = async (
       
       await customSectionRepository.remove(sectionToBeDeleted);
 
-      return { successful: true, message: "Custom section deleted successfully" };
+      return { successful: true, message: "Custom Section deleted successfully." };
    } catch (error) {
-      console.error('Error deleting custom section:', error.message)
-      throw new Error('Error deleting custom section')
+      console.error('Error deleting Custom Section:', error.message)
+      throw new Error('Error deleting Custom Section')
    }
 }
 
