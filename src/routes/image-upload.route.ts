@@ -13,7 +13,7 @@ const router = express.Router();
 /**
  * @swagger
  * /upload:
- *   get:
+ *   post:
  *     summary: Upload images
  *     description: Upload multiple images using a GET request.
  *     parameters:
@@ -49,7 +49,7 @@ router.get("/upload", uploads, uploadImageController);
 /**
  * @swagger
  * /cover/photo:
- *   get:
+ *   post:
  *     summary: Upload images
  *     description: Upload multiple images using a GET request.
  *     parameters:

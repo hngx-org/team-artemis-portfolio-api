@@ -1,15 +1,15 @@
-import { Request, RequestHandler, Response } from 'express';
-import { connectionSource } from '../database/data-source';
+import { Request, RequestHandler, Response } from "express";
+import { connectionSource } from "../database/data-source";
 import {
-	AboutDetail,
-	EducationDetail,
-	InterestDetail,
-	Project,
-	Section,
-	SkillsDetail,
-	WorkExperienceDetail,
-} from '../database/entity/model';
-import { error, success } from '../utils';
+  AboutDetail,
+  EducationDetail,
+  InterestDetail,
+  Project,
+  Section,
+  SkillsDetail,
+  WorkExperienceDetail,
+} from "../database/entity/model";
+import { error, success } from "../utils";
 
 export const retrievePortfolioController: RequestHandler = async (
   req: Request,

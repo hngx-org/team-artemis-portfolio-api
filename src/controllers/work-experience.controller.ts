@@ -90,13 +90,93 @@ export const deleteWorkExperience: RequestHandler = async (req, res, next) => {
   }
 };
 
-export const workExperienceController: RequestHandler = async(req, res, next)=>{
-    try {
-        const workExperienceRepository = connectionSource.getRepository(WorkExperienceDetail);
-        const workExperiences = await workExperienceRepository.find();
-        res.json({ workExperiences });
-      } catch (error) {
-        console.log(error);
-        res.status(500).json({ error: 'Internal server error' });
-      }
-}
+
+export const workExperienceController: RequestHandler = async (
+  req,
+  res,
+  next
+) => {
+  try {
+    const workExperienceRepository =
+      connectionSource.getRepository(WorkExperienceDetail);
+    const workExperiences = await workExperienceRepository.find();
+    res.json({ workExperiences });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+export const updateWorkExperience: RequestHandler = async (
+  req: Request,
+  res: Response
+) => {
+  const workId = parseInt(req.params.workId);
+
+  if (!workId) {
+    res.statusCode = 400;
+    return res.json({ message: "workExpId is missing from URL parameter" });
+  }
+
+  const {
+    company,
+    role,
+    startMonth,
+    startYear,
+    endMonth,
+    endYear,
+    description,
+    isEmployee,
+    userId,
+    sectionId,
+  } = req.body;
+
+  if (!userId) {
+    res.statusCode = 400;
+    return res.json({ message: "userId is missing from request body" });
+  }
+
+  if (sectionId === undefined) {
+    res.statusCode = 400;
+    return res.json({ message: "sectionId is missing from request body" });
+  }
+
+  if (!company || !role) {
+    res.statusCode = 400;
+    return res.json({
+      message: "company or role is missing from request body",
+    });
+  }
+
+  try {
+    const workExperienceToUpdate = await workExperienceRepository.findOneBy({ id: workId});
+
+    if (!workExperienceToUpdate) {
+      res.statusCode = 404;
+      return res.json({ message: "Work Experience not found" });
+    }
+
+    // Update the work experience details
+    workExperienceToUpdate.company = company;
+    workExperienceToUpdate.role = role;
+    workExperienceToUpdate.startMonth = startMonth;
+    workExperienceToUpdate.startYear = startYear;
+    workExperienceToUpdate.endMonth = endMonth;
+    workExperienceToUpdate.endYear = endYear;
+    workExperienceToUpdate.description = description;
+    workExperienceToUpdate.isEmployee = isEmployee;
+    workExperienceToUpdate.userId = userId;
+    workExperienceToUpdate.sectionId = sectionId;
+
+    // Save the updated work experience
+    await workExperienceRepository.save(workExperienceToUpdate);
+
+    return res.json({
+      message: "Updated Work Experience Successfully",
+      data: workExperienceToUpdate,
+    });
+  } catch (err) {
+    res.statusCode = 500;
+    res.json({ error: err, message: (err as Error).message });
+  }
+};
