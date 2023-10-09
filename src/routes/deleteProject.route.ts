@@ -1,22 +1,11 @@
-import express, { Request, Response } from 'express';
-import ProjectController from '../controllers/deleteProject.controller'; // Import your project controller
+import express from "express";
+import ProjectController from "../controllers/deleteProject.controller";
 
 const router = express.Router();
 
 /**
  * @swagger
- * swagger: '2.0'
- * info:
- *   title: Delete Project Section API
- *   description: API for deleting a project section
- *   version: '1.0'
- * basePath: /api
- * schemes:
- *   - http
- *   - https
-
- * paths:
- *   /projects/delete/{id}:
+ *   /api/projects/delete/{id}:
  *     delete:
  *       summary: Delete a Project Section
  *       description: Deletes a project section by ID.
@@ -28,7 +17,7 @@ const router = express.Router();
  *           type: integer
  *       responses:
  *         204:
- *           description: deleted project info
+ *           description: Deleted project info
  *         404:
  *           description: Project not found
  *           schema:
@@ -43,9 +32,8 @@ const router = express.Router();
  *             properties:
  *               message:
  *                 type: string
-
  */
 // Define the route for deleting a project section
-router.delete('/projects/delete/:id', ProjectController.deleteProjectSection);
+router.delete("/projects/delete/:id", ProjectController.deleteProjectSection);
 
 module.exports = router;

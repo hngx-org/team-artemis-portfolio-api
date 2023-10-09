@@ -12,7 +12,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /custom:
+ * /api/custom:
  *   post:
  *     summary: Add custom section
  *     description: Add a custom section for a user
@@ -52,7 +52,7 @@ const router = express.Router();
 router.post("/custom", create);
 /**
  * @swagger
- * /custom:
+ * /api/custom:
  *   get:
  *     summary: Get all Custom records for  user
  *     description: Get custom fields
@@ -73,7 +73,7 @@ router.post("/custom", create);
 router.get("/custom", findAll);
 /**
  * @swagger
- * /custom/{id}:
+ * /api/custom/{id}:
  *   get:
  *     summary: Get single custom record
  *     parameters:
@@ -100,7 +100,7 @@ router.get("/custom", findAll);
 router.get("/custom/:id", findOne);
 /**
  * @swagger
- * /custom/field:
+ * /api/custom/field:
  *   post:
  *     summary: Add custom field section
  *     description: Add a custom field in a section usin
@@ -149,7 +149,7 @@ router.post("/custom/field", createCustomField);
 
 /**
  * @swagger
- * /custom/field/{id}:
+ * /api/custom/field/{id}:
  *   get:
  *     summary: Get single custom field record
  *     parameters:
@@ -175,7 +175,6 @@ router.post("/custom/field", createCustomField);
  *       - custom
  */
 router.get("/custom/field/:id", findOneCustomField);
-
 
 /**
  * @swagger
@@ -244,6 +243,6 @@ router.get("/custom/field/:id", findOneCustomField);
  *                 data:
  *                   type: null
  */
-router.delete("/custom-section/:id", deleteCustomSection)
+router.delete("/custom-section/:id", deleteCustomSection);
 
 module.exports = router;
