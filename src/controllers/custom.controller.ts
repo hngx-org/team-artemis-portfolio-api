@@ -39,6 +39,7 @@ const create = async (req: Request, res: Response) => {
     return success(res, newRecord, "Success");
   } catch (err) {
     console.log(err);
+    return error(res, "An error occurred", 500);
   }
 };
 
@@ -121,14 +122,12 @@ const validateSchema =
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       console.log(req.body);
-      await schema.parseAsync({
-        body: req.body,
-      });
+      await schema.parseAsync(req.body);
       return next();
     } catch (error: any) {
       return res.status(400).json({
         status: "error",
-        message: `invalid body parameter(s)`,
+        message: `invalid request data`,
         data: {
           error: error.issues,
           statusCode: 400,
