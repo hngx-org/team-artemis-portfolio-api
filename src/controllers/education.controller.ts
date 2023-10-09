@@ -29,6 +29,7 @@ const educationDetailRepository =
 
 const createEducationDetailController = async (req: Request, res: Response) => {
   try {
+    const userId = req.params.id;
     const {
       degreeId,
       fieldOfStudy,
@@ -36,7 +37,7 @@ const createEducationDetailController = async (req: Request, res: Response) => {
       from,
       description,
       to,
-      userId,
+      // userId,
       sectionId,
     } = req.body as EducationDetailData;
 
@@ -48,7 +49,6 @@ const createEducationDetailController = async (req: Request, res: Response) => {
       "from",
       "description",
       "to",
-      "userId",
       "sectionId",
     ];
     // Add more fields as needed
@@ -61,6 +61,15 @@ const createEducationDetailController = async (req: Request, res: Response) => {
       return res.status(400).json({
         error: `The following fields are missing: ${missingFields.join(", ")}`,
       });
+    }
+
+    // Get the user by userId
+    const userRepository = connectionSource.getRepository(User);
+    const user = await userRepository.findOne({ where: { id: userId } });
+
+    if (!user) {
+      // User not found, return a 404 response
+      return res.status(404).json({ error: "User not found" });
     }
 
     // Call the service function to create an education detail
@@ -83,15 +92,16 @@ const createEducationDetailController = async (req: Request, res: Response) => {
   }
 };
 
-// Get education detail by ID
-const getEducationDetailById = async (req: Request, res: Response) => {
+const updateEducationDetail = async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id);
+    console.log("starting");
 
     // Find the education detail in the database
     const educationDetail = await educationDetailRepository.findOne({
       where: { id },
     });
+    console.log("almost found");
 
     if (!educationDetail) {
       return res.status(404).json({ message: "Education not found" });

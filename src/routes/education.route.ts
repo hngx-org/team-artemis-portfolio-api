@@ -3,8 +3,7 @@ import {
   createEducationDetailController,
   updateEducationDetail,
   getEducationDetailById,
-  fetchEducationDetail,
-  getAllEducationDetails,
+  fetchUserEducationDetail,
   deleteEducationDetail,
 } from "../controllers/education.controller";
 
@@ -79,16 +78,21 @@ const router = express.Router();
  *                 data:
  *                   type: null
  */
-router.get("/education/:id", fetchEducationDetail);
+router.get("/education/:id", fetchUserEducationDetail);
 
 /**
  * @swagger
- * /api/education:
+ * /api/education/{id}:
  *   post:
  *     summary: Create education details
  *     description: Create education details for a user.
  *     tags: [Education]
  *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         type: string
+ *         description: The ID of the education detail to create.
  *       - in: header
  *         name: Authorization
  *         type: string
@@ -102,8 +106,6 @@ router.get("/education/:id", fetchEducationDetail);
  *           items:
  *             type: object
  *             properties:
- *               userId:
- *                 type: string
  *               sectionId:
  *                 type: number
  *               degreeId:
@@ -149,7 +151,7 @@ router.get("/education/:id", fetchEducationDetail);
  *                 data:
  *                   type: null
  */
-router.post("/education", createEducationDetailController);
+router.post("/education:id", createEducationDetailController);
 
 /**
  * @swagger
@@ -254,50 +256,74 @@ router.put("/updateEducationDetail/:id", updateEducationDetail);
 
 /**
  * @swagger
- * /api/education/user/{userId}:
- *   get:
- *     summary: Get all education details for a user
- *     description: Get all education details associated with a specific user.
- *     tags: [Education]
- *     parameters:
- *       - in: path
- *         name: userId
- *         required: true
- *         description: The ID of the user to retrieve education details for.
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: Education details retrieved successfully.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 educationDetails:
- *                   type: array
- *                   items:
+ * /api/educationDetail/{id}:
+ *  get:
+ *   summary: Get education detail by ID
+ *   description: Retrieve an education detail by its ID.
+ *   tags: [Education]
+ *   parameters:
+ *     - in: path
+ *       name: id
+ *       required: true
+ *       description: The ID of the education detail to retrieve.
+ *       schema:
+ *         type: integer
+ *   responses:
+ *     200:
+ *       description: Education detail retrieved successfully.
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               successful:
+ *                 type: boolean
+ *               message:
+ *                 type: string
+ *               data:
+ *                 type: object
+ *                 properties:
+ *                   educationDetail:
  *                     type: object
- *       404:
- *         description: User has no educational details
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *       500:
- *         description: Internal server error
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
+ *                     properties:
+ *                       id:
+ *                         type: integer
+ *                       sectionId:
+ *                         type: number
+ *                       degreeId:
+ *                         type: number
+ *                       fieldOfStudy:
+ *                         type: string
+ *                       school:
+ *                         type: string
+ *                       description:
+ *                         type: string
+ *                       from:
+ *                         type: string
+ *                       to:
+ *                         type: string
+ *                       userId:
+ *                         type: string
+ *     404:
+ *       description: Education detail not found.
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               message:
+ *                 type: string
+ *     500:
+ *       description: Internal server error.
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               message:
+ *                 type: string
  */
-router.get("/education/user/:userId", getAllEducationDetails);
+router.get("/educationDetail/:id", getEducationDetailById);
 
 /**
  * @swagger
