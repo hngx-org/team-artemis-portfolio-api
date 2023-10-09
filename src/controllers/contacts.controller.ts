@@ -26,6 +26,12 @@ export const createContacts = async (req: Request, res: Response) => {
 export const getContacts = async (req: Request, res: Response) => {
   try {
     const { user_id } = req.params;
+
+    const userIdRegex = /^[a-zA-Z0-9]+$/;
+    if (!userIdRegex.test(user_id)) {
+      return res.status(400).json({ message: "Invalid user_id format" });
+    }
+
     const contacts = await contactsRepo.find({
       where: { userId: String(user_id) },
     });
@@ -58,3 +64,4 @@ export const deleteContact = async (req: Request, res: Response) => {
     return res.status(500).json({ message: "Internal server error" });
   }
 };
+
