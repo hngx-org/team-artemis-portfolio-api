@@ -1,7 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { connectionSource } from "../database/data-source";
-import { AnyZodObject } from "zod";
-import { z } from "zod";
+import { AnyZodObject, z } from "zod";
 import { CustomUserSection, CustomField } from "../database/entity/model";
 import { success, error } from "../utils/response.util";
 import { v4 as isUUIDv4 } from "uuid";
@@ -17,7 +16,7 @@ export const deleteCustomSection = async (
   try {
     const id = parseInt(req.params.id)
     if (!id) {
-      return res.status(400).json({
+      return (res as any).status(400).json({
         success: false, 
         message: "Please input section ID"
       })
@@ -36,7 +35,7 @@ export const deleteCustomSection = async (
 
 const create = async (req: Request, res: Response) => {
   try {
-    console.log(req.body);
+    console.log((req as any).body);
     if (!isUUIDv4(req.body.userId) || !req.body.sectionId)
       return error(res, "Please fill all fields correctly", 400);
     const newRecord = await customRepository.save(req.body);
@@ -122,7 +121,7 @@ const customFieldSchema = z.object({
 
 const validateSchema =
   (schema: AnyZodObject) =>
-  async (req: Request, res: Response, next: NextFunction) => {
+  async (req: Request, res: Response, next: any) => {
     try {
       console.log(req.body);
       await schema.parseAsync({

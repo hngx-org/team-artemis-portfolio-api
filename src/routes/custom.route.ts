@@ -245,4 +245,5 @@ router.get("/custom/field/:id", findOneCustomField);
  *                   type: null
  */
 router.delete("/custom-section/:id", deleteCustomSection)
+
 module.exports = router;

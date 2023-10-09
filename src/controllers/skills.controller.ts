@@ -12,8 +12,8 @@ export const createSkills: RequestHandler = async (
   res: Response
 ) => {
   try {
-    const authorizationHeader = _req.header("Authorization");
-    const { skills, sectionId, userId } = _req.body;
+    const authorizationHeader = (_req as any).header("Authorization");
+    const { skills, sectionId, userId } = (_req as any).body;
 
     if (!Array.isArray(skills))
       return error(res, "skills should be an array", 403);
@@ -35,8 +35,8 @@ export const updateSkills: RequestHandler = async (
   res: Response
 ) => {
   try {
-    const id = parseInt(req.params.id);
-    const { skills, sectionId, userId } = req.body;
+    const id = parseInt((req as any).params.id);
+    const { skills, sectionId, userId } = (req as any).body;
 
     const data = await updateSkillsService(id, { skills, sectionId, userId });
     if (data.successful) {
@@ -54,7 +54,7 @@ export const deleteSkills: RequestHandler = async (
   res: Response
 ) => {
   try {
-    const id = parseInt(req.params.id);
+    const id = parseInt((req as any).params.id);
 
     const data = await deleteSkillsService(id);
     if (data.successful) {
@@ -73,8 +73,8 @@ export const getSkillsDetails: RequestHandler = async (
   res: Response
 ) => {
   try {
-    const authorizationHeader = _req.header("Authorization");
-    const { userId } = _req.body;
+    const authorizationHeader = (_req as any).header("Authorization");
+    const { userId } = (_req as any).body;
     // Fetch skills for the logged-in user based on their user ID
     const data = await getSkillsService(userId);
 
