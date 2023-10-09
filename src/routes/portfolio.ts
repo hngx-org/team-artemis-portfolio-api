@@ -1,10 +1,13 @@
-import { getAllUsers, getUserById } from "../controllers/portfolio";
+import {
+  getAllUsers,
+  getUserById,
+  retrievePortfolioController,
+} from '../controllers/portfolio.controller'
+import { Router } from 'express'
 
-import { Router } from "express";
+const router = Router()
 
-const router = Router(); // Create a new router
-
-router.get("/portfolio", getAllUsers);
+router.get('/portfolio', getAllUsers)
 
 /**
  * @swagger
@@ -27,6 +30,55 @@ router.get("/portfolio", getAllUsers);
  *       - User
  *       - User Portfolio Details
  */
-router.get("/portfolio/:id", getUserById);
+router.get('/portfolio/:id', getUserById)
 
-module.exports = router; // Export the router
+/**
+ * @swagger
+ * /retrieve-portfolio/{userId}:
+ *   get:
+ *     summary: Get all portfolio details including sections
+ *     description: Get request to retrieve all portfolio details
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         type: string
+ *         description: userId of the user requesting portfolio
+ *     responses:
+ *       200:
+ *         description: Success.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: A success message.
+ *                 data:
+ *                   type: object
+ *                   description: portfolio details
+ *                 successful:
+ *                   type: boolean
+ *                   description: true
+ *       500:
+ *         description: Internal server error.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: An error message.
+ *                 successful:
+ *                   type: boolean
+ *                   description: false
+ *                 data:
+ *                   type: string
+ *                   description: null
+ *     tags:
+ *       - Portfolio
+ */
+router.get('/retrieve-portfolio/:userId', retrievePortfolioController)
+
+module.exports = router
