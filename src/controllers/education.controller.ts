@@ -2,18 +2,7 @@ import { Request, Response } from "express";
 import { connectionSource } from "../database/data-source";
 import { EducationDetail } from "../database/entity/model";
 import { createEducationDetail } from "../services/education.service";
-
-// Define a Data Transfer Object (DTO) for updating EducationDetail
-export interface UpdateEducationDetailDTO {
-  fieldOfStudy?: string;
-  school?: string;
-  from?: string;
-  to?: string;
-  description?: string;
-  degreeId?: number;
-  userId?: string;
-  sectionId?: number;
-}
+import { EducationDetailData } from "../interfaces/education.interface";
 
 // Get the repository for the EducationDetail entity
 const educationDetailRepository =
@@ -30,7 +19,7 @@ const createEducationDetailController = async (req: Request, res: Response) => {
       to,
       userId,
       sectionId,
-    } = req.body;
+    } = req.body as EducationDetailData;
 
     // Define an array of required fields
     const requiredFields = [
@@ -74,6 +63,52 @@ const createEducationDetailController = async (req: Request, res: Response) => {
   }
 };
 
+// Get education detail by ID
+const getEducationDetailById = async (req: Request, res: Response) => {
+  try {
+    const id = parseInt(req.params.id);
+
+    // Find the education detail in the database
+    const educationDetail = await educationDetailRepository.findOne({
+      where: { id },
+    });
+
+    if (!educationDetail) {
+      return res.status(404).json({ message: "Education not found" });
+    }
+
+    // Return the education detail as a JSON object
+    res.status(200).json({ educationDetail });
+  } catch (error) {
+    console.error("Error fetching education detail:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+// Get all education details attached to a user
+const getAllEducationDetails = async (req: Request, res: Response) => {
+  try {
+    const { userId } = req.params;
+    // Find all education details in the database
+    const educationDetails = await educationDetailRepository.find({
+      where: { userId },
+    });
+
+    if (!educationDetails) {
+      return res
+        .status(404)
+        .json({ message: "This user has no Educational Details" });
+    }
+
+    // Return the education details as a JSON array
+    res.status(200).json({ educationDetails });
+  } catch (error) {
+    console.error("Error fetching education details:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+// Update Education Controller
 const updateEducationDetail = async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id);
@@ -92,7 +127,7 @@ const updateEducationDetail = async (req: Request, res: Response) => {
     console.log("found");
 
     // Validate and apply updates from the DTO
-    const updateData = req.body as UpdateEducationDetailDTO;
+    const updateData = req.body as EducationDetailData;
 
     if (updateData.fieldOfStudy)
       educationDetail.fieldOfStudy = updateData.fieldOfStudy;
@@ -134,4 +169,39 @@ const updateEducationDetail = async (req: Request, res: Response) => {
   }
 };
 
-export { createEducationDetailController, updateEducationDetail };
+// Delete Education Controller
+const deleteEducationDetail = async (req: Request, res: Response) => {
+  try {
+    const id = parseInt(req.params.id);
+
+    // Find the existing education detail by ID
+    const educationDetail = await educationDetailRepository.findOne({
+      where: { id },
+    });
+
+    if (!educationDetail) {
+      console.log("Education not found");
+      return res.status(404).json({ message: "Education not found" });
+    }
+
+    // Delete the education detail
+    await educationDetailRepository.remove(educationDetail);
+
+    res.status(204).json({
+      message: "Education detail deleted successfully",
+      educationDetail,
+    });
+    console.log("Education detail deleted successfully");
+  } catch (error) {
+    console.error("Error deleting education detail:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export {
+  createEducationDetailController,
+  updateEducationDetail,
+  getEducationDetailById,
+  getAllEducationDetails,
+  deleteEducationDetail,
+};
