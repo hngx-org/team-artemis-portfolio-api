@@ -1,5 +1,9 @@
 import express from "express";
-import { createEducationDetailController, updateEducationDetail } from "../controllers/education.controller";
+import {
+  createEducationDetailController,
+  fetchEducationDetail, 
+  updateEducationDetail
+} from "../controllers/education.controller";
 
 const router = express.Router();
 
