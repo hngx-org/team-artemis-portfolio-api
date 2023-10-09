@@ -1,8 +1,11 @@
-import express, { Router } from "express";
-import { updateEducationDetail } from "../controllers/education.controller"; // Replace with the actual path to your controller function
-
-const router: Router = express.Router();
-
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+var express_1 = __importDefault(require("express"));
+var education_controller_1 = require("../controllers/education.controller"); // Replace with the actual path to your controller function
+var router = express_1.default.Router();
 /**
  * @swagger
  * /updateEducationDetail/{id}:
@@ -49,6 +52,6 @@ const router: Router = express.Router();
  *     tags:
  *       - Education
  */
-router.put("/updateEducationDetail/:id", updateEducationDetail);
-
+router.put("/updateEducationDetail/:id", education_controller_1.updateEducationDetail);
 module.exports = router;
+//# sourceMappingURL=updateeducation.route.js.map

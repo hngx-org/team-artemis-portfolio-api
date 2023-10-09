@@ -67,24 +67,32 @@ export const updateContact = async (
   }
 };
 
-export const deleteContact = async (socialId: number, userId: string) => {
-  const socialRepository = connectionSource.getRepository(SocialUser);
+export class SocialUserService {
+  async deleteContact(socialUserId: number) {
+    const socialUserRepository = connectionSource.getRepository(SocialUser);
+    const socialMediaRepository = connectionSource.getRepository(SocialMedia);
 
-  const errorResponse = await checkResourceAndPermission(socialId, userId);
-  if (errorResponse) {
-    return errorResponse; // Return the error response
-  }
+    console.log(typeof socialUserId);
 
-  try {
-    // Use delete method from TypeORM
-    const deleteResult: DeleteResult = await socialRepository.delete(socialId);
+    const socialUser = await socialUserRepository.findOne({
+      where: { id: socialUserId },
+    });
 
-    if (deleteResult.affected && deleteResult.affected >= 1) {
-      return "Contact deleted successfully";
-    } else {
-      return null;
+    if (!socialUser) {
+      throw new Error("Social User not found");
     }
-  } catch (error) {
-    throw new Error("Error deleting contact: " + error.message);
+
+    const socialMedia = socialUser.socialMedia;
+    console.log(socialMedia);
+
+    await socialUserRepository.remove(socialUser);
+
+    const usersCount = await socialMediaRepository.count({
+      where: { id: socialMedia.id },
+    });
+
+    if (usersCount === 0) {
+      await socialMediaRepository.remove(socialMedia);
+    }
   }
-};
+}
