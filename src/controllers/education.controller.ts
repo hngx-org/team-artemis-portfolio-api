@@ -4,6 +4,7 @@ import { EducationDetail } from '../database/entity/model'
 import { createEducationDetail } from '../services/education.service'
 import { EducationDetailData } from '../interfaces/education.interface'
 import { User } from '../database/entity/user'
+import { success } from '../utils'
 
 // Endpoint to fetch the education section
 const fetchUserEducationDetail: RequestHandler = async (req, res) => {
@@ -87,7 +88,8 @@ const createEducationDetailController = async (req: Request, res: Response) => {
 
     const response = {
       message: 'successfully created education detail',
-      status: 201,
+      status: 'success',
+      statusCode: 201,
       educationDetail,
     }
     // Return the created education detail as a JSON response
