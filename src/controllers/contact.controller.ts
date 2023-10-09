@@ -1,5 +1,4 @@
 import { updateContact, findUser } from "../services";
-import { error, success } from "../utils/response.util";
 import { ContactBody } from "../interfaces";
 import { Request, Response, RequestHandler, NextFunction } from "express";
 
@@ -15,27 +14,20 @@ export const updateContactController: RequestHandler = async (
     const user = await findUser(userId);
 
     if (!user) {
-      return error(
-        res,
-        "User not found: The requested user does not exist.",
-        404
-      );
+      return res.status(404).json("user not found");
     }
 
     const contact = await updateContact(socialMediaId, url, socialId, userId);
 
     if (!contact) {
-      return error(
-        res,
-        "Contact not updated: The requested contact could not be updated.",
-        500
-      );
+      return res.status(404).json("can not update contact");
     }
 
     return res.status(200).json({
       message: "new contact updated",
     });
   } catch (error) {
-    next(error(res, (error as Error).message));
+    console.log(error);
+    return res.status(500).json("internal server error");
   }
 };
