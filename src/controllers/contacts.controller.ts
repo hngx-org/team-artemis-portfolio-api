@@ -37,7 +37,7 @@ export const getContacts = async (req: Request, res: Response) => {
     });
     return res.status(200).json(contacts);
   } catch (error) {
-    console.error("Error fetching contacts:", error);
+    console.error("Error getting contacts:", error);
     return res.status(404).json({ message: "Contacts not found" });
   }
 };
