@@ -1,4 +1,5 @@
 import { getAllUsers, getUserById } from "../controllers/portfolio";
+
 import { Router } from "express";
 
 const router = Router(); // Create a new router
