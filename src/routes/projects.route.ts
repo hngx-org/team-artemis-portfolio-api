@@ -14,39 +14,39 @@ import {
 
 /**
  * @swagger
- * /projects/{id}:
- *   put:
- *     summary: Update project by ID
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         description: The ID of the project for update.
- *         schema:
- *           type: string
+ * /api/projects:
+ *   post:
+ *     summary: Create a new project
+ *     description: Create a new project with images and project details.
  *     requestBody:
- *       description: Update details for the project
  *       required: true
  *       content:
- *         application/json:
+ *         multipart/form-data:
  *           schema:
  *             type: object
  *             properties:
- *               title:
- *                 type: string
- *               year:
- *                 type: number
- *               url:
- *                  type: string
- *               tags:
+ *               images:
+ *                 type: array
+ *                 items:
  *                   type: string
- *               description:
- *                    type: string
- *               userId:
- *
+ *                   format: binary
+ *                 description: Images for the project, including the thumbnail. You can upload multiple images.
+ *               jsondata:
+ *                 type: string
+ *                 format: binary
+ *                 description: JSON data containing project details.
+ *                 example: |
+ *                   {
+ *                     "title": "New Project",
+ *                     "year": 2023,
+ *                     "url": "https://example.com",
+ *                     "tags": "tag1, tag2, tag3",
+ *                     "description": "This is a new project",
+ *                     "userId": "ddc5eec2-65be-11ee-8c99-0242ac120002"
+ *                   }
  *     responses:
- *       200:
- *         description: Successful response
+ *       '201':
+ *         description: Successfully created a new project
  *         content:
  *           application/json:
  *             schema:
@@ -54,8 +54,8 @@ import {
  *               properties:
  *                 message:
  *                   type: string
- *       400:
- *         description: Bad request
+ *       '400':
+ *         description: Bad request. Check the request format.
  *         content:
  *           application/json:
  *             schema:
