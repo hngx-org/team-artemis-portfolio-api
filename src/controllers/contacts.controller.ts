@@ -27,8 +27,7 @@ export const getContacts = async (req: Request, res: Response) => {
   try {
     const { user_id } = req.params;
     
-    // Validate user_id using a regular expression
-    const userIdRegex = /^\d+$/;
+    const userIdRegex = /^[a-zA-Z0-9]+$/;
     if (!userIdRegex.test(user_id)) {
       return res.status(400).json({ message: "Invalid user_id format" });
     }
