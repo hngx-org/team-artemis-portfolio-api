@@ -2,18 +2,45 @@ import {
   getAllUsers,
   getUserById,
   retrievePortfolioController,
-} from '../controllers/portfolio.controller'
-import { Router } from 'express'
+} from "../controllers/portfolio.controller";
+import { Router } from "express";
 
-const router = Router()
-
-router.get('/portfolio', getAllUsers)
+const router = Router();
 
 /**
  * @swagger
- * /portfolio/{id}:
+ * /api/portfolio:
+ *   get:
+ *     summary: Get all users' portfolio details
+ *     description: Retrieve a list of all users' portfolio details.
+ *     tags: [User Portfolio Details]
+ *     responses:
+ *       200:
+ *         description: Successful response
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ */
+router.get("/portfolio", getAllUsers);
+
+/**
+ * @swagger
+ * /api/portfolio/{id}:
  *   get:
  *     summary: Get user portfolio details by ID
+ *     description: Retrieve a user's portfolio details by providing their ID.
+ *     tags: [User Portfolio Details]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: The ID of the user whose portfolio details are to be retrieved.
+ *         schema:
+ *           type: string
  *     responses:
  *       200:
  *         description: Successful response
@@ -26,23 +53,23 @@ router.get('/portfolio', getAllUsers)
  *                   type: string
  *       404:
  *         description: Requested user not found
- *     tags:
- *       - User
- *       - User Portfolio Details
  */
-router.get('/portfolio/:id', getUserById)
+router.get("/portfolio/:id", getUserById);
 
 /**
  * @swagger
- * /retrieve-portfolio/{userId}:
+ * /api/retrieve-portfolio/{userId}:
  *   get:
  *     summary: Get all portfolio details including sections
- *     description: Get request to retrieve all portfolio details
+ *     description: Get request to retrieve all portfolio details for a user.
+ *     tags: [Portfolio]
  *     parameters:
  *       - in: path
  *         name: userId
- *         type: string
- *         description: userId of the user requesting portfolio
+ *         required: true
+ *         description: The userId of the user requesting portfolio details.
+ *         schema:
+ *           type: string
  *     responses:
  *       200:
  *         description: Success.
@@ -56,7 +83,7 @@ router.get('/portfolio/:id', getUserById)
  *                   description: A success message.
  *                 data:
  *                   type: object
- *                   description: portfolio details
+ *                   description: Portfolio details.
  *                 successful:
  *                   type: boolean
  *                   description: true
@@ -76,9 +103,7 @@ router.get('/portfolio/:id', getUserById)
  *                 data:
  *                   type: string
  *                   description: null
- *     tags:
- *       - Portfolio
  */
-router.get('/retrieve-portfolio/:userId', retrievePortfolioController)
+router.get("/retrieve-portfolio/:userId", retrievePortfolioController);
 
-module.exports = router
+module.exports = router;
