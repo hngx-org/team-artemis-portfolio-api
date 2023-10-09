@@ -406,7 +406,7 @@ router.delete("/education/:id", deleteEducationDetail);
    *     tags:
    *       - Education
    * 
-  `*    500:
+  *    500:
   *       description: Unable to delete education detail
   *       content:
   *         application/json:
