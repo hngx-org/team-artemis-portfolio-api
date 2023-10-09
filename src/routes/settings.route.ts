@@ -1,17 +1,161 @@
-// this is an example file
-import express from "express";
+import { Router } from "express";
 import {
-  updateNotificationSettings,
+  createNotificationSettingController,
+  deleteUserAccount,
+  createAccountSettingController,
   updateUser,
+  updateNotificationSettings,
 } from "../controllers/settings.controller";
 
-const router = express.Router();
+const router = Router();
 
 /**
  * @swagger
- * /updateUser/{id}:
+ * /createAccountSetting:
  *   put:
- *     summary: Update user information
+ *     summary: Create account settings
+ *     description: Create user account settings.
+ *     requestBody:
+ *       description: New account settings
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *               currentPassword:
+ *                 type: string
+ *               newPassword:
+ *                 type: string
+ *               confirmNewPassword:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Successful response
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *       400:
+ *         description: Bad request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *     tags:
+ *       - User
+ */
+
+router.put("/createAccountSetting", createAccountSettingController);
+
+/**
+ * @swagger
+ * /setNotificationDetails/{userId}:
+ *   post:
+ *     summary: Create notification settings by User ID
+ *     description: Create user notification settings by providing the User ID.
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         description: The unique ID of the user for whom to create notification settings.
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       description: Notification settings detail data
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               communityUpdate:
+ *                 type: boolean
+ *               emailSummary:
+ *                 type: boolean
+ *               newMessages:
+ *                 type: boolean
+ *               followUpdate:
+ *                 type: boolean
+ *               specialOffers:
+ *                 type: boolean
+ *     responses:
+ *       200:
+ *         description: Successful response
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *       400:
+ *         description: Bad request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *     tags:
+ *       - NotificationSetting
+ */
+
+router.post(
+  "/setNotificationDetails/:userId",
+  createNotificationSettingController
+);
+
+/**
+ * @swagger
+ * /api/deleteAccountDetails/{userId}:
+ *   delete:
+ *     summary: Delete user account by ID
+ *     description: Delete user account by providing the User ID.
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         description: The unique ID of the user for whom to delete the account.
+ *     responses:
+ *       200:
+ *         description: Successful response
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *       400:
+ *         description: Bad request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *     tags:
+ *       - User
+ */
+
+router.delete("/deleteAccountDetails/:userId", deleteUserAccount);
+
+/**
+ * @swagger
+ * /api/updateUser/{id}:
+ *   patch:
+ *     summary: Update User Information
  *     description: Update user email and password.
  *     parameters:
  *       - in: path
@@ -21,8 +165,9 @@ const router = express.Router();
  *         schema:
  *           type: string
  *           format: uuid
+ *
  *     requestBody:
- *       description: New User detail data
+ *       description: New user detail data
  *       required: true
  *       content:
  *         application/json:
@@ -52,15 +197,17 @@ const router = express.Router();
  *               properties:
  *                 error:
  *                   type: string
+ *     tags:
+ *       - Update User
  */
 
-router.patch("/settings/:id", updateUser);
+router.patch("/updateUser/:id", updateUser);
 
 /**
  * @swagger
- * /updateNotificationSettings/{id}:
- *   put:
- *     summary: Update notification settings
+ * /api/updateNotificationSettings/{id}:
+ *   patch:
+ *     summary: Update Notification Settings
  *     description: Update user notification settings.
  *     parameters:
  *       - in: path
@@ -106,7 +253,7 @@ router.patch("/settings/:id", updateUser);
  *                 message:
  *                   type: string
  *       400:
- *         description: Bad request. Notification does not exist.
+ *         description: Bad request. Notification settings do not exist.
  *         content:
  *           application/json:
  *             schema:
@@ -114,7 +261,10 @@ router.patch("/settings/:id", updateUser);
  *               properties:
  *                 error:
  *                   type: string
+ *     tags:
+ *       - Update Notification Settings
  */
-router.patch("/settings/notification/:id", updateNotificationSettings);
+
+router.patch("/updateNotificationSettings/:id", updateNotificationSettings);
 
 module.exports = router;

@@ -1,15 +1,15 @@
-import express, { Router } from "express";
-import { sayHelloController } from "../controllers/greeting.controller";
+import express from "express";
+import { getAllTracks } from "../controllers/tracks.controller";
 
-const router: Router = express.Router();
+const router = express.Router();
 
 /**
  * @swagger
  * /:
  *   get:
- *     summary: Get a greeting message
- *     description: Retrieve a greeting message using a GET request.
- *     tags: [Greeting]
+ *     summary: Get all the tracks
+ *     description: Retrieve all tracks using a GET request.
+ *     tags: [Tracks]
  *     responses:
  *       200:
  *         description: Successful response
@@ -21,6 +21,6 @@ const router: Router = express.Router();
  *                 message:
  *                   type: string
  */
-router.get("/", sayHelloController);
+router.get("/tracks", getAllTracks);
 
 module.exports = router;

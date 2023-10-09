@@ -1092,6 +1092,12 @@ export class Section {
 
   @Column("text", { nullable: true })
   meta: string;
+
+  @OneToMany(
+    () => CustomUserSection,
+    (customUserSection) => customUserSection.section
+  )
+  customUserSections: CustomUserSection[];
 }
 
 @Entity({ name: "tracks" })
@@ -1305,7 +1311,15 @@ export class SocialUser {
     onDelete: "CASCADE",
     onUpdate: "CASCADE",
   })
+  @JoinColumn({ name: "user_id" })
   user: User;
+
+  @ManyToOne(() => SocialMedia, (socialMedia) => socialMedia.id, {
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
+  })
+  @JoinColumn({ name: "social_media_id" })
+  socialMedia: SocialMedia;
 }
 
 @Entity({ name: "custom_user_section" })
@@ -1318,6 +1332,12 @@ export class CustomUserSection {
 
   @Column("int")
   sectionId: number;
+
+  @ManyToOne(() => Section, (section) => section.customUserSections)
+  section: Section;
+
+  @OneToMany(() => CustomField, (customField) => customField.customUserSection)
+  customFields: CustomField[];
 }
 
 @Entity({ name: "custom_field" })
@@ -1336,6 +1356,12 @@ export class CustomField {
 
   @Column("text", { nullable: true })
   value: string;
+
+  @ManyToOne(
+    () => CustomUserSection,
+    (customUserSection) => customUserSection.customFields
+  )
+  customUserSection: CustomUserSection;
 }
 
 @Entity({ name: "notification_setting" })
