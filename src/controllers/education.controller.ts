@@ -1,7 +1,26 @@
-import { Request, Response } from "express";
+import { Request, RequestHandler, Response } from "express";
 import { connectionSource } from "../database/data-source";
 import { EducationDetail } from "../database/entity/model";
 import { createEducationDetail } from "../services/education.service";
+
+// Endpoint to fetch the education section
+const fetchEducationDetail: RequestHandler = async (req, res) => {
+  const educationRepository = connectionSource.getRepository(EducationDetail);
+
+  try {
+    const id = req.params.id;
+
+    const educationDetails = await educationRepository.find({
+      where: { userId: id },
+      // Relationship has not been modelled yet... Uncomment the code once the relationship between education detail and degree, section and user table have been established
+      // relations: ["degree", "section", "user"],
+    });
+
+    res.status(200).json({ educationDetails });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
 import { EducationDetailData } from "../interfaces/education.interface";
 
 // Get the repository for the EducationDetail entity
@@ -204,4 +223,5 @@ export {
   getEducationDetailById,
   getAllEducationDetails,
   deleteEducationDetail,
+  fetchEducationDetail,
 };
