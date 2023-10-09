@@ -28,5 +28,5 @@ export const accountSettingSchema = Joi.object({
   currentPassword: Joi.string().pattern(new RegExp("^[a-zA-Z0-9]{3,30}$")),
   newPassword: Joi.string().pattern(new RegExp("^[a-zA-Z0-9]{3,30}$")),
 
-  confirmNewPassword: Joi.ref("password"),
+  confirmNewPassword: Joi.ref("newPassword"),
 }).with("newPassword", "confirmNewPassword");
