@@ -131,59 +131,47 @@ export const createProject: RequestHandler = async (
   }
 };
 
-// export const updateProjectById: RequestHandler = async (
-//   req: Request,
-//   res: Response
-// ) => {
-//   try {
-//     const { id } = req.params;
-//     const { title, year, url, tags, description, userId, sectionId } = req.body;
-//     const updatedProject = await projectRepository.findOneBy({ id: +id });
+// update project section
+export const updateProjectController: RequestHandler = async (
+  req: Request,
+  res: Response
+) => {
+  const id = req.params.project_id;
+  const data = req.body;
+  const images = req.files as Express.Multer.File[];
 
-//     if (!updatedProject) {
-//       throw new Error("Project not found");
-//     }
+  if (!images) {
+    return error(res, "You need to upload an image");
+  }
 
-//     if (title) {
-//       updatedProject.title = title as string;
-//     }
+  if (images.length > 10) {
+    return error(res, "You can only upload a maximum of 10 images at a time");
+  }
 
-//     if (year) {
-//       updatedProject.year = year as string;
-//     }
+  try {
+    console.log(id);
+    const updatedProject = await updateProjectService(
+      parseInt(id),
+      data,
+      images
+    );
+    return success(
+      res,
+      updatedProject,
+      `Project with id: ${id} updated successfully`
+    );
+  } catch (error) {
+    console.log(error);
+    return error(res, "Project update failed");
+  }
+};
 
-//     if (url) {
-//       updatedProject.url = url as string;
-//     }
-
-//     if (tags) {
-//       updatedProject.tags = tags as string;
-//     }
-
-//     if (description) {
-//       updatedProject.description = description as string;
-//     }
-
-//     if (userId) {
-//       updatedProject.userId = userId as string;
-//     }
-
-//     if (sectionId) {
-//       updatedProject.sectionId = sectionId as number;
-//     }
-
-//     const data = await projectRepository.save(updatedProject);
-//     success(res, data, "Project Updated Successfully");
-//   } catch (err) {
-//     error(res, (err as Error).message);
-//   }
-// };
 export const deleteProjectById: RequestHandler = async (
   req: Request,
   res: Response
 ) => {
   try {
-    const { id } = req.body;
+    const { id } = req.params;
     if (!id) {
       throw new Error("No project id provided");
     }

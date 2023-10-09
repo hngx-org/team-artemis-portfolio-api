@@ -146,7 +146,7 @@ router.delete("/projects/:id", deleteProjectById);
  * /api/update-project/{project_id}:
  *   put:
  *     summary: Update a project
- *     description: Update an existing project with images and project details.
+ *     description: D an existing project with images and project details.
  *     parameters:
  *       - in: path
  *         name: project_id
