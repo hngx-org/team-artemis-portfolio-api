@@ -1,7 +1,7 @@
 import { connectionSource } from "../database/data-source";
-import { SocialUser } from "../database/entity/model";
+import { SocialUser, SocialMedia } from "../database/entity/model";
 import { User } from "../database/entity/user";
-import { UpdateResult, DeleteResult } from "typeorm"; // Import TypeORM's Result types
+import { UpdateResult } from "typeorm"; // Import TypeORM's Result types
 
 export const findUser = async (userId: string) => {
   const userRepository = connectionSource.getRepository(User);
