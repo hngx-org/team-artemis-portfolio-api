@@ -26,12 +26,19 @@ export const createContacts = async (req: Request, res: Response) => {
 export const getContacts = async (req: Request, res: Response) => {
   try {
     const { user_id } = req.params;
+    
+    // Validate user_id using a regular expression
+    const userIdRegex = /^\d+$/;
+    if (!userIdRegex.test(user_id)) {
+      return res.status(400).json({ message: "Invalid user_id format" });
+    }
+
     const contacts = await contactsRepo.find({
       where: { userId: String(user_id) },
     });
     return res.status(200).json(contacts);
   } catch (error) {
-    console.error("Error getting contacts:", error);
+    console.error("Error fetching contacts:", error);
     return res.status(404).json({ message: "Contacts not found" });
   }
 };
