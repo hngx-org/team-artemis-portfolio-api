@@ -3,7 +3,6 @@ import {
   getUserById,
   retrievePortfolioController,
 } from '../controllers/portfolio.controller'
-// import { retrievePortfolioController } from '../controllers/retrieve-portfolio.controller'
 import { Router } from 'express'
 
 const router = Router()
