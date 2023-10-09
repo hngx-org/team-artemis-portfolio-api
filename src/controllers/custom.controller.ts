@@ -15,16 +15,20 @@ export const deleteCustomSection = async (
   res: Response
 ) => {
   try {
-    const sectionId = req.params.id
-    if (!sectionId) {
+    const id = parseInt(req.params.id)
+    if (!id) {
       return res.status(400).json({
         success: false, 
         message: "Please input section ID"
       })
     }
 
-    await deleteCustomSectionService(sectionId)
-    res.status(201).json({ success: true, message: "Section deleted" })
+    const data = await deleteCustomSectionService(id)
+    if (data.successful) {
+      success(res, data)
+    } else {
+      error(res, data.message);
+    }
   } catch (error: any) {
     return error(res, error.message)
   }

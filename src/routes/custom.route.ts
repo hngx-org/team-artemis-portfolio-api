@@ -5,6 +5,7 @@ import {
   findOne,
   createCustomField,
   findOneCustomField,
+  deleteCustomSection,
 } from "../controllers/custom.controller";
 
 const router = express.Router();

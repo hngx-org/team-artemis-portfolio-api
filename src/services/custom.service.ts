@@ -1,19 +1,23 @@
 import { connectionSource } from '../database/data-source'
-import { CustomUserSection, CustomField } from '../database/entity/model'
+import { CustomUserSection } from '../database/entity/model'
 
-export const deleteCustomSectionService = async (id: string) => {
+export const deleteCustomSectionService = async (
+   id: any
+   ): Promise<{ successful: boolean; message: string }> => {
    try {
-      // Get the custom section repository
-      const customSectionRepository =
-         connectionSource.getRepository(CustomUserSection)
+      const customSectionRepository = connectionSource.getRepository(CustomUserSection)
+      const sectionToBeDeleted = await customSectionRepository.findOne({ where: { id }})
 
-      // Delete custom section
-      const customSection = customSectionRepository.delete(id)
+      if (!sectionToBeDeleted) {
+         return { successful: false, message: "Custom Section not found" };
+      }
+      
+      await customSectionRepository.remove(sectionToBeDeleted);
 
-      return customSection
+      return { successful: true, message: "Custom section deleted successfully" };
    } catch (error) {
-      console.error('Error creating portfolio section:', error.message)
-      throw new Error('Error creating portfolio section')
+      console.error('Error deleting custom section:', error.message)
+      throw new Error('Error deleting custom section')
    }
 }
 
