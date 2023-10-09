@@ -178,7 +178,7 @@ router.get("/custom/field/:id", findOneCustomField);
 
 /**
  * @swagger
- * /custom-section/{id}:
+ * /api/custom-section/{id}:
  *   delete:
  *     summary: Delete a custom section by ID
  *     description: Delete a custom section by providing its ID.
