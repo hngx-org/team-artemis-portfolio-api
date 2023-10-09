@@ -14,6 +14,7 @@ const router = Router();
  * /createAccountSetting:
  *   put:
  *     summary: Create account settings
+ *     description: Create user account settings.
  *     requestBody:
  *       description: New account settings
  *       required: true
@@ -57,14 +58,15 @@ router.put("/createAccountSetting", createAccountSettingController);
 
 /**
  * @swagger
- * /setNotificationDetails/{id}:
+ * /setNotificationDetails/{userId}:
  *   post:
- *     summary: Create notification settings by ID
+ *     summary: Create notification settings by User ID
+ *     description: Create user notification settings by providing the User ID.
  *     parameters:
  *       - in: path
- *         name: id
+ *         name: userId
  *         required: true
- *         description: The unique ID of the user detail to create its settings.
+ *         description: The unique ID of the user for whom to create notification settings.
  *         schema:
  *           type: string
  *     requestBody:
@@ -115,14 +117,15 @@ router.post(
 
 /**
  * @swagger
- * /deleteAccountDetails/{id}:
- *   post:
- *     summary: delete account by ID
+ * /api/deleteAccountDetails/{userId}:
+ *   delete:
+ *     summary: Delete user account by ID
+ *     description: Delete user account by providing the User ID.
  *     parameters:
  *       - in: path
- *         name: id
+ *         name: userId
  *         required: true
- *         description: The unique ID of the user detail to delete its account.
+ *         description: The unique ID of the user for whom to delete the account.
  *     responses:
  *       200:
  *         description: Successful response
@@ -150,7 +153,7 @@ router.delete("/deleteAccountDetails/:userId", deleteUserAccount);
 
 /**
  * @swagger
- * /updateUser/{id}:
+ * /api/updateUser/{id}:
  *   patch:
  *     summary: Update User Information
  *     description: Update user email and password.
@@ -198,11 +201,11 @@ router.delete("/deleteAccountDetails/:userId", deleteUserAccount);
  *       - Update User
  */
 
-router.patch("/settings/:id", updateUser);
+router.patch("/updateUser/:id", updateUser);
 
 /**
  * @swagger
- * /updateNotificationSettings/{id}:
+ * /api/updateNotificationSettings/{id}:
  *   patch:
  *     summary: Update Notification Settings
  *     description: Update user notification settings.
@@ -213,7 +216,7 @@ router.patch("/settings/:id", updateUser);
  *         description: The ID of the notification settings to update.
  *         schema:
  *           type: integer
- *     request:
+ *     requestBody:
  *       description: New notification settings data
  *       required: true
  *       content:
@@ -262,6 +265,6 @@ router.patch("/settings/:id", updateUser);
  *       - Update Notification Settings
  */
 
-router.patch("/settings/notification/:id", updateNotificationSettings);
+router.patch("/updateNotificationSettings/:id", updateNotificationSettings);
 
 module.exports = router;
