@@ -25,15 +25,13 @@ const router = express.Router();
  *         description: The data for the skills to be created.
  *         required: true
  *         schema:
- *           type: array
- *           items:
- *             type: object
- *             properties:
- *               skills:
- *                 type: string
- *               sectionId:
- *                 type: number
- *               userId:
+ *           type: object
+ *           properties:
+ *             skills:
+ *               type: string
+ *             sectionId:
+ *               type: number
+ *             userId:
  *                 type: string
  *     responses:
  *       200:
