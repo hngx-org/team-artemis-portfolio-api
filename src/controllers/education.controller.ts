@@ -4,6 +4,7 @@ import { EducationDetail } from "../database/entity/model";
 import { createEducationDetail } from "../services/education.service";
 import { EducationDetailData } from "../interfaces/education.interface";
 import { User } from "../database/entity/user";
+import { success } from "../utils";
 
 // Endpoint to fetch the education section
 const fetchUserEducationDetail: RequestHandler = async (req, res) => {
@@ -15,8 +16,9 @@ const fetchUserEducationDetail: RequestHandler = async (req, res) => {
     const educationDetails = await educationRepository.find({
       where: { userId: id },
       // Relationship has not been modelled yet... Uncomment the code once the relationship between education detail and degree, section and user table have been established
-      // relations: ["degree", "section", "user"],
+      relations: ["degree", "section", "user"],
     });
+    console.log(educationDetails);
 
     res.status(200).json({ educationDetails });
   } catch (error) {
@@ -85,8 +87,14 @@ const createEducationDetailController = async (req: Request, res: Response) => {
       sectionId,
     });
 
+    const response = {
+      message: "successfully created education detail",
+      status: "success",
+      statusCode: 201,
+      educationDetail,
+    };
     // Return the created education detail as a JSON response
-    res.status(201).json({ educationDetail });
+    res.status(201).json(response);
   } catch (error) {
     console.error("Error creating education detail:", error.message);
     res.status(500).json({ error: error.message });
