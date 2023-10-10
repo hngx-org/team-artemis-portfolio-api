@@ -143,16 +143,23 @@ router.delete('/work-experience/:id', deleteWorkExperience)
  */
 router.get('/work-experience', workExperienceController)
 
+
 /**
  * @swagger
- * /api/work-experience/{workId}:
+ * /api/update-work-experience/{workId}:
  *   put:
- *     summary: Update a work experience section by ID.
+ *     summary: Update a work experience by ID.
+ *     description: Update a work experience's information by providing its ID.
  *     parameters:
  *       - in: path
  *         name: workId
+ *         description: The ID of the work experience to update.
  *         required: true
- *         description: The ID of the work experience section to update.
+ *         type: integer
+ *       - in: body
+ *         name: updatedWorkExperienceData
+ *         description: The updated data for the work experience.
+ *         required: true
  *         schema:
  *           type: integer
  *       - in: body
@@ -212,6 +219,9 @@ router.get('/work-experience', workExperienceController)
  *             schema:
  *               type: object
  *               properties:
+ *                 successful:
+ *                   type: boolean
+ *                   example: true
  *                 message:
  *                   type: string
  *       '404':
@@ -221,6 +231,9 @@ router.get('/work-experience', workExperienceController)
  *             schema:
  *               type: object
  *               properties:
+ *                 successful:
+ *                   type: boolean
+ *                   example: false
  *                 message:
  *                   type: string
  *       '500':
@@ -230,10 +243,14 @@ router.get('/work-experience', workExperienceController)
  *             schema:
  *               type: object
  *               properties:
- *                 error:
- *                   type: string
+ *                 successful:
+ *                   type: boolean
+ *                   example: false
  *                 message:
  *                   type: string
+ *                   example: "Failed to update Work Experience"
+ *                 data:
+ *                   type: null
  *     tags:
  *       - Work Experience
  */
