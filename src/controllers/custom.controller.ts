@@ -10,17 +10,16 @@ const customRepository = connectionSource.getRepository(CustomUserSection);
 const customFieldRepository = connectionSource.getRepository(CustomField);
 
 export const deleteCustomSection = async (req: Request, res: Response) => {
-  
   try {
-    const idValidator = z.number()
+    const idValidator = z
+      .number({
+        required_error: "id is required",
+        invalid_type_error: "id must be a number",
+      })
+      .int({ message: "id must be an integer" })
+      .positive({ message: "must be a positive integer" });
     const id = parseInt(req.params.id);
-    
-    if (isNaN(id) || id <= 0) { // Validate if id is a positive integer
-      return res.status(400).json({
-        success: false,
-        message: "Please input a valid section ID",
-      });
-    }
+    idValidator.parse(id)
 
     const data = await deleteCustomSectionService(id);
     if (data.successful) {
