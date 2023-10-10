@@ -5,7 +5,6 @@ import {
   getEducationDetailById,
   fetchUserEducationDetail,
   deleteEducationDetail,
-  deleteEducationDetails
 } from "../controllers/education.controller";
 
 const router = express.Router();
@@ -371,53 +370,5 @@ router.get("/educationDetail/:id", getEducationDetailById);
  *                   type: string
  */
 router.delete("/education/:id", deleteEducationDetail);
-  /**
-   * @swagger
-   * /deleteEducationDetail/{id}:
-   *   put:
-   *     summary: Delete education detail by ID
-   *     parameters:
-   *       - in: path
-   *         name: id
-   *         required: true
-   *         description: The ID of the education detail to delete.
-   *         schema:
-   *           type: string
-   *    responses:
-   *       200:
-   *         description: education detail deleted successfully
-   *         content:
-   *           application/json:
-   *             schema:
-   *               type: object
-   *               properties:
-   *                 message:
-   *                   type: string
-   *     
-   *       404:
-   *         description: Education detail not found
-   *         content:
-   *           application/json:
-   *             schema:
-   *               type: object
-   *               properties:
-   *                 error:
-   *                   type: string
-   *     tags:
-   *       - Education
-   * 
-  *    500:
-  *       description: Unable to delete education detail
-  *       content:
-  *         application/json:
-  *           schema:
-  *             type: object
-  *             properties:
-  *               message:
-  *                 type: string
-    */
-
-router.delete('/education/:id', deleteEducationDetails);
-
 
 module.exports = router;
