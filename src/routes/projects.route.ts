@@ -143,63 +143,45 @@ router.delete("/projects/:id", deleteProjectById);
 
 /**
  * @swagger
- * /api/update-project/{project_id}:
+ * /update-project/{project_id}:
  *   put:
- *     summary: Update a project
- *     description: D an existing project with images and project details.
+ *     summary: Update a project by ID.
+ *     description: Update a project with the specified ID using the provided data and images.
+ *     tags:
+ *       - Project
  *     parameters:
  *       - in: path
  *         name: project_id
  *         required: true
- *         description: The ID of the project to update.
  *         schema:
- *           type: string
- *     requestBody:
- *       required: true
- *       content:
- *         multipart/form-data:
- *           schema:
- *             type: object
- *             properties:
- *               images:
- *                 type: array
- *                 items:
- *                   type: string
- *                   format: binary
- *                 description: Images for the project, including the thumbnail. You can upload multiple images.
- *               jsondata:
- *                 type: string
- *                 format: binary
- *                 description: JSON data containing project details.
- *                 example: |
- *                   {
- *                     "title": "Updated Project",
- *                     "year": 2023,
- *                     "url": "https://updated-example.com",
- *                     "tags": "tag1, tag2, tag3",
- *                     "description": "This is an updated project"
- *                   }
+ *           type: integer
+ *         description: The ID of the project to update.
+ *       - in: body
+ *         name: data
+ *         required: true
+ *         description: The data to update the project.
+ *         schema:
+ *           type: object
+ *           properties:
+ *             // Define your data properties here
+ *       - in: formData
+ *         name: images
+ *         required: true
+ *         type: array
+ *         items:
+ *           type: file
+ *         description: Images to upload (max 10).
  *     responses:
- *       '200':
- *         description: Successfully updated the project
+ *       200:
+ *         description: Project updated successfully.
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *       '400':
- *         description: Bad request. Check the request format.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 error:
- *                   type: string
- *     tags:
- *       - Project
+ *               // Define your response schema here
+ *       400:
+ *         description: Bad request.
+ *       500:
+ *         description: Internal server error.
  */
 
 router.put("/update-project/:project_id", uploads, updateProjectById);
