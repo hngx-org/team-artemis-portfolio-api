@@ -143,91 +143,91 @@ router.delete("/work-experience/:id", deleteWorkExperience);
  */
 router.get("/work-experience", workExperienceController);
 
+
 /**
  * @swagger
- * /api/work-experience/{workId}:
+ * /api/update-work-experience/{workId}:
  *   put:
- *     summary: Update a work experience section by ID.
+ *     summary: Update a work experience by ID.
+ *     description: Update a work experience's information by providing its ID.
  *     parameters:
  *       - in: path
  *         name: workId
+ *         description: The ID of the work experience to update.
  *         required: true
- *         description: The ID of the work experience section to update.
+ *         type: integer
+ *       - in: body
+ *         name: updatedWorkExperienceData
+ *         description: The updated data for the work experience.
+ *         required: true
  *         schema:
- *           type: integer
- *     requestBody:
- *       description: New work experience data
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               company:
- *                 type: string
- *               role:
- *                 type: string
- *               startMonth:
- *                 type: string
- *               startYear:
- *                 type: string
- *               endMonth:
- *                 type: string
- *               endYear:
- *                 type: string
- *               description:
- *                 type: string
- *               isEmployee:
- *                 type: boolean
- *               userId:
- *                 type: string
- *               sectionId:
- *                 type: integer
+ *           type: object
+ *           properties:
+ *             company:
+ *               type: string
+ *             role:
+ *               type: string
+ *             startMonth:
+ *               type: string
+ *             startYear:
+ *               type: string
+ *             endMonth:
+ *               type: string
+ *             endYear:
+ *               type: string
+ *             description:
+ *               type: string
+ *             isEmployee:
+ *               type: boolean
+ *             userId:
+ *               type: string
+ *             sectionId:
+ *               type: integer
  *     responses:
  *       200:
- *         description: Successful response
+ *         description: Work Experience updated successfully.
  *         content:
  *           application/json:
  *             schema:
  *               type: object
  *               properties:
+ *                 successful:
+ *                   type: boolean
+ *                   example: true
  *                 message:
  *                   type: string
- *                 data:
- *                   type: object
- *       400:
- *         description: Bad request
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
+ *                   example: "Work Experience updated successfully"
  *       404:
- *         description: Not Found
+ *         description: Work Experience not found.
  *         content:
  *           application/json:
  *             schema:
  *               type: object
  *               properties:
+ *                 successful:
+ *                   type: boolean
+ *                   example: false
  *                 message:
  *                   type: string
+ *                   example: "Work Experience not found"
  *       500:
- *         description: Internal Server Error
+ *         description: Failed to update Work Experience.
  *         content:
  *           application/json:
  *             schema:
  *               type: object
  *               properties:
- *                 error:
- *                   type: string
+ *                 successful:
+ *                   type: boolean
+ *                   example: false
  *                 message:
  *                   type: string
+ *                   example: "Failed to update Work Experience"
+ *                 data:
+ *                   type: null
  *     tags:
  *       - Work Experience
  */
-
 router.put("/work-experience/:workId", updateWorkExperience);
 
 module.exports = router;
