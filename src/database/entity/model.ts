@@ -1366,6 +1366,9 @@ export class CustomField {
   @Column("int")
   customSectionId: number;
 
+  @Column("int")
+  customUserSectionId: number;
+
   @Column("text", { nullable: true })
   value: string;
 
