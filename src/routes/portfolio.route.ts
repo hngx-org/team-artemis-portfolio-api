@@ -54,7 +54,7 @@ router.get("/portfolio", getAllUsers);
  *       404:
  *         description: Requested user not found
  */
-router.get("/portfolio/:id", getUserById);
+router.get("/portfolio/:userId", getUserById);
 
 /**
  * @swagger
