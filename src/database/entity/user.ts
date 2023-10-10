@@ -60,7 +60,6 @@ export class User {
     default: () => "CURRENT_TIMESTAMP",
     name: "created_at",
   })
-  // @OneToMany(() => SocialUser, (socialUser) => socialUser.userId)
-  socialUsers: string;
   createdAt: Date;
+  socialUsers: string;
 }

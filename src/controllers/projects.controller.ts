@@ -202,15 +202,6 @@ export const updateProjectById: RequestHandler = async (
     return error(res, "You can only upload a maximum of 10 images at a time");
   }
 
-  // // Upload images and get image IDs
-  // const { successful, message, urls } = await cloudinaryService(files, 'project')
-  // if (!successful) {
-  //     return error(res, message);
-  // }
-
-  // // Get image IDs from URLs
-  // const imageIds = urls.map(url => ({}));
-
   try {
     console.log(id);
     const updatedProject = await updateProjectService(
