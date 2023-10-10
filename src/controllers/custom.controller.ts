@@ -5,7 +5,6 @@ import { CustomUserSection, CustomField } from "../database/entity/model";
 import { success, error } from "../utils/response.util";
 import { v4 as isUUIDv4 } from "uuid";
 import { deleteCustomSectionService } from "../services/custom.service";
-import { z } from "zod";
 
 const customRepository = connectionSource.getRepository(CustomUserSection);
 const customFieldRepository = connectionSource.getRepository(CustomField);
@@ -25,9 +24,9 @@ export const deleteCustomSection = async (req: Request, res: Response) => {
 
     const data = await deleteCustomSectionService(id);
     if (data.successful) {
-      success(res, data);
+      return success(res, data);
     } else {
-      error(res, data.message);
+      return error(res, data.message);
     }
   } catch (error: any) {
     return error(res, error.message);
