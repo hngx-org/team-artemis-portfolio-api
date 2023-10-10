@@ -1,4 +1,4 @@
-import express, { Request, Response } from "express";
+import express, { Request, RequestHandler, Response } from "express";
 import { connectionSource } from "../database/data-source";
 import { PortfolioDetails, UserTrack } from "../database/entity/model";
 import { User } from "../database/entity/user";
@@ -13,8 +13,7 @@ export interface UpdatePortfolioDetailsDTO {
 }
 
 // Get the repository for the PortfolioDetails entity
-const portfolioDetailsRepository =
-  connectionSource.getRepository(PortfolioDetails);
+const portfolioDetailsRepository = connectionSource.getRepository(PortfolioDetails);
 
 // Export the uploadProfileImageController function
 export const uploadProfileImageController: express.RequestHandler = async (
@@ -69,14 +68,10 @@ export const updatePortfolioDetails: express.RequestHandler = async (
 
     if (error instanceof SyntaxError) {
       // Handle JSON parsing error
-      return res
-        .status(400)
-        .json({ message: "Invalid JSON format in request body" });
+      return res.status(400).json({ message: "Invalid JSON format in request body" });
     } else if (error.code === "23505") {
       // Handle duplicate key constraint violation (unique constraint violation)
-      return res
-        .status(409)
-        .json({ message: "Duplicate key value in the database" });
+      return res.status(409).json({ message: "Duplicate key value in the database" });
     } else if (error.code === "22P02") {
       // Handle invalid integer format error
       return res.status(400).json({ message: "Invalid ID format" });
@@ -92,8 +87,7 @@ export const createProfileController = async (req: Request, res: Response) => {
     const userId = req.params.userId;
 
     const userRepository = connectionSource.getRepository(User);
-    const portfolioDetailsRepository =
-      connectionSource.getRepository(PortfolioDetails);
+    const portfolioDetailsRepository = connectionSource.getRepository(PortfolioDetails);
     const userTrackRepository = connectionSource.getRepository(UserTrack);
 
     const user = await userRepository.findOne({ where: { id: userId } });
@@ -106,14 +100,16 @@ export const createProfileController = async (req: Request, res: Response) => {
       userRepository.update(user.id, { lastName: name });
     }
 
-    const userTrack = await userTrackRepository.findOne({
-      where: { trackId: trackId, userId },
-    });
+    if (trackId) {
+      const userTrack = await userTrackRepository.findOne({
+        where: { trackId: trackId, userId },
+      });
 
-    if (!userTrack) {
-      const newUser = userTrackRepository.create({ trackId: trackId, userId });
+      if (!userTrack) {
+        const newUser = userTrackRepository.create({ trackId: trackId, userId });
 
-      await userTrackRepository.save(newUser);
+        await userTrackRepository.save(newUser);
+      }
     }
 
     const portfolio = portfolioDetailsRepository.create({
@@ -131,5 +127,33 @@ export const createProfileController = async (req: Request, res: Response) => {
     );
   } catch (err) {
     return error(res, err.message, 500);
+  }
+};
+
+// delete Portfolio Profile details
+export const deletePortfolioDetails: RequestHandler = async (req: Request, res: Response) => {
+  try {
+    // convert the id to number
+    const id = parseInt(req.params.id);
+
+    // find the porfolio by id
+    const portfolioToRemove = await portfolioDetailsRepository.findOneBy({
+      id: id,
+    });
+
+    // return error if porfolio is not found
+    if (!portfolioToRemove) {
+      return res.status(404).json({ error: "Portfolio Details not found!" });
+    }
+
+    // delete the porfolio
+
+    const portfolio = await portfolioDetailsRepository.remove(portfolioToRemove);
+    res.status(200).json({
+      message: "Portfolio profile details deleted successfully",
+      portfolio,
+    });
+  } catch (error) {
+    res.status(500).json(error as Error);
   }
 };

@@ -9,7 +9,9 @@ export const coverphoto: RequestHandler = async (
   res: Response
 ) => {
   try {
-    if (!req.files) return error(res, "add event image", 400);
+    if (!req.files) {
+      return error(res, "No files were uploaded", 400);
+    }
 
     const data = await cloudinaryService(req.files, req.body.service);
     const userRepository = connectionSource.getRepository(Images);
@@ -18,8 +20,12 @@ export const coverphoto: RequestHandler = async (
     images.url = String(data.urls);
     await userRepository.save(images);
 
-    return success(res, data.urls, data.message);
+    return success(res, data.urls, "Image uploaded successfully");
   } catch (err) {
-    error(res, (err as Error).message); // Use type assertion to cast 'err' to 'Error' type
+    if (err instanceof Error) {
+      return error(res, err.message, 500);
+    } else {
+      return error(res, "An unknown error occurred", 500);
+    }
   }
 };

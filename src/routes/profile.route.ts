@@ -1,8 +1,8 @@
-// this is an example file
 import express from "express";
 import multer from "multer";
 import {
   createProfileController,
+  deletePortfolioDetails,
   updatePortfolioDetails,
   uploadProfileImageController,
 } from "../controllers";
@@ -14,20 +14,33 @@ const router = express.Router();
 
 /**
  * @swagger
- * /profile/image/upload:
- *   post:
- *     summary: Upload a profile image
- *     description: Upload a user's profile image using a POST request.
- *     consumes:
- *       - multipart/form-data
+ * /api/profile-details/{id}:
+ *   put:
+ *     summary: Update portfolio details by ID
+ *     description: Update a user's portfolio details by providing its ID.
+ *     tags: [Profile]
  *     parameters:
- *       - in: formData
- *         name: images
- *         type: file
- *         description: The profile image to upload (one file allowed).
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: The ID of the portfolio details to update.
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       description: Updated portfolio detail data
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               field1:
+ *                 type: string
+ *               field2:
+ *                 type: number
  *     responses:
  *       200:
- *         description: Profile image uploaded successfully.
+ *         description: Portfolio details updated successfully.
  *         content:
  *           application/json:
  *             schema:
@@ -35,9 +48,8 @@ const router = express.Router();
  *               properties:
  *                 message:
  *                   type: string
- *                   description: A success message.
- *       400:
- *         description: Bad request. The uploaded file may not be valid.
+ *       404:
+ *         description: Portfolio details not found.
  *         content:
  *           application/json:
  *             schema:
@@ -45,21 +57,16 @@ const router = express.Router();
  *               properties:
  *                 error:
  *                   type: string
- *                   description: An error message.
- *     tags:
- *       - Profile
- *     multipart: true
  */
-router.post("/profile/image/upload", uploads, uploadProfileImageController);
-
-// Update portfolio details
 router.put("/profile-details/:id", updatePortfolioDetails);
 
 /**
  * @swagger
- * /profile/{userId}:
+ * /api/profile/{userId}:
  *   post:
  *     summary: Create Portfolio profile
+ *     description: Create a portfolio.
+ *     tags: [Profile]
  *     parameters:
  *       - in: path
  *         name: userId
@@ -107,9 +114,52 @@ router.put("/profile-details/:id", updatePortfolioDetails);
  *               properties:
  *                 error:
  *                   type: string
- *     tags:
- *       - Profile
  */
 router.post("/profile/:userId", createProfileController);
+
+/**
+ * @swagger
+ * /api/profile-details/{id}:
+ *   delete:
+ *     summary: Delete a Portfolio Profile details
+ *     description: Delete a user's Portfolio Profile details by providing its ID.
+ *     tags: [Portfolio]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: The ID of Portfolio to delete.
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Successful response
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *       404:
+ *         description: Not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *       500:
+ *         description: Internal error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ */
+router.delete("/profile-details/:id", deletePortfolioDetails);
 
 module.exports = router;

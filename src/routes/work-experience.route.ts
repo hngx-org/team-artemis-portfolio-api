@@ -2,13 +2,15 @@ import express from "express";
 import {
   createWorkExperience,
   deleteWorkExperience,
+  workExperienceController,
+  updateWorkExperience,
 } from "../controllers/work-experience.controller";
 
 const router = express.Router();
 
 /**
  * @swagger
- * /create-work-experience:
+ * /api/create-work-experience:
  *   post:
  *     summary: Create a new work experience.
  *     requestBody:
@@ -77,7 +79,7 @@ router.post("/create-work-experience", createWorkExperience);
 
 /**
  * @swagger
- * /work-experience/:id:
+ * /api/work-experience/:id:
  *   delete:
  *     summary: Delete a work experience section.
  *     parameters:
@@ -110,5 +112,122 @@ router.post("/create-work-experience", createWorkExperience);
  *       - Work Experience
  */
 router.delete("/work-experience/:id", deleteWorkExperience);
+
+/**
+ * @swagger
+ * /api/work-experience:
+ *   get:
+ *     summary: Get all work experience sections.
+ *     description: Get all work experience sections from Database.
+ *     responses:
+ *       200:
+ *         description: Successful response
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *       500:
+ *         description: Internal Server Error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *     tags:
+ *       - Work Experience
+ */
+router.get("/work-experience", workExperienceController);
+
+/**
+ * @swagger
+ * /api/work-experience/{workId}:
+ *   put:
+ *     summary: Update a work experience section by ID.
+ *     parameters:
+ *       - in: path
+ *         name: workId
+ *         required: true
+ *         description: The ID of the work experience section to update.
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       description: New work experience data
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               company:
+ *                 type: string
+ *               role:
+ *                 type: string
+ *               startMonth:
+ *                 type: string
+ *               startYear:
+ *                 type: string
+ *               endMonth:
+ *                 type: string
+ *               endYear:
+ *                 type: string
+ *               description:
+ *                 type: string
+ *               isEmployee:
+ *                 type: boolean
+ *               userId:
+ *                 type: string
+ *               sectionId:
+ *                 type: integer
+ *     responses:
+ *       200:
+ *         description: Successful response
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   type: object
+ *       400:
+ *         description: Bad request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *       404:
+ *         description: Not Found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *       500:
+ *         description: Internal Server Error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                 message:
+ *                   type: string
+ *     tags:
+ *       - Work Experience
+ */
+
+router.put("/work-experience/:workId", updateWorkExperience);
 
 module.exports = router;
