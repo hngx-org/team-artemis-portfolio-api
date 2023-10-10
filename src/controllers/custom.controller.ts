@@ -19,8 +19,10 @@ export const deleteCustomSection = async (req: Request, res: Response) => {
       .int({ message: "id must be an integer" })
       .positive({ message: "must be a positive integer" });
     const id = parseInt(req.params.id);
-    idValidator.parse(id)
-
+    const validate =  idValidator.safeParse(id)
+    if (!validate.success){
+      return error(res, (validate.error).message);
+    }
     const data = await deleteCustomSectionService(id);
     if (data.successful) {
       return success(res, data);
@@ -28,7 +30,7 @@ export const deleteCustomSection = async (req: Request, res: Response) => {
       return error(res, data.message);
     }
   } catch (error: any) {
-    return error(res, error.message);
+    return res.send(error) //error(res, error);
   }
 };
 
