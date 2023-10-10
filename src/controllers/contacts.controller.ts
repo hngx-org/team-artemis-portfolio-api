@@ -1,19 +1,22 @@
 import { Request, Response } from "express";
 import { connectionSource as dataSource } from "../database/data-source";
-import { SocialUser } from "../database/entity/model";
+import { SocialUser} from "../database/entity/model";
 import { SocialUserService } from "../services/contact.service";
 
 const contactsRepo = dataSource.getRepository(SocialUser);
+
 const socialUserService = new SocialUserService();
 
 export const createContacts = async (req: Request, res: Response) => {
   try {
     const { url, user_id, social_media_id } = req.body;
+    
     const contactsRepo = dataSource.getRepository(SocialUser);
     const contact = contactsRepo.create({
       url,
       userId: user_id,
       socialMediaId: social_media_id,
+      
     });
     await contactsRepo.save(contact);
     return res.status(201).json({ message: "Contact created successfully" });

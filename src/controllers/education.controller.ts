@@ -212,6 +212,7 @@ const deleteEducationDetail = async (req: Request, res: Response) => {
   }
 };
 
+
 export {
   createEducationDetailController,
   updateEducationDetail,
