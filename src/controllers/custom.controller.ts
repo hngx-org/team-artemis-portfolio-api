@@ -5,17 +5,21 @@ import { CustomUserSection, CustomField } from "../database/entity/model";
 import { success, error } from "../utils/response.util";
 import { v4 as isUUIDv4 } from "uuid";
 import { deleteCustomSectionService } from "../services/custom.service";
+import { z } from "zod";
 
 const customRepository = connectionSource.getRepository(CustomUserSection);
 const customFieldRepository = connectionSource.getRepository(CustomField);
 
 export const deleteCustomSection = async (req: Request, res: Response) => {
+  
   try {
+    const idValidator = z.number()
     const id = parseInt(req.params.id);
-    if (!id) {
-      return (res as any).status(400).json({
+    
+    if (isNaN(id) || id <= 0) { // Validate if id is a positive integer
+      return res.status(400).json({
         success: false,
-        message: "Please input section ID",
+        message: "Please input a valid section ID",
       });
     }
 
