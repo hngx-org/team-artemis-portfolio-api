@@ -70,7 +70,7 @@ router.get("/portfolio/:userId", getUserById);
  *         description: The userId of the user requesting portfolio details.
  *         schema:
  *           type: string
- *     responses:
+  *     responses:
  *       200:
  *         description: Success.
  *         content:
@@ -78,15 +78,15 @@ router.get("/portfolio/:userId", getUserById);
  *             schema:
  *               type: object
  *               properties:
+ *                 status:
+ *                   type: integer
+ *                   description: http success code.
  *                 message:
  *                   type: string
- *                   description: A success message.
+ *                   description: success message.
  *                 data:
  *                   type: object
- *                   description: Portfolio details.
- *                 successful:
- *                   type: boolean
- *                   description: true
+ *                   description: portfolio details
  *       404:
  *         description: Resource not found.
  *         content:
@@ -94,14 +94,35 @@ router.get("/portfolio/:userId", getUserById);
  *             schema:
  *               type: object
  *               properties:
- *                 status:
+ *                 error:
+ *                   type: string
+ *                 status: 
  *                   type: integer
- *                   description: An error http code
+ *                   description: http error code
  *                 message:
- *                   type: object
- *                   description: User not found.
+ *                   type: string
+ *                   description: An error message.
  *                 data:
- *                   type: object
+ *                   type: string
+ *                   description: null
+ *       400:
+ *         description: Bad Request.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: describes error
+ *                 status: 
+ *                   type: integer
+ *                   description: http error code
+ *                 message:
+ *                   type: string
+ *                   description: An error message.
+ *                 data:
+ *                   type: string
  *                   description: null
  *       500:
  *         description: Internal server error.
@@ -110,12 +131,15 @@ router.get("/portfolio/:userId", getUserById);
  *             schema:
  *               type: object
  *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: describes error
+ *                 status: 
+ *                   type: integer
+ *                   description: http error code
  *                 message:
  *                   type: string
  *                   description: An error message.
- *                 successful:
- *                   type: boolean
- *                   description: false
  *                 data:
  *                   type: string
  *                   description: null

@@ -1,5 +1,6 @@
 import { Request, RequestHandler, Response } from 'express';
 import { connectionSource } from '../database/data-source';
+import { validate as isValidUUID } from 'uuid';
 import {
   AboutDetail,
   CustomUserSection,
@@ -16,7 +17,6 @@ import {
 } from '../database/entity/model';
 import { User } from '../database/entity/user';
 import { error, success } from '../utils';
-
 const userRepository = connectionSource.getRepository(User);
 const portfolioRepository = connectionSource.getRepository(PortfolioDetails);
 const userTrackRepository = connectionSource.getRepository(UserTrack);
@@ -55,15 +55,27 @@ const retrievePortfolioController: RequestHandler = async (
 ) => {
   try {
     const userId = req.params.userId;
+
+    if (!userId || !isValidUUID(`${userId}`))
+      return res.status(404).json({
+        error: 'Bad request',
+        status: 400,
+        message: 'userId must be a UUID',
+        data: null,
+      });
+
     const user = await connectionSource.manager.find(User, {
       where: { id: userId },
     });
 
     if (user.length < 1)
       // Add userid validation
-      return res
-        .status(404)
-        .json({ status: 404, message: 'User not found', data: null });
+      return res.status(404).json({
+        error: 'Not found',
+        status: 404,
+        message: 'User not found',
+        data: null,
+      });
 
     const sectionModels = {
       work_experience: WorkExperienceDetail,
@@ -91,9 +103,18 @@ const retrievePortfolioController: RequestHandler = async (
       })
     );
 
-    return success(res, responseObject);
+    return res
+      .status(200)
+      .json({ status: 200, message: 'success', data: responseObject });
   } catch (err) {
-    return error(res, (err as Error).message);
+    return res
+      .status(500)
+      .json({
+		error: 'Internal server error',
+        status: 500,
+        message: err.message,
+        data: null,
+      });
   }
 };
 
