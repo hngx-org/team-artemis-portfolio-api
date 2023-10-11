@@ -20,7 +20,6 @@ export const createSkills: RequestHandler = async (
   res: Response
 ) => {
   try {
-    const authorizationHeader = req.header("Authorization");
     const { skills, sectionId, userId } = skillsSchema.parse(req.body);
 
     const skillData = skills.map((skill) => ({
@@ -83,7 +82,6 @@ export const getSkillsDetails: RequestHandler = async (
   res: Response
 ) => {
   try {
-    const authorizationHeader = (_req as any).header("Authorization");
     const { userId } = (_req as any).body;
     // Fetch skills for the logged-in user based on their user ID
     const data = await getSkillsService(userId);
