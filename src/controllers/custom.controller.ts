@@ -36,11 +36,11 @@ export const deleteCustomSection = async (req: Request, res: Response) => {
     const customIdValidate = customIdValidator.safeParse(customId);
     const userIdValidate = userIdValidator.safeParse(userId);
 
-    if (!customIdValidate.success) {
+    if (customIdValidate.success === false) {
       return error(res, customIdValidate.error.message);
     }
 
-    if (!userIdValidate.success) {
+    if (userIdValidate.success === false) {
       return error(res, userIdValidate.error.message);
     }
     const data = await deleteCustomSectionService(customId, userId);

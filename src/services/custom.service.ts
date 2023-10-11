@@ -14,7 +14,10 @@ export const deleteCustomSectionService = async (
     });
 
     if (!sectionToBeDeleted) {
-      return { successful: false, message: "Custom Section not found for this user" };
+      return {
+        successful: false,
+        message: "Custom Section not found for this user",
+      };
     }
 
     await customSectionRepository.remove(sectionToBeDeleted);
