@@ -1,7 +1,14 @@
-import { Request, RequestHandler, Response } from "express";
-import { connectionSource } from "../database/data-source";
-import { User } from "../database/entity/user";
-import { UserTrack, PortfolioDetails, Tracks } from "../database/entity/model";
+import { Request, RequestHandler, Response } from 'express';
+import { connectionSource } from '../database/data-source';
+import { User } from '../database/entity/user';
+import {
+  UserTrack,
+  PortfolioDetails,
+  Tracks,
+  SocialUser,
+  NotificationSetting,
+  CustomUserSection,
+} from '../database/entity/model';
 
 import {
   AboutDetail,
@@ -11,8 +18,8 @@ import {
   Section,
   SkillsDetail,
   WorkExperienceDetail,
-} from "../database/entity/model";
-import { error, success } from "../utils";
+} from '../database/entity/model';
+import { error, success } from '../utils';
 
 const userRepository = connectionSource.getRepository(User);
 const portfolioRepository = connectionSource.getRepository(PortfolioDetails);
@@ -33,16 +40,16 @@ const getUserById = async (req: Request, res: Response) => {
       where: { userId },
     });
     const userTracks = await userTrackRepository
-      .createQueryBuilder('userTrack')  // Create a query builder for the 'userTrack' entity.
-      .innerJoinAndSelect('userTrack.track', 'track')  // Perform an inner join with the 'track' entity.
-      .where('userTrack.userId = :userId', { userId: userId })  // Filter the results based on a condition.
+      .createQueryBuilder('userTrack') // Create a query builder for the 'userTrack' entity.
+      .innerJoinAndSelect('userTrack.track', 'track') // Perform an inner join with the 'track' entity.
+      .where('userTrack.userId = :userId', { userId: userId }) // Filter the results based on a condition.
       .getMany();
     for (let userTrack of userTracks) {
       tracks.push(userTrack.track);
     }
     res.status(200).json({ user, portfolio, tracks });
   } catch (error) {
-    res.status(404).json({ message: "User not found" });
+    res.status(404).json({ message: 'User not found' });
   }
 };
 
@@ -52,42 +59,41 @@ const retrievePortfolioController: RequestHandler = async (
 ) => {
   try {
     const userId = req.params.userId;
-    const workExperience = await connectionSource.manager.find(
-      WorkExperienceDetail,
-      { where: { userId } }
+    const user = await connectionSource.manager.find(User, {
+      where: { id: userId },
+    });
+
+    if (user.length < 1)	// Add userid validation
+      return res
+        .status(404)
+        .json({ status: 404, message: 'User not found', data: null });
+
+    const sectionModels = {
+      work_experience: WorkExperienceDetail,
+      education: EducationDetail,
+      skill: SkillsDetail,
+      interest: InterestDetail,
+      about: AboutDetail,
+      project: Project,
+      contacts: SocialUser,
+      tracks: UserTrack,
+      settings: NotificationSetting,
+      custom_sections: CustomUserSection,
+    };
+
+    let responseObject = { user };
+
+	// fetch details with a loop to avoid repetitions
+    await Promise.all(
+      Object.entries(sectionModels).map(async ([key, value]) => {
+        const details = await connectionSource.manager.find(value, {
+          where: { userId },
+        });
+        responseObject = { ...responseObject, [key]: details };
+      })
     );
 
-    const education = await connectionSource.manager.find(EducationDetail, {
-      where: { userId },
-    });
-
-    const skills = await connectionSource.manager.find(SkillsDetail, {
-      where: { userId },
-    });
-
-    const interests = await connectionSource.manager.find(InterestDetail, {
-      where: { userId },
-    });
-
-    const aboutMe = await connectionSource.manager.find(AboutDetail, {
-      where: { userId },
-    });
-
-    const projects = await connectionSource.manager.find(Project, {
-      where: { userId },
-    });
-
-    const sections = await connectionSource.manager.find(Section);
-
-    return success(res, {
-      workExperience,
-      education,
-      projects,
-      skills,
-      interests,
-      aboutMe,
-      sections,
-    });
+    return success(res, responseObject);
   } catch (err) {
     return error(res, (err as Error).message);
   }

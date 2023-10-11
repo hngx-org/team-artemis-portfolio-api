@@ -87,6 +87,22 @@ router.get("/portfolio/:userId", getUserById);
  *                 successful:
  *                   type: boolean
  *                   description: true
+ *       404:
+ *         description: Resource not found.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: integer
+ *                   description: An error http code
+ *                 message:
+ *                   type: object
+ *                   description: User not found.
+ *                 data:
+ *                   type: object
+ *                   description: null
  *       500:
  *         description: Internal server error.
  *         content:
