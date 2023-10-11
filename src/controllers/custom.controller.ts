@@ -9,6 +9,12 @@ import {
 import { success, error } from "../utils/response.util";
 import { v4 as isUUIDv4 } from "uuid";
 import { deleteCustomSectionService } from "../services/custom.service";
+import {
+  BadRequestError,
+  CustomError,
+  InternalServerError,
+  NotFoundError,
+} from "../middlewares";
 
 const customRepository = connectionSource.getRepository(CustomUserSection);
 const customFieldRepository = connectionSource.getRepository(CustomField);
@@ -33,26 +39,35 @@ export const deleteCustomSection = async (req: Request, res: Response) => {
       })
       .uuid({ message: "userId must be of type uuid" });
 
-    const customSectionIdValidate = customSectionIdValidator.safeParse(customSectionId);
+    const customSectionIdValidate =
+      customSectionIdValidator.safeParse(customSectionId);
     const userIdValidate = userIdValidator.safeParse(userId);
 
     if (customSectionIdValidate.success === false) {
-      return error(res, customSectionIdValidate.error.message);
+      const err = new BadRequestError(customSectionIdValidate.error.message);
+      return res
+        .status(err.statusCode)
+        .json({ err: JSON.parse(err.message)[0].message });
     }
 
     if (userIdValidate.success === false) {
-      return error(res, userIdValidate.error.message);
+      const err = new BadRequestError(userIdValidate.error.message);
+      return res
+        .status(err.statusCode)
+        .json({ err: JSON.parse(err.message)[0].message });
     }
 
     const data = await deleteCustomSectionService(customSectionId, userId);
-    
+
     if (data.successful) {
       return success(res, data);
     } else {
-      return error(res, data.message);
+      const err = new NotFoundError(data.message);
+      return res.status(err.statusCode).json({ err: err.message });
     }
   } catch (error: any) {
-    return error(res, error.message); 
+    const err = new InternalServerError(error.message);
+    return res.status(err.statusCode).json({ err: err.message });
   }
 };
 
