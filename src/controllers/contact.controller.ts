@@ -33,6 +33,8 @@ export const createSocials = async (req: Request, res: Response) => {
   }
 }
 
+
+
 // creates new contacts socials
 export const createContacts = async (req: Request, res: Response, next:NextFunction) => {
   interface Icontacts {
@@ -59,27 +61,34 @@ export const createContacts = async (req: Request, res: Response, next:NextFunct
   }
 };
 
-//gets all contact socials
+
+
+//gets all contact socials controller
 export const getContacts = async (req: Request, res: Response) => {
   try {
     const { user_id } = req.params
-   
-
-    const userIdRegex = /^[A-Fa-f0-9\-]+$/
-    if (!userIdRegex.test(user_id)) {
-      return res.status(400).json({ message: 'Invalid user_id format' })
+    const schema = z.object({user_id:z.string().uuid()})
+    const parsedUserId = schema.safeParse({user_id})
+    console.log(parsedUserId)
+   // const userIdRegex = /^[A-Fa-f0-9\-]+$/
+    if ( !parsedUserId.success) {
+      console.log('in')
+      return res.status(400).json({ message: MESSAGES.INVALID_INPUT })
     }
 
     const contacts = await contactsRepo.find({
       where: { userId: String(user_id) },
     })
+    console.log(contacts)
     return res.status(200).json(contacts)
   } catch (error) {
     console.error('Error getting contacts:', error)
-    return res.status(404).json({ message: 'Contacts not found' })
+    return res.status(404).json({ message: MESSAGES.NOT_FOUND })
   }
 }
 
+
+//deleteContact controller
 export const deleteContact = async (req: Request, res: Response) => {
   try {
     const socialUserIdString = req.params.id
@@ -103,6 +112,8 @@ export const deleteContact = async (req: Request, res: Response) => {
   }
 }
 
+
+//update Contact controller
 export const updateContactController: RequestHandler = async (
   req: Request,
   res: Response,
