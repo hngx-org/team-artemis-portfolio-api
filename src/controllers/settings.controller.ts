@@ -217,7 +217,7 @@ export const updateUser = async (req: Request, res: Response) => {
     const userId = req.params.id;
     const userModel = connectionSource.getRepository(User);
     const user = await userModel.findOneBy({ id: userId });
-
+    console.log("user", user);
     if (!user) {
       return error(
         res,
