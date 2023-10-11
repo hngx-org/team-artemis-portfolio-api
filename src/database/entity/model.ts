@@ -1230,17 +1230,17 @@ export class EducationDetail {
   @UpdateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
   updatedAt: Date;
 
-  @ManyToOne(() => Section, (section) => section.id)
-  @JoinColumn({ name: "sectionId" })
-  section: Section;
+  // @ManyToOne(() => Section, (section) => section.id)
+  // @JoinColumn({ name: "sectionId" })
+  // section: Section;
 
-  @ManyToOne(() => Degree, (degree) => degree.id)
-  @JoinColumn({ name: "degreeId" })
-  degree: Degree;
+  // @ManyToOne(() => Degree, (degree) => degree.id)
+  // @JoinColumn({ name: "degreeId" })
+  // degree: Degree;
 
-  @ManyToOne(() => User, (user) => user.id)
-  @JoinColumn({ name: "userId" })
-  user: User;
+  //   @ManyToOne(() => User, (user) => user.id)
+  //   @JoinColumn({ name: "userId" })
+  //   user: User;
 }
 
 @Entity({ name: "degree" })
@@ -1479,4 +1479,95 @@ export class Coupon {
 
   @Column("timestamp", { default: () => "CURRENT_TIMESTAMP" })
   expiryDate: Date;
+}
+
+// Awards Entity
+@Entity()
+export class Award {
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column()
+  title: string;
+
+  @Column()
+  year: string;
+
+  @Column()
+  user_id: string;
+
+  @Column()
+  presented_by: string;
+
+  @Column({ type: "text", nullable: true })
+  url: string;
+
+  @Column("text")
+  description: string;
+
+  @CreateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
+  createdAt: Date;
+
+  @ManyToOne(() => User)
+  @JoinColumn({ name: "user_id" })
+  user: User;
+
+  @ManyToOne(() => Section)
+  @JoinColumn({ name: "section_id" })
+  section: Section;
+}
+
+// Certificates Entity
+@Entity()
+export class Certificate {
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column()
+  title: string;
+
+  @Column()
+  year: string;
+
+  @Column()
+  organization: string;
+
+  @Column({ type: "text", nullable: true })
+  url: string;
+
+  @Column("text")
+  description: string;
+
+  @CreateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
+  created_at: Date;
+
+  @ManyToOne(() => User)
+  @JoinColumn({ name: "user_id" })
+  user: User;
+
+  @ManyToOne(() => Section)
+  @JoinColumn({ name: "section_id" })
+  section: Section;
+}
+
+// Languages Entity
+@Entity()
+export class Language {
+  @PrimaryGeneratedColumn("uuid")
+  id: string;
+
+  @Column({ name: "userId" })
+  userId: string;
+
+  @JoinColumn({ name: "userId" })
+  user: User;
+
+  @Column({ default: false })
+  preferred: boolean;
+
+  @Column()
+  language: string;
+
+  @ManyToOne(() => User, (user) => user.languages)
+  Languageuser: User;
 }
