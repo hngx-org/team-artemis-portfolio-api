@@ -1,24 +1,20 @@
 import { Request, RequestHandler, Response } from 'express';
 import { connectionSource } from '../database/data-source';
+import {
+	AboutDetail,
+	CustomUserSection,
+	EducationDetail,
+	InterestDetail,
+	NotificationSetting,
+	PortfolioDetails,
+	Project,
+	SkillsDetail,
+	SocialUser,
+	Tracks,
+	UserTrack,
+	WorkExperienceDetail,
+} from '../database/entity/model';
 import { User } from '../database/entity/user';
-import {
-  UserTrack,
-  PortfolioDetails,
-  Tracks,
-  SocialUser,
-  NotificationSetting,
-  CustomUserSection,
-} from '../database/entity/model';
-
-import {
-  AboutDetail,
-  EducationDetail,
-  InterestDetail,
-  Project,
-  Section,
-  SkillsDetail,
-  WorkExperienceDetail,
-} from '../database/entity/model';
 import { error, success } from '../utils';
 
 const userRepository = connectionSource.getRepository(User);
