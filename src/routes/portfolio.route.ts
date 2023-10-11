@@ -2,6 +2,7 @@ import {
   getAllUsers,
   getUserById,
   retrievePortfolioController,
+  getAllPortfolios
 } from "../controllers/portfolio.controller";
 import { Router } from "express";
 
@@ -29,7 +30,7 @@ router.get("/portfolio", getAllUsers);
 
 /**
  * @swagger
- * /api/portfolio/{id}:
+ * /api/portfolio/{userId}:
  *   get:
  *     summary: Get user portfolio details by ID
  *     description: Retrieve a user's portfolio details by providing their ID.
@@ -105,5 +106,25 @@ router.get("/portfolio/:userId", getUserById);
  *                   description: null
  */
 router.get("/retrieve-portfolio/:userId", retrievePortfolioController);
+
+/**
+ * @swagger
+ * /api/portfolios:
+ *   get:
+ *     summary: Get all users' portfolio details
+ *     description: Retrieve a list of all users' portfolio details.
+ *     tags: [User Portfolio Details]
+ *     responses:
+ *       200:
+ *         description: Successful response
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ */
+router.get("/portfolios", getAllPortfolios);
 
 module.exports = router;

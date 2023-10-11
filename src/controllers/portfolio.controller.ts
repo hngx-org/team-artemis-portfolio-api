@@ -93,4 +93,9 @@ const retrievePortfolioController: RequestHandler = async (
   }
 };
 
-export { getAllUsers, getUserById, retrievePortfolioController };
+const getAllPortfolios = async (req: Request, res: Response) => {
+  const portfolios = await portfolioRepository.find();
+  return res.json(portfolios);
+}
+
+export { getAllUsers, getUserById, retrievePortfolioController, getAllPortfolios };

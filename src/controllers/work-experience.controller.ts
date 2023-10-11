@@ -20,13 +20,14 @@ export const createWorkExperience: RequestHandler = async (
     endYear,
     description,
     isEmployee,
-    userId,
     sectionId,
   } = req.body;
 
+  const userId = req.params.userId || req.body.userId;
+
   if (!userId) {
     res.statusCode = 400;
-    return res.json({ message: "userId is missing from request body" });
+    return res.json({ message: "userId must be provided" });
   }
 
   if (sectionId === undefined) {
