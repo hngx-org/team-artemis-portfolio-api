@@ -2,7 +2,7 @@ import { connectionSource } from '../database/data-source'
 import { Certification } from '../database/entity/model'
 import { CertificationInterface } from '../interfaces/cerification.interface'
 
-export const updateCertification = async (
+export const updateACertification = async (
    id: number,
    userId: string,
    payload: CertificationInterface
