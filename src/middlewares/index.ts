@@ -83,7 +83,6 @@ const errorHandler = (
   }
 
   if (err instanceof CustomError) {
-    // Check if the error is an instance of CustomError
     res.status(err.statusCode).json({ message: err.message });
   }
 };
@@ -97,5 +96,4 @@ export {
   ForbiddenError,
   InternalServerError,
   MethodNotAllowedError,
-  QueryFailedError,
 };
