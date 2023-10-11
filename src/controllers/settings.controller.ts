@@ -9,9 +9,10 @@ import {
   hashPassword,
   notificationSettingSchema,
 } from "../services/settings.service";
+import { NotificationSettings } from "../interfaces/settings.interface";
 const userRespository = connectionSource.getRepository(User);
 
-export const updateAccountSettingController = async (
+export const updateUserAccountSettingController = async (
   req: Request,
   res: Response,
   next: NextFunction
@@ -137,7 +138,7 @@ export const createNotificationSettingController = async (
       });
     }
 
-    const notificationSetting = new NotificationSetting();
+    const notificationSetting: NotificationSettings = new NotificationSetting();
     notificationSetting.userId = userId;
     notificationSetting.communityUpdate = communityUpdate || false;
     notificationSetting.emailSummary = emailSummary || false;
@@ -240,12 +241,28 @@ export const updateNotificationSettings = async (
       communityUpdate,
       followUpdate,
       newMessages,
-      userId,
-    } = req.body;
+    }: NotificationSettings = req.body;
     const notificationModel =
       connectionSource.getRepository(NotificationSetting);
 
+    const userId = req.params.userId;
+
+    if (!userId) {
+      return error(res, "Please provide a valid User ID", 400);
+    }
+
+    const userModel = connectionSource.getRepository(User);
+    const user = await userModel.findOneBy({ id: userId });
+
+    if (!user) {
+      return error(res, "User does not exist", 400);
+    }
+
     const notificationId = Number(req.params.id);
+
+    if (!notificationId) {
+      return error(res, "Please provide a valid Notification ID", 400);
+    }
 
     const notification = await notificationModel.findOneBy({
       id: notificationId,

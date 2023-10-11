@@ -2,19 +2,19 @@ import { Router } from "express";
 import {
   createNotificationSettingController,
   deleteUserAccount,
-  updateAccountSettingController,
+  updateUserAccountSettingController,
   updateNotificationSettings,
 } from "../controllers/settings.controller";
-import { validateUserId , validate } from "../services";
+import { validateUserId, validate } from "../services";
 
 const router = Router();
 
 /**
  * @swagger
- * /api/create-account-settings:
- *   put:
- *     summary: Create account settings
- *     description: Create user account settings.
+ * /api/update-user-account-settings:
+ *   patch:
+ *     summary: update account settings
+ *     description: update user account password settings.
  *     requestBody:
  *       description: New account settings
  *       required: true
@@ -54,7 +54,10 @@ const router = Router();
  *       - Settings
  */
 
-router.patch("/update-account-settings", updateAccountSettingController);
+router.patch(
+  "/update-user-account-settings",
+  updateUserAccountSettingController
+);
 
 /**
  * @swagger
@@ -111,13 +114,15 @@ router.patch("/update-account-settings", updateAccountSettingController);
  */
 
 router.post(
-  "/set-notification-settings/:userId",validateUserId,validate,
+  "/set-notification-settings/:userId",
+  validateUserId,
+  validate,
   createNotificationSettingController
 );
 
 /**
  * @swagger
- * /api/delete-account/{userId}:
+ * /api/delete-user-account/{userId}:
  *   delete:
  *     summary: Delete user account by ID
  *     description: Delete user account by providing the User ID.
@@ -149,15 +154,26 @@ router.post(
  *       - Settings
  */
 
-router.delete("/delete-account/:userId", validateUserId, validate, deleteUserAccount);
+router.delete(
+  "/delete-user-account/:userId",
+  validateUserId,
+  validate,
+  deleteUserAccount
+);
 
 /**
  * @swagger
- * /api/update-notification-settings/{id}:
+ * /api/update-notification-settings/{userId}/{id}:
  *   patch:
  *     summary: Update Notification Settings
  *     description: Update user notification settings.
  *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         description: The User's ID to update the notification settings .
+ *         schema:
+ *           type: string
  *       - in: path
  *         name: id
  *         required: true
@@ -213,6 +229,9 @@ router.delete("/delete-account/:userId", validateUserId, validate, deleteUserAcc
  *       - Settings
  */
 
-router.patch("/update-notification-settings/:id", updateNotificationSettings);
+router.patch(
+  "/update-notification-settings/:userId/:id",
+  updateNotificationSettings
+);
 
 module.exports = router;
