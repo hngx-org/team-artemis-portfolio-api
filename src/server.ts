@@ -31,7 +31,7 @@ readdirSync('./src/routes').map((path) =>
 )
 app.get('/', sayHelloController)
 
-const port = process.env.PORT || 8008
+const port = process.env.PORT || 3000
 
 app.listen(port, () => {
   // console.log(entities);
