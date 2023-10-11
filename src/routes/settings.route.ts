@@ -265,6 +265,6 @@ router.patch("/updateUser/:id", updateUser);
  *       - Update Notification Settings
  */
 
-router.patch("/updateNotificationSettings/:id", updateNotificationSettings);
+router.patch("/updateNotificationSettings/:userId/:id", updateNotificationSettings);
 
 module.exports = router;
