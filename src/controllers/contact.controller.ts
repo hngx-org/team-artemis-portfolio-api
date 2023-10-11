@@ -12,7 +12,6 @@ const contactsRepo = dataSource.getRepository(SocialUser)
 
 const socialUserService = new SocialUserService()
 
-
 export const createSocials = async (req: Request, res: Response) => {
   try {
     const { name } = req.body
