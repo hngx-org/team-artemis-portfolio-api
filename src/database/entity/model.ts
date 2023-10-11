@@ -1234,7 +1234,7 @@ export class EducationDetail {
   @JoinColumn({ name: "sectionId" })
   section: Section;
 
-  @ManyToOne(() => Degree, (degree) => degree.type)
+  @ManyToOne(() => Degree, (degree) => degree.id)
   @JoinColumn({ name: "degreeId" })
   degree: Degree;
 
