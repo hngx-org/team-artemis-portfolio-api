@@ -1571,4 +1571,4 @@ export class Language {
   Languageuser: User;
 }
 
-//lang
+//language entity
