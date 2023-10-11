@@ -13,7 +13,7 @@ const router = express.Router();
  * @swagger
  * /api/education/:id:
  *   get:
- *     summary: Get education detail(s) by ID
+ *     summary: Get education detail(s) for a user who's id is in the params and returns an array of objects containing a user education details.
  *     description: Get education detail(s) for a user who's id is in the params and returns an array of objects containing a user education details.
  *     tags: [Education]
  *     parameters:
@@ -84,15 +84,16 @@ router.get("/education/:id", fetchUserEducationDetail);
  * @swagger
  * /api/education/{id}:
  *   post:
- *     summary: Create education details
+ *     summary: Create education details for a user with a specified ID.
  *     description: Create education details for a user.
  *     tags: [Education]
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
- *         type: string
- *         description: The ID of the education detail to create.
+ *         schema:
+ *           type: string
+ *         description: The ID of the user for whom to create education details.
  *       - in: header
  *         name: Authorization
  *         type: string
@@ -102,24 +103,30 @@ router.get("/education/:id", fetchUserEducationDetail);
  *         description: The data for the education details to be created.
  *         required: true
  *         schema:
- *           type: array
- *           items:
- *             type: object
- *             properties:
- *               sectionId:
- *                 type: number
- *               degreeId:
- *                 type: number
- *               fieldOfStudy:
- *                 type: string
- *               school:
- *                 type: string
- *               description:
- *                 type: string
- *               from:
- *                 type: string
- *               to:
- *                 type: string
+ *           type: object
+ *           properties:
+ *             sectionId:
+ *               type: number
+ *             degreeId:
+ *               type: number
+ *             fieldOfStudy:
+ *               type: string
+ *             school:
+ *               type: string
+ *             description:
+ *               type: string
+ *             from:
+ *               type: string
+ *             to:
+ *               type: string
+ *         example:
+ *           sectionId: 1
+ *           degreeId: 1
+ *           fieldOfStudy: "Engineering"
+ *           school: "Unilag"
+ *           description: "Description"
+ *           from: "2017"
+ *           to: "2020"
  *
  *     responses:
  *       201:
@@ -151,13 +158,14 @@ router.get("/education/:id", fetchUserEducationDetail);
  *                 data:
  *                   type: null
  */
-router.post("/education:id", createEducationDetailController);
+
+router.post("/education/:id", createEducationDetailController);
 
 /**
  * @swagger
  * /api/education/{id}:
  *   get:
- *     summary: Get education detail by ID
+ *     summary: Get a single education detail by ID
  *     description: Get an education detail by its ID.
  *     tags: [Education]
  *     parameters:
@@ -202,7 +210,7 @@ router.get("/education/:id", getEducationDetailById);
  * @swagger
  * /api/updateEducationDetail/{id}:
  *   put:
- *     summary: Update education detail by ID
+ *     summary: Update education details for a user by its ID.
  *     description: Update education details for a user by its ID.
  *     tags: [Education]
  *     parameters:
@@ -258,7 +266,7 @@ router.put("/updateEducationDetail/:id", updateEducationDetail);
  * @swagger
  * /api/educationDetail/{id}:
  *  get:
- *   summary: Get education detail by ID
+ *   summary: Get education detail by its ID
  *   description: Retrieve an education detail by its ID.
  *   tags: [Education]
  *   parameters:

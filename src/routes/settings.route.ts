@@ -11,7 +11,7 @@ const router = Router();
 
 /**
  * @swagger
- * /createAccountSetting:
+ * /api/createAccountSetting:
  *   put:
  *     summary: Create account settings
  *     description: Create user account settings.
@@ -58,7 +58,7 @@ router.put("/createAccountSetting", createAccountSettingController);
 
 /**
  * @swagger
- * /setNotificationDetails/{userId}:
+ * /api/setNotificationDetails/{userId}:
  *   post:
  *     summary: Create notification settings by User ID
  *     description: Create user notification settings by providing the User ID.

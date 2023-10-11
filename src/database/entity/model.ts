@@ -1229,6 +1229,18 @@ export class EducationDetail {
 
   @UpdateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
   updatedAt: Date;
+
+  @ManyToOne(() => Section, (section) => section.id)
+  @JoinColumn({ name: "sectionId" })
+  section: Section;
+
+  @ManyToOne(() => Degree, (degree) => degree.id)
+  @JoinColumn({ name: "degreeId" })
+  degree: Degree;
+
+  @ManyToOne(() => User, (user) => user.id)
+  @JoinColumn({ name: "userId" })
+  user: User;
 }
 
 @Entity({ name: "degree" })
@@ -1353,6 +1365,9 @@ export class CustomField {
 
   @Column("int")
   customSectionId: number;
+
+  @Column("int")
+  customUserSectionId: number;
 
   @Column("text", { nullable: true })
   value: string;

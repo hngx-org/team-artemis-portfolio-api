@@ -1,7 +1,7 @@
 import { Request, RequestHandler, Response } from "express";
 import { connectionSource } from "../database/data-source";
 import { User } from "../database/entity/user";
-import { UserTrack, PortfolioDetails } from "../database/entity/model";
+import { UserTrack, PortfolioDetails, Tracks } from "../database/entity/model";
 
 import {
   AboutDetail,
@@ -16,7 +16,8 @@ import { error, success } from "../utils";
 
 const userRepository = connectionSource.getRepository(User);
 const portfolioRepository = connectionSource.getRepository(PortfolioDetails);
-const trackRepository = connectionSource.getRepository(UserTrack);
+const userTrackRepository = connectionSource.getRepository(UserTrack);
+const trackRepository = connectionSource.getRepository(Tracks);
 
 const getAllUsers = async (req: Request, res: Response) => {
   const users = await userRepository.find();
@@ -24,13 +25,22 @@ const getAllUsers = async (req: Request, res: Response) => {
 };
 
 const getUserById = async (req: Request, res: Response) => {
+  let tracks: any[] = [];
   try {
-    const { id } = req.params;
-    const user = await userRepository.findOne({ where: { id } });
+    const { userId } = req.params;
+    const user = await userRepository.findOne({ where: { id: userId } });
     const portfolio = await portfolioRepository.findOne({
-      where: { userId: id },
+      where: { userId },
     });
-    res.status(200).json({ user, portfolio });
+    const userTracks = await userTrackRepository
+      .createQueryBuilder('userTrack')  // Create a query builder for the 'userTrack' entity.
+      .innerJoinAndSelect('userTrack.track', 'track')  // Perform an inner join with the 'track' entity.
+      .where('userTrack.userId = :userId', { userId: userId })  // Filter the results based on a condition.
+      .getMany();
+    for (let userTrack of userTracks) {
+      tracks.push(userTrack.track);
+    }
+    res.status(200).json({ user, portfolio, tracks });
   } catch (error) {
     res.status(404).json({ message: "User not found" });
   }

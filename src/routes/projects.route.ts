@@ -153,31 +153,60 @@ router.delete("/projects/:id", deleteProjectById);
  *         description: The ID of the project to update.
  *         schema:
  *           type: string
- *     requestBody:
- *       required: true
- *       content:
- *         multipart/form-data:
- *           schema:
- *             type: object
- *             properties:
- *               images:
- *                 type: array
- *                 items:
- *                   type: string
- *                   format: binary
- *                 description: Images for the project, including the thumbnail. You can upload multiple images.
- *               jsondata:
- *                 type: string
- *                 format: binary
- *                 description: JSON data containing project details.
- *                 example: |
- *                   {
- *                     "title": "Updated Project",
- *                     "year": 2023,
- *                     "url": "https://updated-example.com",
- *                     "tags": "tag1, tag2, tag3",
- *                     "description": "This is an updated project"
- *                   }
+ *       - name: title
+ *         in: formData
+ *         type: string
+ *         description: The title of the project.
+ *         required: true
+ *         example: "New Project Title"
+ *       - name: year
+ *         in: formData
+ *         type: integer
+ *         format: int32
+ *         required: true
+ *         description: The year of the project.
+ *         example: 2024
+ *       - name: url
+ *         in: formData
+ *         type: string
+ *         description: Url associated with the project.
+ *         example: example.com
+ *       - name: tags
+ *         in: formData
+ *         type: string
+ *         description: Comma separated tags associated with the project.
+ *         example: tag1,tag2,tag3
+ *       - name: description
+ *         in: formData
+ *         type: string
+ *         description: A description of the project.
+ *         example: "This is a new project description"
+ *       - name: thumbnail
+ *         in: formData
+ *         type: integer
+ *         description: The thumbnail associated with the project
+ *         example: 0
+ *       - name: userId
+ *         in: formData
+ *         type: string
+ *         format: uuid
+ *         description: The user ID associated with the project.
+ *         required: true
+ *         example: "ddc5eec2-65be-11ee-8c99-0242ac120002"
+ *       - name: sectionId
+ *         in: formData
+ *         type: integer
+ *         format: int32
+ *         description: The section ID associated with the project.
+ *         example: 4
+ *       - name: images
+ *         in: formData
+ *         type: file
+ *         description: Images for the project, including the thumbnail. You can upload multiple images.
+ *     consumes:
+ *       - multipart/form-data
+ *     produces:
+ *       - application/json
  *     responses:
  *       '200':
  *         description: Successfully updated the project

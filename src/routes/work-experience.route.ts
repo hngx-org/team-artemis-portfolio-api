@@ -1,12 +1,12 @@
-import express from "express";
+import express from 'express'
 import {
   createWorkExperience,
   deleteWorkExperience,
   workExperienceController,
   updateWorkExperience,
-} from "../controllers/work-experience.controller";
+} from '../controllers/work-experience.controller'
 
-const router = express.Router();
+const router = express.Router()
 
 /**
  * @swagger
@@ -75,7 +75,7 @@ const router = express.Router();
  *       - Work Experience
  */
 
-router.post("/create-work-experience", createWorkExperience);
+router.post('/create-work-experience', createWorkExperience)
 
 /**
  * @swagger
@@ -111,7 +111,7 @@ router.post("/create-work-experience", createWorkExperience);
  *     tags:
  *       - Work Experience
  */
-router.delete("/work-experience/:id", deleteWorkExperience);
+router.delete('/work-experience/:id', deleteWorkExperience)
 
 /**
  * @swagger
@@ -141,48 +141,67 @@ router.delete("/work-experience/:id", deleteWorkExperience);
  *     tags:
  *       - Work Experience
  */
-router.get("/work-experience", workExperienceController);
+router.get('/work-experience', workExperienceController)
+
 
 /**
  * @swagger
- * /api/work-experience/{workId}:
+ * /api/update-work-experience/{workId}:
  *   put:
- *     summary: Update a work experience section by ID.
+ *     summary: Update a work experience by ID.
+ *     description: Update a work experience's information by providing its ID.
  *     parameters:
  *       - in: path
  *         name: workId
+ *         description: The ID of the work experience to update.
  *         required: true
- *         description: The ID of the work experience section to update.
+ *         type: integer
+ *       - in: body
+ *         name: updatedWorkExperienceData
+ *         description: The updated data for the work experience.
+ *         required: true
  *         schema:
- *           type: string
- *     requestBody:
- *       description: New work experience data
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               company:
- *                 type: string
- *               role:
- *                 type: string
- *               startMonth:
- *                 type: string
- *               startYear:
- *                 type: string
- *               endMonth:
- *                 type: string
- *               endYear:
- *                 type: string
- *               description:
- *                 type: string
- *               isEmployee:
- *                 type: boolean
- *               userId:
- *                 type: string
+ *           type: integer
+ *       - in: body
+ *         name: updateWorkExperience
+ *         description: New work experience data
+ *         required: true
+ *         schema:
+ *           type: object
+ *           properties:
+ *             company:
+ *               type: string
+ *             role:
+ *               type: string
+ *             startMonth:
+ *               type: string
+ *             startYear:
+ *               type: string
+ *             endMonth:
+ *               type: string
+ *             endYear:
+ *               type: string
+ *             description:
+ *               type: string
+ *             isEmployee:
+ *               type: boolean
+ *             userId:
+ *               type: string
+ *             sectionId:
+ *               type: integer
+ *         example:
+ *           company: "Interna"
+ *           role: "Mobile Intern"
+ *           startMonth: "August"
+ *           startYear: "2022"
+ *           endMonth: "October"
+ *           endYear: "2023"
+ *           description: "I developed web applications using Next.js"
+ *           isEmployee: true
+ *           userId: "550e8400-e29b-41d4-a716-446655440000"
+ *           sectionId: 1
  *     responses:
- *       200:
+ *       '200':
  *         description: Successful response
  *         content:
  *           application/json:
@@ -191,18 +210,51 @@ router.get("/work-experience", workExperienceController);
  *               properties:
  *                 message:
  *                   type: string
- *       400:
+ *                 data:
+ *                   type: object
+ *       '400':
  *         description: Bad request
  *         content:
  *           application/json:
  *             schema:
  *               type: object
  *               properties:
- *                 error:
+ *                 successful:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
  *                   type: string
+ *       '404':
+ *         description: Not Found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 successful:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *       '500':
+ *         description: Internal Server Error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 successful:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Failed to update Work Experience"
+ *                 data:
+ *                   type: null
  *     tags:
  *       - Work Experience
  */
-router.put("/work-experience/:workId", updateWorkExperience);
 
-module.exports = router;
+router.put('/work-experience/:workId', updateWorkExperience)
+
+module.exports = router

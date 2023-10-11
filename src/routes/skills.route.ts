@@ -68,6 +68,8 @@ const router = express.Router();
  *                   example: "Failed to create skills"
  *                 data:
  *                   type: null
+ *     tags:
+ *       - Skills
  */
 router.post("/create-skills", createSkills);
 
@@ -170,6 +172,8 @@ router.get("/skills-details", getSkillsDetails);
  *                   example: "Failed to update skill"
  *                 data:
  *                   type: null
+ *     tags:
+ *       - Skills
  */
 router.put("/update-skills/:id", updateSkills);
 

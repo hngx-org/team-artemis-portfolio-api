@@ -13,7 +13,7 @@ const router = Router();
  *   get:
  *     summary: Get all users' portfolio details
  *     description: Retrieve a list of all users' portfolio details.
- *     tags: [User Portfolio Details]  // Added tags for grouping
+ *     tags: [User Portfolio Details]
  *     responses:
  *       200:
  *         description: Successful response
@@ -33,7 +33,7 @@ router.get("/portfolio", getAllUsers);
  *   get:
  *     summary: Get user portfolio details by ID
  *     description: Retrieve a user's portfolio details by providing their ID.
- *     tags: [User Portfolio Details]  // Added tags for grouping
+ *     tags: [User Portfolio Details]
  *     parameters:
  *       - in: path
  *         name: id
@@ -54,7 +54,7 @@ router.get("/portfolio", getAllUsers);
  *       404:
  *         description: Requested user not found
  */
-router.get("/portfolio/:id", getUserById);
+router.get("/portfolio/:userId", getUserById);
 
 /**
  * @swagger
@@ -62,7 +62,7 @@ router.get("/portfolio/:id", getUserById);
  *   get:
  *     summary: Get all portfolio details including sections
  *     description: Get request to retrieve all portfolio details for a user.
- *     tags: [Portfolio]  // Added tags for grouping
+ *     tags: [Portfolio]
  *     parameters:
  *       - in: path
  *         name: userId

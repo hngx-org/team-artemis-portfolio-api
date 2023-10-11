@@ -4,6 +4,7 @@ import {
   findAll,
   findOne,
   createCustomField,
+  updateCustomField,
   findOneCustomField,
   deleteCustomSection,
 } from "../controllers/custom.controller";
@@ -178,11 +179,10 @@ router.get("/custom/field/:id", findOneCustomField);
 
 /**
  * @swagger
- * /custom-section/{id}:
+ * /api/custom-section/{id}:
  *   delete:
  *     summary: Delete a custom section by ID
  *     description: Delete a custom section by providing its ID.
- *     tags: [Skills]
  *     parameters:
  *       - in: path
  *         name: id
@@ -242,7 +242,95 @@ router.get("/custom/field/:id", findOneCustomField);
  *                   example: "Error deleting Custom Section"
  *                 data:
  *                   type: null
+ *     tags:
+ *       - custom
  */
 router.delete("/custom-section/:id", deleteCustomSection);
+
+/**
+ * @swagger
+ * /api/custom/field/{id}:
+ *   put:
+ *     summary: Update a custom field by ID
+ *     description: Update a custom field by providing its ID and the new field data.
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         description: The ID of the custom field to update.
+ *         required: true
+ *         schema:
+ *           type: string
+ *       - in: formData
+ *         name: fieldType
+ *         type: string
+ *         description: The updated field type.
+ *       - in: formData
+ *         name: customSectionId
+ *         type: number
+ *         description: The updated custom section ID.
+ *       - in: formData
+ *         name: fieldName
+ *         type: string
+ *         description: The updated field name.
+ *       - in: formData
+ *         name: value
+ *         type: string
+ *         description: The updated field value.
+ *     responses:
+ *       200:
+ *         description: Custom Field updated successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Success"
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     field:
+ *                       type: object
+ *                       example:
+ *                         id: 1
+ *                         fieldType: "UpdatedFieldType"
+ *                         fieldName: "UpdatedFieldName"
+ *                         customSectionId: 2
+ *                         value: "UpdatedValue"
+ *       400:
+ *         description: Bad request. Please provide valid field data.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "Invalid input data"
+ *       404:
+ *         description: Custom Field not found.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "Custom Field not found"
+ *       500:
+ *         description: Error updating Custom Field.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "Error updating Custom Field"
+ *     tags:
+ *       - custom
+ */
+router.put("/custom/field/:id", updateCustomField);
 
 module.exports = router;
