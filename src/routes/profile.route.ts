@@ -14,7 +14,6 @@ const storage = multer.memoryStorage();
 const uploads = multer({ storage }).array("images", 1);
 
 const router = express.Router();
-
 /**
  * @swagger
  * /api/profile-details/{id}:
@@ -57,10 +56,11 @@ const router = express.Router();
  *           application/json:
  *             schema:
  *               type: object
- *               properties:validateCreatePortfolioDetails
+ *               properties:
  *                 error:
  *                   type: string
  */
+
 router.put("/profile-details/:id", updatePortfolioDetails);
 
 /**
