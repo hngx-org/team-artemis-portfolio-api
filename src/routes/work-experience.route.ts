@@ -1,12 +1,12 @@
-import express from "express";
+import express from 'express'
 import {
   createWorkExperience,
   deleteWorkExperience,
   workExperienceController,
   updateWorkExperience,
-} from "../controllers/work-experience.controller";
+} from '../controllers/work-experience.controller'
 
-const router = express.Router();
+const router = express.Router()
 
 /**
  * @swagger
@@ -75,7 +75,7 @@ const router = express.Router();
  *       - Work Experience
  */
 
-router.post("/create-work-experience", createWorkExperience);
+router.post('/create-work-experience', createWorkExperience)
 
 /**
  * @swagger
@@ -111,7 +111,7 @@ router.post("/create-work-experience", createWorkExperience);
  *     tags:
  *       - Work Experience
  */
-router.delete("/work-experience/:id", deleteWorkExperience);
+router.delete('/work-experience/:id', deleteWorkExperience)
 
 /**
  * @swagger
@@ -141,7 +141,7 @@ router.delete("/work-experience/:id", deleteWorkExperience);
  *     tags:
  *       - Work Experience
  */
-router.get("/work-experience", workExperienceController);
+router.get('/work-experience', workExperienceController)
 
 
 /**
@@ -159,6 +159,12 @@ router.get("/work-experience", workExperienceController);
  *       - in: body
  *         name: updatedWorkExperienceData
  *         description: The updated data for the work experience.
+ *         required: true
+ *         schema:
+ *           type: integer
+ *       - in: body
+ *         name: updateWorkExperience
+ *         description: New work experience data
  *         required: true
  *         schema:
  *           type: object
@@ -183,9 +189,31 @@ router.get("/work-experience", workExperienceController);
  *               type: string
  *             sectionId:
  *               type: integer
+ *         example:
+ *           company: "Interna"
+ *           role: "Mobile Intern"
+ *           startMonth: "August"
+ *           startYear: "2022"
+ *           endMonth: "October"
+ *           endYear: "2023"
+ *           description: "I developed web applications using Next.js"
+ *           isEmployee: true
+ *           userId: "550e8400-e29b-41d4-a716-446655440000"
+ *           sectionId: 1
  *     responses:
- *       200:
- *         description: Work Experience updated successfully.
+ *       '200':
+ *         description: Successful response
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   type: object
+ *       '400':
+ *         description: Bad request
  *         content:
  *           application/json:
  *             schema:
@@ -196,9 +224,8 @@ router.get("/work-experience", workExperienceController);
  *                   example: true
  *                 message:
  *                   type: string
- *                   example: "Work Experience updated successfully"
- *       404:
- *         description: Work Experience not found.
+ *       '404':
+ *         description: Not Found
  *         content:
  *           application/json:
  *             schema:
@@ -209,9 +236,8 @@ router.get("/work-experience", workExperienceController);
  *                   example: false
  *                 message:
  *                   type: string
- *                   example: "Work Experience not found"
- *       500:
- *         description: Failed to update Work Experience.
+ *       '500':
+ *         description: Internal Server Error
  *         content:
  *           application/json:
  *             schema:
@@ -228,6 +254,7 @@ router.get("/work-experience", workExperienceController);
  *     tags:
  *       - Work Experience
  */
-router.put("/work-experience/:workId", updateWorkExperience);
 
-module.exports = router;
+router.put('/work-experience/:workId', updateWorkExperience)
+
+module.exports = router
