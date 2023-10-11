@@ -7,9 +7,60 @@ import {
   updateCustomField,
   findOneCustomField,
   deleteCustomSection,
+  createSection,
+  validateSchema,
+  sectionSchema,
+  customUserSectionSchema,
+  customFieldSchema,
+  fieldsSchema,
 } from "../controllers/custom.controller";
 
 const router = express.Router();
+
+/**
+ * @swagger
+ * /api/section:
+ *   post:
+ *     summary: Add custom section
+ *     description: Add a custom section for a user
+ *     parameters:
+ *       - in: formData
+ *         name: name
+ *         type: string
+ *         description: must be a string
+ *       - in: formData
+ *         name: description
+ *         type:  string
+ *         description: it's optional
+ *       - in: formData
+ *         name: meta
+ *         type:  string
+ *         description: it's optional
+ *     responses:
+ *       200:
+ *         description: Success
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: A success message.
+ *       400:
+ *         description: Bad request. Please fill all fields
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: An error message.
+ *     tags:
+ *       - custom
+ */
+router.post("/section", validateSchema(sectionSchema), createSection);
 
 /**
  * @swagger
@@ -50,7 +101,7 @@ const router = express.Router();
  *     tags:
  *       - custom
  */
-router.post("/custom", create);
+router.post("/custom", validateSchema(customUserSectionSchema), create);
 /**
  * @swagger
  * /api/custom:
@@ -99,29 +150,38 @@ router.get("/custom", findAll);
  *       - custom
  */
 router.get("/custom/:id", findOne);
+
 /**
  * @swagger
  * /api/custom/field:
  *   post:
  *     summary: Add custom field section
- *     description: Add a custom field in a section usin
+ *     description: Add custom fields in a section using an array
  *     parameters:
  *       - in: formData
- *         name: fieldType
- *         type: string
- *         description: must be a string
- *       - in: formData
- *         name: customSectionId
- *         type:  number
- *         description: must be a number
- *       - in: formData
- *         name: fieldName
- *         type:  string
- *         description: must be a string
- *       - in: formData
- *         name: value
- *         type:  string
- *         description: must be a string
+ *         name: fields
+ *         description: Array of custom fields
+ *         required: true
+ *         type: array
+ *         items:
+ *           type: object
+ *           properties:
+ *             fieldType:
+ *               type: string
+ *               description: Must be a string
+ *             customSectionId:
+ *               type: number
+ *               description: Must be a number
+ *             customUserSectionId:
+ *               type: number
+ *               description: Must be a number
+ *             fieldName:
+ *               type: string
+ *               description: Must be a string
+ *             value:
+ *               type: string
+ *               nullable: true
+ *               description: Must be a string (nullable)
  *     responses:
  *       200:
  *         description: Success
@@ -132,7 +192,7 @@ router.get("/custom/:id", findOne);
  *               properties:
  *                 message:
  *                   type: string
- *                   description: A success message.
+ *                   description: A success message
  *       400:
  *         description: Bad request. Please fill all fields
  *         content:
@@ -142,11 +202,11 @@ router.get("/custom/:id", findOne);
  *               properties:
  *                 error:
  *                   type: string
- *                   description: An error message.
+ *                   description: An error message
  *     tags:
  *       - custom
  */
-router.post("/custom/field", createCustomField);
+router.post("/custom/field", validateSchema(fieldsSchema), createCustomField);
 
 /**
  * @swagger
