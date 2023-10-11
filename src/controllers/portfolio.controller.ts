@@ -63,7 +63,8 @@ const retrievePortfolioController: RequestHandler = async (
       where: { id: userId },
     });
 
-    if (user.length < 1)	// Add userid validation
+    if (user.length < 1)
+      // Add userid validation
       return res
         .status(404)
         .json({ status: 404, message: 'User not found', data: null });
@@ -81,9 +82,9 @@ const retrievePortfolioController: RequestHandler = async (
       custom_sections: CustomUserSection,
     };
 
-    let responseObject = { user };
+    let responseObject = { user: user[0] };
 
-	// fetch details with a loop to avoid repetitions
+    // fetch details with a loop to avoid repetitions
     await Promise.all(
       Object.entries(sectionModels).map(async ([key, value]) => {
         const details = await connectionSource.manager.find(value, {
