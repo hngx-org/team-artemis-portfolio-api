@@ -1550,7 +1550,6 @@ export class Certificate {
   section: Section;
 }
 
-// Languages Entity
 @Entity()
 export class Language {
   @PrimaryGeneratedColumn("uuid")
