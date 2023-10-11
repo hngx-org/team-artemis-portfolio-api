@@ -1,13 +1,14 @@
 import { Request, Response, NextFunction } from "express";
 import { success, error } from "../utils";
 import { ZodError } from "zod";
-import { NotificationSetting } from "../database/entity/model";
+import { NotificationSetting, UserTrack } from "../database/entity/model";
 import { connectionSource } from "../database/data-source";
 import { User } from "../database/entity/user";
 import {
   accountSettingSchema,
   hashPassword,
   notificationSettingSchema,
+  verifyPassword,
 } from "../services/settings.service";
 import { NotificationSettings } from "../interfaces/settings.interface";
 const userRespository = connectionSource.getRepository(User);
@@ -46,10 +47,15 @@ export const updateUserAccountSettingController = async (
       });
     }
 
-    if (currentPassword !== user.password) {
+    const verifyCurrentPassword = verifyPassword(
+      currentPassword,
+      user.password
+    );
+
+    if (!verifyCurrentPassword) {
       return res.status(400).json({
         status: `error`,
-        message: `Incorrect user email or password input`,
+        message: `Incorrect current password input`,
         success: false,
       });
     }
@@ -188,6 +194,7 @@ export const deleteUserAccount = async (
         success: false,
       });
     }
+    
 
     try {
       // Wait for the delete operation to complete
