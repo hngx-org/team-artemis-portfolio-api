@@ -15,10 +15,10 @@ const customFieldRepository = connectionSource.getRepository(CustomField);
 
 export const deleteCustomSection = async (req: Request, res: Response) => {
   try {
-    const customId = parseInt(req.params.id);
+    const customSectionId = parseInt(req.params.id);
     const { userId } = req.body;
 
-    const customIdValidator = z
+    const customSectionIdValidator = z
       .number({
         required_error: "id is required",
         invalid_type_error: "id must be a number",
@@ -33,7 +33,7 @@ export const deleteCustomSection = async (req: Request, res: Response) => {
       })
       .uuid({ message: "userId must be of type uuid" });
 
-    const customIdValidate = customIdValidator.safeParse(customId);
+    const customIdValidate = customSectionIdValidator.safeParse(customSectionId);
     const userIdValidate = userIdValidator.safeParse(userId);
 
     if (customIdValidate.success === false) {
@@ -43,14 +43,16 @@ export const deleteCustomSection = async (req: Request, res: Response) => {
     if (userIdValidate.success === false) {
       return error(res, userIdValidate.error.message);
     }
-    const data = await deleteCustomSectionService(customId, userId);
+
+    const data = await deleteCustomSectionService(customSectionId, userId);
+    
     if (data.successful) {
       return success(res, data);
     } else {
       return error(res, data.message);
     }
   } catch (error: any) {
-    return res.send(error); //error(res, error);
+    return error(res, error.message); 
   }
 };
 

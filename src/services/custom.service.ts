@@ -2,7 +2,7 @@ import { connectionSource } from "../database/data-source";
 import { CustomUserSection } from "../database/entity/model";
 
 export const deleteCustomSectionService = async (
-  customId: any,
+  customSectionId: any,
   userId: any
 ): Promise<{ successful: boolean; message: string }> => {
   try {
@@ -10,7 +10,7 @@ export const deleteCustomSectionService = async (
       connectionSource.getRepository(CustomUserSection);
 
     const sectionToBeDeleted = await customSectionRepository.findOne({
-      where: { id: customId, userId: userId },
+      where: { id: customSectionId, userId: userId },
     });
 
     if (!sectionToBeDeleted) {
