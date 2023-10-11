@@ -7,14 +7,14 @@ import {
   Section,
 } from "../database/entity/model";
 import { success, error } from "../utils/response.util";
-import { deleteCustomSectionService  } from "../services/custom.service";
+import { deleteCustomSectionService } from "../services/custom.service";
 import {
   BadRequestError,
   CustomError,
   InternalServerError,
   NotFoundError,
 } from "../middlewares";
-import {  ICustomSection, ISection, IField } from "../interfaces";
+import { ICustomSection, ISection, IField } from "../interfaces";
 
 const customRepository = connectionSource.getRepository(CustomUserSection);
 const customFieldRepository = connectionSource.getRepository(CustomField);
@@ -25,6 +25,7 @@ export const deleteCustomSection = async (req: Request, res: Response) => {
     const customSectionId = parseInt(req.params.id);
     const { userId } = req.body;
 
+    // validator for the custom section Id
     const customSectionIdValidator = z
       .number({
         required_error: "id is required",
@@ -33,6 +34,7 @@ export const deleteCustomSection = async (req: Request, res: Response) => {
       .int({ message: "id must be an integer" })
       .positive({ message: "must be a positive integer" });
 
+    // validator for user ID
     const userIdValidator = z
       .string({
         required_error: "userId is required",
@@ -40,9 +42,9 @@ export const deleteCustomSection = async (req: Request, res: Response) => {
       })
       .uuid({ message: "userId must be of type uuid" });
 
+    const userIdValidate = userIdValidator.safeParse(userId);
     const customSectionIdValidate =
       customSectionIdValidator.safeParse(customSectionId);
-    const userIdValidate = userIdValidator.safeParse(userId);
 
     if (customSectionIdValidate.success === false) {
       const err = new BadRequestError(customSectionIdValidate.error.message);
@@ -243,7 +245,7 @@ const validateSchema =
     }
   };
 
-  // updated customsection field
+// updated customsection field
 const updateCustomField = async (req: Request, res: Response) => {
   const { id } = req.params;
   try {

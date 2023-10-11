@@ -17,8 +17,6 @@ class NotFoundError extends CustomError {
   }
 }
 
-
-
 class BadRequestError extends CustomError {
   constructor(message: string) {
     super(message, 400);
@@ -55,14 +53,16 @@ const errorHandler = (
   res: Response,
   next: NextFunction
 ) => {
- console.error("An error occurred:", err);
+  console.error("An error occurred:", err);
 
   if (res.headersSent) {
     return next(err);
   }
 
- 
-
+  if (err instanceof SyntaxError) {
+    res.status(400).json({ message: err.message });
+  }
+  
   if (err instanceof NotFoundError) {
     res.status(err.statusCode).json({ message: err.message });
   }
