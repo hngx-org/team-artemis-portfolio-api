@@ -1,15 +1,14 @@
 import { Request, Response, NextFunction } from "express";
 import { success, error } from "../utils/response.util";
-import { number } from "joi";
 import { updateACertificate } from "../services/certification.service";
 
 
 export const updateCertificate = async (req: Request, res: Response) => {
    try {
       const id = parseInt(req.params.id)
-      const userId = req.user.id
+      const userId = req.params.userId
 
-      if (!id) {
+      if (!id || !userId) {
          return (res as any).status(400).json({
            success: false, 
            message: "Please provide as a parameter an integer id"

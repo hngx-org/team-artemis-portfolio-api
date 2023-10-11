@@ -114,6 +114,6 @@ const router = express.Router();
  *                   type: null
  */
 
-router.put('/certification/:id', updateCertificate)
+router.put('/certification/:userId/:id', updateCertificate)
 
 module.exports = router;
