@@ -333,10 +333,4 @@ router.delete("/custom-section/:id", deleteCustomSection);
  */
 router.put("/custom/field/:id", updateCustomField);
 
-
-
-
-
-
-
 module.exports = router;
