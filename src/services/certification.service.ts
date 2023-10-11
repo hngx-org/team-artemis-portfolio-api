@@ -2,7 +2,7 @@ import { connectionSource } from '../database/data-source'
 import { Certification } from '../database/entity/model'
 import { CertificationInterface } from '../interfaces/cerification.interface'
 
-export const updateACertification = async (
+export const updateACertificate = async (
    id: number,
    userId: string,
    payload: CertificationInterface
@@ -15,7 +15,7 @@ export const updateACertification = async (
       })
 
       if (!certificateToUpdate) {
-         return { successful: false, message: "Certification not found" };
+         return { successful: false, message: "Certificate not found" };
       }
 
       const {title, year, organization, url, description} = payload
@@ -25,9 +25,9 @@ export const updateACertification = async (
 
       certificateToUpdate = {...payload, id, userId}
       await certificationRepository.save(certificateToUpdate);
-      return { successful: true, message: "Certification updated successfully" };
+      return { successful: true, message: "Certificate updated successfully" };
    } catch (error) {
-      console.error('Error updating Certification', error.message)
-      throw new Error('Error updating Certification')
+      console.error('Error updating certificate', error.message)
+      throw new Error('Error updating certificate')
    }
 }

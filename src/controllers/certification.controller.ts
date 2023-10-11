@@ -1,10 +1,10 @@
 import { Request, Response, NextFunction } from "express";
 import { success, error } from "../utils/response.util";
 import { number } from "joi";
-import { updateACertification } from "../services/certification.service";
+import { updateACertificate } from "../services/certification.service";
 
 
-export const updateCertification = async (req: Request, res: Response) => {
+export const updateCertificate = async (req: Request, res: Response) => {
    try {
       const id = parseInt(req.params.id)
       const userId = req.user.id
@@ -12,11 +12,11 @@ export const updateCertification = async (req: Request, res: Response) => {
       if (!id) {
          return (res as any).status(400).json({
            success: false, 
-           message: "Please input certification id as a number"
+           message: "Please provide as a parameter an integer id"
          })
       }
 
-      const data = await updateACertification(id, userId, req.body)
+      const data = await updateACertificate(id, userId, req.body)
       if (data.successful) {
          success(res, data)
       } else {
