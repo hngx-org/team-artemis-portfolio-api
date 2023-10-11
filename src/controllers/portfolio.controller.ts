@@ -1,18 +1,18 @@
 import { Request, RequestHandler, Response } from 'express';
 import { connectionSource } from '../database/data-source';
 import {
-	AboutDetail,
-	CustomUserSection,
-	EducationDetail,
-	InterestDetail,
-	NotificationSetting,
-	PortfolioDetails,
-	Project,
-	SkillsDetail,
-	SocialUser,
-	Tracks,
-	UserTrack,
-	WorkExperienceDetail,
+  AboutDetail,
+  CustomUserSection,
+  EducationDetail,
+  InterestDetail,
+  NotificationSetting,
+  PortfolioDetails,
+  Project,
+  SkillsDetail,
+  SocialUser,
+  Tracks,
+  UserTrack,
+  WorkExperienceDetail,
 } from '../database/entity/model';
 import { User } from '../database/entity/user';
 import { error, success } from '../utils';
@@ -75,6 +75,7 @@ const retrievePortfolioController: RequestHandler = async (
       contacts: SocialUser,
       tracks: UserTrack,
       settings: NotificationSetting,
+      portfolio: PortfolioDetails,
       custom_sections: CustomUserSection,
     };
 
