@@ -184,11 +184,24 @@ router.get("/custom/field/:id", findOneCustomField);
  *     summary: Delete a custom section by ID
  *     description: Delete a custom section by providing its ID.
  *     parameters:
+ *       - in: header
+ *         name: Authorization
+ *         type: string
+ *         description: Optional authorization header
  *       - in: path
  *         name: id
  *         description: The ID of the custom section to delete.
  *         required: true
  *         type: integer
+ *       - in: body
+ *         name: userId
+ *         description: user id of the user that wants to delete a section. {will be removed once the auth middleware is implemented}
+ *         required: true
+ *         schema:
+ *           type: object
+ *           properties:
+ *             userId:
+ *               type: string
  *     responses:
  *       200:
  *         description: Custom Section deleted successfully.
@@ -332,11 +345,5 @@ router.delete("/custom-section/:id", deleteCustomSection);
  *       - custom
  */
 router.put("/custom/field/:id", updateCustomField);
-
-
-
-
-
-
 
 module.exports = router;
