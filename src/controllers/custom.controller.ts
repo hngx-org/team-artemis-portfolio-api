@@ -8,7 +8,13 @@ import {
 } from "../database/entity/model";
 import { success, error } from "../utils/response.util";
 import { deleteCustomSectionService } from "../services/custom.service";
-import {  ICustomSection, ISection, IField } from "../interfaces";
+import {
+  BadRequestError,
+  CustomError,
+  InternalServerError,
+  NotFoundError,
+} from "../middlewares";
+import { ICustomSection, ISection, IField } from "../interfaces";
 
 const customRepository = connectionSource.getRepository(CustomUserSection);
 const customFieldRepository = connectionSource.getRepository(CustomField);
@@ -16,22 +22,55 @@ const sectionRepository = connectionSource.getRepository(Section);
 
 export const deleteCustomSection = async (req: Request, res: Response) => {
   try {
-    const id = parseInt(req.params.id);
-    if (!id) {
-      return (res as any).status(400).json({
-        success: false,
-        message: "Please input section ID",
-      });
+    const customSectionId = parseInt(req.params.id);
+    const { userId } = req.body;
+
+    // validator for the custom section Id
+    const customSectionIdValidator = z
+      .number({
+        required_error: "id is required",
+        invalid_type_error: "id must be a number",
+      })
+      .int({ message: "id must be an integer" })
+      .positive({ message: "must be a positive integer" });
+
+    // validator for user ID
+    const userIdValidator = z
+      .string({
+        required_error: "userId is required",
+        invalid_type_error: "userId must be uuid",
+      })
+      .uuid({ message: "userId must be of type uuid" });
+
+    const userIdValidate = userIdValidator.safeParse(userId);
+    const customSectionIdValidate =
+      customSectionIdValidator.safeParse(customSectionId);
+
+    if (customSectionIdValidate.success === false) {
+      const err = new BadRequestError(customSectionIdValidate.error.message);
+      return res
+        .status(err.statusCode)
+        .json({ err: JSON.parse(err.message)[0].message });
     }
 
-    const data = await deleteCustomSectionService(id);
+    if (userIdValidate.success === false) {
+      const err = new BadRequestError(userIdValidate.error.message);
+      return res
+        .status(err.statusCode)
+        .json({ err: JSON.parse(err.message)[0].message });
+    }
+
+    const data = await deleteCustomSectionService(customSectionId, userId);
+
     if (data.successful) {
-      success(res, data);
+      return success(res, data);
     } else {
-      error(res, data.message);
+      const err = new NotFoundError(data.message);
+      return res.status(err.statusCode).json({ err: err.message });
     }
   } catch (error: any) {
-    return error(res, error.message);
+    const err = new InternalServerError(error.message);
+    return res.status(err.statusCode).json({ err: err.message });
   }
 };
 
