@@ -1,10 +1,10 @@
 import { Request, Response, NextFunction } from "express";
 import { connectionSource } from "../database/data-source";
 import { AnyZodObject, z } from "zod";
-import { CustomUserSection, CustomField } from "../database/entity/model";
+import { CustomUserSection, CustomField, Section } from "../database/entity/model";
 import { success, error } from "../utils/response.util";
 import { v4 as isUUIDv4 } from "uuid";
-import { deleteCustomSectionService } from "../services/custom.service";
+import { deleteCustomSectionService} from "../services/custom.service";
 
 const customRepository = connectionSource.getRepository(CustomUserSection);
 const customFieldRepository = connectionSource.getRepository(CustomField);
@@ -136,6 +136,33 @@ const validateSchema =
     }
   };
 
+  // updated customsection field
+const updateCustomField = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  try {
+    const existingRecord = await customFieldRepository.findOne({
+      where: { id: Number(id) },
+    });
+    if (!existingRecord) {
+      return error(res, "Record not found", 400);
+    }
+    // Update the existing record with the new data from the request body
+    existingRecord.fieldType = req.body.fieldType;
+    existingRecord.fieldName = req.body.fieldName;
+    existingRecord.customSectionId = req.body.customSectionId;
+    existingRecord.value = req.body.value;
+    const updatedRecord = await customFieldRepository.save(existingRecord);
+    return success(res, updatedRecord, "Success");
+  } catch (err) {
+    console.log(err);
+    return error(res, "An error occurred while updating the record", 500);
+  }
+};
+
+
+
+
+
 export {
   create,
   findAll,
@@ -143,6 +170,7 @@ export {
   createCustomField,
   findOneCustomField,
   validateSchema,
+  updateCustomField,
   customUserSectionSchema,
   customFieldSchema,
 };
