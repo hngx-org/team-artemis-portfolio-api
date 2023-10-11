@@ -7,6 +7,10 @@ import {
   accountSettingSchema,
   hashPassword,
 } from "../services/settings.service";
+import {
+  UserSettings,
+  NotificationSettings,
+} from "../interfaces/settings.interface";
 const userRespository = connectionSource.getRepository(User);
 
 export const createAccountSettingController = async (
@@ -213,11 +217,17 @@ export const deleteUserAccount = async (
 
 export const updateUser = async (req: Request, res: Response) => {
   try {
-    const { email, password } = req.body;
-    const userId = req.params.id;
+    const { email, password }: Pick<UserSettings, "email" | "password"> =
+      req.body;
+    const userId: string = req.params.id;
+
+    if (!userId) {
+      return error(res, "Please provide a valid User ID", 400);
+    }
+
     const userModel = connectionSource.getRepository(User);
     const user = await userModel.findOneBy({ id: userId });
-
+    console.log("user", user);
     if (!user) {
       return error(
         res,
@@ -261,12 +271,28 @@ export const updateNotificationSettings = async (
       communityUpdate,
       followUpdate,
       newMessages,
-      userId,
-    } = req.body;
+    }: NotificationSettings = req.body;
     const notificationModel =
       connectionSource.getRepository(NotificationSetting);
 
+    const userId = req.params.userId;
+
+    if (!userId) {
+      return error(res, "Please provide a valid User ID", 400);
+    }
+
+    const userModel = connectionSource.getRepository(User);
+    const user = await userModel.findOneBy({ id: userId });
+
+    if (!user) {
+      return error(res, "User does not exist", 400);
+    }
+
     const notificationId = Number(req.params.id);
+
+    if (!notificationId) {
+      return error(res, "Please provide a valid Notification ID", 400);
+    }
 
     const notification = await notificationModel.findOneBy({
       id: notificationId,
