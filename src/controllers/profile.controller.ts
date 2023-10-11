@@ -1,6 +1,7 @@
-import express, { Request, RequestHandler, Response } from "express";
+import express, { NextFunction, Request, RequestHandler, Response } from "express";
+import { AnyZodObject, z } from "zod";
 import { connectionSource } from "../database/data-source";
-import { PortfolioDetails, UserTrack } from "../database/entity/model";
+import { PortfolioDetails, Tracks, UserTrack } from "../database/entity/model";
 import { User } from "../database/entity/user";
 import { cloudinaryService, uploadProfileImageService } from "../services";
 import { error, success } from "../utils";
@@ -81,6 +82,10 @@ export const updatePortfolioDetails: express.RequestHandler = async (
   }
 };
 
+
+
+
+
 export const createProfileController = async (req: Request, res: Response) => {
   try {
     const { name, trackId, city, country } = req.body;
@@ -89,6 +94,7 @@ export const createProfileController = async (req: Request, res: Response) => {
     const userRepository = connectionSource.getRepository(User);
     const portfolioDetailsRepository = connectionSource.getRepository(PortfolioDetails);
     const userTrackRepository = connectionSource.getRepository(UserTrack);
+    const trackRepository = connectionSource.getRepository(Tracks);
 
     const user = await userRepository.findOne({ where: { id: userId } });
 
@@ -100,7 +106,16 @@ export const createProfileController = async (req: Request, res: Response) => {
       userRepository.update(user.id, { lastName: name });
     }
 
+    let track: Tracks;
+
     if (trackId) {
+      // first  check if the track exists
+      track = await trackRepository.findOne({ where: { id: trackId } });
+
+      if (!track) {
+        return error(res, "Track Not found", 400);
+      }
+
       const userTrack = await userTrackRepository.findOne({
         where: { trackId: trackId, userId },
       });
