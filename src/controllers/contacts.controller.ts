@@ -1,24 +1,20 @@
 import { Request, Response } from "express";
 import { connectionSource as dataSource } from "../database/data-source";
 import { SocialUser} from "../database/entity/model";
-import { SocialUserService } from "../services/contact.service";
+import {z} from 'zod';
+import { SocialUserService, createContact } from "../services/contact.service";
+//import joi from 'joi';
 
 const contactsRepo = dataSource.getRepository(SocialUser);
 
 const socialUserService = new SocialUserService();
 
 export const createContacts = async (req: Request, res: Response) => {
+  const { url, user_id, social_media_id } = req.body;
+
   try {
-    const { url, user_id, social_media_id } = req.body;
     
-    const contactsRepo = dataSource.getRepository(SocialUser);
-    const contact = contactsRepo.create({
-      url,
-      userId: user_id,
-      socialMediaId: social_media_id,
-      
-    });
-    await contactsRepo.save(contact);
+    await createContact(social_media_id, url, user_id);
     return res.status(201).json({ message: "Contact created successfully" });
   } catch (error) {
     console.error("Error creating contact:", error);
@@ -27,8 +23,8 @@ export const createContacts = async (req: Request, res: Response) => {
 };
 
 export const getContacts = async (req: Request, res: Response) => {
+  const { user_id } = req.params;
   try {
-    const { user_id } = req.params;
 
     const userIdRegex = /^[A-Fa-f0-9\-]+$/;
     if (!userIdRegex.test(user_id)) {
