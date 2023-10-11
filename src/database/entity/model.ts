@@ -1570,3 +1570,5 @@ export class Language {
   @ManyToOne(() => User, (user) => user.languages)
   Languageuser: User;
 }
+
+//lang
