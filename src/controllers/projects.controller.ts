@@ -6,6 +6,12 @@ import { cloudinaryService } from "../services/image-upload.service";
 import { updateProjectService } from "../services/project.service";
 import {z} from 'zod'
 
+
+import {
+  CustomError,
+  NotFoundError,
+BadRequestError} from '../middlewares'
+
 const projectRepository = connectionSource.getRepository(Project);
 const imageRepository = connectionSource.getRepository(Images);
 const projectImageRepository = connectionSource.getRepository(ProjectsImage);
@@ -180,10 +186,10 @@ export const deleteProjectById: RequestHandler = async (req, res) => {
       if (deletionResult.affected) {
         return success(res, deletionResult, 'Project Deleted Successfully');
       } else {
-        throw new Error('Project not found');
+        throw new NotFoundError ('Project not found');
       }
     } else {
-      throw new Error('Invalid project id');
+      throw new BadRequestError('Invalid project id');
     }
   } catch (err) {
     error(res, err.message);
