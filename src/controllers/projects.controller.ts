@@ -1,9 +1,9 @@
 import { Project, Images, ProjectsImage } from "../database/entity/model";
 import { connectionSource } from "../database/data-source";
 import express, { Request, RequestHandler, Response } from "express";
-import { error, success } from "../utils";
 import { cloudinaryService } from "../services/image-upload.service";
 import { updateProjectService } from "../services/project.service";
+import { success, error } from '../utils/response.util';
 
 const projectRepository = connectionSource.getRepository(Project);
 const imageRepository = connectionSource.getRepository(Images);
@@ -50,20 +50,14 @@ export const createProject: RequestHandler = async (
   res: Response
 ) => {
   try {
-    console.log(req.body.jsondata);
-    const { title, year, url, tags, description, userId, sectionId } =
-      JSON.parse(req.body.jsondata);
+    const { title, year, url, tags, description, userId, sectionId } = req.body;
 
-    if (
-      !title ||
-      !year ||
-      !url ||
-      !tags ||
-      !description ||
-      !userId ||
-      !sectionId
-    )
-      return error(res, "All fields are required", 400);
+    const requiredFields = ['title', 'year', 'url', 'tags', 'description', 'userId', 'sectionId'];
+    const missingFields = requiredFields.filter(field => !eval(field));
+
+    if (missingFields.length > 0) {
+      return error(res, `Error: ${missingFields.join(', ')} ${missingFields.length > 1 ? 'are' : 'is'} required`, 400);
+    }
 
     const project = new Project() as ProjectModel;
     project.title = title;
@@ -82,21 +76,29 @@ export const createProject: RequestHandler = async (
     if (!files) {
       return error(res, "Add thumbnail image", 400);
     }
+    console.log(files.length)
+    if (files.length > 10) {
+      return error(res, "You can only upload a maximum of 10 images at a time", 400);
+    }
 
     const imagesRes = await cloudinaryService(files, req.body.service);
 
-    const imagePromises = imagesRes.urls.map(async (url) => {
+    for (const url of imagesRes.urls) {
       const image = new Images() as Images;
       image.url = url;
-      const imageResponse = await imageRepository.save(image);
 
-      const projectImage = new ProjectsImage() as ProjectsImage;
-      projectImage.projectId = projectId;
-      projectImage.imageId = imageResponse.id;
-      await projectImageRepository.save(projectImage);
-    });
+      try {
+        const imageResponse = await imageRepository.save(image);
 
-    await Promise.all(imagePromises);
+        const projectImage = new ProjectsImage() as ProjectsImage;
+        projectImage.projectId = projectId;
+        projectImage.imageId = imageResponse.id;
+
+        await projectImageRepository.save(projectImage);
+      } catch (error) {
+        console.error(error);
+      }
+    }
 
     const allThumbnails = await projectImageRepository.findBy({
       projectId: projectId,

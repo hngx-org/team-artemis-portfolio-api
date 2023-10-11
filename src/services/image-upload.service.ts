@@ -1,22 +1,7 @@
 const path = require("path");
 const cloudinary = require("cloudinary");
 const DataUri = require("datauri/parser");
-// const {
-//   ListObjectsV2Command,
-//   S3Client,
-//   GetObjectCommand,
-//   PutObjectCommand,
-// } = require("@aws-sdk/client-s3");
 
-// const fetchConfig = {
-//   credentials: {
-//     accessKeyId: "",
-//     secretAccessKey: "",
-//   },
-//   region: "",
-// };
-
-// const s3 = new S3Client(fetchConfig);
 
 export const cloudinaryService = async (
   files: any,
@@ -32,6 +17,13 @@ export const cloudinaryService = async (
     const urls = [];
 
     const dtauri = new DataUri();
+    if (files.length > 10) {
+      return {
+        successful: false,
+        message: "You can only upload a maximum of 10 images at a time",
+        urls: [],
+      };
+    }
 
     for (const file of files) {
       const dataUri = dtauri.format(
@@ -53,29 +45,3 @@ export const cloudinaryService = async (
   }
 };
 
-// export const AWSService = async (
-//   files: any,
-//   service: any
-// ): Promise<{ successful: boolean; message: string; urls: any[] }> => {
-//   try {
-//     const urls = [];
-
-//     const dtauri = new DataUri();
-
-//     for (const file of files) {
-//       const putCommand = new PutObjectCommand({
-//         Bucket: "bucketName",
-//         Key: file.originalname,
-//         Body: file.buffer,
-//       });
-
-//       const img = await s3.send(putCommand);
-
-//       urls.push(img.secure_url);
-//     }
-
-//     return { successful: true, message: "files uploaded successfully", urls };
-//   } catch (error) {
-//     return { successful: false, message: (error as Error).message, urls: [] };
-//   }
-// };
