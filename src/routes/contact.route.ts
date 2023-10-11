@@ -1,10 +1,11 @@
 import express from 'express'
+// import { updateContactController } from '../controllers/contact.controller'
 import {
+  createSocials,
   createContacts,
   getContacts,
   deleteContact,
   updateContactController,
-  createSocials,
 } from '../controllers/contact.controller'
 
 const router = express.Router()
@@ -150,8 +151,8 @@ router.post('/contacts/', createContacts)
  */
 router.delete('/contacts/:id', deleteContact)
 
-router.patch('/contact/:Id', updateContactController)
-
 router.post('/socials', createSocials)
+
+router.patch('/contact/:Id', updateContactController)
 
 module.exports = router
