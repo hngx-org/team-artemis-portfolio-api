@@ -8,30 +8,101 @@ import {
 } from "../database/entity/model";
 import { success, error } from "../utils/response.util";
 import { deleteCustomSectionService } from "../services/custom.service";
-import {  ICustomSection, ISection, IField } from "../interfaces";
+import {
+  BadRequestError,
+  CustomError,
+  InternalServerError,
+  NotFoundError,
+} from "../middlewares";
+import { ICustomSection, ISection, IField } from "../interfaces";
 
 const customRepository = connectionSource.getRepository(CustomUserSection);
 const customFieldRepository = connectionSource.getRepository(CustomField);
 const sectionRepository = connectionSource.getRepository(Section);
 
-export const deleteCustomSection = async (req: Request, res: Response) => {
-  try {
-    const id = parseInt(req.params.id);
-    if (!id) {
-      return (res as any).status(400).json({
+const MAX_ID_LENGTH = 10;
+
+const sectionIdSchema = z
+  .number()
+  .int()
+  .positive()
+  .refine((value) => {
+    if (value <= 0) {
+      throw new Error("Number must be greater than 0");
+    }
+    return true;
+  });
+
+  export const validateSectionId = (sectionId: any, res: Response) => {
+    try {
+      const parsedSectionId = sectionIdSchema.parse(sectionId);
+  
+      if (!Number.isInteger(parsedSectionId)) {
+        throw new Error("Section ID must be a whole number (integer)");
+      }
+      if (parsedSectionId.toString().length > MAX_ID_LENGTH) {
+        throw new Error(`Section ID must have at most ${MAX_ID_LENGTH} digits`);
+      }
+      return true;
+    } catch (error: any) {
+      return res.status(400).json({
         success: false,
-        message: "Please input section ID",
+        message: error.message,
       });
     }
+  };   
 
-    const data = await deleteCustomSectionService(id);
+export const deleteCustomSection = async (req: Request, res: Response) => {
+  try {
+    const customSectionId = parseInt(req.params.id);
+    const { userId } = req.body;
+
+    // validator for the custom section Id
+    const customSectionIdValidator = z
+      .number({
+        required_error: "id is required",
+        invalid_type_error: "id must be a number",
+      })
+      .int({ message: "id must be an integer" })
+      .positive({ message: "must be a positive integer" });
+
+    // validator for user ID
+    const userIdValidator = z
+      .string({
+        required_error: "userId is required",
+        invalid_type_error: "userId must be uuid",
+      })
+      .uuid({ message: "userId must be of type uuid" });
+
+    const userIdValidate = userIdValidator.safeParse(userId);
+    const customSectionIdValidate =
+      customSectionIdValidator.safeParse(customSectionId);
+
+    if (customSectionIdValidate.success === false) {
+      const err = new BadRequestError(customSectionIdValidate.error.message);
+      return res
+        .status(err.statusCode)
+        .json({ err: JSON.parse(err.message)[0].message });
+    }
+
+    if (userIdValidate.success === false) {
+      const err = new BadRequestError(userIdValidate.error.message);
+      return res
+        .status(err.statusCode)
+        .json({ err: JSON.parse(err.message)[0].message });
+    }
+
+    const data = await deleteCustomSectionService(customSectionId, userId);
+
     if (data.successful) {
-      success(res, data);
+      return success(res, data);
     } else {
-      error(res, data.message);
+      const err = new NotFoundError(data.message);
+      return res.status(err.statusCode).json({ err: err.message });
     }
   } catch (error: any) {
-    return error(res, error.message);
+    const err = new InternalServerError(error.message);
+    return res.status(err.statusCode).json({ err: err.message });
   }
 };
 
@@ -94,7 +165,11 @@ const findAll = async (req: Request, res: Response) => {
 
 const findOne = async (req: Request, res: Response) => {
   const { id } = req.params;
-  try {
+    try {
+      const sectionId = parseInt(req.params.id);
+      if (!validateSectionId(sectionId, res)) {
+        return;
+      }
     const record = await customRepository.findOne({
       where: { id: Number(id) },
     });
@@ -144,15 +219,26 @@ const createCustomField = async (
 
 const findOneCustomField = async (req: Request, res: Response) => {
   const { id } = req.params;
+
   try {
+    const sectionId = parseInt(req.params.id);
+
+    if (!validateSectionId(sectionId, res)) {
+      return;
+    }
+
     const record = await customFieldRepository.findOne({
       where: { id: Number(id) },
     });
-    return record
-      ? success(res, record, "Success")
-      : error(res, "record not found", 400);
+
+    if (record) {
+      return success(res, record, "Success");
+    } else {
+      return error(res, "Record not found", 400);
+    }
   } catch (err) {
     console.log(err);
+    return error(res, "An error occurred", 500);
   }
 };
 
