@@ -202,7 +202,6 @@ router.delete("/deleteAccountDetails/:userId", deleteUserAccount);
  */
 
 router.patch("/updateUser/:id", updateUser);
-
 /**
  * @swagger
  * /api/updateNotificationSettings/{id}:

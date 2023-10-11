@@ -24,3 +24,10 @@ export interface UserSettings {
   createdAt?: Date;
   socialUsers?: string;
 }
+
+export interface NotificationSetting {
+  id: number;
+  newMessages: boolean;
+  portfolioUpdates: boolean;
+  userId: string; 
+}
