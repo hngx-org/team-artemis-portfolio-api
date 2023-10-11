@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { connectionSource as dataSource } from "../database/data-source";
 import { SocialUser} from "../database/entity/model";
 import {z} from 'zod';
@@ -9,16 +9,28 @@ const contactsRepo = dataSource.getRepository(SocialUser);
 
 const socialUserService = new SocialUserService();
 
-export const createContacts = async (req: Request, res: Response) => {
-  const { url, user_id, social_media_id } = req.body;
-
+export const createContacts = async (req: Request, res: Response, next:NextFunction) => {
+  interface Icontacts {
+   url: string,
+   user_id: string,
+   social_media_id:number|number
+  }
+  const schema= z.object({url: z.string(),user_id: z.string().uuid(),social_media_id:z.number()})
+  const { url, user_id, social_media_id }:Icontacts = req.body;
+  const formattedId = Number(social_media_id);
+   const isValid = schema.safeParse({url,user_id,social_media_id:formattedId})
+   console.log(isValid)
   try {
-    
-    await createContact(social_media_id, url, user_id);
-    return res.status(201).json({ message: "Contact created successfully" });
+    if(isValid.success){
+      await createContact(social_media_id, url, user_id);
+      return res.status(201).json({ message: "Contact created successfully" });
+
+    }else{
+      return res.status(400).json({ message: "Invalid input data" })
+    }
   } catch (error) {
     console.error("Error creating contact:", error);
-    return res.status(400).json({ message: "Invalid input data" });
+    next(error)
   }
 };
 
