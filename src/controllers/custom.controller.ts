@@ -1,36 +1,56 @@
 import { Request, Response, NextFunction } from "express";
 import { connectionSource } from "../database/data-source";
 import { AnyZodObject, z } from "zod";
-import { CustomUserSection, CustomField, Section } from "../database/entity/model";
+import {
+  CustomUserSection,
+  CustomField,
+  Section,
+} from "../database/entity/model";
 import { success, error } from "../utils/response.util";
 import { v4 as isUUIDv4 } from "uuid";
-import { deleteCustomSectionService} from "../services/custom.service";
+import { deleteCustomSectionService } from "../services/custom.service";
 
 const customRepository = connectionSource.getRepository(CustomUserSection);
 const customFieldRepository = connectionSource.getRepository(CustomField);
 
 export const deleteCustomSection = async (req: Request, res: Response) => {
   try {
-    const idValidator = z
+    const customId = parseInt(req.params.id);
+    const { userId } = req.body;
+
+    const customIdValidator = z
       .number({
         required_error: "id is required",
         invalid_type_error: "id must be a number",
       })
       .int({ message: "id must be an integer" })
       .positive({ message: "must be a positive integer" });
-    const id = parseInt(req.params.id);
-    const validate =  idValidator.safeParse(id)
-    if (!validate.success){
-      return error(res, (validate.error).message);
+
+    const userIdValidator = z
+      .string({
+        required_error: "userId is required",
+        invalid_type_error: "userId must be uuid",
+      })
+      .uuid({ message: "userId must be of type uuid" });
+
+    const customIdValidate = customIdValidator.safeParse(customId);
+    const userIdValidate = userIdValidator.safeParse(userId);
+
+    if (!customIdValidate.success) {
+      return error(res, customIdValidate.error.message);
     }
-    const data = await deleteCustomSectionService(id);
+
+    if (!userIdValidate.success) {
+      return error(res, userIdValidate.error.message);
+    }
+    const data = await deleteCustomSectionService(customId, userId);
     if (data.successful) {
       return success(res, data);
     } else {
       return error(res, data.message);
     }
   } catch (error: any) {
-    return res.send(error) //error(res, error);
+    return res.send(error); //error(res, error);
   }
 };
 
@@ -140,7 +160,7 @@ const validateSchema =
     }
   };
 
-  // updated customsection field
+// updated customsection field
 const updateCustomField = async (req: Request, res: Response) => {
   const { id } = req.params;
   try {
@@ -162,10 +182,6 @@ const updateCustomField = async (req: Request, res: Response) => {
     return error(res, "An error occurred while updating the record", 500);
   }
 };
-
-
-
-
 
 export {
   create,
