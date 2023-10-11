@@ -1,6 +1,6 @@
 import { Project, Images, ProjectsImage } from "../database/entity/model";
 import { connectionSource } from "../database/data-source";
-import express, { Request, RequestHandler, Response } from "express";
+import express, { NextFunction, Request, RequestHandler, Response } from "express";
 import { error, success } from "../utils";
 import { cloudinaryService } from "../services/image-upload.service";
 import { updateProjectService } from "../services/project.service";
@@ -172,46 +172,31 @@ export const updateProjectController: RequestHandler = async (
     return error(res, "Project update failed");
   }
 };
-export const deleteProjectById: RequestHandler = async (req, res) => {
-  
+export const deleteProjectController: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { id } = req.params;
-    
-    const idParamSchema = z.string();
-    const validId = idParamSchema.safeParse(id);
+    const id = parseInt(req.params.id);
+    const projectDetail = await projectRepository.findOne({ where: { id } });
 
-    if (validId.success) {
-      const deletionResult = await performProjectDeletion(validId.data);
-
-      if (deletionResult.affected) {
-        return success(res, deletionResult, 'Project Deleted Successfully');
-      } else {
-        throw new NotFoundError ('Project not found');
-      }
+    if (!projectDetail) {
+      const errorResponse = {
+        message: 'Project not Found!',
+      };
+      res.status(404).json(errorResponse);
     } else {
-      throw new BadRequestError('Invalid project id');
+      const deletedProject = await projectRepository.delete({ id });
+
+      res.status(200).json({
+        message: 'Project deleted successfully',
+        deletedProject: projectDetail,
+      });
+      console.log('Project deleted successfully');
     }
-  } catch (err) {
-    error(res, err.message);
+  } catch (error) {
+    console.error('Error deleting project detail', error);
+    next(error);
   }
 };
 
-async function performProjectDeletion(id) {
-  console.log('Deleting project with ID:', id);
-  try {
-    const deletionResult = await projectRepository.delete({id});
-    console.log('Deletion result:', deletionResult);
-    if(deletionResult.affected > 0){
-      return { affected: deletionResult.affected, message: 'Project Deleted Successfully' };
-    }else{
-      return { affected: 0 , message: 'Project not found' };
-    }
-  } catch (error) {
-    console.error('Error deleting project:', error);
-    return { affected: 0, message: 'Error deleting project' };
-  }
-  
-}
 
 // update project section
 export const updateProjectById: RequestHandler = async (
