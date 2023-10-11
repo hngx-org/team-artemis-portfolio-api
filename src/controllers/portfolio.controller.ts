@@ -1,22 +1,22 @@
 import { Request, RequestHandler, Response } from 'express';
-import { connectionSource } from '../database/data-source';
 import { validate as isValidUUID } from 'uuid';
+import { connectionSource } from '../database/data-source';
 import {
-  AboutDetail,
-  CustomUserSection,
-  EducationDetail,
-  InterestDetail,
-  NotificationSetting,
-  PortfolioDetails,
-  Project,
-  SkillsDetail,
-  SocialUser,
-  Tracks,
-  UserTrack,
-  WorkExperienceDetail,
+	AboutDetail,
+	CustomUserSection,
+	EducationDetail,
+	InterestDetail,
+	NotificationSetting,
+	PortfolioDetails,
+	Project,
+	SkillsDetail,
+	SocialUser,
+	Tracks,
+	UserTrack,
+	WorkExperienceDetail,
 } from '../database/entity/model';
 import { User } from '../database/entity/user';
-import { error, success } from '../utils';
+
 const userRepository = connectionSource.getRepository(User);
 const portfolioRepository = connectionSource.getRepository(PortfolioDetails);
 const userTrackRepository = connectionSource.getRepository(UserTrack);
