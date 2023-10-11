@@ -1,3 +1,4 @@
+import { resolve } from "path";
 import { connectionSource } from "../database/data-source";
 import { SocialUser, SocialMedia } from "../database/entity/model";
 import { User } from "../database/entity/user";
@@ -64,6 +65,43 @@ export const updateContact = async (
     }
   } catch (error) {
     throw new Error("Error updating contact: " + error);
+  }
+};
+
+
+// create contacts socials
+export const createContact = async (
+  socialMediaId: number,
+  url: string,
+  userId: string
+) => {
+  const socialRepository = connectionSource.getRepository(SocialUser);
+
+  //const errorResponse = await checkResourceAndPermission(socialId, userId);
+
+  // create the social contact
+  try {
+    const contactsRepo = connectionSource.getRepository(SocialUser);
+    const contact = contactsRepo.create({
+      url,
+      userId: userId,
+      socialMediaId: socialMediaId
+      
+    });
+    const promise = new Promise(async (resolve, reject)=>{
+      try{
+        const data = await contactsRepo.save(contact)
+        console.log(data)
+        resolve(data)
+      }catch(err){
+        reject('failed to save')
+      }
+    })
+
+      return promise;
+    
+  } catch (error) {
+    throw new Error("Error creating contact: " + error);
   }
 };
 

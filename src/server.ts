@@ -22,6 +22,7 @@ connectionSource
   .catch((error) => console.log(error));
 
 // middleware setup
+
 app.use(express.json());
 app.use(errorHandler);
 app.use(express.urlencoded({ extended: true }));
@@ -33,7 +34,7 @@ readdirSync("./src/routes").map((path) =>
 );
 app.get("/", sayHelloController);
 
-const port = process.env.PORT || 3000
+const port = process.env.PORT || 3000;
 
 app.listen(port, () => {
   // console.log(entities);

@@ -4,14 +4,16 @@ import {
   createProfileController,
   deletePortfolioDetails,
   updatePortfolioDetails,
-  uploadProfileImageController,
 } from "../controllers";
+import {
+  createPorfolioDataSchema,
+  validateCreatePortfolioDetails,
+} from "../middlewares/profile.zod";
 
 const storage = multer.memoryStorage();
 const uploads = multer({ storage }).array("images", 1);
 
 const router = express.Router();
-
 /**
  * @swagger
  * /api/profile-details/{id}:
@@ -58,6 +60,7 @@ const router = express.Router();
  *                 error:
  *                   type: string
  */
+
 router.put("/profile-details/:id", updatePortfolioDetails);
 
 /**
@@ -75,26 +78,30 @@ router.put("/profile-details/:id", updatePortfolioDetails);
  *         schema:
  *           type: string
  *     requestBody:
- *       description: New profile detail data
  *       required: true
  *       content:
  *         application/json:
  *           schema:
  *             type: object
- *             required:
- *               - name
- *               - trackId
- *               - city
- *               - country
  *             properties:
  *               name:
  *                 type: string
- *               trackId:
- *                 type: number
+ *                 description: The user's name.
+ *                 example: Leanne Graham
+ *                 required: false
  *               city:
  *                 type: string
+ *                 description: The user's city.
+ *                 example: Lagos
  *               country:
  *                 type: string
+ *                 description: The user's country.
+ *                 example: Nigeria
+ *               trackId:
+ *                 type: string
+ *                 description: The user's selected track.
+ *                 example: 1
+ *                 required: false
  *     responses:
  *       200:
  *         description: Successful response
@@ -115,7 +122,11 @@ router.put("/profile-details/:id", updatePortfolioDetails);
  *                 error:
  *                   type: string
  */
-router.post("/profile/:userId", createProfileController);
+router.post(
+  "/profile/:userId",
+  validateCreatePortfolioDetails(createPorfolioDataSchema),
+  createProfileController
+);
 
 /**
  * @swagger

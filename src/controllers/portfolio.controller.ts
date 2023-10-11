@@ -1,9 +1,10 @@
 import { Request, RequestHandler, Response } from "express";
 import { connectionSource } from "../database/data-source";
 import { User } from "../database/entity/user";
-import { UserTrack, PortfolioDetails, Tracks } from "../database/entity/model";
-
 import {
+  UserTrack,
+  PortfolioDetails,
+  Tracks,
   AboutDetail,
   EducationDetail,
   InterestDetail,
@@ -33,9 +34,9 @@ const getUserById = async (req: Request, res: Response) => {
       where: { userId },
     });
     const userTracks = await userTrackRepository
-      .createQueryBuilder('userTrack')  // Create a query builder for the 'userTrack' entity.
-      .innerJoinAndSelect('userTrack.track', 'track')  // Perform an inner join with the 'track' entity.
-      .where('userTrack.userId = :userId', { userId: userId })  // Filter the results based on a condition.
+      .createQueryBuilder("userTrack") // Create a query builder for the 'userTrack' entity.
+      .innerJoinAndSelect("userTrack.track", "track") // Perform an inner join with the 'track' entity.
+      .where("userTrack.userId = :userId", { userId: userId }) // Filter the results based on a condition.
       .getMany();
     for (let userTrack of userTracks) {
       tracks.push(userTrack.track);

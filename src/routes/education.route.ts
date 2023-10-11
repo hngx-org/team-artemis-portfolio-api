@@ -1,13 +1,18 @@
-import express from "express";
+import express from 'express'
 import {
   createEducationDetailController,
   updateEducationDetail,
   getEducationDetailById,
   fetchUserEducationDetail,
   deleteEducationDetail,
-} from "../controllers/education.controller";
+} from '../controllers/education.controller'
 
-const router = express.Router();
+import {
+  validateCreateData,
+  validateUpdateData,
+} from '../middlewares/education.zod'
+
+const router = express.Router()
 
 /**
  * @swagger
@@ -78,7 +83,7 @@ const router = express.Router();
  *                 data:
  *                   type: null
  */
-router.get("/education/:id", fetchUserEducationDetail);
+router.get('/education/:id', fetchUserEducationDetail)
 
 /**
  * @swagger
@@ -159,7 +164,11 @@ router.get("/education/:id", fetchUserEducationDetail);
  *                   type: null
  */
 
-router.post("/education/:id", createEducationDetailController);
+router.post(
+  '/education/:id',
+  validateCreateData,
+  createEducationDetailController
+)
 
 /**
  * @swagger
@@ -204,7 +213,7 @@ router.post("/education/:id", createEducationDetailController);
  *                 message:
  *                   type: string
  */
-router.get("/education/:id", getEducationDetailById);
+router.get('/education/:id', getEducationDetailById)
 
 /**
  * @swagger
@@ -260,7 +269,12 @@ router.get("/education/:id", getEducationDetailById);
  *             error:
  *               type: string
  */
-router.put("/updateEducationDetail/:id", updateEducationDetail);
+router.patch(
+  '/updateEducationDetail/:id',
+  // Call validateUpdateData as middleware to validate req.body
+  validateUpdateData,
+  updateEducationDetail
+)
 
 /**
  * @swagger
@@ -331,7 +345,7 @@ router.put("/updateEducationDetail/:id", updateEducationDetail);
  *               message:
  *                 type: string
  */
-router.get("/educationDetail/:id", getEducationDetailById);
+router.get('/educationDetail/:id', getEducationDetailById)
 
 /**
  * @swagger
@@ -369,6 +383,6 @@ router.get("/educationDetail/:id", getEducationDetailById);
  *                 message:
  *                   type: string
  */
-router.delete("/education/:id", deleteEducationDetail);
+router.delete('/education/:id', deleteEducationDetail)
 
-module.exports = router;
+module.exports = router
