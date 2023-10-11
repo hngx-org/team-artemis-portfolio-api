@@ -7,6 +7,8 @@ import {
   deleteEducationDetail,
 } from "../controllers/education.controller";
 
+import { validateUpdateData } from "../middlewares/education.zod";
+
 const router = express.Router();
 
 /**
@@ -260,7 +262,12 @@ router.get("/education/:id", getEducationDetailById);
  *             error:
  *               type: string
  */
-router.put("/updateEducationDetail/:id", updateEducationDetail);
+router.patch(
+  "/updateEducationDetail/:id",
+  // Call validateUpdateData as middleware to validate req.body
+  validateUpdateData,
+  updateEducationDetail
+);
 
 /**
  * @swagger
