@@ -58,6 +58,8 @@ const errorHandler = (
   if (res.headersSent) {
     return next(err);
   }
+  res.setHeader('Content-Type', 'application/json');
+
 
   if (err instanceof NotFoundError) {
     res.status(err.statusCode).json({ message: err.message });

@@ -1,8 +1,11 @@
 import express, { Response, Request } from "express";
-const router = express.Router();
 import multer from "multer";
+import { error } from "../utils/response.util";
+
+const router = express.Router();
 const storage = multer.memoryStorage();
 const uploads = multer({ storage }).array("images", 10);
+
 
 
 
@@ -114,7 +117,7 @@ router.get("/projects/:id", getProjectById);
 router.post("/projects", function (req, res, next) {
   uploads(req, res, function (err) {
     if (err) {
-      res.status(403).json({ message: "A maximum of 10 files are allowed" });
+      error(res, "A maximum of 10 files are allowed", 403);
       return
     }
     next();

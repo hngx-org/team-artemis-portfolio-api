@@ -5,6 +5,7 @@ import { cloudinaryService } from "../services/image-upload.service";
 import { updateProjectService } from "../services/project.service";
 import { success, error } from '../utils/response.util';
 
+
 const projectRepository = connectionSource.getRepository(Project);
 const imageRepository = connectionSource.getRepository(Images);
 const projectImageRepository = connectionSource.getRepository(ProjectsImage);
@@ -50,14 +51,29 @@ export const createProject: RequestHandler = async (
   res: Response
 ) => {
   try {
-    const { title, year, url, tags, description, userId, sectionId } = req.body;
+    const jsonData = JSON.parse(req.body.jsondata);
+    const normalizedData: any = {};
+    for (const key in jsonData) {
+      if (Object.hasOwnProperty.call(jsonData, key)) {
+        const normalizedKey = key.toLowerCase();
+        normalizedData[normalizedKey] = jsonData[key];
+      }
+    }
+
+    const { title, year, url, tags, description, userid, sectionid } = normalizedData;
+
+    console.log(title, year, url, tags, description, userid, sectionid)
 
     const requiredFields = ['title', 'year', 'url', 'tags', 'description', 'userId', 'sectionId'];
-    const missingFields = requiredFields.filter(field => !eval(field));
+
+    const jsonFields = Object.keys(JSON.parse(req.body.jsondata)).map(field => field.toLowerCase());
+
+    const missingFields = requiredFields.filter(field => !jsonFields.includes(field.toLowerCase()));
 
     if (missingFields.length > 0) {
       return error(res, `Error: ${missingFields.join(', ')} ${missingFields.length > 1 ? 'are' : 'is'} required`, 400);
     }
+    console.log(title, year, url, tags, description, userid, sectionid)
 
     const project = new Project() as ProjectModel;
     project.title = title;
@@ -65,8 +81,8 @@ export const createProject: RequestHandler = async (
     project.url = url;
     project.tags = tags;
     project.description = description;
-    project.userId = userId;
-    project.sectionId = sectionId;
+    project.userId = userid;
+    project.sectionId = sectionid;
     project.thumbnail = 0;
 
     const data = await projectRepository.save(project);
