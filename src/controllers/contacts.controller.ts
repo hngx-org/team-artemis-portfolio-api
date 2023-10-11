@@ -3,7 +3,6 @@ import { connectionSource as dataSource } from "../database/data-source";
 import { SocialUser} from "../database/entity/model";
 import {z} from 'zod';
 import { SocialUserService, createContact } from "../services/contact.service";
-//import joi from 'joi';
 
 const contactsRepo = dataSource.getRepository(SocialUser);
 
@@ -15,7 +14,7 @@ export const createContacts = async (req: Request, res: Response, next:NextFunct
    user_id: string,
    social_media_id:number|number
   }
-  const schema= z.object({url: z.string(),user_id: z.string().uuid(),social_media_id:z.number()})
+  const schema= z.object({url: z.string().min(7),user_id: z.string().uuid(),social_media_id:z.number()})
   const { url, user_id, social_media_id }:Icontacts = req.body;
   const formattedId = Number(social_media_id);
    const isValid = schema.safeParse({url,user_id,social_media_id:formattedId})
