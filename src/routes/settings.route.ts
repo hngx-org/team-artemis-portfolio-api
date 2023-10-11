@@ -2,16 +2,16 @@ import { Router } from "express";
 import {
   createNotificationSettingController,
   deleteUserAccount,
-  createAccountSettingController,
-  updateUser,
+  updateAccountSettingController,
   updateNotificationSettings,
 } from "../controllers/settings.controller";
+import { validateUserId , validate } from "../services";
 
 const router = Router();
 
 /**
  * @swagger
- * /api/createAccountSetting:
+ * /api/create-account-settings:
  *   put:
  *     summary: Create account settings
  *     description: Create user account settings.
@@ -51,14 +51,14 @@ const router = Router();
  *                 error:
  *                   type: string
  *     tags:
- *       - User
+ *       - Settings
  */
 
-router.put("/createAccountSetting", createAccountSettingController);
+router.patch("/update-account-settings", updateAccountSettingController);
 
 /**
  * @swagger
- * /api/setNotificationDetails/{userId}:
+ * /api/set-notification-settings/{userId}:
  *   post:
  *     summary: Create notification settings by User ID
  *     description: Create user notification settings by providing the User ID.
@@ -107,17 +107,17 @@ router.put("/createAccountSetting", createAccountSettingController);
  *                 error:
  *                   type: string
  *     tags:
- *       - NotificationSetting
+ *       - Settings
  */
 
 router.post(
-  "/setNotificationDetails/:userId",
+  "/set-notification-settings/:userId",validateUserId,validate,
   createNotificationSettingController
 );
 
 /**
  * @swagger
- * /api/deleteAccountDetails/{userId}:
+ * /api/delete-account/{userId}:
  *   delete:
  *     summary: Delete user account by ID
  *     description: Delete user account by providing the User ID.
@@ -146,66 +146,14 @@ router.post(
  *                 error:
  *                   type: string
  *     tags:
- *       - User
+ *       - Settings
  */
 
-router.delete("/deleteAccountDetails/:userId", deleteUserAccount);
+router.delete("/delete-account/:userId", validateUserId, validate, deleteUserAccount);
 
 /**
  * @swagger
- * /api/updateUser/{id}:
- *   patch:
- *     summary: Update User Information
- *     description: Update user email and password.
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         description: The ID of the user to update.
- *         schema:
- *           type: string
- *           format: uuid
- *
- *     requestBody:
- *       description: New user detail data
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               email:
- *                 type: string
- *               password:
- *                 type: string
- *     responses:
- *       200:
- *         description: User updated successfully.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *       400:
- *         description: Bad request. User does not exist or email is the same as the current one.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 error:
- *                   type: string
- *     tags:
- *       - Update User
- */
-
-router.patch("/updateUser/:id", updateUser);
-
-/**
- * @swagger
- * /api/updateNotificationSettings/{id}:
+ * /api/update-notification-settings/{id}:
  *   patch:
  *     summary: Update Notification Settings
  *     description: Update user notification settings.
@@ -262,9 +210,9 @@ router.patch("/updateUser/:id", updateUser);
  *                 error:
  *                   type: string
  *     tags:
- *       - Update Notification Settings
+ *       - Settings
  */
 
-router.patch("/updateNotificationSettings/:id", updateNotificationSettings);
+router.patch("/update-notification-settings/:id", updateNotificationSettings);
 
 module.exports = router;
