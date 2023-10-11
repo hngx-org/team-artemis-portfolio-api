@@ -1,11 +1,11 @@
 export interface NotificationSettings {
-  id: number;
-  emailSummary: boolean | null;
-  specialOffers: boolean | null;
-  communityUpdate: boolean | null;
-  followUpdate: boolean | null;
-  newMessages: boolean | null;
-  userId: string;
+  id?: number;
+  emailSummary?: boolean ;
+  specialOffers?: boolean;
+  communityUpdate?: boolean;
+  followUpdate?: boolean ;
+  newMessages?: boolean;
+  userId?: string;
 }
 
 export interface UserSettings {
