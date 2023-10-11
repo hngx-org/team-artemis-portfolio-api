@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@types/cors": "^2.8.14",
     "@types/uuid": "^9.0.5",
     "aws-sdk": "^2.1472.0",
     "bcryptjs": "^2.4.3",
