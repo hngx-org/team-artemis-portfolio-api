@@ -1,5 +1,6 @@
 import express, { Request, RequestHandler, Response } from "express";
 import { z } from 'zod';
+import { Skill } from '../interfaces';
 import {
   createSkillsService,
   updateSkillsService,
@@ -78,18 +79,20 @@ export const deleteSkills: RequestHandler = async (
 
 // Controller function to fetch skills for a logged-in user
 export const getSkillsDetails: RequestHandler = async (
-  _req: Request,
+  req: Request,
   res: Response
 ) => {
   try {
-    const { userId } = (_req as any).body;
+    const { userId } = req.body;
     // Fetch skills for the logged-in user based on their user ID
-    const data = await getSkillsService(userId);
+    const result: Skill[] = await getSkillsService(userId);
+
+    const data = result.map(record => record.skills);
 
     // Send a response with the fetched skills
     success(res, data, "Skills");
   } catch (err) {
     console.error("Error fetching skills:", error);
-    error(res, (err as Error).message);
+    error(res, err instanceof Error ? err.message : 'An error occurred');
   }
 };

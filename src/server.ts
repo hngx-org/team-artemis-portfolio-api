@@ -22,6 +22,7 @@ connectionSource
   .catch((error) => console.log(error));
 
 // middleware setup
+
 app.use(express.json());
 app.use(errorHandler);
 app.use(express.urlencoded({ extended: true }));
