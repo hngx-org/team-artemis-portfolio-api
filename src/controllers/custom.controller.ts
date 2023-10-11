@@ -33,11 +33,11 @@ export const deleteCustomSection = async (req: Request, res: Response) => {
       })
       .uuid({ message: "userId must be of type uuid" });
 
-    const customIdValidate = customSectionIdValidator.safeParse(customSectionId);
+    const customSectionIdValidate = customSectionIdValidator.safeParse(customSectionId);
     const userIdValidate = userIdValidator.safeParse(userId);
 
-    if (customIdValidate.success === false) {
-      return error(res, customIdValidate.error.message);
+    if (customSectionIdValidate.success === false) {
+      return error(res, customSectionIdValidate.error.message);
     }
 
     if (userIdValidate.success === false) {
