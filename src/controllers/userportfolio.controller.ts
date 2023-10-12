@@ -1,4 +1,4 @@
-import { Request, RequestHandler, Response } from "express";
+import { Request, Response, RequestHandler } from "express";
 import { connectionSource } from "../database/data-source";
 import { User } from "../database/entity/user";
 import {
@@ -13,7 +13,6 @@ import {
   SkillsDetail,
   WorkExperienceDetail,
 } from "../database/entity/model";
-import { error, success } from "../utils";
 
 const userRepository = connectionSource.getRepository(User);
 const portfolioRepository = connectionSource.getRepository(PortfolioDetails);
@@ -22,7 +21,7 @@ const trackRepository = connectionSource.getRepository(Tracks);
 
 const getAllUsers = async (req: Request, res: Response) => {
   const users = await userRepository.find();
-  res.json(users);
+  res.status(200).json({ users });
 };
 
 const getUserById = async (req: Request, res: Response) => {
@@ -30,13 +29,11 @@ const getUserById = async (req: Request, res: Response) => {
   try {
     const { userId } = req.params;
     const user = await userRepository.findOne({ where: { id: userId } });
-    const portfolio = await portfolioRepository.findOne({
-      where: { userId },
-    });
+    const portfolio = await portfolioRepository.findOne({ where: { userId } });
     const userTracks = await userTrackRepository
-      .createQueryBuilder("userTrack") // Create a query builder for the 'userTrack' entity.
-      .innerJoinAndSelect("userTrack.track", "track") // Perform an inner join with the 'track' entity.
-      .where("userTrack.userId = :userId", { userId: userId }) // Filter the results based on a condition.
+      .createQueryBuilder("userTrack")
+      .innerJoinAndSelect("userTrack.track", "track")
+      .where("userTrack.userId = :userId", { userId: userId })
       .getMany();
     for (let userTrack of userTracks) {
       tracks.push(userTrack.track);
@@ -47,12 +44,9 @@ const getUserById = async (req: Request, res: Response) => {
   }
 };
 
-const retrievePortfolioController: RequestHandler = async (
-  req: Request,
-  res: Response
-) => {
+const getPortfolioDetails = async (req: Request, res: Response) => {
   try {
-    const userId = req.params.userId;
+    const { userId } = req.params;
     const workExperience = await connectionSource.manager.find(
       WorkExperienceDetail,
       { where: { userId } }
@@ -70,7 +64,7 @@ const retrievePortfolioController: RequestHandler = async (
       where: { userId },
     });
 
-    const aboutMe = await connectionSource.manager.find(AboutDetail, {
+    const about = await connectionSource.manager.find(AboutDetail, {
       where: { userId },
     });
 
@@ -79,24 +73,28 @@ const retrievePortfolioController: RequestHandler = async (
     });
 
     const sections = await connectionSource.manager.find(Section);
-
-    return success(res, {
+    res.status(200).json({
       workExperience,
       education,
-      projects,
       skills,
       interests,
-      aboutMe,
+      about,
+      projects,
       sections,
     });
-  } catch (err) {
-    return error(res, (err as Error).message);
+  } catch (error) {
+    res.status(404).json({ message: "Portfolio not found" });
   }
 };
 
-const getAllPortfolios = async (req: Request, res: Response) => {
-  const portfolios = await portfolioRepository.find();
-  return res.json(portfolios);
-}
+const getAllPortfolioDetails = async (req: Request, res: Response) => {
+  const PortfolioDetails = await portfolioRepository.find();
+  return res.json(PortfolioDetails);
+};
 
-export { getAllUsers, getUserById, retrievePortfolioController, getAllPortfolios };
+export {
+  getAllUsers,
+  getUserById,
+  getPortfolioDetails,
+  getAllPortfolioDetails,
+};
