@@ -1,15 +1,15 @@
-import express from 'express'
-import { validateCreateAwardData } from '../middlewares/award.zod';
-import { createAwardController,
-        getAwardController,
-        getAllAwardsController,
-        deleteAwardController
-} from '../controllers/award.controller'
+import express from "express";
+import { validateCreateAwardData } from "../middlewares/award.zod";
+import {
+  createAwardController,
+  getAwardController,
+  getAllAwardsController,
+  deleteAwardController,
+} from "../controllers/award.controller";
 
-const router = express.Router()
+const router = express.Router();
 
-
-router.post('/award/:userId', validateCreateAwardData, createAwardController)
+router.post("/award/:userId", validateCreateAwardData, createAwardController);
 /**
  * @swagger
  * /api/award/:id:
@@ -65,7 +65,7 @@ router.post('/award/:userId', validateCreateAwardData, createAwardController)
  *                     successful:
  *                       type: boolean
  *                     message:
- *                       type: string    
+ *                       type: string
  *       500:
  *         description: Internal server error.
  *         content:
@@ -80,8 +80,7 @@ router.post('/award/:userId', validateCreateAwardData, createAwardController)
  *                 data:
  *                   type: null
  */
-router.get('/award/:id', getAwardController);
-
+router.get("/award/:id", getAwardController);
 
 /**
  * @swagger
@@ -108,7 +107,7 @@ router.get('/award/:id', getAwardController);
  *                     successful:
  *                       type: boolean
  *                     message:
- *                       type: string    
+ *                       type: string
  *       500:
  *         description: Internal server error.
  *         content:
@@ -123,40 +122,7 @@ router.get('/award/:id', getAwardController);
  *                 data:
  *                   type: null
  */
-router.get('/awards', getAllAwardsController);
+router.get("/awards", getAllAwardsController);
+router.delete("/award/:id", deleteAwardController);
 
-
-/**
- * @swagger
- * /api/award/:id:
- *   get:
- *     summary: Delete award detail(s) of a user detail by ID
- *     description: Delete award detail(s) of a user detail by ID
- *     tags: [Award]
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         description: The ID of the award detail to delete.
- *         schema:
- *           type: integer
- *
- *     responses:
- *       200:
- *         description: Award deleted successfully.
- *         Details: Array of user awards detail(s).   
- *  
- *       500:
- *         description: Internal server error.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- */
-
-router.delete('/award/:id', deleteAwardController)
-
-module.exports = router
+module.exports = router;
