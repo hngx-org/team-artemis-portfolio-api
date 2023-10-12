@@ -48,7 +48,7 @@ class MethodNotAllowedError extends CustomError {
 }
 
 const errorHandler = (
-  err: Error,
+  err: CustomError,
   req: Request,
   res: Response,
   next: NextFunction
