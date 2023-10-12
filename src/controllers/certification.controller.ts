@@ -1,15 +1,9 @@
 import { Request, Response, NextFunction } from "express";
 import { success, error } from "../utils/response.util";
 import { updateACertificate } from "../services/certification.service";
-// import { CertificationInterface } from "../interfaces/cerification.interface"
+import { CertificationInterface } from "../interfaces/cerification.interface"
 
-interface CertificationInterface {
-   title: string
-   year: string
-   organization: string
-   url: string
-   description: string   
-}
+const uuidPattern = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
 
 const isValidCertification = (payload: any): payload is CertificationInterface => {
    return (
@@ -27,10 +21,10 @@ export const updateCertificate = async (req: Request, res: Response) => {
       const userId = req.params.userId
       const payload = req.body
 
-      if (!id || typeof id !== "number" || !userId || typeof userId !== "string") {
+      if (!id || typeof id !== "number" || !userId || !uuidPattern.test(userId)) {
          return res.status(400).json({
            success: false, 
-           message: "Please provide an integer id and string user id as parameters"
+           message: "Please provide an integer id and a valid UUID user id as parameters"
          })
       }
 

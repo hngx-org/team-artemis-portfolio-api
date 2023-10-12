@@ -31,7 +31,7 @@ const router = express.Router();
  *               type: string
  *             url: 
  *               type: string
- *             description
+ *             description:
  *               type: string
  *     responses:
  *       201:
@@ -67,21 +67,21 @@ const router = express.Router();
  *                           type: string
  *                         url: 
  *                           type: string
- *                         description
+ *                         description:
  *                           type: string
  *       400:
  *         description: Invalid parameter id or parameter id not provided
  *         content:
- *           application/json
+ *           application/json:
  *             schema:
  *               type: object
- *               properties;
+ *               properties:
  *                 successful:
  *                   type: boolean
  *                   example: false
  *                 message:
  *                   type: string
- *                   example: "Please provide as a parameter an integer id"
+ *                   example: "Please provide an integer id and a valid UUID user id as parameters"
  *       404:
  *         description: certificate not found.
  *         content:
