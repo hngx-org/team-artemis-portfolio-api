@@ -4,7 +4,7 @@ import express, { NextFunction, Request, RequestHandler, Response } from "expres
 import { error, success } from "../utils";
 import { cloudinaryService } from "../services/image-upload.service";
 import { updateProjectService } from "../services/project.service";
-import { z } from 'zod'
+import { projectSchema } from "../middlewares/projects.zod";
 
 
 import {
@@ -58,38 +58,55 @@ export const createProject: RequestHandler = async (
   res: Response
 ) => {
   try {
-    const jsonData = JSON.parse(req.body.jsondata);
-    const normalizedData: any = {};
+    let jsonData;
+    try {
+      jsonData = JSON.parse(req.body.jsondata);
+    } catch (error) {
+      return res.status(400).json({ error: "Please check the input data", message: "Invalid JSON" });
+    }
+
+    const normalizedData: ProjectModel = {} as ProjectModel;
     for (const key in jsonData) {
       if (Object.hasOwnProperty.call(jsonData, key)) {
         const normalizedKey = key.toLowerCase();
+        if (key === 'userid') {
+          normalizedData["userId"] = jsonData[key];
+          continue;
+        }
+        if (key === 'sectionid') {
+          normalizedData["sectionId"] = +jsonData[key];
+          continue;
+        }
         normalizedData[normalizedKey] = jsonData[key];
       }
     }
 
-    const { title, year, url, tags, description, userid, sectionid } = normalizedData;
+    try {
+      projectSchema.parse(normalizedData);
 
-    console.log(title, year, url, tags, description, userid, sectionid)
+    } catch (error) {
+      const errors = []
+      if (error.name == 'ZodError') {
+        const msg = error.issues.map((issue: any) => {
+          errors.push(`${issue.path[0]}: ${issue.message}`)
+        })
+      }
 
-    const requiredFields = ['title', 'year', 'url', 'tags', 'description', 'userId', 'sectionId'];
-
-    const jsonFields = Object.keys(JSON.parse(req.body.jsondata)).map(field => field.toLowerCase());
-
-    const missingFields = requiredFields.filter(field => !jsonFields.includes(field.toLowerCase()));
-
-    if (missingFields.length > 0) {
-      return error(res, `Error: ${missingFields.join(', ')} ${missingFields.length > 1 ? 'are' : 'is'} required`, 400);
+      const response = errors.join(', ');
+      return res.status(400).json({ error: "Please check the input data", message: response });
     }
-    console.log(title, year, url, tags, description, userid, sectionid)
+    const { title, year, url, tags, description, userId, sectionId } = normalizedData;
 
-    const project = new Project() as ProjectModel;
+
+
+    const project = new Project() as unknown as ProjectModel;
     project.title = title;
     project.year = year;
     project.url = url;
     project.tags = tags;
     project.description = description;
-    project.userId = userid;
-    project.sectionId = sectionid;
+    project.userId = userId;
+    project.sectionId = sectionId;
     project.thumbnail = 0;
 
     const data = await projectRepository.save(project);
