@@ -58,12 +58,13 @@ const errorHandler = (
   if (res.headersSent) {
     return next(err);
   }
-  res.setHeader("Content-Type", "application/json");
+  res.setHeader('Content-Type', 'application/json');
+
 
   if (err instanceof SyntaxError) {
     res.status(400).json({ message: err.message });
   }
-
+  
   if (err instanceof NotFoundError) {
     res.status(err.statusCode).json({ message: err.message });
   }
@@ -90,8 +91,6 @@ const errorHandler = (
   if (err instanceof CustomError) {
     res.status(err.statusCode).json({ message: err.message });
   }
-
-  res.status(err.statusCode).json({ message: err.message });
 };
 
 export {
