@@ -5,7 +5,7 @@ import {
 import { validateCreateAwardData,
   validateUpdateAwardData } from '../middlewares/award.zod'
 
-const router = express.Router()
+const router = express.Router();
 
 
 router.post('/award/:userId', validateCreateAwardData, createAwardController)
