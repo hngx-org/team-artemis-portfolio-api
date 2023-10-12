@@ -62,7 +62,7 @@ export const fetchDegree = async (
 };
 
 // endpoint to fetch all degree
-export const fetchAllDegre = async (
+export const fetchAllDegree = async (
   req: Request,
   res: Response,
   next: NextFunction
@@ -72,11 +72,11 @@ export const fetchAllDegre = async (
     const degrees = await degreeRepository.find();
 
     if (!degrees) {
-      throw new NotFoundError("No degrees found");
+      throw new NotFoundError("No degrees found!");
     }
     res
       .status(200)
-      .json({ message: "degrees gotten successfully", data: degrees });
+      .json({ message: "degrees gotten successfully!", data: degrees });
   } catch (error) {
     next(error);
   }
