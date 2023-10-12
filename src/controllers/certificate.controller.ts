@@ -1,26 +1,53 @@
-import { Request, Response, NextFunction } from "express";
-import { connectionSource } from "../database/data-source";
+import { Request, Response } from "express";
+import { connectionSource as dataSource } from "../database/data-source";
+import { success, error } from "../utils";
 import { Certificate } from "../database/entity/model";
-import { CertificateData } from "../interfaces/certificate.interface";
 import { User } from "../database/entity/user";
-import { saveCertificate } from "../services/certificate.service";
+import { validateUpdateData } from "../middlewares/certificate.zod";
 
-export const createCertificate = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+const certificateRepo = dataSource.getRepository(Certificate);
+
+export const addCertificateController = async (req: Request, res: Response) => {
   try {
-    //collect the payload from req.body
-    // pass the payload to the service and create certificate
-    // return created certificate
+    // Validate the request body using the validator
+    await validateUpdateData(req, res, async () => {
+      const { title, year, organization, url, description, sectionId } =
+        req.body;
 
-    const certificatePayload: CertificateData = req.body;
+      const userId = req.params.id;
 
-    const createdCertificate = await saveCertificate(certificatePayload);
+      const userRepository = dataSource.getRepository(User);
 
-    res.status(201).json(createdCertificate);
-  } catch (error) {
-    next(error);
+      const isExistingUser = await userRepository.findOneBy({
+        id: userId,
+      });
+
+      if (!isExistingUser) {
+        return error(
+          res,
+          "User not found. Please provide a valid User ID",
+          404
+        );
+      }
+
+      const certificateInfo = {
+        title,
+        year,
+        organization,
+        url,
+        description,
+        userId,
+        sectionId,
+      };
+
+      const certificate = certificateRepo.create(certificateInfo);
+      if (!certificate) {
+        return error(res, "Error creating certificate", 400);
+      }
+      return success(res, certificate, "Certificate created successfully");
+    });
+  } catch (err) {
+    console.error("Error creating contact:", error);
+    return error(res, (err as Error)?.message);
   }
 };

@@ -1,26 +1,42 @@
-import { z, ZodAny } from "zod";
-import { Request, Response, NextFunction } from "express";
+import { z } from "zod";
+import { NextFunction, Request, Response } from "express";
+import { BadRequestError } from "../middlewares";
+import {
+  parseAsync,
+  ErrorMessageOptions,
+  TransformErrorParams,
+} from "zod-error";
 
-export const CertificateSchema = z.object({
-  title: z.string().min(1).max(255),
-  year: z.string().min(4).max(4),
-  organization: z.string().min(1).max(255),
-  url: z.string().url().optional(),
-  description: z.string().min(1),
-  userId: z.string(),
-  sectionId: z.number(),
+const certificateDataSchema = z.object({
+  title: z.string().trim(),
+  year: z.string().trim().optional(),
+  organization: z.string().trim().optional(),
+  url: z.string().url().trim().optional(),
+  description: z.string().trim().optional(),
+  userId: z.string().uuid().trim(),
+  sectionId: z.number().optional(),
 });
 
-export const validateCertificate = (
+const options: ErrorMessageOptions = {
+  delimiter: {
+    error: " 🔥 ",
+  },
+  transform: (error: TransformErrorParams) => `${error?.errorMessage}`,
+};
+
+async function validateUpdateData(
   req: Request,
   res: Response,
   next: NextFunction
-): void => {
+) {
   try {
-    const certificatePayload = CertificateSchema.parse(req.body);
-    req.body = certificatePayload; // Replace the request body with the validated payload
+    await parseAsync(certificateDataSchema, req.body, options);
     next();
   } catch (error) {
-    res.status(400).json({ success: false, error: error.errors });
+    const err = new BadRequestError(error.message);
+    console.log(err.message);
+    res.status(err.statusCode).json({ error: err.message });
   }
-};
+}
+
+export { validateUpdateData, certificateDataSchema };
