@@ -17,33 +17,41 @@ const uploads = multer({ storage }).array("images", 1);
 const router = express.Router();
 /**
  * @swagger
- * /api/profile-details/{id}:
- *   put:
- *     summary: Update portfolio details by ID
- *     description: Update a user's portfolio details by providing its ID.
- *     tags: [Profile]
+ * /api/portfolio:
+ *   get:
+ *     summary: Get all users' portfolio details
+ *     description: Retrieve a list of all users' portfolio details.
+ *     tags: [User Portfolio Details]
+ *     responses:
+ *       200:
+ *         description: Successful response
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ */
+router.get("/portfolio", getAllUsers);
+
+/**
+ * @swagger
+ * /api/portfolio/{userId}:
+ *   get:
+ *     summary: Get user portfolio details by ID
+ *     description: Retrieve a user's portfolio details by providing their ID.
+ *     tags: [User Portfolio Details]
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
- *         description: The ID of the portfolio details to update.
+ *         description: The ID of the user whose portfolio details are to be retrieved.
  *         schema:
  *           type: string
- *     requestBody:
- *       description: Updated portfolio detail data
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               field1:
- *                 type: string
- *               field2:
- *                 type: number
  *     responses:
  *       200:
- *         description: Portfolio details updated successfully.
+ *         description: Successful response
  *         content:
  *           application/json:
  *             schema:
@@ -52,17 +60,11 @@ const router = express.Router();
  *                 message:
  *                   type: string
  *       404:
- *         description: Portfolio details not found.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 error:
- *                   type: string
+ *         description: Requested user not found
  */
+router.get("/portfolio/:userId", getUserById);
 
-router.put("/profile-details/:id", updatePortfolioDetails);
+
 
 /**
  * @swagger
@@ -116,50 +118,5 @@ router.post(
   validateCreatePortfolioDetails(createPorfolioDataSchema),
   createProfileController
 );
-
-/**
- * @swagger
- * /api/profile-details/{id}:
- *   delete:
- *     summary: Delete a Portfolio Profile details
- *     description: Delete a user's Portfolio Profile details by providing its ID.
- *     tags: [Portfolio]
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         description: The ID of Portfolio to delete.
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: Successful response
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *       404:
- *         description: Not found
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 error:
- *                   type: string
- *       500:
- *         description: Internal error
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 error:
- *                   type: string
- */
-router.delete("/profile-details/:id", deletePortfolioDetails);
 
 module.exports = router;
