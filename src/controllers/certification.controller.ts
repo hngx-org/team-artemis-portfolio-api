@@ -1,21 +1,54 @@
 import { Request, Response, NextFunction } from "express";
 import { success, error } from "../utils/response.util";
 import { updateACertificate } from "../services/certification.service";
+// import { CertificationInterface } from "../interfaces/cerification.interface"
 
+interface CertificationInterface {
+   title: string
+   year: string
+   organization: string
+   url: string
+   description: string   
+}
 
+const isValidCertification = (payload: any): payload is CertificationInterface => {
+   return (
+     typeof payload.title === "string" &&
+     typeof payload.year === "string" &&
+     typeof payload.organization === "string" &&
+     typeof payload.url === "string" &&
+     typeof payload.description === "string"
+   );
+};
+ 
 export const updateCertificate = async (req: Request, res: Response) => {
    try {
       const id = parseInt(req.params.id)
       const userId = req.params.userId
+      const payload = req.body
 
-      if (!id || !userId) {
-         return (res as any).status(400).json({
+      if (!id || typeof id !== "number" || !userId || typeof userId !== "string") {
+         return res.status(400).json({
            success: false, 
-           message: "Please provide as a parameter an integer id"
+           message: "Please provide an integer id and string user id as parameters"
          })
       }
 
-      const data = await updateACertificate(id, userId, req.body)
+      if (!isValidCertification(payload)) {
+         return res.status(400).json({
+            success: false,
+            message: "Payload should be in the format below",
+            format: {
+               title: "string",
+               year: "string",
+               organization: "string",
+               url: "string",
+               description: "string",
+            }
+         });
+      };
+
+      const data = await updateACertificate(id, userId, payload)
       if (data.successful) {
          success(res, data)
       } else {

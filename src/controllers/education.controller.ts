@@ -1,55 +1,64 @@
-import { Request, RequestHandler, Response } from "express";
+import { Request, RequestHandler, Response, NextFunction } from "express";
 import { connectionSource } from "../database/data-source";
 import { EducationDetail } from "../database/entity/model";
 import { createEducationDetail } from "../services/education.service";
+import { EducationDetailData } from "../interfaces/education.interface";
+import { User } from "../database/entity/user";
+
+import {
+  CustomError,
+  NotFoundError,
+  BadRequestError,
+  UnauthorizedError,
+  ForbiddenError,
+  InternalServerError,
+  MethodNotAllowedError,
+  errorHandler,
+} from "../middlewares";
 
 // Endpoint to fetch the education section
-const fetchEducationDetail: RequestHandler = async (req, res) => {
+const fetchUserEducationDetail: RequestHandler = async (req, res, next) => {
+  // Add 'next' parameter
   const educationRepository = connectionSource.getRepository(EducationDetail);
 
   try {
     const id = req.params.id;
 
-    const educationDetails = await educationRepository.find({
-      where: { userId: id },
-      // Relationship has not been modelled yet... Uncomment the code once the relationship between education detail and degree, section and user table have been established
-      // relations: ["degree", "section", "user"],
-    });
+    if (!id) {
+      throw new Error("User ID is required");
+    }
 
-    res.status(200).json({ educationDetails });
+    try {
+      const educationDetails = await educationRepository.find({
+        where: { userId: id },
+        // Relationship has not been modeled yet... Uncomment the code once the relationship between education detail and degree, section, and user tables have been established
+        // relations: ["degree", "section", "user"],
+      });
+
+      // Send a success response
+      res.status(200).json({ educationDetails });
+    } catch (error) {
+      // Handle the database query error (e.g., QueryFailedError)
+      console.log("Error fetching education details:", error.message);
+      const customError = new CustomError(error.message, 500);
+      res.status(customError.statusCode).json({ err: customError.message });
+      next(customError); // Pass the custom error to the error handler
+    }
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    // Handle other types of errors or pass them to the error handler
+    next(error);
   }
 };
-
-// Define a Data Transfer Object (DTO) for updating EducationDetail
-export interface UpdateEducationDetailDTO {
-  fieldOfStudy?: string;
-  school?: string;
-  from?: string;
-  to?: string;
-  description?: string;
-  degreeId?: number;
-  userId?: string;
-  sectionId?: number;
-}
 
 // Get the repository for the EducationDetail entity
 const educationDetailRepository =
   connectionSource.getRepository(EducationDetail);
 
-const createEducationDetailController = async (req: Request, res: Response) => {
+const createEducationDetailController = async (req, res, next) => {
   try {
-    const {
-      degreeId,
-      fieldOfStudy,
-      school,
-      from,
-      description,
-      to,
-      userId,
-      sectionId,
-    } = req.body;
+    const userId = req.params.id;
+    const { degreeId, fieldOfStudy, school, from, description, to, sectionId } =
+      req.body as EducationDetailData;
 
     // Define an array of required fields
     const requiredFields = [
@@ -59,18 +68,31 @@ const createEducationDetailController = async (req: Request, res: Response) => {
       "from",
       "description",
       "to",
-      "userId",
       "sectionId",
     ];
-    // Add more fields as needed
 
     // Check for missing fields
     const missingFields = requiredFields.filter((field) => !req.body[field]);
 
     if (missingFields.length > 0) {
-      return res.status(400).json({
-        error: `The following fields are missing: ${missingFields.join(", ")}`,
-      });
+      // Create a CustomError with a 400 status code
+      const err = new CustomError(
+        `Missing fields: ${missingFields.join(", ")}`,
+        400
+      );
+      res.status(err.statusCode).json({ err: err.message });
+    }
+
+    // Get the user by userId
+    const userRepository = connectionSource.getRepository(User);
+    const user = await userRepository.findOne({ where: { id: userId } });
+
+    if (!user) {
+      // Create a CustomError with a 404 status code
+      const err = new NotFoundError(
+        "Error creating education detail: User not found"
+      );
+      res.status(err.statusCode).json({ err: err.message });
     }
 
     // Call the service function to create an education detail
@@ -85,76 +107,123 @@ const createEducationDetailController = async (req: Request, res: Response) => {
       sectionId,
     });
 
-    // Return the created education detail as a JSON response
-    res.status(201).json({ educationDetail });
+    const response = {
+      message: "Successfully created education detail",
+      status: "success",
+      statusCode: 201,
+      educationDetail,
+    };
+
+    res.status(201).json(response);
   } catch (error) {
     console.error("Error creating education detail:", error.message);
-    res.status(500).json({ error: error.message });
+    next(error);
   }
 };
 
-const updateEducationDetail = async (req: Request, res: Response) => {
+// get education detail by id
+const getEducationDetailById = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const id = parseInt(req.params.id);
-    console.log("starting");
 
-    // Find the existing education detail by ID
+    // Attempt to fetch education details
     const educationDetail = await educationDetailRepository.findOne({
       where: { id },
     });
-    console.log("almost found");
 
+    // If the education detail is not found, you can throw a NotFoundError
     if (!educationDetail) {
-      return res.status(404).json({ message: "Education not found" });
+      throw new NotFoundError("Education detail not found");
     }
 
-    console.log("found");
+    // Send a success response
+    res.status(200).json({ educationDetail });
+  } catch (error) {
+    console.error("Error fetching education detail:", error.message);
+    next(error);
+  }
+};
 
-    // Validate and apply updates from the DTO
-    const updateData = req.body as UpdateEducationDetailDTO;
+const updateEducationDetail = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const id = parseInt(req.params.id);
 
-    if (updateData.fieldOfStudy)
-      educationDetail.fieldOfStudy = updateData.fieldOfStudy;
-    if (updateData.school) educationDetail.school = updateData.school;
-    if (updateData.from) educationDetail.from = updateData.from;
-    if (updateData.to) educationDetail.to = updateData.to;
-    if (updateData.description)
-      educationDetail.description = updateData.description;
-    if (updateData.degreeId) educationDetail.degreeId = updateData.degreeId;
-    if (updateData.userId) educationDetail.userId = updateData.userId;
-    if (updateData.sectionId) educationDetail.sectionId = updateData.sectionId;
+    const educationDetail = await educationDetailRepository.findOne({
+      where: { id },
+    });
+
+    if (!educationDetail) {
+      throw new NotFoundError("Education detail not found");
+    }
+
+    const updateData = req.body;
+
+    // Dynamic updates based on the updateData object
+    for (const key in updateData) {
+      if (updateData.hasOwnProperty(key)) {
+        educationDetail[key] = updateData[key];
+      }
+    }
 
     // Save the updated education detail
     await educationDetailRepository.save(educationDetail);
+
+    console.log("Education detail updated successfully");
 
     res.status(200).json({
       message: "Education detail updated successfully",
       educationDetail,
     });
   } catch (error) {
-    console.error("Error updating education detail:", error);
+    console.error("Error updating education detail:", error.message);
+    next(error);
+  }
+};
 
-    if (error instanceof SyntaxError) {
-      // Handle JSON parsing error
-      return res
-        .status(400)
-        .json({ message: "Invalid JSON format in request body" });
-    } else if (error.code === "23505") {
-      // Handle duplicate key constraint violation (unique constraint violation)
-      return res
-        .status(409)
-        .json({ message: "Duplicate key value in the database" });
-    } else if (error.code === "22P02") {
-      // Handle invalid integer format error
-      return res.status(400).json({ message: "Invalid ID format" });
+// Delete Education Controller
+const deleteEducationDetail = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const id = parseInt(req.params.id);
+
+    // Find the existing education detail by ID
+    const educationDetail = await educationDetailRepository.findOne({
+      where: { id },
+    });
+
+    if (!educationDetail) {
+      throw new NotFoundError("Education detail not found");
     }
 
-    res.status(500).json({ message: "Internal server error" });
+    // Delete the education detail
+    await educationDetailRepository.remove(educationDetail);
+
+    res.status(204).json({
+      message: "Education detail deleted successfully",
+      educationDetail,
+    });
+    console.log("Education detail deleted successfully");
+  } catch (error) {
+    console.error("Error deleting education detail:", error);
+    next(error);
   }
 };
 
 export {
   createEducationDetailController,
   updateEducationDetail,
-  fetchEducationDetail,
+  getEducationDetailById,
+  deleteEducationDetail,
+  fetchUserEducationDetail,
 };

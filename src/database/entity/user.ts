@@ -6,7 +6,7 @@ import {
   OneToMany,
 } from "typeorm";
 
-import { SocialUser } from "./model";
+import { Language, SocialUser } from "./model";
 @Entity({ name: "user" })
 export class User {
   @PrimaryGeneratedColumn("uuid")
@@ -55,12 +55,14 @@ export class User {
   })
   refreshToken: string;
 
+  @OneToMany(() => Language, (language) => language.user, { cascade: true })
+  languages: Language[];
+
   @CreateDateColumn({
     type: "timestamp",
     default: () => "CURRENT_TIMESTAMP",
     name: "created_at",
   })
-  // @OneToMany(() => SocialUser, (socialUser) => socialUser.userId)
-  socialUsers: string;
   createdAt: Date;
+  socialUsers: string;
 }

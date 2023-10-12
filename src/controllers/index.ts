@@ -13,3 +13,5 @@ export * from "./profile.controller";
 export * from "./education.controller";
 export * from "./settings.controller";
 export * from "./custom.controller";
+export * from "./contact.controller";
+export * from "./award.controller"

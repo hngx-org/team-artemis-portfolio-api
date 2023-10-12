@@ -1,6 +1,6 @@
 export interface CertificationInterface {
    title: string
-   year: number
+   year: string
    organization: string
    url: string
    description: string   

@@ -1,12 +1,15 @@
-// this is an example file
 import express from "express";
 import multer from "multer";
 import {
   createProfileController,
-  deletePortfolioDetails,
-  updatePortfolioDetails,
-  uploadProfileImageController,
+  getAllUsers,
+  getUserById,
+  uploadImageController,
 } from "../controllers";
+import {
+  createPorfolioDataSchema,
+  validateCreatePortfolioDetails,
+} from "../middlewares/profile.zod";
 
 const storage = multer.memoryStorage();
 const uploads = multer({ storage }).array("images", 1);
@@ -15,20 +18,14 @@ const router = express.Router();
 
 /**
  * @swagger
- * /profile/image/upload:
- *   post:
- *     summary: Upload a profile image
- *     description: Upload a user's profile image using a POST request.
- *     consumes:
- *       - multipart/form-data
- *     parameters:
- *       - in: formData
- *         name: images
- *         type: file
- *         description: The profile image to upload (one file allowed).
+ * /api/users:
+ *   get:
+ *     summary: Get all users
+ *     description: Retrieve a list of all users' portfolio details.
+ *     tags: [User Portfolio Details]
  *     responses:
  *       200:
- *         description: Profile image uploaded successfully.
+ *         description: Successful response
  *         content:
  *           application/json:
  *             schema:
@@ -36,59 +33,66 @@ const router = express.Router();
  *               properties:
  *                 message:
  *                   type: string
- *                   description: A success message.
- *       400:
- *         description: Bad request. The uploaded file may not be valid.
+ */
+router.get("/users", getAllUsers);
+
+/**
+ * @swagger
+ * /api/users/{userId}:
+ *   get:
+ *     summary: Get user details by ID
+ *     description: Retrieve a user's portfolio details by providing their ID.
+ *     tags: [User Portfolio Details]
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         description: The ID of the user whose portfolio details are to be retrieved.
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Successful response
  *         content:
  *           application/json:
  *             schema:
  *               type: object
  *               properties:
- *                 error:
+ *                 message:
  *                   type: string
- *                   description: An error message.
- *     tags:
- *       - Profile
- *     multipart: true
+ *       404:
+ *         description: Requested user not found
  */
-router.post("/profile/image/upload", uploads, uploadProfileImageController);
-
-// Update portfolio details
-router.put("/profile-details/:id", updatePortfolioDetails);
+router.get("/users/:userId", getUserById);
 
 /**
  * @swagger
- * /profile/{userId}:
+ * /api/profile/{userId}:
  *   post:
  *     summary: Create Portfolio profile
+ *     description: Create a portfolio.
+ *     tags: [User Portfolio Details]
  *     parameters:
  *       - in: path
  *         name: userId
  *         required: true
- *         description: The id of the user.
+ *         description: The ID of the user.
+ *         type: uuid
+ *       - in: body
+ *         name: createPortfolioDetails
+ *         description: New portfolio detail
+ *         required: true
  *         schema:
- *           type: string
- *     requestBody:
- *       description: New profile detail data
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - name
- *               - trackId
- *               - city
- *               - country
- *             properties:
- *               name:
- *                 type: string
- *               trackId:
- *                 type: number
- *               city:
- *                 type: string
- *               country:
- *                 type: string
+ *           type: object
+ *           properties:
+ *             name:
+ *               type: string
+ *             city:
+ *               type: string
+ *             country:
+ *               type: string
+ *             trackId:
+ *               type: string
  *     responses:
  *       200:
  *         description: Successful response
@@ -108,57 +112,11 @@ router.put("/profile-details/:id", updatePortfolioDetails);
  *               properties:
  *                 error:
  *                   type: string
- *     tags:
- *       - Profile
  */
-router.post("/profile/:userId", createProfileController);
-
-// delete portfolio details
-
-router.delete("/profile-details/:id", deletePortfolioDetails);
-
-/**
- * @swagger
- * /profile-details/:id:
- *   delete:
- *     summary: Delete a Portfolio Profile details.
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         description: The ID of Portfolio to delete.
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: Successful response
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *       404:
- *         description: Not found
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 error:
- *                   type: string
- *       500:
- *         description: Internal error
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 error:
- *                   type: string
- *     tags:
- *       - Portfolio
- */
+router.post(
+  "/profile/:userId",
+  validateCreatePortfolioDetails(createPorfolioDataSchema),
+  createProfileController
+);
 
 module.exports = router;

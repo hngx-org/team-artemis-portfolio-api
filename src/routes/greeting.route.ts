@@ -1,4 +1,3 @@
-// this is an example file
 import express, { Router } from "express";
 import { sayHelloController } from "../controllers/greeting.controller";
 
@@ -9,6 +8,8 @@ const router: Router = express.Router();
  * /:
  *   get:
  *     summary: Get a greeting message
+ *     description: Retrieve a greeting message using a GET request.
+ *     tags: [Greeting]
  *     responses:
  *       200:
  *         description: Successful response
@@ -19,8 +20,6 @@ const router: Router = express.Router();
  *               properties:
  *                 message:
  *                   type: string
- *     tags:
- *       - Greeting
  */
 router.get("/", sayHelloController);
 

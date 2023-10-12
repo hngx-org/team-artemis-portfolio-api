@@ -2,18 +2,19 @@ import { Router } from "express";
 import {
   createNotificationSettingController,
   deleteUserAccount,
-  createAccountSettingController,
-  updateUser,
+  updateUserAccountSettingController,
   updateNotificationSettings,
 } from "../controllers/settings.controller";
+import { validateUserId, validate } from "../services";
 
 const router = Router();
 
 /**
  * @swagger
- * /createAccountSetting:
- *   put:
- *     summary: Create account settings
+ * /api/update-user-account-settings:
+ *   patch:
+ *     summary: update account settings
+ *     description: update user account password settings.
  *     requestBody:
  *       description: New account settings
  *       required: true
@@ -50,21 +51,25 @@ const router = Router();
  *                 error:
  *                   type: string
  *     tags:
- *       - User
+ *       - Settings
  */
 
-router.put("/createAccountSetting", createAccountSettingController);
+router.patch(
+  "/update-user-account-settings",
+  updateUserAccountSettingController
+);
 
 /**
  * @swagger
- * /setNotificationDetails/{id}:
+ * /api/set-notification-settings/{userId}:
  *   post:
- *     summary: Create notification settings by ID
+ *     summary: Create notification settings by User ID
+ *     description: Create user notification settings by providing the User ID.
  *     parameters:
  *       - in: path
- *         name: id
+ *         name: userId
  *         required: true
- *         description: The unique ID of the user detail to create its settings.
+ *         description: The unique ID of the user for whom to create notification settings.
  *         schema:
  *           type: string
  *     requestBody:
@@ -105,24 +110,27 @@ router.put("/createAccountSetting", createAccountSettingController);
  *                 error:
  *                   type: string
  *     tags:
- *       - NotificationSetting
+ *       - Settings
  */
 
 router.post(
-  "/setNotificationDetails/:userId",
+  "/set-notification-settings/:userId",
+  validateUserId,
+  validate,
   createNotificationSettingController
 );
 
 /**
  * @swagger
- * /deleteAccountDetails/{id}:
- *   post:
- *     summary: delete account by ID
+ * /api/delete-user-account/{userId}:
+ *   delete:
+ *     summary: Delete user account by ID
+ *     description: Delete user account by providing the User ID.
  *     parameters:
  *       - in: path
- *         name: id
+ *         name: userId
  *         required: true
- *         description: The unique ID of the user detail to delete its account.
+ *         description: The unique ID of the user for whom to delete the account.
  *     responses:
  *       200:
  *         description: Successful response
@@ -143,77 +151,36 @@ router.post(
  *                 error:
  *                   type: string
  *     tags:
- *       - User
+ *       - Settings
  */
 
-router.delete("/deleteAccountDetails/:userId", deleteUserAccount);
+router.delete(
+  "/delete-user-account/:userId",
+  validateUserId,
+  validate,
+  deleteUserAccount
+);
 
 /**
  * @swagger
- * /updateUser/{id}:
- *   patch:
- *     summary: Update User Information
- *     description: Update user email and password.
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         description: The ID of the user to update.
- *         schema:
- *           type: string
- *           format: uuid
- *
- *     requestBody:
- *       description: New user detail data
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               email:
- *                 type: string
- *               password:
- *                 type: string
- *     responses:
- *       200:
- *         description: User updated successfully.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *       400:
- *         description: Bad request. User does not exist or email is the same as the current one.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 error:
- *                   type: string
- *     tags:
- *       - Update User
- */
-
-router.patch("/settings/:id", updateUser);
-
-/**
- * @swagger
- * /updateNotificationSettings/{id}:
+ * /api/update-notification-settings/{userId}/{id}:
  *   patch:
  *     summary: Update Notification Settings
  *     description: Update user notification settings.
  *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         description: The User's ID to update the notification settings .
+ *         schema:
+ *           type: string
  *       - in: path
  *         name: id
  *         required: true
  *         description: The ID of the notification settings to update.
  *         schema:
  *           type: integer
- *     request:
+ *     requestBody:
  *       description: New notification settings data
  *       required: true
  *       content:
@@ -259,9 +226,12 @@ router.patch("/settings/:id", updateUser);
  *                 error:
  *                   type: string
  *     tags:
- *       - Update Notification Settings
+ *       - Settings
  */
 
-router.patch("/settings/notification/:id", updateNotificationSettings);
+router.patch(
+  "/update-notification-settings/:userId/:id",
+  updateNotificationSettings
+);
 
 module.exports = router;

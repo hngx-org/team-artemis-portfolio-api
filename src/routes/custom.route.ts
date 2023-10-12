@@ -4,15 +4,67 @@ import {
   findAll,
   findOne,
   createCustomField,
+  updateCustomField,
   findOneCustomField,
   deleteCustomSection,
+  createSection,
+  validateSchema,
+  sectionSchema,
+  customUserSectionSchema,
+  customFieldSchema,
+  fieldsSchema,
 } from "../controllers/custom.controller";
 
 const router = express.Router();
 
 /**
  * @swagger
- * /custom:
+ * /api/section:
+ *   post:
+ *     summary: Add custom section
+ *     description: Add a custom section for a user
+ *     parameters:
+ *       - in: formData
+ *         name: name
+ *         type: string
+ *         description: must be a string
+ *       - in: formData
+ *         name: description
+ *         type:  string
+ *         description: it's optional
+ *       - in: formData
+ *         name: meta
+ *         type:  string
+ *         description: it's optional
+ *     responses:
+ *       200:
+ *         description: Success
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: A success message.
+ *       400:
+ *         description: Bad request. Please fill all fields
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: An error message.
+ *     tags:
+ *       - custom
+ */
+router.post("/section", validateSchema(sectionSchema), createSection);
+
+/**
+ * @swagger
+ * /api/custom:
  *   post:
  *     summary: Add custom section
  *     description: Add a custom section for a user
@@ -49,10 +101,10 @@ const router = express.Router();
  *     tags:
  *       - custom
  */
-router.post("/custom", create);
+router.post("/custom", validateSchema(customUserSectionSchema), create);
 /**
  * @swagger
- * /custom:
+ * /api/custom:
  *   get:
  *     summary: Get all Custom records for  user
  *     description: Get custom fields
@@ -73,7 +125,7 @@ router.post("/custom", create);
 router.get("/custom", findAll);
 /**
  * @swagger
- * /custom/{id}:
+ * /api/custom/{id}:
  *   get:
  *     summary: Get single custom record
  *     parameters:
@@ -98,29 +150,38 @@ router.get("/custom", findAll);
  *       - custom
  */
 router.get("/custom/:id", findOne);
+
 /**
  * @swagger
- * /custom/field:
+ * /api/custom/field:
  *   post:
  *     summary: Add custom field section
- *     description: Add a custom field in a section usin
+ *     description: Add custom fields in a section using an array
  *     parameters:
  *       - in: formData
- *         name: fieldType
- *         type: string
- *         description: must be a string
- *       - in: formData
- *         name: customSectionId
- *         type:  number
- *         description: must be a number
- *       - in: formData
- *         name: fieldName
- *         type:  string
- *         description: must be a string
- *       - in: formData
- *         name: value
- *         type:  string
- *         description: must be a string
+ *         name: fields
+ *         description: Array of custom fields
+ *         required: true
+ *         type: array
+ *         items:
+ *           type: object
+ *           properties:
+ *             fieldType:
+ *               type: string
+ *               description: Must be a string
+ *             customSectionId:
+ *               type: number
+ *               description: Must be a number
+ *             customUserSectionId:
+ *               type: number
+ *               description: Must be a number
+ *             fieldName:
+ *               type: string
+ *               description: Must be a string
+ *             value:
+ *               type: string
+ *               nullable: true
+ *               description: Must be a string (nullable)
  *     responses:
  *       200:
  *         description: Success
@@ -131,7 +192,7 @@ router.get("/custom/:id", findOne);
  *               properties:
  *                 message:
  *                   type: string
- *                   description: A success message.
+ *                   description: A success message
  *       400:
  *         description: Bad request. Please fill all fields
  *         content:
@@ -141,15 +202,15 @@ router.get("/custom/:id", findOne);
  *               properties:
  *                 error:
  *                   type: string
- *                   description: An error message.
+ *                   description: An error message
  *     tags:
  *       - custom
  */
-router.post("/custom/field", createCustomField);
+router.post("/custom/field", validateSchema(fieldsSchema), createCustomField);
 
 /**
  * @swagger
- * /custom/field/{id}:
+ * /api/custom/field/{id}:
  *   get:
  *     summary: Get single custom field record
  *     parameters:
@@ -176,20 +237,31 @@ router.post("/custom/field", createCustomField);
  */
 router.get("/custom/field/:id", findOneCustomField);
 
-
 /**
  * @swagger
  * /api/custom-section/{id}:
  *   delete:
  *     summary: Delete a custom section by ID
  *     description: Delete a custom section by providing its ID.
- *     tags: [Skills]
  *     parameters:
+ *       - in: header
+ *         name: Authorization
+ *         type: string
+ *         description: Optional authorization header
  *       - in: path
  *         name: id
  *         description: The ID of the custom section to delete.
  *         required: true
  *         type: integer
+ *       - in: body
+ *         name: userId
+ *         description: user id of the user that wants to delete a section. {will be removed once the auth middleware is implemented}
+ *         required: true
+ *         schema:
+ *           type: object
+ *           properties:
+ *             userId:
+ *               type: string
  *     responses:
  *       200:
  *         description: Custom Section deleted successfully.
@@ -243,7 +315,95 @@ router.get("/custom/field/:id", findOneCustomField);
  *                   example: "Error deleting Custom Section"
  *                 data:
  *                   type: null
+ *     tags:
+ *       - custom
  */
-router.delete("/custom-section/:id", deleteCustomSection)
+router.delete("/custom-section/:id", deleteCustomSection);
+
+/**
+ * @swagger
+ * /api/custom/field/{id}:
+ *   put:
+ *     summary: Update a custom field by ID
+ *     description: Update a custom field by providing its ID and the new field data.
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         description: The ID of the custom field to update.
+ *         required: true
+ *         schema:
+ *           type: string
+ *       - in: formData
+ *         name: fieldType
+ *         type: string
+ *         description: The updated field type.
+ *       - in: formData
+ *         name: customSectionId
+ *         type: number
+ *         description: The updated custom section ID.
+ *       - in: formData
+ *         name: fieldName
+ *         type: string
+ *         description: The updated field name.
+ *       - in: formData
+ *         name: value
+ *         type: string
+ *         description: The updated field value.
+ *     responses:
+ *       200:
+ *         description: Custom Field updated successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Success"
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     field:
+ *                       type: object
+ *                       example:
+ *                         id: 1
+ *                         fieldType: "UpdatedFieldType"
+ *                         fieldName: "UpdatedFieldName"
+ *                         customSectionId: 2
+ *                         value: "UpdatedValue"
+ *       400:
+ *         description: Bad request. Please provide valid field data.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "Invalid input data"
+ *       404:
+ *         description: Custom Field not found.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "Custom Field not found"
+ *       500:
+ *         description: Error updating Custom Field.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "Error updating Custom Field"
+ *     tags:
+ *       - custom
+ */
+router.put("/custom/field/:id", updateCustomField);
 
 module.exports = router;
