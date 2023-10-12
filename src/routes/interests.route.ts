@@ -79,6 +79,64 @@ const interestSchema = z.object({
  */
 
 router.post("/interests", validateSchema(interestSchema), createInterest);
+
+/**
+ * @swagger
+ * /api/interests/{userId}:
+ *   get:
+ *     summary: Get interest details
+ *     description: Get details of user interest.
+ *     tags: [Interests]
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The ID of the user for whom to retrieve interest details.
+ *     responses:
+ *       200:
+ *         description: Successful response with user interest details.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 successful:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: object
+ *                   example: {} // Provide an example of the interest details response
+ *       500:
+ *         description: Internal server error while retrieving interests.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 successful:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Internal server error occurred."
+ *                 error:
+ *                   type: string
+ *                   example: "Error message details"
+ *       400:
+ *         description: Invalid userId format.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Invalid userId format. Please provide a valid user ID."
+ *                 error:
+ *                   type: string  
+ */
 router.get("/interests/:userId", getInterests);
 
 module.exports = router;
