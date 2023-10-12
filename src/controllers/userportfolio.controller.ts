@@ -1,5 +1,6 @@
 import { Request, Response, RequestHandler } from "express";
 import { connectionSource } from "../database/data-source";
+import { validate as isValidUUID } from "uuid";
 import {
   PortfolioDetails,
   AboutDetail,
@@ -10,6 +11,7 @@ import {
   SkillsDetail,
   WorkExperienceDetail,
 } from "../database/entity/model";
+import { NotFoundError, BadRequestError } from "../middlewares/index";
 
 const portfolioDetailsRepository =
   connectionSource.getRepository(PortfolioDetails);
@@ -24,6 +26,10 @@ export interface UpdatePortfolioDetailsDTO {
 const getPortfolioDetails = async (req: Request, res: Response) => {
   try {
     const { userId } = req.params;
+    if (!userId || !isValidUUID(`${userId}`)) {
+      throw new BadRequestError("userId must be a UUID");
+    }
+
     const workExperience = await connectionSource.manager.find(
       WorkExperienceDetail,
       { where: { userId } }
@@ -60,13 +66,17 @@ const getPortfolioDetails = async (req: Request, res: Response) => {
       sections,
     });
   } catch (error) {
-    res.status(404).json({ message: "Portfolio not found" });
+    if (error instanceof BadRequestError) {
+      return res.status(error.statusCode).json({ message: error.message });
+    } else {
+      res.status(500).json({ message: "Internal server error" });
+    }
   }
 };
 
 const getAllPortfolioDetails = async (req: Request, res: Response) => {
   const PortfolioDetails = await portfolioRepository.find();
-  return res.json(PortfolioDetails);
+  return res.json({ PortfolioDetails });
 };
 
 // Export the updatePortfolioDetails function
@@ -76,6 +86,9 @@ const updatePortfolioDetails: RequestHandler = async (
 ) => {
   try {
     const id = parseInt(req.params.id);
+    if (!id) {
+      throw new BadRequestError("Must provide an ID");
+    }
 
     // Find the existing portfolio details by ID
     const portfolioDetails = await portfolioDetailsRepository.findOne({
@@ -83,7 +96,7 @@ const updatePortfolioDetails: RequestHandler = async (
     });
 
     if (!portfolioDetails) {
-      return res.status(404).json({ message: "Portfolio details not found" });
+      throw new NotFoundError("Portfolio details not found");
     }
 
     // Validate and apply updates from the DTO
@@ -101,7 +114,11 @@ const updatePortfolioDetails: RequestHandler = async (
       portfolioDetails,
     });
   } catch (error) {
-    console.error("Error updating portfolio details:", error);
+    if (error instanceof BadRequestError || error instanceof NotFoundError) {
+      res.status(error.statusCode).json({ message: error.message });
+    } else {
+      console.error("Error updating portfolio details:", error);
+    }
 
     if (error instanceof SyntaxError) {
       // Handle JSON parsing error
@@ -149,7 +166,11 @@ const deletePortfolioDetails: RequestHandler = async (
       portfolio,
     });
   } catch (error) {
-    res.status(500).json(error as Error);
+    if (error instanceof BadRequestError || error instanceof NotFoundError) {
+      res.status(error.statusCode).json({ message: error.message });
+    } else {
+      res.status(500).json(error as Error);
+    }
   }
 };
 
