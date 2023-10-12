@@ -52,14 +52,15 @@ export const getInterests: RequestHandler = async (req, res) => {
     }
   
       // Retrieve interests from the database for the specific userId
-      const interests = await interestRepository.find({ 
+      const interests = await interestRepository.findOne({ 
         where: { userId: String(userId) },
        });
-    
+      const interestArray = interests.interest.split(",")
     res
       .status(200).json({
         successful: true,
         data: interests,
+        interestArray
     });
   } catch (err) {
     console.error(err);
