@@ -1,6 +1,6 @@
 import express from "express";
 import { z } from "zod";
-import { createInterest } from "../controllers/interests.controller";
+import { createInterest, getInterests } from "../controllers/interests.controller";
 import { validateSchema } from "../middlewares/custom.zod";
 
 const router = express.Router();
@@ -79,5 +79,6 @@ const interestSchema = z.object({
  */
 
 router.post("/interests", validateSchema(interestSchema), createInterest);
+router.get("/interests/:userId", getInterests);
 
 module.exports = router;

@@ -56,8 +56,6 @@ const createAwardController = async (
       statusCode: 201,
       createdAward,
     }
-
-    res.status(201).json(response)
     return res.status(201).json(response)
   } catch (error) {
     console.error('Error creating award:', error.message)
