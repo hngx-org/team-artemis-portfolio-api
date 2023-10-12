@@ -33,24 +33,24 @@ const sectionIdSchema = z
     return true;
   });
 
-  export const validateSectionId = (sectionId: any, res: Response) => {
-    try {
-      const parsedSectionId = sectionIdSchema.parse(sectionId);
-  
-      if (!Number.isInteger(parsedSectionId)) {
-        throw new Error("Section ID must be a whole number (integer)");
-      }
-      if (parsedSectionId.toString().length > MAX_ID_LENGTH) {
-        throw new Error(`Section ID must have at most ${MAX_ID_LENGTH} digits`);
-      }
-      return true;
-    } catch (error: any) {
-      return res.status(400).json({
-        success: false,
-        message: error.message,
-      });
+export const validateSectionId = (sectionId: any, res: Response) => {
+  try {
+    const parsedSectionId = sectionIdSchema.parse(sectionId);
+
+    if (!Number.isInteger(parsedSectionId)) {
+      throw new Error("Section ID must be a whole number (integer)");
     }
-  };   
+    if (parsedSectionId.toString().length > MAX_ID_LENGTH) {
+      throw new Error(`Section ID must have at most ${MAX_ID_LENGTH} digits`);
+    }
+    return true;
+  } catch (error: any) {
+    return res.status(400).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
 
 export const deleteCustomSection = async (req: Request, res: Response) => {
   try {
@@ -165,11 +165,11 @@ const findAll = async (req: Request, res: Response) => {
 
 const findOne = async (req: Request, res: Response) => {
   const { id } = req.params;
-    try {
-      const sectionId = parseInt(req.params.id);
-      if (!validateSectionId(sectionId, res)) {
-        return;
-      }
+  try {
+    const sectionId = parseInt(req.params.id);
+    if (!validateSectionId(sectionId, res)) {
+      return;
+    }
     const record = await customRepository.findOne({
       where: { id: Number(id) },
     });
@@ -198,11 +198,13 @@ const createCustomField = async (
 
         if (!section) {
           errors.push(`Invalid customSectionId for field: ${field.fieldName}`);
+          return;
         }
         if (!customUserSection) {
           errors.push(
             `Invalid customUserSectionId for field: ${field.fieldName}`
           );
+          return;
         }
 
         return customFieldRepository.save(field);
