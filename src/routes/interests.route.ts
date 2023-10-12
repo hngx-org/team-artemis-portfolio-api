@@ -6,30 +6,16 @@ import {
   updateInterest,
   deleteInterest,
 } from "../controllers/interests.controller";
-import { validateSchema } from "../middlewares/custom.zod";
 import {
+  validateCreateSchema,
   validateUpdateInterest,
   validateUserId,
+  createInterestSchema,
   updateInterestsSchema,
   userIdSchema,
 } from "../middlewares/interests.zod";
 
 const router = express.Router();
-
-// Create interest schema
-const interestSchema = z.object({
-  interests: z.array(
-    z.string({
-      required_error: "Interests are required",
-      invalid_type_error: "Interests must be a string",
-    })
-  ),
-  userId: z.string().uuid({ message: "userId must be a valid uuid" }),
-  sectionId: z.number({
-    required_error: "sectionId is required",
-    invalid_type_error: "sectionId must be a number",
-  }),
-});
 
 // Add interests
 
@@ -39,6 +25,8 @@ const interestSchema = z.object({
  *   post:
  *     description: Create section for user interests.
  *     tags: [Interests]
+ *     consumes:
+ *       - application/json
  *     parameters:
  *       - in: body
  *         name: InterestsDetails
@@ -50,7 +38,7 @@ const interestSchema = z.object({
  *             interests:
  *               type: array
  *               items:
- *                type: string
+ *                 type: string
  *               example: ["Sports", "Music"]
  *             userId:
  *               type: string
@@ -89,7 +77,11 @@ const interestSchema = z.object({
  *                   type: string
  */
 
-router.post("/interests", validateSchema(interestSchema), createInterest);
+router.post(
+  "/interests",
+  validateCreateSchema(createInterestSchema),
+  createInterest
+);
 router.get("/interests/:userId", getInterests);
 
 // Update interests
