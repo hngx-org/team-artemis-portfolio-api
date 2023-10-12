@@ -1,13 +1,15 @@
 import express from 'express'
-import { createAwardsController,
+import { validateCreateAwardData } from '../middlewares/award.zod';
+import { createAwardController,
         getAwardController,
+        getAllAwardsController,
         deleteAwardController
 } from '../controllers/award.controller'
 
 const router = express.Router()
 
-router.post('awards/:id', createAwardsController);
 
+router.post('/award/:userId', validateCreateAwardData, createAwardController)
 /**
  * @swagger
  * /api/awards/:id:
@@ -78,8 +80,9 @@ router.post('awards/:id', createAwardsController);
  *                 data:
  *                   type: null
  */
-router.get('/awards/:id', getAwardController);
+router.get('/award/:id', getAwardController);
 
+router.get('/awards', getAllAwardsController);
 /**
  * @swagger
  * /api/awards/:id:
@@ -111,6 +114,10 @@ router.get('/awards/:id', getAwardController);
  *                   type: string
  */
 
-router.delete('/awards/:id', deleteAwardController)
+router.delete('/award/:id', deleteAwardController)
+
+
+
+
 
 module.exports = router
