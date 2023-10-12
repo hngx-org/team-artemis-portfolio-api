@@ -115,7 +115,7 @@ export const updateWorkExperience: RequestHandler = async (
 
   if (!workId) {
     res.statusCode = 400;
-    return res.json({ message: "workExpId is missing from URL parameter" });
+    return res.json({ message: "workExpId must be provided as a parameter" });
   }
 
   const {
