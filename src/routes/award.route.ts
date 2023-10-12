@@ -134,7 +134,7 @@ router.get('/awards', getAllAwardsController);
  *     description: Delete award detail(s) of a user detail by ID
  *     tags: [Award]
  *     parameters:
- *       in: path
+ *       - in: path
  *         name: id
  *         required: true
  *         description: The ID of the award detail to delete.
