@@ -16,6 +16,7 @@ import {
 import { NotFoundError, BadRequestError, CustomError } from "../middlewares/index";
 import { User } from "../database/entity/user";
 import { success } from "../utils";
+import { start } from "repl";
 
 const portfolioDetailsRepository =
   connectionSource.getRepository(PortfolioDetails);
@@ -88,6 +89,8 @@ const updatePortfolioDetails: RequestHandler = async (req: Request, res: Respons
   try {
     const userId = req.params.userId;
     const { name, trackId, city, country } = req.body;
+
+    console.log("strting update profile route")
 
     if (!req.body) {
       throw new BadRequestError("No data provided");
