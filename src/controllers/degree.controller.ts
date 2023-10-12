@@ -4,7 +4,7 @@ import { Degree } from "../database/entity/model";
 import { DegreeDataSchema } from "../middlewares/degree.zod";
 import { getDegree } from "../services/degree.service";
 import { z } from "zod";
-
+import { NotFoundError } from "../middlewares/index";
 // Controller function to create a degree
 const createDegreeController = async (
   req: Request,
@@ -56,6 +56,27 @@ export const fetchDegree = async (
     const degree = await getDegree(id);
 
     return res.status(200).json(degree);
+  } catch (error) {
+    next(error);
+  }
+};
+
+// endpoint to fetch all degree
+export const fetchAllDegre = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const degreeRepository = connectionSource.getRepository(Degree);
+    const degrees = await degreeRepository.find();
+
+    if (!degrees) {
+      throw new NotFoundError("No degrees found");
+    }
+    res
+      .status(200)
+      .json({ message: "degrees gotten successfully", data: degrees });
   } catch (error) {
     next(error);
   }

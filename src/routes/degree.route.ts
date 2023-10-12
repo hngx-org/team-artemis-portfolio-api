@@ -2,6 +2,7 @@ import express from "express";
 import {
   createDegreeController,
   fetchDegree,
+  fetchAllDegre,
 } from "../controllers/degree.controller";
 
 const router = express.Router();
@@ -89,4 +90,37 @@ router.post("/degree", createDegreeController);
  *                   type: string
  */
 router.get("/degree/:id", fetchDegree);
+
+/**
+ * @swagger
+ * /api/degree:
+ *   get:
+ *     summary: Get all Degrees
+ *     description: Retrieve a list of all degrees.
+ *     tags: Degree]
+ *     responses:
+ *       200:
+ *         description: Successful response
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ * '404':
+ *         description: Not Found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 successful:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ */
+router.get("/degree", fetchAllDegre);
+
 module.exports = router;
