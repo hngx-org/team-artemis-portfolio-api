@@ -1100,6 +1100,7 @@ export class Section {
   customUserSections: CustomUserSection[];
 
   @ManyToOne(() => Template, (template) => template.sections)
+  @JoinColumn({ name: "templateId" }) // Specify the actual column name
   template: Template;
 }
 

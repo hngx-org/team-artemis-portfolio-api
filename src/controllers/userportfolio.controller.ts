@@ -73,7 +73,7 @@ const getPortfolioDetails = async (
     return next(error);
   }
 };
-
+//.
 const getAllPortfolioDetails = async (req: Request, res: Response) => {
   const PortfolioDetails = await portfolioRepository.find();
   return res.json({ PortfolioDetails });
