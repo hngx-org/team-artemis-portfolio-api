@@ -1,3 +1,4 @@
+import { resolve } from "path";
 import { connectionSource } from "../database/data-source";
 import { SocialUser, SocialMedia } from "../database/entity/model";
 import { User } from "../database/entity/user";
@@ -67,32 +68,56 @@ export const updateContact = async (
   }
 };
 
-export class SocialUserService {
-  async deleteContact(socialUserId: number) {
-    const socialUserRepository = connectionSource.getRepository(SocialUser);
-    const socialMediaRepository = connectionSource.getRepository(SocialMedia);
 
-    console.log(typeof socialUserId);
+// create contacts socials
+export const createContact = async (
+  socialMediaId: number,
+  url: string,
+  userId: string
+) => {
+  const socialRepository = connectionSource.getRepository(SocialUser);
 
-    const socialUser = await socialUserRepository.findOne({
-      where: { id: socialUserId },
+  //const errorResponse = await checkResourceAndPermission(socialId, userId);
+
+  // create the social contact
+  try {
+    const contactsRepo = connectionSource.getRepository(SocialUser);
+    const contact = contactsRepo.create({
+      url,
+      userId: userId,
+      socialMediaId: socialMediaId
+      
     });
+    const promise = new Promise(async (resolve, reject)=>{
+      try{
+        const data = await contactsRepo.save(contact)
+        console.log(data)
+        resolve(data)
+      }catch(err){
+        reject('failed to save')
+      }
+    })
 
-    if (!socialUser) {
-      throw new Error("Social User not found");
+      return promise;
+    
+  } catch (error) {
+    throw new Error("Error creating contact: " + error);
+  }
+};
+
+export const deleteContactService = async (
+  id: number
+) => {
+  try {
+    const socialUserRepo = connectionSource.getRepository(SocialUser);
+    const contactToDelete = await socialUserRepo.findOne({ where: { id: id } });
+
+      if (contactToDelete === null || contactToDelete === undefined) {
+      const error = new Error(`SocialUser with ID ${id} not found`);
+      return Promise.reject(error);
     }
-
-    const socialMedia = socialUser.socialMedia;
-    console.log(socialMedia);
-
-    await socialUserRepository.remove(socialUser);
-
-    const usersCount = await socialMediaRepository.count({
-      where: { id: socialMedia.id },
-    });
-
-    if (usersCount === 0) {
-      await socialMediaRepository.remove(socialMedia);
-    }
+    await socialUserRepo.remove(contactToDelete);
+  } catch (error) {
+    console.error("Error deleting skill: "+ error.message);
   }
 }

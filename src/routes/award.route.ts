@@ -1,8 +1,9 @@
 import express from 'express'
-import { createAwardsController } from '../controllers/award.controller'
+import { createAwardController } from '../controllers/award.controller'
+import { validateCreateAwardData } from '../middlewares/award.zod'
 
 const router = express.Router()
 
-router.post('awards/:id', createAwardsController)
+router.post('/award/:userId', validateCreateAwardData, createAwardController)
 
 module.exports = router

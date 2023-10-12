@@ -7,7 +7,10 @@ import {
   deleteEducationDetail,
 } from "../controllers/education.controller";
 
-import { validateUpdateData } from "../middlewares/education.zod";
+import {
+  validateCreateData,
+  validateUpdateData,
+} from "../middlewares/education.zod";
 
 const router = express.Router();
 
@@ -160,8 +163,11 @@ router.get("/education/:id", fetchUserEducationDetail);
  *                 data:
  *                   type: null
  */
-
-router.post("/education/:id", createEducationDetailController);
+router.post(
+  "/education/:id",
+  validateCreateData,
+  createEducationDetailController
+);
 
 /**
  * @swagger
@@ -211,7 +217,7 @@ router.get("/education/:id", getEducationDetailById);
 /**
  * @swagger
  * /api/updateEducationDetail/{id}:
- *   put:
+ *   patch:
  *     summary: Update education details for a user by its ID.
  *     description: Update education details for a user by its ID.
  *     tags: [Education]
@@ -221,6 +227,13 @@ router.get("/education/:id", getEducationDetailById);
  *         required: true
  *         description: The ID of the education detail to update.
  *         type: integer
+ *         schema:
+ *           type: integer
+ *           properties:
+ *             degreeId:
+ *               type: number
+ *         example:
+ *           id: 1
  *       - in: body
  *         name: educationDetails
  *         description: New education detail data
@@ -228,10 +241,6 @@ router.get("/education/:id", getEducationDetailById);
  *         schema:
  *           type: object
  *           properties:
- *             userId:
- *               type: string
- *             sectionId:
- *               type: number
  *             degreeId:
  *               type: number
  *             fieldOfStudy:
@@ -244,6 +253,13 @@ router.get("/education/:id", getEducationDetailById);
  *               type: string
  *             to:
  *               type: string
+ *         example:
+ *           degreeId: 1
+ *           fieldOfStudy: "Engineering"
+ *           school: "Unilag"
+ *           description: "Description"
+ *           from: "2023-10-12"
+ *           to: "2023-10-12"
  *     responses:
  *       200:
  *         description: Education details successfully updated.
@@ -264,7 +280,6 @@ router.get("/education/:id", getEducationDetailById);
  */
 router.patch(
   "/updateEducationDetail/:id",
-  // Call validateUpdateData as middleware to validate req.body
   validateUpdateData,
   updateEducationDetail
 );
