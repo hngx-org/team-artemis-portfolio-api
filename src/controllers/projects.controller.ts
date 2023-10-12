@@ -28,7 +28,7 @@ interface ProjectModel {
 }
 
 export const getAllProjects: RequestHandler = async (
-  _req: Request,
+  req: Request,
   res: Response
 ) => {
   try {

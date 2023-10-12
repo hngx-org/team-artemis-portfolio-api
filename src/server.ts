@@ -32,12 +32,10 @@ readdirSync("./src/routes").map((path) =>
   app.use("/api", require(`./routes/${path}`))
 );
 app.get("/", sayHelloController);
-
+app.use(errorHandler);
 const port = process.env.PORT || 3000;
 
 app.listen(port, () => {
   // console.log(entities);
   console.log(`Server is running on port ${port}`);
 });
-
-app.use(errorHandler);

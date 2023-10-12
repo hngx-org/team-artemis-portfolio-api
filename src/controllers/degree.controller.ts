@@ -1,23 +1,39 @@
 import { Request, Response, NextFunction } from "express";
 import { connectionSource } from "../database/data-source";
 import { Degree } from "../database/entity/model";
-import { getDegree } from "../services/degree.service";
+import { DegreeDataSchema } from "../middlewares/degree.zod";
+import { z } from "zod";
 
-export const fetchDegree = async (
+// Controller function to create a degree
+const createDegreeController = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    // check if there is id
-    // pass the id to the service
-    // return degreee to the client
+    // const { type } = req.body as DegreeData
 
-    const id = parseInt(req.params.id);
-    const degree = await getDegree(id);
+    const { type } = req.body;
+    const degreeType: string = type;
 
-    return res.status(200).json(degree);
+    // Validate the payload against the schema
+    DegreeDataSchema.parse({ type });
+
+    // Create a new degree instance and save it to the database
+
+    const degreeRepository = connectionSource.getRepository(Degree);
+    const degree = degreeRepository.create({ type: degreeType });
+    const createdDegree = await degreeRepository.save(degree);
+
+    return res.status(201).json(createdDegree);
   } catch (error) {
-    next(error);
+    if (error instanceof z.ZodError) {
+      res.status(400).json({ errors: error.errors });
+    } else {
+      res.status(500).json({ error: "Internal server error" });
+      next(error);
+    }
   }
 };
+
+export { createDegreeController };
