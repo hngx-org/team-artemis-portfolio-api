@@ -58,6 +58,8 @@ const errorHandler = (
   if (res.headersSent) {
     return next(err);
   }
+  res.setHeader('Content-Type', 'application/json');
+
 
   if (err instanceof SyntaxError) {
     res.status(400).json({ message: err.message });
