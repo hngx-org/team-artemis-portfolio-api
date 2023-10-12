@@ -13,7 +13,7 @@ export const postLanguageSchema = z.object({
       return arr.every((str) => str.length >= 1);
     },
     {
-      message: 'Each string in array must be at least 2 characters long',
+      message: 'Each string in array must be at least 1 characters long',
     }
   ),
 });
