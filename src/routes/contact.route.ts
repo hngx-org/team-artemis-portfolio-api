@@ -150,7 +150,27 @@ router.post('/contacts/', createContacts)
  *       - Contacts
  */
 router.delete('/contacts/:id', deleteContact)
-
+/**
+ * @swagger
+ * /api/socials:
+ *   post:
+ *     summary: Create a Social Media type 'requires admin privilegdes'
+ *     description: Create a new Social Media type.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: Social Media type created successfully
+ *       400:
+ *         description: Invalid input data
+ */
 router.post('/socials', createSocials)
 
 router.patch('/contact/:Id', updateContactController)
