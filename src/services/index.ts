@@ -5,4 +5,4 @@ export * from "./settings.service";
 export * from "./skills.service";
 export * from "./contact.service";
 export * from "./award.service"
-export * from "./certification.service"
+export * from "./certificate.service"

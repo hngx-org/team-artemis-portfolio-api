@@ -1,13 +1,13 @@
 import { connectionSource } from '../database/data-source'
 import { Certificate } from '../database/entity/model'
-import { CertificationInterface } from '../interfaces/cerification.interface'
+import { UpdateCertificateInterface } from '../interfaces/certification.interface'
 
 const certificationRepository = connectionSource.getRepository(Certificate)
 
 export const updateACertificate = async (
    id: number,
    userId: string,
-   payload: CertificationInterface
+   payload: UpdateCertificateInterface
 ) => {
    try {
       let certificateToUpdate = await certificationRepository.findOne({

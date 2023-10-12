@@ -1,11 +1,11 @@
-import { Request, Response, NextFunction } from "express";
+import { Request, Response } from "express";
 import { success, error } from "../utils/response.util";
-import { updateACertificate } from "../services/certification.service";
-import { CertificationInterface } from "../interfaces/cerification.interface"
+import { updateACertificate } from "../services/certificate.service";
+import { UpdateCertificateInterface } from "../interfaces/certification.interface"
 
 const uuidPattern = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
 
-const isValidCertification = (payload: any): payload is CertificationInterface => {
+const isValidCertification = (payload: any): payload is UpdateCertificateInterface => {
    return (
      typeof payload.title === "string" &&
      typeof payload.year === "string" &&

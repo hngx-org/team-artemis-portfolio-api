@@ -1,4 +1,4 @@
-export interface CertificationInterface {
+export interface UpdateCertificateInterface {
    title: string
    year: string
    organization: string
