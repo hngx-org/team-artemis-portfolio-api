@@ -1,9 +1,9 @@
 import {
   getAllUsers,
   getUserById,
-  retrievePortfolioController,
-  getAllPortfolios
-} from "../controllers/portfolio.controller";
+  getAllPortfolioDetails,
+  getPortfolioDetails,
+} from "../controllers/userportfolio.controller";
 import { Router } from "express";
 
 const router = Router();
@@ -59,7 +59,7 @@ router.get("/portfolio/:userId", getUserById);
 
 /**
  * @swagger
- * /api/retrieve-portfolio/{userId}:
+ * /api/portfolio/{userId}:
  *   get:
  *     summary: Get all portfolio details including sections
  *     description: Get request to retrieve all portfolio details for a user.
@@ -105,7 +105,7 @@ router.get("/portfolio/:userId", getUserById);
  *                   type: string
  *                   description: null
  */
-router.get("/retrieve-portfolio/:userId", retrievePortfolioController);
+router.get("/getPortfolioDetails/:userId", getPortfolioDetails);
 
 /**
  * @swagger
@@ -125,6 +125,6 @@ router.get("/retrieve-portfolio/:userId", retrievePortfolioController);
  *                 message:
  *                   type: string
  */
-router.get("/portfolios", getAllPortfolios);
+router.get("/portfolios", getAllPortfolioDetails);
 
 module.exports = router;
