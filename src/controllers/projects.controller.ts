@@ -1,10 +1,17 @@
 import { Project, Images, ProjectsImage } from "../database/entity/model";
 import { connectionSource } from "../database/data-source";
-import express, { Request, RequestHandler, Response } from "express";
+import express, { NextFunction, Request, RequestHandler, Response } from "express";
+import { error, success } from "../utils";
 import { cloudinaryService } from "../services/image-upload.service";
 import { updateProjectService } from "../services/project.service";
-import { success, error } from '../utils/response.util';
+import { z } from 'zod'
 
+
+import {
+  CustomError,
+  NotFoundError,
+  BadRequestError
+} from '../middlewares'
 
 const projectRepository = connectionSource.getRepository(Project);
 const imageRepository = connectionSource.getRepository(Images);
@@ -180,25 +187,31 @@ export const updateProjectController: RequestHandler = async (
     return error(res, "Project update failed");
   }
 };
-
-export const deleteProjectById: RequestHandler = async (
-  req: Request,
-  res: Response
-) => {
+export const deleteProjectController: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { id } = req.params;
-    if (!id) {
-      throw new Error("No project id provided");
+    const id = parseInt(req.params.id);
+    const projectDetail = await projectRepository.findOne({ where: { id } });
+
+    if (!projectDetail) {
+      const errorResponse = {
+        message: 'Project not Found!',
+      };
+      res.status(404).json(errorResponse);
+    } else {
+      const deletedProject = await projectRepository.delete({ id });
+
+      res.status(200).json({
+        message: 'Project deleted successfully',
+        deletedProject: projectDetail,
+      });
+      console.log('Project deleted successfully');
     }
-    const data = await projectRepository.delete({ id: +id });
-    if (!data.affected) {
-      throw new Error("Project not found");
-    }
-    success(res, data, "Project Deleted Successfully");
-  } catch (err) {
-    error(res, (err as Error).message);
+  } catch (error) {
+    console.error('Error deleting project detail', error);
+    next(error);
   }
 };
+
 
 // update project section
 export const updateProjectById: RequestHandler = async (

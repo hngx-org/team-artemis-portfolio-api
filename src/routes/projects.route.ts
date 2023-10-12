@@ -1,6 +1,7 @@
 import express, { Response, Request } from "express";
 import multer from "multer";
 import { error } from "../utils/response.util";
+import { ForbiddenError } from '../middlewares/index'
 
 const router = express.Router();
 const storage = multer.memoryStorage();
@@ -12,7 +13,7 @@ import {
   getProjectById,
   createProject,
   updateProjectById,
-  deleteProjectById,
+  deleteProjectController,
 } from "../controllers/projects.controller";
 
 /**
@@ -114,8 +115,8 @@ router.get("/projects/:id", getProjectById);
 router.post("/projects", function (req, res, next) {
   uploads(req, res, function (err) {
     if (err) {
-      error(res, "You can only upload a maximum of 10 images", 403);
-      return
+      const newForbbidenError = new ForbiddenError("You can only upload a maximum of 10 images");
+      res.status(newForbbidenError.statusCode).json({ error: newForbbidenError.message });
     }
     next();
   })
@@ -150,7 +151,7 @@ router.post("/projects", function (req, res, next) {
  *       - Project
  */
 
-router.delete("/projects/:id", deleteProjectById);
+router.delete("/projects/:id", deleteProjectController);
 
 /**
  * @swagger
