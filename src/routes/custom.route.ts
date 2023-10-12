@@ -7,25 +7,37 @@ import {
   updateCustomField,
   findOneCustomField,
   deleteCustomSection,
+  createSection,
+  validateSchema,
+  sectionSchema,
+  customUserSectionSchema,
+  customFieldSchema,
+  fieldsSchema,
 } from "../controllers/custom.controller";
 
 const router = express.Router();
 
 /**
  * @swagger
- * /api/custom:
+ * /api/section:
  *   post:
- *     summary: Add custom section
- *     description: Add a custom section for a user
- *     parameters:
- *       - in: formData
- *         name: userId
- *         type: string
- *         description: must be a uuid
- *       - in: formData
- *         name: sectionId
- *         type:  number
- *         description: must be a number
+ *     summary: Add section
+ *     description: Add a new section
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 description: required
+ *               description:
+ *                 type: string
+ *                 description: optional
+ *               meta:
+ *                 type: string
+ *                 description: optional
  *     responses:
  *       200:
  *         description: Success
@@ -36,7 +48,7 @@ const router = express.Router();
  *               properties:
  *                 message:
  *                   type: string
- *                   description: A success message.
+ *                   description: A success message
  *       400:
  *         description: Bad request. Please fill all fields
  *         content:
@@ -46,11 +58,55 @@ const router = express.Router();
  *               properties:
  *                 error:
  *                   type: string
- *                   description: An error message.
+ *                   description: An error message
  *     tags:
  *       - custom
  */
-router.post("/custom", create);
+router.post("/section", validateSchema(sectionSchema), createSection);
+
+/**
+ * @swagger
+ * /api/custom:
+ *   post:
+ *     summary: Add custom user section
+ *     description: Add a new custom user section
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               userId:
+ *                 type: string
+ *                 description: required must be a uuid
+ *               sectionId:
+ *                 type: number
+ *                 description: required must be an integer
+ *     responses:
+ *       200:
+ *         description: Success
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: A success message
+ *       400:
+ *         description: Bad request. Please fill all fields
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: An error message
+ *     tags:
+ *       - custom
+ */
+router.post("/custom", validateSchema(customUserSectionSchema), create);
 /**
  * @swagger
  * /api/custom:
@@ -99,29 +155,40 @@ router.get("/custom", findAll);
  *       - custom
  */
 router.get("/custom/:id", findOne);
+
 /**
  * @swagger
  * /api/custom/field:
  *   post:
  *     summary: Add custom field section
- *     description: Add a custom field in a section usin
- *     parameters:
- *       - in: formData
- *         name: fieldType
- *         type: string
- *         description: must be a string
- *       - in: formData
- *         name: customSectionId
- *         type:  number
- *         description: must be a number
- *       - in: formData
- *         name: fieldName
- *         type:  string
- *         description: must be a string
- *       - in: formData
- *         name: value
- *         type:  string
- *         description: must be a string
+ *     description: Add custom fields in a section using an array
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               fields:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     fieldType:
+ *                       type: string
+ *                       description: Must be a string
+ *                     customSectionId:
+ *                       type: number
+ *                       description: Must be a number
+ *                     customUserSectionId:
+ *                       type: number
+ *                       description: Must be a number
+ *                     fieldName:
+ *                       type: string
+ *                       description: Must be a string
+ *                     value:
+ *                       type: string
+ *                       nullable: true
+ *                       description: Must be a string (nullable)
  *     responses:
  *       200:
  *         description: Success
@@ -132,7 +199,7 @@ router.get("/custom/:id", findOne);
  *               properties:
  *                 message:
  *                   type: string
- *                   description: A success message.
+ *                   description: A success message
  *       400:
  *         description: Bad request. Please fill all fields
  *         content:
@@ -142,11 +209,11 @@ router.get("/custom/:id", findOne);
  *               properties:
  *                 error:
  *                   type: string
- *                   description: An error message.
+ *                   description: An error message
  *     tags:
  *       - custom
  */
-router.post("/custom/field", createCustomField);
+router.post("/custom/field", validateSchema(fieldsSchema), createCustomField);
 
 /**
  * @swagger
@@ -184,11 +251,24 @@ router.get("/custom/field/:id", findOneCustomField);
  *     summary: Delete a custom section by ID
  *     description: Delete a custom section by providing its ID.
  *     parameters:
+ *       - in: header
+ *         name: Authorization
+ *         type: string
+ *         description: Optional authorization header
  *       - in: path
  *         name: id
  *         description: The ID of the custom section to delete.
  *         required: true
  *         type: integer
+ *       - in: body
+ *         name: userId
+ *         description: user id of the user that wants to delete a section. {will be removed once the auth middleware is implemented}
+ *         required: true
+ *         schema:
+ *           type: object
+ *           properties:
+ *             userId:
+ *               type: string
  *     responses:
  *       200:
  *         description: Custom Section deleted successfully.

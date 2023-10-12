@@ -11,7 +11,7 @@ export const success = (
 export const error = (
   res: Response,
   message: string = "Error",
-  statusCode: number = 500
+  statusCode: number = 404
 ) => {
   return res
     .status(statusCode)

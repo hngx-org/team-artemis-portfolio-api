@@ -1098,7 +1098,11 @@ export class Section {
     (customUserSection) => customUserSection.section
   )
   customUserSections: CustomUserSection[];
+
+  @ManyToOne(() => Template, (template) => template.sections)
+  template: Template; // This establishes the relationship with the Template entity
 }
+
 
 @Entity({ name: "tracks" })
 export class Tracks {
@@ -1230,17 +1234,17 @@ export class EducationDetail {
   @UpdateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
   updatedAt: Date;
 
-  @ManyToOne(() => Section, (section) => section.id)
-  @JoinColumn({ name: "sectionId" })
-  section: Section;
+  // @ManyToOne(() => Section, (section) => section.id)
+  // @JoinColumn({ name: "sectionId" })
+  // section: Section;
 
-  @ManyToOne(() => Degree, (degree) => degree.id)
-  @JoinColumn({ name: "degreeId" })
-  degree: Degree;
+  // @ManyToOne(() => Degree, (degree) => degree.id)
+  // @JoinColumn({ name: "degreeId" })
+  // degree: Degree;
 
-  @ManyToOne(() => User, (user) => user.id)
-  @JoinColumn({ name: "userId" })
-  user: User;
+  //   @ManyToOne(() => User, (user) => user.id)
+  //   @JoinColumn({ name: "userId" })
+  //   user: User;
 }
 
 @Entity({ name: "degree" })
@@ -1479,4 +1483,121 @@ export class Coupon {
 
   @Column("timestamp", { default: () => "CURRENT_TIMESTAMP" })
   expiryDate: Date;
+}
+
+// Awards Entity
+@Entity()
+export class Award {
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column()
+  title: string;
+
+  @Column()
+  year: string;
+
+  @Column()
+  user_id: string;
+
+  @Column()
+  presented_by: string;
+
+  @Column({ type: "text", nullable: true })
+  url: string;
+
+  @Column("text")
+  description: string;
+
+  @CreateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
+  createdAt: Date;
+
+  @ManyToOne(() => User)
+  @JoinColumn({ name: "user_id" })
+  user: User;
+
+  @ManyToOne(() => Section)
+  @JoinColumn({ name: "section_id" })
+  section: Section;
+}
+
+// Certificates Entity
+@Entity()
+export class Certificate {
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column()
+  title: string;
+
+  @Column()
+  year: string;
+
+  @Column()
+  organization: string;
+
+  @Column({ type: "text", nullable: true })
+  url: string;
+
+  @Column("text")
+  description: string;
+
+  @CreateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
+  created_at: Date;
+
+  @Column({ name: "user_id" })
+  userId: string;
+
+  @Column({ name: "section_id" })
+  sectionId: number;
+
+  @ManyToOne(() => User)
+  @JoinColumn({ name: "user_id" })
+  user: User;
+
+  @ManyToOne(() => Section)
+  @JoinColumn({ name: "section_id" })
+  section: Section;
+}
+
+@Entity()
+export class Language {
+  @PrimaryGeneratedColumn("uuid")
+  id: string;
+
+  @Column({ name: "userId" })
+  userId: string;
+
+  @JoinColumn({ name: "userId" })
+  user: User;
+
+  @Column({ default: false })
+  preferred: boolean;
+
+  @Column()
+  language: string;
+
+  @ManyToOne(() => User, (user) => user.languages)
+  Languageuser: User;
+}
+
+@Entity({ name: "templates" })
+export class Template {
+  @PrimaryGeneratedColumn()
+  id: number;
+  @Column()
+  name: string;
+  @Column({ nullable: true })
+  description: string;
+  @CreateDateColumn()
+  createdAt: Date;
+  @UpdateDateColumn()
+  updatedAt: Date;
+  @ManyToOne(() => User, { eager: true })
+  @JoinColumn({ name: "createdBy" })
+  createdBy: User;
+  @Column({ default: false })
+  isSelected: boolean;
+  @OneToMany(() => Section, (section) => section.template)
+  sections: Section[];
 }

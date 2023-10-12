@@ -6,7 +6,7 @@ import {
   OneToMany,
 } from "typeorm";
 
-import { SocialUser } from "./model";
+import { Language, SocialUser } from "./model";
 @Entity({ name: "user" })
 export class User {
   @PrimaryGeneratedColumn("uuid")
@@ -47,6 +47,9 @@ export class User {
   @Column({ type: "text", nullable: true, name: "profile_pic" })
   profilePic: string;
 
+  @Column({ type: "text", nullable: true, name: "profile_cover_photo" })
+  profileCoverPhoto: string;
+
   @Column({
     type: "varchar",
     length: 255,
@@ -54,6 +57,9 @@ export class User {
     name: "refresh_token",
   })
   refreshToken: string;
+
+  @OneToMany(() => Language, (language) => language.user, { cascade: true })
+  languages: Language[];
 
   @CreateDateColumn({
     type: "timestamp",

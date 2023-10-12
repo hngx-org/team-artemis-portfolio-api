@@ -71,6 +71,7 @@ const router = express.Router();
  *     tags:
  *       - Skills
  */
+
 router.post("/create-skills", createSkills);
 
 /**

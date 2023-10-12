@@ -20,13 +20,14 @@ export const createWorkExperience: RequestHandler = async (
     endYear,
     description,
     isEmployee,
-    userId,
     sectionId,
   } = req.body;
 
+  const userId = req.params.userId || req.body.userId;
+
   if (!userId) {
     res.statusCode = 400;
-    return res.json({ message: "userId is missing from request body" });
+    return res.json({ message: "userId must be provided" });
   }
 
   if (sectionId === undefined) {
@@ -114,7 +115,7 @@ export const updateWorkExperience: RequestHandler = async (
 
   if (!workId) {
     res.statusCode = 400;
-    return res.json({ message: "workExpId is missing from URL parameter" });
+    return res.json({ message: "workExpId must be provided as a parameter" });
   }
 
   const {
