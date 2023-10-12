@@ -1,6 +1,10 @@
-import express from 'express'
-import {} from '../controllers/certificate.controller'
+import express from "express";
+import { createCertificate } from "../controllers/certificate.controller";
+import {
+  validateCertificate,
+  CertificateSchema,
+} from "../middlewares/certificate.zod";
+const router = express.Router();
 
-const router = express.Router()
-
-module.exports = router
+router.post("/certificate", validateCertificate, createCertificate);
+module.exports = router;
