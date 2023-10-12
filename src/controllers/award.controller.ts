@@ -1,10 +1,12 @@
-import { NextFunction, Request, Response } from 'express'
+import { NextFunction, Request, RequestHandler, Response } from 'express'
 import { createAwardService } from '../services/award.service'
 import { AwardData } from '../interfaces/'
 import { User } from '../database/entity/user'
 import { connectionSource } from '../database/data-source'
 import { NotFoundError } from '../middlewares'
 import { Award } from '../database/entity/model'
+import { QueryFailedError } from 'typeorm'
+
 
 // Controller function to create an award
 const createAwardController = async (
@@ -79,17 +81,25 @@ const updateAwardController = async (req: Request, res: Response, next: NextFunc
     })
 
     if (!award) {
-      throw new NotFoundError('Cannot find award')
+      throw new NotFoundError('Award not found')
     }
     
     const updateAward = req.body;
     
+    // fields that must be strings
+    const stringFields = ['year', 'title', 'description', 'presented_by', 'url'];
+
+
+
     // update the award dynamically based on the data passed
     for (const key in updateAward) {
-      if (updateAward.hasOwnProperty(key)) {
-        award[key] = updateAward[key]
-      }
+    if (updateAward.hasOwnProperty(key)) {
+      if (stringFields.includes(key) && typeof updateAward[key] !== 'string') {
+      return res.status(400).json({ 'Input Error': `Field '${key}' should be a string` });
     }
+    award[key] = updateAward[key];
+  }
+}
     
     await awardRepository.save(award)
 
@@ -101,6 +111,9 @@ const updateAwardController = async (req: Request, res: Response, next: NextFunc
     });
     
   } catch (error) {
+    if(error instanceof QueryFailedError) {
+      res.status(400).json({ 'Input Error': error.message})
+    }
     console.error('Error updating award details:', error.message)
     next(error)
   }
