@@ -1,19 +1,19 @@
 import { Request, Response, NextFunction } from "express";
 import { success, error } from "../utils";
-import { NotificationSetting } from "../database/entity/model";
+import { ZodError } from "zod";
+import { NotificationSetting, UserTrack } from "../database/entity/model";
 import { connectionSource } from "../database/data-source";
 import { User } from "../database/entity/user";
 import {
   accountSettingSchema,
   hashPassword,
+  notificationSettingSchema,
+  verifyPassword,
 } from "../services/settings.service";
-import {
-  UserSettings,
-  NotificationSettings,
-} from "../interfaces/settings.interface";
+import { NotificationSettings } from "../interfaces/settings.interface";
 const userRespository = connectionSource.getRepository(User);
 
-export const createAccountSettingController = async (
+export const updateUserAccountSettingController = async (
   req: Request,
   res: Response,
   next: NextFunction
@@ -22,18 +22,18 @@ export const createAccountSettingController = async (
     const { email, currentPassword, newPassword, confirmNewPassword } =
       req.body;
 
-    const { error } = accountSettingSchema.validate({
+    const error = accountSettingSchema.parse({
       email,
       currentPassword,
       newPassword,
       confirmNewPassword,
     });
 
-    if (error) {
-      return res.status(400).json({
+    if (error instanceof ZodError) {
+      return res.status(404).json({
         status: `error`,
-        method: req.method,
-        message: error.message,
+        message: error.errors,
+        success: false,
       });
     }
 
@@ -47,10 +47,15 @@ export const createAccountSettingController = async (
       });
     }
 
-    if (currentPassword !== user.password) {
+    const verifyCurrentPassword = verifyPassword(
+      currentPassword,
+      user.password
+    );
+
+    if (!verifyCurrentPassword) {
       return res.status(400).json({
         status: `error`,
-        message: `Incorrect user email or password input`,
+        message: `Incorrect current password input`,
         success: false,
       });
     }
@@ -74,7 +79,7 @@ export const createAccountSettingController = async (
         });
       }
 
-      return success(res, updateUser, `User password updated successfully`);
+      success(res, updateUser, `User password updated successfully`);
     } catch (error) {
       console.error(error); // Log the error for debugging
       return res.status(500).json({
@@ -100,7 +105,7 @@ export const createNotificationSettingController = async (
 ) => {
   try {
     const { userId } = req.params;
-    console.log("userId 1", userId);
+
     const {
       communityUpdate,
       emailSummary,
@@ -110,6 +115,22 @@ export const createNotificationSettingController = async (
     } = req.body;
     const notificationSettingRepository =
       connectionSource.getRepository(NotificationSetting);
+
+    const error = notificationSettingSchema.parse({
+      communityUpdate,
+      emailSummary,
+      newMessages,
+      followUpdate,
+      specialOffers,
+    });
+
+    if (error instanceof ZodError) {
+      return res.status(404).json({
+        status: `error`,
+        message: error.errors,
+        success: false,
+      });
+    }
 
     const isExistingUser = await userRespository.findOneBy({
       id: userId,
@@ -122,8 +143,8 @@ export const createNotificationSettingController = async (
         success: false,
       });
     }
-    console.log("userId ", userId);
-    const notificationSetting = new NotificationSetting();
+
+    const notificationSetting: NotificationSettings = new NotificationSetting();
     notificationSetting.userId = userId;
     notificationSetting.communityUpdate = communityUpdate || false;
     notificationSetting.emailSummary = emailSummary || false;
@@ -167,12 +188,13 @@ export const deleteUserAccount = async (
     });
 
     if (!isExistingUser) {
-      return res.status(404).json({
+      return res.status(400).json({
         status: `error`,
         message: `User does not exist`,
         success: false,
       });
     }
+    
 
     try {
       // Wait for the delete operation to complete
@@ -182,9 +204,9 @@ export const deleteUserAccount = async (
         .from(User)
         .where("id = :id", { id: userId })
         .execute();
-      console.log("destroyAccount", destroyAccount);
+
       if (destroyAccount.affected === 0) {
-        return res.status(404).json({
+        return res.status(400).json({
           status: `error`,
           message: `Account not deleted`,
           success: false,
@@ -199,7 +221,7 @@ export const deleteUserAccount = async (
       });
     } catch (error) {
       console.error(error); // Log the error for debugging
-      return res.status(500).json({
+      return res.status(400).json({
         status: `error`,
         message: `Failed to delete account`,
         success: false,
@@ -212,51 +234,6 @@ export const deleteUserAccount = async (
       message: `Internet error`,
       success: false,
     });
-  }
-};
-
-export const updateUser = async (req: Request, res: Response) => {
-  try {
-    const { email, password }: Pick<UserSettings, "email" | "password"> =
-      req.body;
-    const userId: string = req.params.id;
-
-    if (!userId) {
-      return error(res, "Please provide a valid User ID", 400);
-    }
-
-    const userModel = connectionSource.getRepository(User);
-    const user = await userModel.findOneBy({ id: userId });
-    console.log("user", user);
-    if (!user) {
-      return error(
-        res,
-        "User does not exist. Please provide a valid User ID",
-        400
-      );
-    }
-
-    if (user.email === email) {
-      return error(
-        res,
-        "Email is the same as the current one. Please choose a different email address",
-        400
-      );
-    }
-
-    user.email = email;
-    user.password = password;
-
-    const updatedUser = await userModel.update(userId, user);
-
-    if (!updatedUser) {
-      return error(res, "Error updating user", 400);
-    }
-
-    return success(res, user, "User updated successfully");
-  } catch (err) {
-    console.error("Error:", err);
-    return error(res, err?.message);
   }
 };
 
