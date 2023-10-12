@@ -16,7 +16,7 @@ export const getDegree = async (id: number): Promise<UpdateDegreeResponse> => {
     }
 
     const response: UpdateDegreeResponse = {
-      message: "Degree gotten successfully",
+      message: "Degree gotten successfully!",
       data: degree,
     };
     return response;
