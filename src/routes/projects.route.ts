@@ -1,8 +1,12 @@
-import express from "express";
-const router = express.Router();
+import express, { Response, Request } from "express";
 import multer from "multer";
+import { error } from "../utils/response.util";
+import { ForbiddenError } from '../middlewares/index'
+
+const router = express.Router();
 const storage = multer.memoryStorage();
 const uploads = multer({ storage }).array("images", 10);
+
 
 import {
   getAllProjects,
@@ -108,7 +112,15 @@ router.get("/projects/:id", getProjectById);
  *       - Project
  */
 
-router.post("/projects", uploads, createProject);
+router.post("/projects", function (req, res, next) {
+  uploads(req, res, function (err) {
+    if (err) {
+      const newForbbidenError = new ForbiddenError("You can only upload a maximum of 10 images");
+      res.status(newForbbidenError.statusCode).json({ error: newForbbidenError.message });
+    }
+    next();
+  })
+}, createProject);
 
 /**
  * @swagger
