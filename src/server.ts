@@ -28,6 +28,8 @@ app.use(errorHandler);
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 
+app.use()
+
 //serve all routes dynamically using readdirsync
 readdirSync("./src/routes").map((path) =>
   app.use("/api", require(`./routes/${path}`))

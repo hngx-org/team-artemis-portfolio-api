@@ -1,9 +1,14 @@
-import express, { NextFunction, Request, RequestHandler, Response } from "express";
+import express, {
+  NextFunction,
+  Request,
+  RequestHandler,
+  Response,
+} from "express";
 import { AnyZodObject, z } from "zod";
 import { connectionSource } from "../database/data-source";
 import { PortfolioDetails, Tracks, UserTrack } from "../database/entity/model";
 import { User } from "../database/entity/user";
-import { cloudinaryService, uploadProfileImageService } from "../services";
+import { cloudinaryService, uploadProfileCoverPhotoService, uploadProfileImageService } from "../services";
 import { error, success } from "../utils";
 
 // Define a Data Transfer Object (DTO) for updating PortfolioDetails
@@ -14,12 +19,13 @@ export interface UpdatePortfolioDetailsDTO {
 }
 
 // Get the repository for the PortfolioDetails entity
-const portfolioDetailsRepository = connectionSource.getRepository(PortfolioDetails);
+const portfolioDetailsRepository =
+  connectionSource.getRepository(PortfolioDetails);
 
 // Export the uploadProfileImageController function
-export const uploadProfileImageController: express.RequestHandler = async (
-  req: express.Request,
-  res: express.Response
+export const uploadProfileImageController: RequestHandler = async (
+  req: Request,
+  res: Response
 ) => {
   try {
     if (!req.files) return error(res, "add event image", 400);
@@ -33,10 +39,35 @@ export const uploadProfileImageController: express.RequestHandler = async (
   }
 };
 
+export const coverphoto: RequestHandler = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    if (!req.files) {
+      return error(res, "No files were uploaded", 400);
+    }
+
+    const { service, userId } = req.body;
+
+    const { urls } = await cloudinaryService(req.files, req.body.service);
+
+    const data = await uploadProfileCoverPhotoService(userId, urls);
+
+    return success(res, data, "Profile cover photo uploaded successfully");
+  } catch (err) {
+    if (err instanceof Error) {
+      return error(res, err.message, 500);
+    } else {
+      return error(res, "An unknown error occurred", 500);
+    }
+  }
+};
+
 // Export the updatePortfolioDetails function
-export const updatePortfolioDetails: express.RequestHandler = async (
-  req: express.Request,
-  res: express.Response
+export const updatePortfolioDetails: RequestHandler = async (
+  req: Request,
+  res: Response
 ) => {
   try {
     const id = parseInt(req.params.id);
@@ -69,10 +100,14 @@ export const updatePortfolioDetails: express.RequestHandler = async (
 
     if (error instanceof SyntaxError) {
       // Handle JSON parsing error
-      return res.status(400).json({ message: "Invalid JSON format in request body" });
+      return res
+        .status(400)
+        .json({ message: "Invalid JSON format in request body" });
     } else if (error.code === "23505") {
       // Handle duplicate key constraint violation (unique constraint violation)
-      return res.status(409).json({ message: "Duplicate key value in the database" });
+      return res
+        .status(409)
+        .json({ message: "Duplicate key value in the database" });
     } else if (error.code === "22P02") {
       // Handle invalid integer format error
       return res.status(400).json({ message: "Invalid ID format" });
@@ -82,17 +117,14 @@ export const updatePortfolioDetails: express.RequestHandler = async (
   }
 };
 
-
-
-
-
 export const createProfileController = async (req: Request, res: Response) => {
   try {
     const { name, trackId, city, country } = req.body;
     const userId = req.params.userId;
 
     const userRepository = connectionSource.getRepository(User);
-    const portfolioDetailsRepository = connectionSource.getRepository(PortfolioDetails);
+    const portfolioDetailsRepository =
+      connectionSource.getRepository(PortfolioDetails);
     const userTrackRepository = connectionSource.getRepository(UserTrack);
     const trackRepository = connectionSource.getRepository(Tracks);
 
@@ -121,7 +153,10 @@ export const createProfileController = async (req: Request, res: Response) => {
       });
 
       if (!userTrack) {
-        const newUser = userTrackRepository.create({ trackId: trackId, userId });
+        const newUser = userTrackRepository.create({
+          trackId: trackId,
+          userId,
+        });
 
         await userTrackRepository.save(newUser);
       }
@@ -146,7 +181,10 @@ export const createProfileController = async (req: Request, res: Response) => {
 };
 
 // delete Portfolio Profile details
-export const deletePortfolioDetails: RequestHandler = async (req: Request, res: Response) => {
+export const deletePortfolioDetails: RequestHandler = async (
+  req: Request,
+  res: Response
+) => {
   try {
     // convert the id to number
     const id = parseInt(req.params.id);
@@ -163,7 +201,9 @@ export const deletePortfolioDetails: RequestHandler = async (req: Request, res: 
 
     // delete the porfolio
 
-    const portfolio = await portfolioDetailsRepository.remove(portfolioToRemove);
+    const portfolio = await portfolioDetailsRepository.remove(
+      portfolioToRemove
+    );
     res.status(200).json({
       message: "Portfolio profile details deleted successfully",
       portfolio,
