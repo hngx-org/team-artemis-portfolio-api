@@ -13,7 +13,7 @@ import {
   ForbiddenError,
   InternalServerError,
   MethodNotAllowedError,
-  QueryFailedError,
+  errorHandler,
 } from "../middlewares";
 
 // Endpoint to fetch the education section
@@ -148,54 +148,52 @@ const getEducationDetailById = async (
   }
 };
 
-// Update Education Controller
-const updateEducationDetail = async (req: Request, res: Response, next) => {
+const updateEducationDetail = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const id = parseInt(req.params.id);
 
-    // Find the existing education detail by ID
     const educationDetail = await educationDetailRepository.findOne({
       where: { id },
     });
 
     if (!educationDetail) {
-      const err = new NotFoundError("Education not found");
-      res.status(err.statusCode).json({ err: err.message });
+      throw new NotFoundError("Education detail not found");
     }
 
-    // Validate and apply updates from the DTO
-    const updateData = req.body as EducationDetailData;
+    const updateData = req.body;
 
-    if (updateData.fieldOfStudy)
-      educationDetail.fieldOfStudy = updateData.fieldOfStudy;
-    if (updateData.school) educationDetail.school = updateData.school;
-    if (updateData.from) educationDetail.from = updateData.from;
-    if (updateData.to) educationDetail.to = updateData.to;
-    if (updateData.description)
-      educationDetail.description = updateData.description;
-    if (updateData.degreeId) educationDetail.degreeId = updateData.degreeId;
-    if (updateData.userId) educationDetail.userId = updateData.userId;
-    if (updateData.sectionId) educationDetail.sectionId = updateData.sectionId;
+    // Dynamic updates based on the updateData object
+    for (const key in updateData) {
+      if (updateData.hasOwnProperty(key)) {
+        educationDetail[key] = updateData[key];
+      }
+    }
 
     // Save the updated education detail
     await educationDetailRepository.save(educationDetail);
+
+    console.log("Education detail updated successfully");
 
     res.status(200).json({
       message: "Education detail updated successfully",
       educationDetail,
     });
   } catch (error) {
-    const err = new InternalServerError(
-      "Error updating education detail: Internal server error"
-    );
-    res.status(err.statusCode).json({ err: err.message });
-
+    console.error("Error updating education detail:", error.message);
     next(error);
   }
 };
 
 // Delete Education Controller
-const deleteEducationDetail = async (req: Request, res: Response) => {
+const deleteEducationDetail = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const id = parseInt(req.params.id);
 
@@ -205,8 +203,7 @@ const deleteEducationDetail = async (req: Request, res: Response) => {
     });
 
     if (!educationDetail) {
-      console.log("Education not found");
-      return res.status(404).json({ message: "Education not found" });
+      throw new NotFoundError("Education detail not found");
     }
 
     // Delete the education detail
@@ -219,7 +216,7 @@ const deleteEducationDetail = async (req: Request, res: Response) => {
     console.log("Education detail deleted successfully");
   } catch (error) {
     console.error("Error deleting education detail:", error);
-    res.status(500).json({ message: "Internal server error" });
+    next(error);
   }
 };
 
