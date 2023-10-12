@@ -62,9 +62,8 @@ export const deleteReferenceDetail = async (
 
     await referenceRepository.remove(referenceDetail);
 
-    res.status(204).json({
+     res.status(200).json({
       message: "Reference detail deleted successfully"  });
-    console.log("Reference detail deleted successfully");
   } catch (error) {
     console.error("Error deleting reference detail:", error);
     next(error);
