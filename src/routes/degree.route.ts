@@ -2,7 +2,7 @@ import express from "express";
 import {
   createDegreeController,
   fetchDegree,
-  fetchAllDegre,
+  fetchAllDegree,
   updateExisitingDegree,
 } from "../controllers/degree.controller";
 
@@ -122,7 +122,7 @@ router.get("/degree/:id", fetchDegree);
  *                 message:
  *                   type: string
  */
-router.get("/degree", fetchAllDegre);
+router.get("/degree", fetchAllDegree);
 
 /**
  * @swagger
