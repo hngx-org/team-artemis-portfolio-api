@@ -1,5 +1,4 @@
 import express, { Request, RequestHandler, Response } from "express";
-import { z } from 'zod';
 import {
   createSkillsService,
   updateSkillsService,
@@ -8,34 +7,26 @@ import {
 } from "../services/skills.service";
 import { error, success } from "../utils";
 
-// Schema to validate req body
-const skillsSchema = z.object({
-  skills: z.array(z.string()),
-  sectionId: z.number(),
-  userId: z.string(),
-});
-
 export const createSkills: RequestHandler = async (
-  req: Request,
+  _req: Request,
   res: Response
 ) => {
   try {
-    const { skills, sectionId, userId } = skillsSchema.parse(req.body);
+    const authorizationHeader = (_req as any).header("Authorization");
+    const { skills, sectionId, userId } = (_req as any).body;
 
-    const skillData = skills.map((skill) => ({
-      skills: skill,
-      sectionId,
-      userId,
-    }));
+    if (!Array.isArray(skills))
+      return error(res, "skills should be an array", 403);
+
+    const skillData = [];
+    for (const skill of skills) {
+      skillData.push({ skills: skill, sectionId, userId });
+    }
 
     const data = await createSkillsService(skillData);
     success(res, data);
   } catch (err) {
-    if (err instanceof z.ZodError) {
-      const errorMessages = err.issues.map((issue) => issue.message);
-      error(res, errorMessages.join(', '), 400);
-    }
-    error(res, err instanceof Error ? err.message : 'An error occurred');
+    error(res, (err as Error).message); // Use type assertion to cast 'err' to 'Error' type
   }
 };
 
@@ -78,23 +69,19 @@ export const deleteSkills: RequestHandler = async (
 
 // Controller function to fetch skills for a logged-in user
 export const getSkillsDetails: RequestHandler = async (
-  req: Request,
+  _req: Request,
   res: Response
 ) => {
   try {
-    const { userId } = req.body;
+    const authorizationHeader = (_req as any).header("Authorization");
+    const { userId } = (_req as any).body;
     // Fetch skills for the logged-in user based on their user ID
-    const result = await getSkillsService(userId);
-
-    const data = result.map(record => ({
-      skillId: record['id'],
-      skill: record['skills']
-    }));
+    const data = await getSkillsService(userId);
 
     // Send a response with the fetched skills
     success(res, data, "Skills");
   } catch (err) {
     console.error("Error fetching skills:", error);
-    error(res, err instanceof Error ? err.message : 'An error occurred');
+    error(res, (err as Error).message);
   }
 };

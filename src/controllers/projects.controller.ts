@@ -4,13 +4,14 @@ import express, { NextFunction, Request, RequestHandler, Response } from "expres
 import { error, success } from "../utils";
 import { cloudinaryService } from "../services/image-upload.service";
 import { updateProjectService } from "../services/project.service";
-import {z} from 'zod'
+import { z } from 'zod'
 
 
 import {
   CustomError,
   NotFoundError,
-BadRequestError} from '../middlewares'
+  BadRequestError
+} from '../middlewares'
 
 const projectRepository = connectionSource.getRepository(Project);
 const imageRepository = connectionSource.getRepository(Images);
@@ -57,20 +58,29 @@ export const createProject: RequestHandler = async (
   res: Response
 ) => {
   try {
-    console.log(req.body.jsondata);
-    const { title, year, url, tags, description, userId, sectionId } =
-      JSON.parse(req.body.jsondata);
+    const jsonData = JSON.parse(req.body.jsondata);
+    const normalizedData: any = {};
+    for (const key in jsonData) {
+      if (Object.hasOwnProperty.call(jsonData, key)) {
+        const normalizedKey = key.toLowerCase();
+        normalizedData[normalizedKey] = jsonData[key];
+      }
+    }
 
-    if (
-      !title ||
-      !year ||
-      !url ||
-      !tags ||
-      !description ||
-      !userId ||
-      !sectionId
-    )
-      return error(res, "All fields are required", 400);
+    const { title, year, url, tags, description, userid, sectionid } = normalizedData;
+
+    console.log(title, year, url, tags, description, userid, sectionid)
+
+    const requiredFields = ['title', 'year', 'url', 'tags', 'description', 'userId', 'sectionId'];
+
+    const jsonFields = Object.keys(JSON.parse(req.body.jsondata)).map(field => field.toLowerCase());
+
+    const missingFields = requiredFields.filter(field => !jsonFields.includes(field.toLowerCase()));
+
+    if (missingFields.length > 0) {
+      return error(res, `Error: ${missingFields.join(', ')} ${missingFields.length > 1 ? 'are' : 'is'} required`, 400);
+    }
+    console.log(title, year, url, tags, description, userid, sectionid)
 
     const project = new Project() as ProjectModel;
     project.title = title;
@@ -78,8 +88,8 @@ export const createProject: RequestHandler = async (
     project.url = url;
     project.tags = tags;
     project.description = description;
-    project.userId = userId;
-    project.sectionId = sectionId;
+    project.userId = userid;
+    project.sectionId = sectionid;
     project.thumbnail = 0;
 
     const data = await projectRepository.save(project);
@@ -89,21 +99,29 @@ export const createProject: RequestHandler = async (
     if (!files) {
       return error(res, "Add thumbnail image", 400);
     }
+    console.log(files.length)
+    if (files.length > 10) {
+      return error(res, "You can only upload a maximum of 10 images", 400);
+    }
 
     const imagesRes = await cloudinaryService(files, req.body.service);
 
-    const imagePromises = imagesRes.urls.map(async (url) => {
+    for (const url of imagesRes.urls) {
       const image = new Images() as Images;
       image.url = url;
-      const imageResponse = await imageRepository.save(image);
 
-      const projectImage = new ProjectsImage() as ProjectsImage;
-      projectImage.projectId = projectId;
-      projectImage.imageId = imageResponse.id;
-      await projectImageRepository.save(projectImage);
-    });
+      try {
+        const imageResponse = await imageRepository.save(image);
 
-    await Promise.all(imagePromises);
+        const projectImage = new ProjectsImage() as ProjectsImage;
+        projectImage.projectId = projectId;
+        projectImage.imageId = imageResponse.id;
+
+        await projectImageRepository.save(projectImage);
+      } catch (error) {
+        console.error(error);
+      }
+    }
 
     const allThumbnails = await projectImageRepository.findBy({
       projectId: projectId,
@@ -119,12 +137,9 @@ export const createProject: RequestHandler = async (
 
     if (thumbnail) {
       const thumbnailId = thumbnail.id;
-      const projectUpdate = await projectRepository.findOneBy({
-        id: projectId,
-      });
       const data = await projectRepository.update(
-        { id: +projectId },
-        { thumbnail: +thumbnailId }
+        { id: projectId },
+        { thumbnail: thumbnailId }
       );
       const updatedProject = await projectRepository.findOneBy({
         id: +projectId,
