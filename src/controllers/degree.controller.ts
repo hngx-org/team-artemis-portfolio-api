@@ -82,39 +82,4 @@ export const fetchAllDegre = async (
   }
 };
 
-// endpoint to update a degree
-
-export const updateExisitingDegree = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const id = parseInt(req.params.id);
-
-    // Check if ID is valid
-    if (isNaN(id)) {
-      throw new BadRequestError("Invalid degree ID");
-    }
-
-    const degreePayload = req.body;
-
-    const degreeType: string = degreePayload.type;
-    // Validate the payload against the schema
-    DegreeDataSchema.parse(degreePayload);
-
-    // Call service function to update degree
-    const updatedDegree = await updateDegree(id, degreeType);
-
-    res.status(200).json(updatedDegree);
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      res.status(400).json({ errors: error.errors });
-    } else {
-      res.status(500).json({ error: "Internal server error" });
-      next(error);
-    }
-  }
-};
-
 export { createDegreeController };
