@@ -24,7 +24,6 @@ connectionSource
 // middleware setup
 
 app.use(express.json());
-app.use(errorHandler);
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 
@@ -35,10 +34,12 @@ readdirSync("./src/routes").map((path) =>
 app.get("/", sayHelloController);
 
 app.use(function notFound(req, res, next) {
-  res.status(404);
-  const error = new Error(`Oops! Resource Not Found: ${req.originalUrl}`);
-  next(error);
+  res.status(404).json({
+    NotFound: `Oops! Resource not found: ${req.originalUrl}`
+  }) 
+  next();
 })
+app.use(errorHandler);
 
 const port = process.env.PORT || 3000;
 
