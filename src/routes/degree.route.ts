@@ -1,5 +1,8 @@
 import express from "express";
-import { createDegreeController } from "../controllers/degree.controller";
+import {
+  createDegreeController,
+  fetchDegree,
+} from "../controllers/degree.controller";
 
 const router = express.Router();
 
@@ -42,4 +45,48 @@ const router = express.Router();
  */
 router.post("/degree", createDegreeController);
 
+/**
+ * @swagger
+ * /api/degree/{id}:
+ *   get:
+ *     summary: Get a degree by id
+ *     description: Get a single degree by providing its ID.
+ *     tags: [Degree]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: The ID of the degree.
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Successful response
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *       404:
+ *         description: Not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *       500:
+ *         description: Internal error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ */
+router.get("/degree/:id", fetchDegree);
 module.exports = router;
