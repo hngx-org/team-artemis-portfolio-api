@@ -41,6 +41,25 @@ enum RESTRICTED {
   PERMANENT = "permanent",
 }
 
+@Entity({ name: "reference_detail" })
+export class References {
+  @PrimaryGeneratedColumn()
+  id: number;
+  @Column("varchar")
+  name: string;
+  @Column("varchar")
+  company: string;
+  @Column("varchar")
+  position: string;
+  @Column("varchar")
+  emailAddress: string;
+  @Column("varchar")
+  phoneNumber: string;
+  @Column("uuid")
+  userId: string; 
+  @Column("int")
+  sectionId: number; 
+}
 @Entity({ name: "mail_log" })
 export class MailLog {
   @PrimaryGeneratedColumn()
