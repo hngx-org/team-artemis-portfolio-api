@@ -8,6 +8,7 @@ const swaggerUi = require("swagger-ui-express");
 const swaggerOptions = require("./swagger");
 const router = require("./routes/image-upload.route");
 import { errorHandler } from "./middlewares/index";
+import { authMiddleWare } from "./middlewares/auth";
 
 const app = express();
 
@@ -24,19 +25,20 @@ connectionSource
 // middleware setup
 
 app.use(express.json());
-app.use(errorHandler);
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());
+
+// comment out  to use as auth middleware
+// app.use(authMiddleWare)
 
 //serve all routes dynamically using readdirsync
 readdirSync("./src/routes").map((path) =>
   app.use("/api", require(`./routes/${path}`))
 );
 app.get("/", sayHelloController);
-
+app.use(errorHandler);
 const port = process.env.PORT || 3000;
 
 app.listen(port, () => {
-  // console.log(entities);
   console.log(`Server is running on port ${port}`);
 });
