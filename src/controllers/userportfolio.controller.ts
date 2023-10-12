@@ -11,11 +11,7 @@ import {
   SkillsDetail,
   WorkExperienceDetail,
 } from "../database/entity/model";
-import {
-  NotFoundError,
-  BadRequestError,
-  InternalServerError,
-} from "../middlewares/index";
+import { NotFoundError, BadRequestError } from "../middlewares/index";
 
 const portfolioDetailsRepository =
   connectionSource.getRepository(PortfolioDetails);
