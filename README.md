@@ -111,7 +111,10 @@ npm run start:dev
 - [ ] I have added tests to cover my changes.
 - [ ] All new and existing tests passed.
 ```
+
 ## Folder Structure
+
+```
 team-artemis-portfolio-api/
 │
 ├── src/
