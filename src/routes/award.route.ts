@@ -129,7 +129,7 @@ router.get('/awards', getAllAwardsController);
 /**
  * @swagger
  * /api/award/:id:
- *   get:
+ *   delete:
  *     summary: Delete award detail(s) of a user detail by ID
  *     description: Delete award detail(s) of a user detail by ID
  *     tags: [Award]
