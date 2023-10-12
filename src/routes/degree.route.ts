@@ -98,7 +98,7 @@ router.get("/degree/:id", fetchDegree);
  *   get:
  *     summary: Get all Degrees
  *     description: Retrieve a list of all degrees.
- *     tags: Degree]
+ *     tags: [Degree]
  *     responses:
  *       200:
  *         description: Successful response
