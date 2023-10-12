@@ -3,7 +3,6 @@ import {
   createDegreeController,
   fetchDegree,
   fetchAllDegre,
-  updateExisitingDegree,
 } from "../controllers/degree.controller";
 
 const router = express.Router();
