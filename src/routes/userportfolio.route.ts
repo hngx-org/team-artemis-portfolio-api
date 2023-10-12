@@ -14,7 +14,7 @@ const router = Router();
  *   get:
  *     summary: Get all portfolio details including sections
  *     description: Get request to retrieve all portfolio details for a user.
- *     tags: [Portfolio]
+ *     tags: [User Portfolio Details]
  *     parameters:
  *       - in: path
  *         name: userId
@@ -62,7 +62,7 @@ router.get("/getPortfolioDetails/:userId", getPortfolioDetails);
  * @swagger
  * /api/portfolioDetails:
  *   get:
- *     summary: Get all users' portfolio details
+ *     summary: Get all portfolio details
  *     description: Retrieve a list of all users' portfolio details.
  *     tags: [User Portfolio Details]
  *     responses:
@@ -84,7 +84,7 @@ router.get("/portfolioDetails", getAllPortfolioDetails);
  *   put:
  *     summary: Update portfolio details by ID
  *     description: Update a user's portfolio details by providing its ID.
- *     tags: [Profile]
+ *     tags: [User Portfolio Details]
  *     parameters:
  *       - in: path
  *         name: id
@@ -133,7 +133,7 @@ router.put("/profile-details/:id", updatePortfolioDetails);
  *   delete:
  *     summary: Delete a Portfolio Profile details
  *     description: Delete a user's Portfolio Profile details by providing its ID.
- *     tags: [Portfolio]
+ *     tags: [User Portfolio Details]
  *     parameters:
  *       - in: path
  *         name: id
