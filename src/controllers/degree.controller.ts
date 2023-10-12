@@ -14,6 +14,11 @@ const createDegreeController = async (
 
     const { type }: DegreeData = req.body
 
+    if (!type) {
+      return res.status(400).json({ error: 'No type provided' })
+    }
+
+
     // Create a new degree instance and save it to the database
     const degreeRepository = connectionSource.getRepository(Degree)
     const degree = degreeRepository.create({ type })
