@@ -16,7 +16,7 @@ export const getDegree = async (id: number): Promise<UpdateDegreeResponse> => {
     }
 
     const response: UpdateDegreeResponse = {
-      message: "Degree gotten successfully",
+      message: "Degree gotten successfully!",
       data: degree,
     };
     return response;
@@ -51,7 +51,7 @@ export const updateDegree = async (
     const findDegree = await degreeRepository.findOneBy({ id: id });
 
     const response: UpdateDegreeResponse = {
-      message: "Degree updated succesfully",
+      message: "Degree updated succesfully!",
       data: {
         id: findDegree.id,
         type: findDegree.type,
