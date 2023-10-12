@@ -4,6 +4,7 @@ import {
   deleteUserAccount,
   updateUserAccountSettingController,
   updateNotificationSettings,
+  getUserNotificationSettings,
 } from "../controllers/settings.controller";
 import { validateUserId, validate } from "../services";
 
@@ -230,8 +231,10 @@ router.delete(
  */
 
 router.patch(
-  "/update-notification-settings/:userId/:id",
+  "/update-notification-settings/:userId",
   updateNotificationSettings
 );
+
+router.get("/get-notification-settings/:userId", getUserNotificationSettings);
 
 module.exports = router;
