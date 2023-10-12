@@ -86,7 +86,7 @@ router.post('/award/:userId', validateCreateAwardData, createAwardController)
  *     tags:
  *       - Awards
  */
-router.put('/award/:awardId', validateUpdateAwardData, updateAwardController)
+router.put('/award/:awardId', updateAwardController)
 
 
 module.exports = router
