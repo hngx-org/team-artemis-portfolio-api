@@ -1,5 +1,5 @@
 import express from "express";
-import { addCertificateController } from "../controllers/certificate.controller";
+import { addCertificateController,deleteCertificate,getAllCertificates,getCertificateById } from "../controllers/certificate.controller";
 
 const router = express.Router();
 
@@ -45,7 +45,7 @@ const router = express.Router();
  *           sectionId: 2
  *     responses:
  *       201:
- *         description: Certificate details successfully created.
+ *         description: Certificate details successfully created. Returns the just created certificate.
  *         content:
  *           application/json:
  *             schema:
@@ -90,4 +90,101 @@ const router = express.Router();
  */
 router.post("/add-certificate/:userId", addCertificateController);
 
-module.exports = router;
+
+/**
+ * @swagger
+ * /certifications:
+ *   get:
+ *     summary: Get all certificates.
+ *     description: Get a list of all certificates.
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved the list of certificates.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: A success message.
+ *                 certificates:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                   description: An array of certificates.
+ *       404:
+ *         description: No certificates found.
+ *       500:
+ *         description: Internal Server Error.
+ */
+router.get("/certifications", getAllCertificates)
+
+/**
+ * @swagger
+ * /certifications/{certId}:
+ *   delete:
+ *     summary: Delete a certificate by ID.
+ *     description: Delete a certificate by its unique ID.
+ *     parameters:
+ *       - in: path
+ *         name: certId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Certificate deleted successfully. Returns a list of updated certificates.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: A success message.
+ *                 certificates:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                   description: An array of updated certificates.
+ *       404:
+ *         description: Certificate not found.
+ *       500:
+ *         description: Internal Server Error.
+
+ */
+router.delete('/certifications/:certId', deleteCertificate);
+
+
+/**
+ * @swagger
+ * /certifications/{certId}:
+ *   get:
+ *     summary: Get a certificate by ID.
+ *     description: Get a certificate by its unique ID.
+ *     parameters:
+ *       - in: path
+ *         name: certId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved the certificate.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 certificate:
+ *                   type: object
+ *                   description: The retrieved certificate.
+ *       404:
+ *         description: Certificate not found.
+ *       500:
+ *         description: Internal Server Error.
+ */
+router.get('/certifications/:certId', getCertificateById);
+
+module.exports = router
