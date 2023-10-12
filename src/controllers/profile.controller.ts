@@ -16,21 +16,15 @@ import {
 import { error, success } from "../utils";
 import { validateUser } from "../middlewares/auth";
 
-// Define a Data Transfer Object (DTO) for updating PortfolioDetails
-export interface UpdatePortfolioDetailsDTO {
-  name?: string;
-  city?: string;
-  country?: string;
-}
-
 // Get the repository for the PortfolioDetails entity
-const portfolioDetailsRepository =
-  connectionSource.getRepository(PortfolioDetails);
+const userRepository = connectionSource.getRepository(User);
+const portfolioRepository = connectionSource.getRepository(PortfolioDetails);
+const userTrackRepository = connectionSource.getRepository(UserTrack);
 
 // Export the uploadProfileImageController function
-export const uploadProfileImageController: RequestHandler = async (
-  req: Request,
-  res: Response
+export const uploadProfileImageController: express.RequestHandler = async (
+  req: express.Request,
+  res: express.Response
 ) => {
   try {
     if (!req.files) return error(res, "add event image", 400);
@@ -51,6 +45,8 @@ export const uploadProfileImageController: RequestHandler = async (
     error(res, (err as Error).message); // Use type assertion to cast 'err' to 'Error' type
   }
 };
+
+
 
 export const coverphoto: RequestHandler = async (
   req: Request,
@@ -83,37 +79,27 @@ export const coverphoto: RequestHandler = async (
   }
 };
 
-// Export the updatePortfolioDetails function
-export const updatePortfolioDetails: RequestHandler = async (
-  req: Request,
-  res: Response
-) => {
+
+export const getAllUsers = async (req: Request, res: Response) => {
+  const users = await userRepository.find();
+  res.status(200).json({ users });
+};
+
+export const getUserById = async (req: Request, res: Response) => {
+  let tracks: any[] = [];
   try {
-    const id = parseInt(req.params.id);
-
-    // Find the existing portfolio details by ID
-    const portfolioDetails = await portfolioDetailsRepository.findOne({
-      where: { id },
-    });
-
-    if (!portfolioDetails) {
-      return res.status(404).json({ message: "Portfolio details not found" });
+    const { userId } = req.params;
+    const user = await userRepository.findOne({ where: { id: userId } });
+    const portfolio = await portfolioRepository.findOne({ where: { userId } });
+    const userTracks = await userTrackRepository
+      .createQueryBuilder("userTrack")
+      .innerJoinAndSelect("userTrack.track", "track")
+      .where("userTrack.userId = :userId", { userId: userId })
+      .getMany();
+    for (let userTrack of userTracks) {
+      tracks.push(userTrack.track);
     }
-
-    // Validate and apply updates from the DTO
-    const updateData = req.body as UpdatePortfolioDetailsDTO;
-
-    // if (updateData.name) portfolioDetails.name = updateData.name;
-    if (updateData.city) portfolioDetails.city = updateData.city;
-    if (updateData.country) portfolioDetails.country = updateData.country;
-
-    // Save the updated portfolio details
-    await portfolioDetailsRepository.save(portfolioDetails);
-
-    res.status(200).json({
-      message: "Portfolio details updated successfully",
-      portfolioDetails,
-    });
+    res.status(200).json({ user, portfolio, tracks });
   } catch (error) {
     console.error("Error updating portfolio details:", error);
 
@@ -209,7 +195,7 @@ export const deletePortfolioDetails: RequestHandler = async (
     const id = parseInt(req.params.id);
 
     // find the porfolio by id
-    const portfolioToRemove = await portfolioDetailsRepository.findOneBy({
+    const portfolioToRemove = await portfolioRepository.findOneBy({
       id: id,
     });
 
@@ -220,7 +206,7 @@ export const deletePortfolioDetails: RequestHandler = async (
 
     // delete the porfolio
 
-    const portfolio = await portfolioDetailsRepository.remove(
+    const portfolio = await portfolioRepository.remove(
       portfolioToRemove
     );
     res.status(200).json({
@@ -230,4 +216,6 @@ export const deletePortfolioDetails: RequestHandler = async (
   } catch (error) {
     res.status(500).json(error as Error);
   }
-};
+}
+
+

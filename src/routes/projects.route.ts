@@ -9,7 +9,7 @@ import {
   getProjectById,
   createProject,
   updateProjectById,
-  deleteProjectById,
+  deleteProjectController,
 } from "../controllers/projects.controller";
 
 /**
@@ -139,7 +139,7 @@ router.post("/projects", uploads, createProject);
  *       - Project
  */
 
-router.delete("/projects/:id", deleteProjectById);
+router.delete("/projects/:id", deleteProjectController);
 
 /**
  * @swagger

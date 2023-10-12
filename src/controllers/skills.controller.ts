@@ -1,6 +1,5 @@
 import express, { Request, RequestHandler, Response } from "express";
 import { z } from 'zod';
-import { Skill } from '../interfaces';
 import {
   createSkillsService,
   updateSkillsService,
@@ -85,9 +84,12 @@ export const getSkillsDetails: RequestHandler = async (
   try {
     const { userId } = req.body;
     // Fetch skills for the logged-in user based on their user ID
-    const result: Skill[] = await getSkillsService(userId);
+    const result = await getSkillsService(userId);
 
-    const data = result.map(record => record.skills);
+    const data = result.map(record => ({
+      skillId: record['id'],
+      skill: record['skills']
+    }));
 
     // Send a response with the fetched skills
     success(res, data, "Skills");
