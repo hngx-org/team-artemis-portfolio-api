@@ -50,6 +50,7 @@ async function validateCreateAwardData(
     const result = await parseAsync(CreateAwardDataSchema, {
       ...data,
       userId,
+      options
     })
 
     // Store the validated data in the request object if needed
