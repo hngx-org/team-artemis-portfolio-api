@@ -32,18 +32,9 @@ readdirSync("./src/routes").map((path) =>
   app.use("/api", require(`./routes/${path}`))
 );
 app.get("/", sayHelloController);
-
-app.use(function notFound(req, res, next) {
-  res.status(404).json({
-    NotFound: `Oops! Resource not found: ${req.originalUrl}`
-  }) 
-  next();
-})
 app.use(errorHandler);
-
 const port = process.env.PORT || 3000;
 
 app.listen(port, () => {
-  // console.log(entities);
   console.log(`Server is running on port ${port}`);
 });
