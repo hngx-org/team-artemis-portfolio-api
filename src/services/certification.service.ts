@@ -2,14 +2,14 @@ import { connectionSource } from '../database/data-source'
 import { Certificate } from '../database/entity/model'
 import { CertificationInterface } from '../interfaces/cerification.interface'
 
+const certificationRepository = connectionSource.getRepository(Certificate)
+
 export const updateACertificate = async (
    id: number,
    userId: string,
    payload: CertificationInterface
 ) => {
    try {
-      const certificationRepository = connectionSource.getRepository(Certificate)
-
       let certificateToUpdate = await certificationRepository.findOne({
          where: {id, userId}
       })
@@ -25,11 +25,12 @@ export const updateACertificate = async (
       }
 
       certificateToUpdate = {...payload, id, userId, created_at, section, user, sectionId}
-
       await certificationRepository.save(certificateToUpdate);
-      return { successful: true, message: "Certificate updated successfully" };
+      const data = await certificationRepository.find({ where : {id, userId}})
+      return { successful: true, data};
    } catch (error) {
       console.error('Error updating certificate', error.message)
       throw new Error('Error updating certificate')
    }
 }
+

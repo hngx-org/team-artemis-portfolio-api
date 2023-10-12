@@ -44,7 +44,7 @@ export const updateCertificate = async (req: Request, res: Response) => {
 
       const data = await updateACertificate(id, userId, payload)
       if (data.successful) {
-         success(res, data)
+         success(res, data.data[0], "Certificate updated successfully")
       } else {
          error(res, data.message);
       }
