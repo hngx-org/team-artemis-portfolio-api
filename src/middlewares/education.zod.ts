@@ -78,7 +78,8 @@ async function validateUpdateData(
     console.log(validatedData);
     next(); // Continue to the next middleware or route handler
   } catch (error) {
-    throw new BadRequestError(error.message);
+    const err = new BadRequestError(error.message);
+    return res.status(err.statusCode).json({ message: err.message });
   }
 }
 
