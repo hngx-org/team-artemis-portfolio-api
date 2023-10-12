@@ -15,11 +15,12 @@ const storage = multer.memoryStorage();
 const uploads = multer({ storage }).array("images", 1);
 
 const router = express.Router();
+
 /**
  * @swagger
- * /api/portfolio:
+ * /api/users:
  *   get:
- *     summary: Get all users' portfolio details
+ *     summary: Get all users
  *     description: Retrieve a list of all users' portfolio details.
  *     tags: [User Portfolio Details]
  *     responses:
@@ -33,18 +34,18 @@ const router = express.Router();
  *                 message:
  *                   type: string
  */
-router.get("/portfolio", getAllUsers);
+router.get("/users", getAllUsers);
 
 /**
  * @swagger
- * /api/portfolio/{userId}:
+ * /api/users/{userId}:
  *   get:
- *     summary: Get user portfolio details by ID
+ *     summary: Get user details by ID
  *     description: Retrieve a user's portfolio details by providing their ID.
  *     tags: [User Portfolio Details]
  *     parameters:
  *       - in: path
- *         name: id
+ *         name: userId
  *         required: true
  *         description: The ID of the user whose portfolio details are to be retrieved.
  *         schema:
@@ -62,9 +63,7 @@ router.get("/portfolio", getAllUsers);
  *       404:
  *         description: Requested user not found
  */
-router.get("/portfolio/:userId", getUserById);
-
-
+router.get("/users/:userId", getUserById);
 
 /**
  * @swagger
@@ -72,11 +71,12 @@ router.get("/portfolio/:userId", getUserById);
  *   post:
  *     summary: Create Portfolio profile
  *     description: Create a portfolio.
+ *     tags: [User Portfolio Details]
  *     parameters:
  *       - in: path
  *         name: userId
  *         required: true
- *         description: The id of the user.
+ *         description: The ID of the user.
  *         type: uuid
  *       - in: body
  *         name: createPortfolioDetails
