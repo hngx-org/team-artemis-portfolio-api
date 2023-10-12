@@ -24,7 +24,10 @@ connectionSource
 // middleware setup
 
 app.use(express.json());
+<<<<<<< HEAD
 
+=======
+>>>>>>> 4f0f7ae03398aa358fbcd457ddc41f5b74f2b848
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 
@@ -37,6 +40,5 @@ app.use(errorHandler);
 const port = process.env.PORT || 3000;
 
 app.listen(port, () => {
-  // console.log(entities);
   console.log(`Server is running on port ${port}`);
 });

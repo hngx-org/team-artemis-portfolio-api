@@ -59,8 +59,7 @@ const errorHandler = (
   if (res.headersSent) {
     return next(err);
   }
-  res.setHeader('Content-Type', 'application/json');
-
+  res.setHeader("Content-Type", "application/json");
 
   if (err instanceof SyntaxError) {
     res.status(400).json({ message: err.message });
@@ -92,8 +91,13 @@ const errorHandler = (
   if (err instanceof CustomError) {
     res.status(err.statusCode).json({ message: err.message });
   }
+<<<<<<< HEAD
 
   res.status(err.statusCode || 500).json({ message: err.message });
+=======
+    res.status(err.statusCode || 500).json({ message: err.message });
+
+>>>>>>> 4f0f7ae03398aa358fbcd457ddc41f5b74f2b848
 };
 
 export {
