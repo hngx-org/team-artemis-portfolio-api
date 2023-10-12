@@ -5,7 +5,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /add-certificate/{userId}:
+ * /api/add-certificate/{userId}:
  *   post:
  *     summary: Create certificate details for a user with a specified ID.
  *     description: Create certificate details for a user.
