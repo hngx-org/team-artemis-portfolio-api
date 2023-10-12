@@ -10,7 +10,7 @@ const router = express.Router()
 
 /**
  * @swagger
- * /api/create-work-experience:
+ * /api/create-work-experience/{userId}:
  *   post:
  *     summary: Create a new work experience.
  *     parameters:
@@ -101,7 +101,7 @@ const router = express.Router()
  *       - Work Experience
  */
 
-router.post('/create-work-experience', createWorkExperience)
+router.post('/create-work-experience/:userId', createWorkExperience)
 
 /**
  * @swagger
@@ -182,12 +182,6 @@ router.get('/work-experience', workExperienceController)
  *         description: The ID of the work experience to update.
  *         required: true
  *         type: integer
- *       - in: body
- *         name: updatedWorkExperienceData
- *         description: The updated data for the work experience.
- *         required: true
- *         schema:
- *           type: integer
  *       - in: body
  *         name: updateWorkExperience
  *         description: New work experience data

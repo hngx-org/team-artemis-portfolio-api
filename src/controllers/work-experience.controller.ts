@@ -21,9 +21,11 @@ export const createWorkExperience: RequestHandler = async (
     endYear,
     description,
     isEmployee,
-    userId,
     sectionId,
   } = req.body;
+
+  const userId = req.params.userId || req.body.userId;
+
 
   const workExperienceSchema = object({
     company: string({
@@ -185,7 +187,7 @@ export const updateWorkExperience: RequestHandler = async (
 
   if (!workId) {
     res.statusCode = 400;
-    return res.json({ message: "workExpId is missing from URL parameter" });
+    return res.json({ message: "workExpId must be provided as a parameter" });
   }
 
   const {
