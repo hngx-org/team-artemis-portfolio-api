@@ -2,8 +2,9 @@ import express from "express";
 import multer from "multer";
 import {
   createProfileController,
-  deletePortfolioDetails,
-  updatePortfolioDetails,
+  getAllUsers,
+  getUserById,
+  uploadImageController,
 } from "../controllers";
 import {
   createPorfolioDataSchema,

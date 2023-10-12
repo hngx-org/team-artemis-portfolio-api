@@ -14,35 +14,15 @@ import {
   WorkExperienceDetail,
 } from "../database/entity/model";
 
-const userRepository = connectionSource.getRepository(User);
+const portfolioDetailsRepository =
+  connectionSource.getRepository(PortfolioDetails);
 const portfolioRepository = connectionSource.getRepository(PortfolioDetails);
-const userTrackRepository = connectionSource.getRepository(UserTrack);
-const trackRepository = connectionSource.getRepository(Tracks);
 
-const getAllUsers = async (req: Request, res: Response) => {
-  const users = await userRepository.find();
-  res.status(200).json({ users });
-};
-
-const getUserById = async (req: Request, res: Response) => {
-  let tracks: any[] = [];
-  try {
-    const { userId } = req.params;
-    const user = await userRepository.findOne({ where: { id: userId } });
-    const portfolio = await portfolioRepository.findOne({ where: { userId } });
-    const userTracks = await userTrackRepository
-      .createQueryBuilder("userTrack")
-      .innerJoinAndSelect("userTrack.track", "track")
-      .where("userTrack.userId = :userId", { userId: userId })
-      .getMany();
-    for (let userTrack of userTracks) {
-      tracks.push(userTrack.track);
-    }
-    res.status(200).json({ user, portfolio, tracks });
-  } catch (error) {
-    res.status(404).json({ message: "User not found" });
-  }
-};
+export interface UpdatePortfolioDetailsDTO {
+  name?: string;
+  city?: string;
+  country?: string;
+}
 
 const getPortfolioDetails = async (req: Request, res: Response) => {
   try {
@@ -92,9 +72,93 @@ const getAllPortfolioDetails = async (req: Request, res: Response) => {
   return res.json(PortfolioDetails);
 };
 
+// Export the updatePortfolioDetails function
+const updatePortfolioDetails: RequestHandler = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const id = parseInt(req.params.id);
+
+    // Find the existing portfolio details by ID
+    const portfolioDetails = await portfolioDetailsRepository.findOne({
+      where: { id },
+    });
+
+    if (!portfolioDetails) {
+      return res.status(404).json({ message: "Portfolio details not found" });
+    }
+
+    // Validate and apply updates from the DTO
+    const updateData = req.body as UpdatePortfolioDetailsDTO;
+
+    // if (updateData.name) portfolioDetails.name = updateData.name;
+    if (updateData.city) portfolioDetails.city = updateData.city;
+    if (updateData.country) portfolioDetails.country = updateData.country;
+
+    // Save the updated portfolio details
+    await portfolioDetailsRepository.save(portfolioDetails);
+
+    res.status(200).json({
+      message: "Portfolio details updated successfully",
+      portfolioDetails,
+    });
+  } catch (error) {
+    console.error("Error updating portfolio details:", error);
+
+    if (error instanceof SyntaxError) {
+      // Handle JSON parsing error
+      return res
+        .status(400)
+        .json({ message: "Invalid JSON format in request body" });
+    } else if (error.code === "23505") {
+      // Handle duplicate key constraint violation (unique constraint violation)
+      return res
+        .status(409)
+        .json({ message: "Duplicate key value in the database" });
+    } else if (error.code === "22P02") {
+      // Handle invalid integer format error
+      return res.status(400).json({ message: "Invalid ID format" });
+    }
+
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+// delete Portfolio Profile details
+const deletePortfolioDetails: RequestHandler = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    // convert the id to number
+    const id = parseInt(req.params.id);
+
+    // find the porfolio by id
+    const portfolioToRemove = await portfolioDetailsRepository.findOneBy({
+      id: id,
+    });
+
+    // return error if porfolio is not found
+    if (!portfolioToRemove) {
+      return res.status(404).json({ error: "Portfolio Details not found!" });
+    }
+
+    const portfolio = await portfolioDetailsRepository.remove(
+      portfolioToRemove
+    );
+    res.status(200).json({
+      message: "Portfolio profile details deleted successfully",
+      portfolio,
+    });
+  } catch (error) {
+    res.status(500).json(error as Error);
+  }
+};
+
 export {
-  getAllUsers,
-  getUserById,
   getPortfolioDetails,
   getAllPortfolioDetails,
+  updatePortfolioDetails,
+  deletePortfolioDetails,
 };
