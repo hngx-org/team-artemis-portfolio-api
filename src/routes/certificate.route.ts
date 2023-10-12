@@ -1,5 +1,10 @@
 import express from "express";
-import { addCertificateController,deleteCertificate,getAllCertificates,getCertificateById } from "../controllers/certificate.controller";
+import { 
+   addCertificateController, 
+   deleteCertificate, 
+   getAllCertificates, 
+   getCertificateById
+} from "../controllers/certificate.controller";
 
 const router = express.Router();
 
@@ -187,4 +192,6 @@ router.delete('/certifications/:certId', deleteCertificate);
  */
 router.get('/certifications/:certId', getCertificateById);
 
-module.exports = router
+
+module.exports = router;
+
