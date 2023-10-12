@@ -8,8 +8,8 @@ import {
 } from "zod-error";
 
 const projectSchema = z.object({
-    title: z.string().trim(),
-    year: z.string().trim(),
+    title: z.string().trim().min(2).max(50),
+    year: z.string().trim().min(4,).max(4),
     url: z.string().url({
         message: "Please provide a valid URL in this format: https://example.com",
     }).trim().optional(),

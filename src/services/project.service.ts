@@ -2,6 +2,7 @@ import { connectionSource } from "../database/data-source";
 import { error, success } from "../utils";
 import { Images, Project, ProjectsImage } from "../database/entity/model";
 import { cloudinaryService } from "./image-upload.service";
+import { NotFoundError, CustomError } from "../middlewares";
 
 
 export const updateProjectService = async (
@@ -15,15 +16,18 @@ export const updateProjectService = async (
     const projectToUpdate = await projectRepository.findOneBy({ id: id });
 
     if (!projectToUpdate) {
-        console.log("Project not found");
-        throw new Error("Project not found");
+
+        throw new NotFoundError("Project not found!!");
+    }
+    if(JSON.stringify(data) === '{}'){
+        throw new CustomError("No data to update", 400);
     }
 
     await projectRepository.update(id, data);
     const updatedProject = await projectRepository.findOneBy({ id: id });
 
     // handle image upload
-    if (images.length > 0) {
+    if (images && images.length > 0) {
         const { successful, message, urls } = await cloudinaryService(images, "image");
         if (successful) {
             for (let i = 0; i < urls.length; i++) {
@@ -36,7 +40,7 @@ export const updateProjectService = async (
                 await projectsImageRepository.save(projectImage);
             }
         } else {
-            throw new Error(message);
+            throw new CustomError(message, 400);
         }
     }
 

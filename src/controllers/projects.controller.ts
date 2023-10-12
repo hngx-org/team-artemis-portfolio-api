@@ -55,7 +55,8 @@ export const getProjectById: RequestHandler = async (
 
 export const createProject: RequestHandler = async (
   req: Request,
-  res: Response
+  res: Response,
+  next: NextFunction
 ) => {
   try {
     let jsonData;
@@ -93,7 +94,7 @@ export const createProject: RequestHandler = async (
       }
 
       const response = errors.join(', ');
-      return res.status(400).json({ error: "Please check the input data", message: response });
+      throw new BadRequestError(response);
     }
     const { title, year, url, tags, description, userId, sectionId } = normalizedData;
 
@@ -113,12 +114,12 @@ export const createProject: RequestHandler = async (
     const projectId = data.id;
 
     const files = req.files as any;
-    if (!files) {
-      return error(res, "Add thumbnail image", 400);
+    if (!files.length) {
+      throw new BadRequestError('Add thumbnail image');
     }
     console.log(files.length)
     if (files.length > 10) {
-      return error(res, "You can only upload a maximum of 10 images", 400);
+      throw new BadRequestError('You can only upload a maximum of 10 images');
     }
 
     const imagesRes = await cloudinaryService(files, req.body.service);
@@ -136,7 +137,7 @@ export const createProject: RequestHandler = async (
 
         await projectImageRepository.save(projectImage);
       } catch (error) {
-        console.error(error);
+        throw new CustomError('Error saving image', 400);
       }
     }
 
@@ -166,7 +167,7 @@ export const createProject: RequestHandler = async (
       success(res, data, "Created without thumbnail");
     }
   } catch (err) {
-    error(res, (err as Error).message);
+    return next(err);
   }
 };
 
@@ -179,12 +180,12 @@ export const updateProjectController: RequestHandler = async (
   const data = req.body;
   const images = req.files as Express.Multer.File[];
 
-  if (!images) {
-    return error(res, "You need to upload an image");
-  }
 
   if (images.length > 10) {
     return error(res, "You can only upload a maximum of 10 images at a time");
+  }
+  if (!data) {
+    throw new BadRequestError('Please provide data to update!!');
   }
 
   try {
@@ -207,7 +208,7 @@ export const updateProjectController: RequestHandler = async (
 export const deleteProjectController: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const id = parseInt(req.params.id);
-    const projectDetail = await projectRepository.findOne({ where: { id } });
+    const projectDetail = await projectRepository.findOne({ where: { id: id } });
 
     if (!projectDetail) {
       const errorResponse = {
@@ -233,22 +234,14 @@ export const deleteProjectController: RequestHandler = async (req: Request, res:
 // update project section
 export const updateProjectById: RequestHandler = async (
   req: Request,
-  res: Response
+  res: Response,
+  next: NextFunction
 ) => {
   const id = req.params.project_id;
   const data = req.body;
   const images = req.files as Express.Multer.File[];
 
-  if (!images) {
-    return error(res, "You need to upload an image");
-  }
-
-  if (images.length > 10) {
-    return error(res, "You can only upload a maximum of 10 images at a time");
-  }
-
   try {
-    console.log(id);
     const updatedProject = await updateProjectService(
       parseInt(id),
       data,
@@ -259,8 +252,7 @@ export const updateProjectById: RequestHandler = async (
       updatedProject,
       `Project with id: ${id} updated successfully`
     );
-  } catch (error) {
-    console.log(error);
-    return error(res, "Project update failed");
+  } catch (err) {
+    return next(err);
   }
 };
