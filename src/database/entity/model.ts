@@ -1100,8 +1100,9 @@ export class Section {
   customUserSections: CustomUserSection[];
 
   @ManyToOne(() => Template, (template) => template.sections)
-  template: Template;
+  template: Template; // This establishes the relationship with the Template entity
 }
+
 
 @Entity({ name: "tracks" })
 export class Tracks {
