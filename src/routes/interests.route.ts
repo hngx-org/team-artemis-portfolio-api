@@ -82,7 +82,74 @@ router.post(
   validateCreateSchema(createInterestSchema),
   createInterest
 );
-router.get("/interests/:userId", getInterests);
+
+// Get interests
+
+/**
+ * @swagger
+ * /api/interests/{userId}:
+ *   get:
+ *     summary: Fetch user interests.
+ *     description: Fetch the interests of a user.
+ *     tags:
+ *       - Interests
+ *     consumes:
+ *       - application/json
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         description: The ID of the user whose interests are to be fetched.
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Successful response with user interest details.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 successful:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: object
+ *                   example: ["Backend", "Frontend"] 
+ *       500:
+ *         description: Internal server error while retrieving interests.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 successful:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Internal server error occurred."
+ *                 error:
+ *                   type: string
+ *                   example: "Error message details"
+ *       400:
+ *         description: Invalid userId format.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Invalid userId format. Please provide a valid user ID."
+ *                 error:
+ *                   type: string  
+ */
+
+router.get(
+  "/interests/:userId", 
+  getInterests
+  );
 
 // Update interests
 
