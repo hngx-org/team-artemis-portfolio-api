@@ -23,6 +23,7 @@ const router = express.Router();
  * @swagger
  * /api/interests:
  *   post:
+ *     summary: Create user interests.
  *     description: Create section for user interests.
  *     tags: [Interests]
  *     consumes:
@@ -115,7 +116,7 @@ router.post(
  *                   example: true
  *                 data:
  *                   type: object
- *                   example: ["Backend", "Frontend"] 
+ *                   example: ["Backend", "Frontend"]
  *       500:
  *         description: Internal server error while retrieving interests.
  *         content:
@@ -143,13 +144,10 @@ router.post(
  *                   type: string
  *                   example: "Invalid userId format. Please provide a valid user ID."
  *                 error:
- *                   type: string  
+ *                   type: string
  */
 
-router.get(
-  "/interests/:userId", 
-  getInterests
-  );
+router.get("/interests/:userId", getInterests);
 
 // Update interests
 

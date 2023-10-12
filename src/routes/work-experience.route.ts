@@ -13,77 +13,92 @@ const router = express.Router()
  * /api/create-work-experience/{userId}:
  *   post:
  *     summary: Create a new work experience.
- *     description: Create education details for a user.
  *     parameters:
- *       - in: path
- *         name: userIds
- *         required: true
- *         schema:
- *           type: string
- *         description: The ID of the user for whom to create work experience.
- *       - in: header
- *         name: Authorization
- *         type: string
- *         description: Optional authorization header
- *       - in: body
- *         name: educationDetails
- *         description: The data for the education details to be created.
- *         required: true
- *         schema:
-  *             type: object
-  *             properties:
-  *               company:
-  *                 type: string
-  *               role:
-  *                 type: string
-  *               startMonth:
-  *                 type: string
-  *               startYear:
-  *                 type: string
-  *               endMonth:
-  *                 type: string
-  *               endYear:
-  *                 type: string
-  *               description:
-  *                 type: string
-  *               isEmployee:
-  *                 type: boolean
-  *               userId:
-  *                 type: string  # Change 'uuid' to 'string' for consistency
-  *               sectionId:
-  *                 type: integer  # Change 'number' to 'integer'
-  *     responses:
-  *       200:
-  *         description: Added Work Experience Successfully
-  *         content:
-  *           application/json:
-  *             schema:
-  *               type: object
-  *               properties:
-  *                 message:
-  *                   type: string
-  *                 data:
-  *                   type: object
-  *       400:
-  *         description: Bad request
-  *         content:
-  *           application/json:
-  *             schema:
-  *               type: object
-  *               properties:
-  *                 message:
-  *                   type: string
-  *       500:
-  *         description: Internal Server Error
-  *         content:
-  *           application/json:
-  *             schema:
-  *               type: object
-  *               properties:
-  *                 message:
-  *                   type: string
-  *     tags:
-  *       - Work Experience
+ *     requestBody:
+ *       required: true
+ *       description: This will contain all the information that will be added to the new work experience.
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               company:
+ *                 type: string
+ *               role:
+ *                 type: string
+ *               startMonth:
+ *                 type: string
+ *               startYear:
+ *                 type: string
+ *               endMonth:
+ *                 type: string
+ *               endYear:
+ *                 type: string
+ *               description:
+ *                 type: string
+ *               isEmployee:
+ *                 type: boolean
+ *               userId:
+ *                 type: string  # Change 'uuid' to 'string' for consistency
+ *               sectionId:
+ *                 type: integer  # Change 'number' to 'integer'
+ *      
+ *     responses:
+ *       200:
+ *         description: Added Work Experience Successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     company:
+ *                       type: string
+ *                     role:
+ *                       type: string
+ *                     startMonth:
+ *                       type: string
+ *                     startYear:
+ *                       type: string
+ *                     endMonth:
+ *                       type: string
+ *                     endYear:
+ *                       type: string
+ *                     description:
+ *                       type: string
+ *                     isEmployee:
+ *                       type: boolean
+ *                     userId:
+ *                       type: string  # Change 'uuid' to 'string' for consistency
+ *                     sectionId:
+ *                       type: integer  # Change 'number' to 'integer'
+ *      
+ *       400:
+ *         description: Bad request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: array
+ *                   items:
+ *                      type: string
+ *       500:
+ *         description: Internal Server Error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *     tags:
+ *       - Work Experience
  */
 
 router.post('/create-work-experience/:userId', createWorkExperience)
@@ -260,6 +275,6 @@ router.get('/work-experience', workExperienceController)
  *       - Work Experience
  */
 
-router.put('/work-experience/:workId', updateWorkExperience)
+router.put('/update-work-experience/:workId', updateWorkExperience)
 
 module.exports = router
