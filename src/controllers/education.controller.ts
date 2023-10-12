@@ -57,6 +57,7 @@ const educationDetailRepository =
 const createEducationDetailController = async (req, res, next) => {
   try {
     const userId = req.params.id;
+
     const { degreeId, fieldOfStudy, school, from, description, to, sectionId } =
       req.body as EducationDetailData;
 
@@ -130,6 +131,11 @@ const getEducationDetailById = async (
   try {
     const id = parseInt(req.params.id);
 
+    if (isNaN(id) || id < 1) {
+      const err = new BadRequestError("Invalid ID Format");
+      return res.status(err.statusCode).json({ error: err.message });
+    }
+
     // Attempt to fetch education details
     const educationDetail = await educationDetailRepository.findOne({
       where: { id },
@@ -137,7 +143,8 @@ const getEducationDetailById = async (
 
     // If the education detail is not found, you can throw a NotFoundError
     if (!educationDetail) {
-      throw new NotFoundError("Education detail not found");
+      const err = new NotFoundError("Education detail not found");
+      throw JSON.stringify(err);
     }
 
     // Send a success response
@@ -156,12 +163,30 @@ const updateEducationDetail = async (
   try {
     const id = parseInt(req.params.id);
 
+    if (isNaN(id) || id < 1) {
+      const err = new BadRequestError("Invalid ID Format");
+      return res.status(err.statusCode).json({ error: err.message });
+    }
+
+    // convert the date objects to date strings
+    if (req.body.from && req.body.to) {
+      req.body.from = new Date(req.body.from);
+      req.body.to = new Date(req.body.to);
+    }
+
+    if (!req.body) {
+      const err = new BadRequestError("No data provided");
+      res.status(err.statusCode).json({ err: err.message });
+      throw JSON.stringify(err);
+    }
+
     const educationDetail = await educationDetailRepository.findOne({
       where: { id },
     });
 
     if (!educationDetail) {
-      throw new NotFoundError("Education detail not found");
+      const err = new NotFoundError("Education detail not found");
+      res.status(err.statusCode).json({ err: err.message });
     }
 
     const updateData = req.body;
@@ -197,16 +222,21 @@ const deleteEducationDetail = async (
   try {
     const id = parseInt(req.params.id);
 
+    if (isNaN(id) || id < 1) {
+      const err = new BadRequestError("Invalid ID Format");
+      return res.status(err.statusCode).json({ error: err.message });
+    }
+
     // Find the existing education detail by ID
     const educationDetail = await educationDetailRepository.findOne({
       where: { id },
     });
 
     if (!educationDetail) {
-      throw new NotFoundError("Education detail not found");
+      const err = new NotFoundError("Education detail not found");
+      res.status(err.statusCode).json({ err: err.message });
     }
 
-    // Delete the education detail
     await educationDetailRepository.remove(educationDetail);
 
     res.status(204).json({
@@ -216,6 +246,7 @@ const deleteEducationDetail = async (
     console.log("Education detail deleted successfully");
   } catch (error) {
     console.error("Error deleting education detail:", error);
+    // errorHandler(error, req, res, next);
     next(error);
   }
 };
