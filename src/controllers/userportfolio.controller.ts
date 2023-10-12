@@ -10,8 +10,12 @@ import {
   Section,
   SkillsDetail,
   WorkExperienceDetail,
+  UserTrack,
+  Tracks
 } from "../database/entity/model";
-import { NotFoundError, BadRequestError } from "../middlewares/index";
+import { NotFoundError, BadRequestError, CustomError } from "../middlewares/index";
+import { User } from "../database/entity/user";
+import { success } from "../utils";
 
 const portfolioDetailsRepository =
   connectionSource.getRepository(PortfolioDetails);
@@ -79,45 +83,120 @@ const getAllPortfolioDetails = async (req: Request, res: Response) => {
   return res.json({ PortfolioDetails });
 };
 
-// Export the updatePortfolioDetails function
-const updatePortfolioDetails: RequestHandler = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+
+const updatePortfolioDetails: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const id = parseInt(req.params.id);
-    if (!id) {
-      throw new BadRequestError("Must provide an ID");
+    const userId = req.params.userId;
+    const { name, trackId, city, country } = req.body;
+
+    if (!req.body) {
+      throw new BadRequestError("No data provided");
     }
 
-    // Find the existing portfolio details by ID
-    const portfolioDetails = await portfolioDetailsRepository.findOne({
-      where: { id },
-    });
+    const userRepository = connectionSource.getRepository(User);
+    const portfolioDetailsRepository =
+      connectionSource.getRepository(PortfolioDetails);
+    const userTrackRepository = connectionSource.getRepository(UserTrack);
+    const trackRepository = connectionSource.getRepository(Tracks);
 
-    if (!portfolioDetails) {
-      throw new NotFoundError("Portfolio details not found");
+    const user = await userRepository.findOne({ where: { id: userId } });
+
+    if (!user) {
+      throw new NotFoundError("User Not Found");
     }
 
-    // Validate and apply updates from the DTO
-    const updateData = req.body as UpdatePortfolioDetailsDTO;
+    if (name) {
+      let splitName = [];
+      splitName = name.split(" ");
+      userRepository.update(user.id, { firstName: splitName[0], lastName: splitName[1] });
+    }
 
-    // if (updateData.name) portfolioDetails.name = updateData.name;
-    if (updateData.city) portfolioDetails.city = updateData.city;
-    if (updateData.country) portfolioDetails.country = updateData.country;
+    let track: Tracks;
 
-    // Save the updated portfolio details
-    await portfolioDetailsRepository.save(portfolioDetails);
+    if (trackId) {
+      track = await trackRepository.findOne({ where: { id: trackId } });
 
-    res.status(200).json({
-      message: "Portfolio details updated successfully",
-      portfolioDetails,
-    });
+      if (!track) {
+        throw new NotFoundError("Track Not Found");
+      }
+
+      const userTrack = await userTrackRepository.findOne({ where: { trackId: trackId, userId } });
+
+      if (!userTrack) {
+        const newUser = userTrackRepository.create({
+          trackId: trackId,
+          userId,
+        });
+
+        await userTrackRepository.save(newUser);
+      }
+    }
+
+    // Fetch the portfolio
+    let portfolio = await portfolioDetailsRepository.findOne({ where: { userId: userId } });
+    if (!portfolio) {
+      throw new NotFoundError("Portfolio Not Found");
+    }
+    portfolio.city = city;
+    portfolio.country = country;
+
+    portfolio = await portfolioDetailsRepository.save(portfolio);
+
+    console.log("Successfully updated user profile portfolio details");
+    return success(
+      res, {
+      portfolio: portfolio,
+      track: track,
+      user: user
+    },
+      "Successfully updated user profile portfolio details"
+    );
+
   } catch (error) {
-    return next(error);
+    console.log("Error updating profile detail:", error.message);
+    next(error);
   }
-};
+}
+
+// Export the updatePortfolioDetails function
+// const updatePortfolioDetails: RequestHandler = async (
+//   req: Request,
+//   res: Response,
+//   next: NextFunction
+// ) => {
+//   try {
+//     const id = parseInt(req.params.id);
+//     if (!id) {
+//       throw new BadRequestError("Must provide an ID");
+//     }
+
+//     // Find the existing portfolio details by ID
+//     const portfolioDetails = await portfolioDetailsRepository.findOne({
+//       where: { id },
+//     });
+
+//     if (!portfolioDetails) {
+//       throw new NotFoundError("Portfolio details not found");
+//     }
+
+//     // Validate and apply updates from the DTO
+//     const updateData = req.body as UpdatePortfolioDetailsDTO;
+
+//     // if (updateData.name) portfolioDetails.name = updateData.name;
+//     if (updateData.city) portfolioDetails.city = updateData.city;
+//     if (updateData.country) portfolioDetails.country = updateData.country;
+
+//     // Save the updated portfolio details
+//     await portfolioDetailsRepository.save(portfolioDetails);
+
+//     res.status(200).json({
+//       message: "Portfolio details updated successfully",
+//       portfolioDetails,
+//     });
+//   } catch (error) {
+//     return next(error);
+//   }
+// };
 
 // delete Portfolio Profile details
 const deletePortfolioDetails: RequestHandler = async (
