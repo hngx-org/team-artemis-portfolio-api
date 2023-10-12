@@ -16,6 +16,11 @@ const router = express.Router();
  *         description: The id of the certificate to be updated
  *         required: true
  *         type: integer
+ *       - in: path
+ *         name: userId
+ *         description: A valid user id (uuid) 
+ *         required: true
+ *         type: uuid
  *       - in: body
  *         name: payload
  *         description: New certificate details.
@@ -26,7 +31,7 @@ const router = express.Router();
  *             title:
  *               type: string
  *             year:
- *               type: number
+ *               type: string
  *             organization:
  *               type: string
  *             url: 
@@ -55,10 +60,12 @@ const router = express.Router();
  *                       example: true
  *                     message:
  *                       type: string
- *                       example: "certificate updated successfully"
+ *                       example: "Certificate updated successfully"
  *                     data:
  *                       type: object
  *                       properties:
+ *                         id:
+ *                           type: string
  *                         title:
  *                           type: string
  *                         year:
@@ -69,8 +76,14 @@ const router = express.Router();
  *                           type: string
  *                         description:
  *                           type: string
+ *                         created_at:
+ *                           type: string
+ *                         userId: 
+ *                           type: string
+ *                         sectionId:
+ *                           type: string
  *       400:
- *         description: Invalid parameter id or parameter id not provided
+ *         description: Invalid parameter id or invalid UUID user id not provided
  *         content:
  *           application/json:
  *             schema:
