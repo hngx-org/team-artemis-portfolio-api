@@ -1,15 +1,15 @@
-import express from 'express'
-import { validateCreateAwardData } from '../middlewares/award.zod';
-import { createAwardController,
-        getAwardController,
-        getAllAwardsController,
-        deleteAwardController
-} from '../controllers/award.controller'
+import express from "express";
+import { validateCreateAwardData } from "../middlewares/award.zod";
+import {
+  createAwardController,
+  getAwardController,
+  getAllAwardsController,
+  deleteAwardController,
+} from "../controllers/award.controller";
 
-const router = express.Router()
+const router = express.Router();
 
-
-router.post('/award/:userId', validateCreateAwardData, createAwardController)
+router.post("/award/:userId", validateCreateAwardData, createAwardController);
 /**
  * @swagger
  * /api/award/:id:
@@ -65,7 +65,7 @@ router.post('/award/:userId', validateCreateAwardData, createAwardController)
  *                     successful:
  *                       type: boolean
  *                     message:
- *                       type: string    
+ *                       type: string
  *       500:
  *         description: Internal server error.
  *         content:
@@ -80,8 +80,7 @@ router.post('/award/:userId', validateCreateAwardData, createAwardController)
  *                 data:
  *                   type: null
  */
-router.get('/award/:id', getAwardController);
-
+router.get("/award/:id", getAwardController);
 
 /**
  * @swagger
@@ -108,7 +107,7 @@ router.get('/award/:id', getAwardController);
  *                     successful:
  *                       type: boolean
  *                     message:
- *                       type: string    
+ *                       type: string
  *       500:
  *         description: Internal server error.
  *         content:
@@ -124,7 +123,6 @@ router.get('/award/:id', getAwardController);
  *                   type: null
  */
 router.get('/awards', getAllAwardsController);
-
 
 /**
  * @swagger
@@ -159,4 +157,4 @@ router.get('/awards', getAllAwardsController);
 
 router.delete('/award/:id', deleteAwardController)
 
-module.exports = router
+module.exports = router;
