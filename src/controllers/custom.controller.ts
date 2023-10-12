@@ -7,7 +7,7 @@ import {
   Section,
 } from "../database/entity/model";
 import { success, error } from "../utils/response.util";
-import { deleteCustomSectionService } from "../services/custom.service";
+import { deleteCustomSectionService} from "../services/custom.service";
 import {
   BadRequestError,
   CustomError,
@@ -276,7 +276,6 @@ const sectionSchema = z.object({
 const validateSchema =
   (schema: AnyZodObject) => async (req: Request, res: Response, next: any) => {
     try {
-      console.log(req.body);
       await schema.parseAsync(req.body);
       return next();
     } catch (error: any) {
@@ -295,7 +294,24 @@ const validateSchema =
 // updated customsection field
 const updateCustomField = async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
+    const id = parseInt(req.params.id);
+
+
+    const customFieldSchema = z.object({
+      fieldType: z.string({ message: "fieldType must be a string"}),
+      fieldName: z.string({ message: "fieldName must be a string"}),
+      customSectionId: z.number().int({ message: "customSectionId must be an integer"}),
+      value: z.string({ message: "value must be a string"})
+    })
+
+    const data = customFieldSchema.safeParse(req.body)
+
+    if(data.success === false){
+      const err = new BadRequestError(data.error.message);
+      return res
+      .status(err.statusCode)
+      .json({ err: JSON.parse(err.message)[0].message})
+    }
 
     // validator for idValidator
     const idValidator = z.number({
@@ -306,7 +322,7 @@ const updateCustomField = async (req: Request, res: Response) => {
     .positive({ message: "id must be a positive integer"})
 
     const idValidate = idValidator.safeParse(id)
-
+  
     if(idValidate.success === false){
       const err = new BadRequestError(idValidate.error.message);
       return res
@@ -320,7 +336,7 @@ const updateCustomField = async (req: Request, res: Response) => {
     if (!existingRecord) {
       return error(res, "Record not found", 404);
     }
-    // Update the existing record with the new data from the request body
+    
     existingRecord.fieldType = req.body.fieldType;
     existingRecord.fieldName = req.body.fieldName;
     existingRecord.customSectionId = req.body.customSectionId;
@@ -328,12 +344,12 @@ const updateCustomField = async (req: Request, res: Response) => {
     const updatedRecord = await customFieldRepository.save(existingRecord);
     return success(res, updatedRecord, "Success");
   } catch (error: any) {
-    // console.log(err);
     const err = new InternalServerError(error.message)
     return res.status(err.statusCode).json({ err: err.message})
-    // return error(res, "An error occurred while updating the record", 500);
   }
 };
+
+
 
 export {
   create,
@@ -346,6 +362,7 @@ export {
   customUserSectionSchema,
   customFieldSchema,
   createSection,
+  // updateCustomSection,
   sectionSchema,
   fieldsSchema,
 };

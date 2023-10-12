@@ -138,12 +138,8 @@ router.post("/projects", uploads, createProject);
  *     tags:
  *       - Project
  */
-<<<<<<< HEAD
-router.delete("/projects/:id", deleteProjectById);
-=======
 
 router.delete("/projects/:id", deleteProjectController);
->>>>>>> 8a342f953a6f1e35f4b09a2298a1df11d6c53979
 
 /**
  * @swagger
