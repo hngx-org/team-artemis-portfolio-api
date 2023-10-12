@@ -12,7 +12,7 @@ const router = express.Router()
 router.post('/award/:userId', validateCreateAwardData, createAwardController)
 /**
  * @swagger
- * /api/awards/:id:
+ * /api/award/:id:
  *   get:
  *     summary: Get award detail(s) for a user who's id is in the params and returns an array of objects containing a user award details.
  *     description: Get award detail(s) for a user who's id is in the params and returns an array of objects containing a user award details.
@@ -48,7 +48,7 @@ router.post('/award/:userId', validateCreateAwardData, createAwardController)
  *
  *     responses:
  *       200:
- *         description: Award created successfully.
+ *         description: Award retrieved successfully.
  *         educationDetails: Array of user awards detail(s).
  *         content:
  *           application/json:
@@ -82,10 +82,53 @@ router.post('/award/:userId', validateCreateAwardData, createAwardController)
  */
 router.get('/award/:id', getAwardController);
 
-router.get('/awards', getAllAwardsController);
+
 /**
  * @swagger
- * /api/awards/:id:
+ * /api/awards:
+ *   get:
+ *     summary: Get the award detail of all users
+ *     description: All awards retrieved successfully
+ *     responses:
+ *       200:
+ *         description: Award retrieved successfully.
+ *         awardDetails: Array of user award details.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 successful:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     successful:
+ *                       type: boolean
+ *                     message:
+ *                       type: string    
+ *       500:
+ *         description: Internal server error.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 successful:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   type: null
+ */
+router.get('/awards', getAllAwardsController);
+
+
+/**
+ * @swagger
+ * /api/award/:id:
  *   get:
  *     summary: Delete award detail(s) of a user detail by ID
  *     description: Delete award detail(s) of a user detail by ID
@@ -115,9 +158,5 @@ router.get('/awards', getAllAwardsController);
  */
 
 router.delete('/award/:id', deleteAwardController)
-
-
-
-
 
 module.exports = router
