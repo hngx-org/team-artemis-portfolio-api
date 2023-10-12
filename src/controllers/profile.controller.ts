@@ -8,8 +8,13 @@ import { AnyZodObject, z } from "zod";
 import { connectionSource } from "../database/data-source";
 import { PortfolioDetails, Tracks, UserTrack } from "../database/entity/model";
 import { User } from "../database/entity/user";
-import { cloudinaryService, uploadProfileCoverPhotoService, uploadProfileImageService } from "../services";
+import {
+  cloudinaryService,
+  uploadProfileCoverPhotoService,
+  uploadProfileImageService,
+} from "../services";
 import { error, success } from "../utils";
+import { validateUser } from "../middlewares/auth";
 
 // Define a Data Transfer Object (DTO) for updating PortfolioDetails
 export interface UpdatePortfolioDetailsDTO {
@@ -31,8 +36,16 @@ export const uploadProfileImageController: RequestHandler = async (
     if (!req.files) return error(res, "add event image", 400);
     const { service, userId } = req.body;
 
+    const response = await validateUser(
+      req.headers.authorization,
+      "portfolio.update.own"
+    );
+
+    if (!response.authorized)
+      return error(res, "Not authorized to perform action", 400);
+
     const { urls } = await cloudinaryService(req.files, service);
-    const data = await uploadProfileImageService(userId, urls);
+    const data = await uploadProfileImageService(response.user.id, urls);
     return success(res, data, "Profile picture uploaded successfully");
   } catch (err) {
     error(res, (err as Error).message); // Use type assertion to cast 'err' to 'Error' type
@@ -48,11 +61,17 @@ export const coverphoto: RequestHandler = async (
       return error(res, "No files were uploaded", 400);
     }
 
-    const { service, userId } = req.body;
+    const response = await validateUser(
+      req.headers.authorization,
+      "portfolio.update.own"
+    );
+
+    if (!response.authorized)
+      return error(res, "Not authorized to perform action", 400);
 
     const { urls } = await cloudinaryService(req.files, req.body.service);
 
-    const data = await uploadProfileCoverPhotoService(userId, urls);
+    const data = await uploadProfileCoverPhotoService(response.user.id, urls);
 
     return success(res, data, "Profile cover photo uploaded successfully");
   } catch (err) {

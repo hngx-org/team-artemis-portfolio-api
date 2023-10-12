@@ -1,9 +1,11 @@
 import express from "express";
 import multer from "multer";
 import {
+  coverphoto,
   createProfileController,
   deletePortfolioDetails,
   updatePortfolioDetails,
+  uploadProfileImageController,
 } from "../controllers";
 import {
   createPorfolioDataSchema,
@@ -14,6 +16,45 @@ const storage = multer.memoryStorage();
 const uploads = multer({ storage }).array("images", 1);
 
 const router = express.Router();
+
+/**
+ * @swagger
+ * /api/profile/image-upload:
+ *   post:
+ *     summary: Upload a profile image
+ *     description: Upload a user's profile image using a POST request.
+ *     tags: [Profile]
+ *     consumes:
+ *       - multipart/form-data
+ *     parameters:
+ *       - in: formData
+ *         name: images
+ *         type: file
+ *         description: The profile image to upload (one file allowed).
+ *     responses:
+ *       200:
+ *         description: Profile image uploaded successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: A success message.
+ *       400:
+ *         description: Bad request. The uploaded file may not be valid.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: An error message.
+ *     multipart: true
+ */
+router.post("/profile/image-upload", uploads, uploadProfileImageController);
 
 /**
  * @swagger
@@ -57,7 +98,7 @@ const router = express.Router();
  *           application/json:
  *             schema:
  *               type: object
- *               properties:validateCreatePortfolioDetails
+ *               properties: validateCreatePortfolioDetails
  *                 error:
  *                   type: string
  */
@@ -172,5 +213,41 @@ router.post(
  *                   type: string
  */
 router.delete("/profile-details/:id", deletePortfolioDetails);
+
+/**
+ * @swagger
+ * /api/cover/photo:
+ *   post:
+ *     summary: Upload cover photos
+ *     description: Upload multiple cover photos using a POST request.
+ *     tags: [Upload]
+ *     parameters:
+ *       - in: formData
+ *         name: images
+ *         type: file
+ *         description: The cover photos to upload (up to 10 files).
+ *     responses:
+ *       200:
+ *         description: Cover photos uploaded successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: A success message.
+ *       400:
+ *         description: Bad request. One or more files may not be valid.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: An error message.
+ */
+router.post("/profile/cover-photo", uploads, coverphoto);
 
 module.exports = router;
