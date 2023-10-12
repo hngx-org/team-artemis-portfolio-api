@@ -20,32 +20,32 @@ import {
 const fetchUserEducationDetail: RequestHandler = async (req, res, next) => {
   // Add 'next' parameter
   const educationRepository = connectionSource.getRepository(EducationDetail);
+  const userRepository = connectionSource.getRepository(User);
 
   try {
     const id = req.params.id;
 
     if (!id) {
-      throw new Error("User ID is required");
+      throw new BadRequestError("User ID is required");
     }
 
-    try {
-      const educationDetails = await educationRepository.find({
-        where: { userId: id },
-        // Relationship has not been modeled yet... Uncomment the code once the relationship between education detail and degree, section, and user tables have been established
-        // relations: ["degree", "section", "user"],
-      });
+    const isUser = await userRepository.findOne({ where: { id } });
 
-      // Send a success response
-      res.status(200).json({ educationDetails });
-    } catch (error) {
-      // Handle the database query error (e.g., QueryFailedError)
-      console.log("Error fetching education details:", error.message);
-      const customError = new CustomError(error.message, 500);
-      res.status(customError.statusCode).json({ err: customError.message });
-      next(customError); // Pass the custom error to the error handler
+    if (!isUser) {
+      const error = new NotFoundError("A user with this ID does not exist");
+      throw error;
     }
+
+    const educationDetails = await educationRepository.find({
+      where: { userId: id },
+      relations: ["degree", "section", "user"],
+    });
+
+    // Send a success response
+    res.status(200).json({ educationDetails });
   } catch (error) {
     // Handle other types of errors or pass them to the error handler
+    res.status(error.statusCode || 500).json({ error: error.message });
     next(error);
   }
 };
