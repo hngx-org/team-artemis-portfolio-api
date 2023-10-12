@@ -25,7 +25,7 @@ const fetchUserEducationDetail: RequestHandler = async (req, res, next) => {
     const id = req.params.id;
 
     if (!id) {
-      throw new Error("User ID is required");
+      throw new BadRequestError("User ID is required");
     }
 
     try {
@@ -38,11 +38,7 @@ const fetchUserEducationDetail: RequestHandler = async (req, res, next) => {
       // Send a success response
       res.status(200).json({ educationDetails });
     } catch (error) {
-      // Handle the database query error (e.g., QueryFailedError)
-      console.log("Error fetching education details:", error.message);
-      const customError = new CustomError(error.message, 500);
-      res.status(customError.statusCode).json({ err: customError.message });
-      next(customError); // Pass the custom error to the error handler
+      throw new CustomError("Database Error", 500);
     }
   } catch (error) {
     // Handle other types of errors or pass them to the error handler
@@ -77,11 +73,7 @@ const createEducationDetailController = async (req, res, next) => {
 
     if (missingFields.length > 0) {
       // Create a CustomError with a 400 status code
-      const err = new CustomError(
-        `Missing fields: ${missingFields.join(", ")}`,
-        400
-      );
-      res.status(err.statusCode).json({ err: err.message });
+      throw new CustomError(`Missing fields: ${missingFields.join(", ")}`, 400);
     }
 
     // Get the user by userId
@@ -132,8 +124,7 @@ const getEducationDetailById = async (
     const id = parseInt(req.params.id);
 
     if (isNaN(id) || id < 1) {
-      const err = new BadRequestError("Invalid ID Format");
-      return res.status(err.statusCode).json({ error: err.message });
+      throw new BadRequestError("Invalid ID Format");
     }
 
     // Attempt to fetch education details
@@ -143,8 +134,7 @@ const getEducationDetailById = async (
 
     // If the education detail is not found, you can throw a NotFoundError
     if (!educationDetail) {
-      const err = new NotFoundError("Education detail not found");
-      throw JSON.stringify(err);
+      throw new NotFoundError("Education detail not found");
     }
 
     // Send a success response
@@ -164,8 +154,7 @@ const updateEducationDetail = async (
     const id = parseInt(req.params.id);
 
     if (isNaN(id) || id < 1) {
-      const err = new BadRequestError("Invalid ID Format");
-      return res.status(err.statusCode).json({ error: err.message });
+      throw new BadRequestError("Invalid ID Format");
     }
 
     // convert the date objects to date strings
@@ -175,9 +164,7 @@ const updateEducationDetail = async (
     }
 
     if (!req.body) {
-      const err = new BadRequestError("No data provided");
-      res.status(err.statusCode).json({ err: err.message });
-      throw JSON.stringify(err);
+      throw new BadRequestError("No data provided");
     }
 
     const educationDetail = await educationDetailRepository.findOne({
@@ -185,8 +172,7 @@ const updateEducationDetail = async (
     });
 
     if (!educationDetail) {
-      const err = new NotFoundError("Education detail not found");
-      res.status(err.statusCode).json({ err: err.message });
+      throw new NotFoundError("Education detail not found");
     }
 
     const updateData = req.body;
@@ -223,8 +209,7 @@ const deleteEducationDetail = async (
     const id = parseInt(req.params.id);
 
     if (isNaN(id) || id < 1) {
-      const err = new BadRequestError("Invalid ID Format");
-      return res.status(err.statusCode).json({ error: err.message });
+      throw new BadRequestError("Invalid ID Format");
     }
 
     // Find the existing education detail by ID
@@ -233,8 +218,7 @@ const deleteEducationDetail = async (
     });
 
     if (!educationDetail) {
-      const err = new NotFoundError("Education detail not found");
-      res.status(err.statusCode).json({ err: err.message });
+      throw new NotFoundError("Education detail not found");
     }
 
     await educationDetailRepository.remove(educationDetail);

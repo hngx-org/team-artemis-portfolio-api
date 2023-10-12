@@ -52,19 +52,16 @@ async function validateUpdateData(
     console.log("starting validate");
 
     if (!req.body) {
-      const err = new BadRequestError("Missing request body");
-      return res.status(err.statusCode).json({ error: err.message });
+      throw new BadRequestError("Missing request body");
     }
 
     // Validate date strings in "yy-mm-dd" format
     if (data.from && !validateDateYYMMDD(data.from)) {
-      const err = new BadRequestError("Invalid 'from' date format");
-      return res.status(err.statusCode).json({ error: err.message });
+      throw new BadRequestError("Invalid 'from' date format");
     }
 
     if (data.to && !validateDateYYMMDD(data.to)) {
-      const err = new BadRequestError("Invalid 'to' date format");
-      return res.status(err.statusCode).json({ error: err.message });
+      throw new BadRequestError("Invalid 'to' date format");
     }
 
     // Convert date strings to Date objects
@@ -81,9 +78,7 @@ async function validateUpdateData(
     console.log(validatedData);
     next(); // Continue to the next middleware or route handler
   } catch (error) {
-    const err = new BadRequestError(error.message);
-    console.log(err.message);
-    res.status(err.statusCode).json({ error: err.message });
+    throw new BadRequestError(error.message);
   }
 }
 
@@ -97,13 +92,11 @@ async function validateCreateData(
 
     // Validate date strings in "yy-mm-dd" format
     if (data.from && !validateDateYYMMDD(data.from)) {
-      const err = new BadRequestError("Invalid 'from' date format");
-      return res.status(err.statusCode).json({ error: err.message });
+      throw new BadRequestError("Invalid 'from' date format");
     }
 
     if (data.to && !validateDateYYMMDD(data.to)) {
-      const err = new BadRequestError("Invalid 'to' date format");
-      return res.status(err.statusCode).json({ error: err.message });
+      throw new BadRequestError("Invalid 'to' date format");
     }
 
     // Retrieve the "userId" from request parameters
@@ -120,9 +113,7 @@ async function validateCreateData(
     console.log(validatedData);
     next(); // Continue to the next middleware or route handler
   } catch (error) {
-    const err = new BadRequestError(error.message);
-    console.log(err.message);
-    res.status(err.statusCode).json({ error: err.message });
+    throw new BadRequestError(error.message);
   }
 }
 
