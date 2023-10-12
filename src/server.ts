@@ -34,6 +34,12 @@ readdirSync("./src/routes").map((path) =>
 );
 app.get("/", sayHelloController);
 
+app.use(function notFound(req, res, next) {
+  res.status(404);
+  const error = new Error(`Oops! Resource Not Found: ${req.originalUrl}`);
+  next(error);
+})
+
 const port = process.env.PORT || 3000;
 
 app.listen(port, () => {
