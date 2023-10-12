@@ -275,6 +275,6 @@ router.get('/work-experience', workExperienceController)
  *       - Work Experience
  */
 
-router.put('/work-experience/:workId', updateWorkExperience)
+router.put('/update-work-experience/:workId', updateWorkExperience)
 
 module.exports = router
