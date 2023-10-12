@@ -33,10 +33,6 @@ readdirSync("./src/routes").map((path) =>
 );
 app.get("/", sayHelloController);
 app.use(errorHandler);
-<<<<<<< HEAD
-
-=======
->>>>>>> 0b6054f0c4b0e7e8d3628924df0319affa61a291
 const port = process.env.PORT || 3000;
 
 app.listen(port, () => {
