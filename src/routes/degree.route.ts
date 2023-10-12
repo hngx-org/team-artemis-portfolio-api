@@ -1,9 +1,7 @@
 import express from "express";
 import {
   createDegreeController,
-  fetchDegree,
   fetchAllDegre,
-  updateExisitingDegree,
 } from "../controllers/degree.controller";
 
 const router = express.Router();
@@ -49,51 +47,6 @@ router.post("/degree", createDegreeController);
 
 /**
  * @swagger
- * /api/degree/{id}:
- *   get:
- *     summary: Get a degree by id
- *     description: Get a single degree by providing its ID.
- *     tags: [Degree]
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         description: The ID of the degree.
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: Successful response
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *       404:
- *         description: Not found
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 error:
- *                   type: string
- *       500:
- *         description: Internal error
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 error:
- *                   type: string
- */
-router.get("/degree/:id", fetchDegree);
-
-/**
- * @swagger
  * /api/degree:
  *   get:
  *     summary: Get all Degrees
@@ -123,86 +76,5 @@ router.get("/degree/:id", fetchDegree);
  *                   type: string
  */
 router.get("/degree", fetchAllDegre);
-
-/**
- * @swagger
- * /api/degree/{Id}:
- *   put:
- *     summary: Update a degree by ID.
- *     description: Update a degree's information by providing its ID.
- *     parameters:
- *       - in: path
- *         name: degreeId
- *         description: The ID of the degree to update.
- *         required: true
- *         type: integer
- *       - in: body
- *         name: updateDegree
- *         description: New  Degree data
- *         required: true
- *         schema:
- *           type: object
- *           properties:
- *             type:
- *               type: string
- *
- *         example:
- *           type: "Masters degree"
- *
- *     responses:
- *       '200':
- *         description: Successful response
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                 data:
- *                   type: object
- *       '400':
- *         description: Bad request
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 successful:
- *                   type: boolean
- *                   example: true
- *                 message:
- *                   type: string
- *       '404':
- *         description: Not Found
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 successful:
- *                   type: boolean
- *                   example: false
- *                 message:
- *                   type: string
- *       '500':
- *         description: Internal Server Error
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 successful:
- *                   type: boolean
- *                   example: false
- *                 message:
- *                   type: string
- *                   example: "Failed to degree"
- *                 data:
- *                   type: null
- *     tags:
- *       - Degree
- */
-router.put("/degree/:id", updateExisitingDegree);
 
 module.exports = router;
