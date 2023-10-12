@@ -70,39 +70,27 @@ router.put("/profile-details/:id", updatePortfolioDetails);
  *   post:
  *     summary: Create Portfolio profile
  *     description: Create a portfolio.
- *     tags: [Profile]
  *     parameters:
  *       - in: path
  *         name: userId
  *         required: true
  *         description: The id of the user.
+ *         type: uuid
+ *       - in: body
+ *         name: createPortfolioDetails
+ *         description: New portfolio detail
+ *         required: true
  *         schema:
- *           type: string
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               name:
- *                 type: string
- *                 description: The user's name.
- *                 example: Leanne Graham
- *                 required: false
- *               city:
- *                 type: string
- *                 description: The user's city.
- *                 example: Lagos
- *               country:
- *                 type: string
- *                 description: The user's country.
- *                 example: Nigeria
- *               trackId:
- *                 type: string
- *                 description: The user's selected track.
- *                 example: 1
- *                 required: false
+ *           type: object
+ *           properties:
+ *             name:
+ *               type: string
+ *             city:
+ *               type: string
+ *             country:
+ *               type: string
+ *             trackId:
+ *               type: string
  *     responses:
  *       200:
  *         description: Successful response
