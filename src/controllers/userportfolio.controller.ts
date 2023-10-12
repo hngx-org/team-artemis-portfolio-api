@@ -13,10 +13,9 @@ import {
   UserTrack,
   Tracks
 } from "../database/entity/model";
-import { NotFoundError, BadRequestError, CustomError } from "../middlewares/index";
+import { NotFoundError, BadRequestError } from "../middlewares/index";
 import { User } from "../database/entity/user";
 import { success } from "../utils";
-import { start } from "repl";
 
 const portfolioDetailsRepository =
   connectionSource.getRepository(PortfolioDetails);
@@ -90,8 +89,6 @@ const updatePortfolioDetails: RequestHandler = async (req: Request, res: Respons
     const userId = req.params.userId;
     const { name, trackId, city, country } = req.body;
 
-    console.log("strting update profile route")
-
     if (!req.body) {
       throw new BadRequestError("No data provided");
     }
@@ -160,46 +157,6 @@ const updatePortfolioDetails: RequestHandler = async (req: Request, res: Respons
     next(error);
   }
 }
-
-// Export the updatePortfolioDetails function
-// const updatePortfolioDetails: RequestHandler = async (
-//   req: Request,
-//   res: Response,
-//   next: NextFunction
-// ) => {
-//   try {
-//     const id = parseInt(req.params.id);
-//     if (!id) {
-//       throw new BadRequestError("Must provide an ID");
-//     }
-
-//     // Find the existing portfolio details by ID
-//     const portfolioDetails = await portfolioDetailsRepository.findOne({
-//       where: { id },
-//     });
-
-//     if (!portfolioDetails) {
-//       throw new NotFoundError("Portfolio details not found");
-//     }
-
-//     // Validate and apply updates from the DTO
-//     const updateData = req.body as UpdatePortfolioDetailsDTO;
-
-//     // if (updateData.name) portfolioDetails.name = updateData.name;
-//     if (updateData.city) portfolioDetails.city = updateData.city;
-//     if (updateData.country) portfolioDetails.country = updateData.country;
-
-//     // Save the updated portfolio details
-//     await portfolioDetailsRepository.save(portfolioDetails);
-
-//     res.status(200).json({
-//       message: "Portfolio details updated successfully",
-//       portfolioDetails,
-//     });
-//   } catch (error) {
-//     return next(error);
-//   }
-// };
 
 // delete Portfolio Profile details
 const deletePortfolioDetails: RequestHandler = async (

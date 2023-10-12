@@ -90,11 +90,9 @@ router.get("/portfolioDetails", getAllPortfolioDetails);
  *     parameters:
  *       - in: path
  *         name: userId
- *         required: true
  *         description: The ID of the user to update.
- *         type: string(uuid)
- *         example:
- *           userId: 6ba7b810-9dad-11d1-80b4-00c04fd430c8
+ *         required: true
+ *         type: string
  *       - in: body
  *         name: updateUserProfileDetails
  *         description: Data to update user's profile.
