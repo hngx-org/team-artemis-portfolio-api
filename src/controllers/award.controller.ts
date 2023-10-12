@@ -1,4 +1,4 @@
-import { NextFunction, Request, RequestHandler, Response } from 'express'
+import { NextFunction, Request, Response } from 'express'
 import { createAwardService } from '../services/award.service'
 import { AwardData } from '../interfaces/'
 import { User } from '../database/entity/user'
@@ -59,8 +59,6 @@ const createAwardController = async (
       statusCode: 201,
       createdAward,
     }
-
-    res.status(201).json(response)
     return res.status(201).json(response)
   } catch (error) {
     console.error('Error creating award:', error.message)

@@ -1,12 +1,13 @@
 import express from 'express'
-import { 
+import {
   createAwardController,
-  updateAwardController,
-} from '../controllers/award.controller'
+  updateAwardController } from '../controllers/award.controller'
+import { validateCreateAwardData,
+  validateUpdateAwardData } from '../middlewares/award.zod'
 
 const router = express.Router()
 
-router.post('awards/:id', createAwardController)
+router.post('/award/:userId', validateCreateAwardData, createAwardController)
 
 /**
  * @swagger
@@ -85,6 +86,7 @@ router.post('awards/:id', createAwardController)
  *     tags:
  *       - Awards
  */
-router.put('/awards/:awardId', updateAwardController)
+router.put('/award/:awardId', validateUpdateAwardData, updateAwardController)
+
 
 module.exports = router
