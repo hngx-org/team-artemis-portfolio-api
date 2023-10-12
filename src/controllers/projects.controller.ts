@@ -94,7 +94,7 @@ export const createProject: RequestHandler = async (
     }
     console.log(files.length)
     if (files.length > 10) {
-      return error(res, "You can only upload a maximum of 10 images at a time", 400);
+      return error(res, "You can only upload a maximum of 10 images", 400);
     }
 
     const imagesRes = await cloudinaryService(files, req.body.service);

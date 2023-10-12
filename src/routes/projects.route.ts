@@ -7,9 +7,6 @@ const storage = multer.memoryStorage();
 const uploads = multer({ storage }).array("images", 10);
 
 
-
-
-
 import {
   getAllProjects,
   getProjectById,
@@ -117,7 +114,7 @@ router.get("/projects/:id", getProjectById);
 router.post("/projects", function (req, res, next) {
   uploads(req, res, function (err) {
     if (err) {
-      error(res, "A maximum of 10 files are allowed", 403);
+      error(res, "You can only upload a maximum of 10 images", 403);
       return
     }
     next();
