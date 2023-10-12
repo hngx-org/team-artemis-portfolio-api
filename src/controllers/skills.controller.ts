@@ -1,5 +1,5 @@
 import express, { Request, RequestHandler, Response } from "express";
-import { z } from 'zod';
+import { z } from "zod";
 import {
   createSkillsService,
   updateSkillsService,
@@ -33,9 +33,9 @@ export const createSkills: RequestHandler = async (
   } catch (err) {
     if (err instanceof z.ZodError) {
       const errorMessages = err.issues.map((issue) => issue.message);
-      error(res, errorMessages.join(', '), 400);
+      error(res, errorMessages.join(", "), 400);
     }
-    error(res, err instanceof Error ? err.message : 'An error occurred');
+    error(res, err instanceof Error ? err.message : "An error occurred");
   }
 };
 
@@ -86,15 +86,15 @@ export const getSkillsDetails: RequestHandler = async (
     // Fetch skills for the logged-in user based on their user ID
     const result = await getSkillsService(userId);
 
-    const data = result.map(record => ({
-      skillId: record['id'],
-      skill: record['skills']
+    const data = result.map((record) => ({
+      skillId: record["id"],
+      skill: record["skills"],
     }));
 
     // Send a response with the fetched skills
     success(res, data, "Skills");
   } catch (err) {
     console.error("Error fetching skills:", error);
-    error(res, err instanceof Error ? err.message : 'An error occurred');
+    error(res, err instanceof Error ? err.message : "An error occurred");
   }
 };
