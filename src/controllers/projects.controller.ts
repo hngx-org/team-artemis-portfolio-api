@@ -242,6 +242,22 @@ export const updateProjectById: RequestHandler = async (
   const images = req.files as Express.Multer.File[];
 
   try {
+    projectSchema.parse(data);
+
+  } catch (error) {
+    const errors = []
+    if (error.name == 'ZodError') {
+      const msg = error.issues.map((issue: any) => {
+        errors.push(`${issue.path[0]}: ${issue.message}`)
+      })
+    }
+
+    const response = errors.join(', ');
+    return next(new BadRequestError(response));
+  }
+
+  try {
+
     const updatedProject = await updateProjectService(
       parseInt(id),
       data,

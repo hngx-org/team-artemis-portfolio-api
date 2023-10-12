@@ -8,15 +8,15 @@ import {
 } from "zod-error";
 
 const projectSchema = z.object({
-    title: z.string().trim().min(2).max(50),
-    year: z.string().trim().min(4,).max(4),
+    title: z.string().trim().min(3).max(50).optional(),
+    year: z.string().trim().min(4,).max(4).optional(),
     url: z.string().url({
         message: "Please provide a valid URL in this format: https://example.com",
     }).trim().optional(),
     tags: z.string().trim().optional(),
     description: z.string().trim().optional(),
-    userId: z.string().uuid().trim(),
-    sectionId: z.number().optional(),
+    userId: z.string().uuid().trim().optional(),
+    sectionId: z.number().optional().optional(),
 });
 
 const options: ErrorMessageOptions = {
