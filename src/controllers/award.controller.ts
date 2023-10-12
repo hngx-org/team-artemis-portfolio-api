@@ -1,4 +1,3 @@
-import { connectionSource as dataSource } from '../database/data-source';
 import { Award} from '../database/entity/model';
 import { NextFunction, Request, Response } from 'express'
 import { createAwardService } from '../services/award.service'
@@ -69,7 +68,7 @@ const createAwardController = async (
 
 // Get award by Id
 const getAwardController = async (req: Request, res: Response) => {
-    const awardRepo = dataSource.getRepository(Award);
+    const awardRepo = connectionSource.getRepository(Award);
   
     try {
       const id = parseInt(req.params.id);
@@ -92,7 +91,7 @@ const getAwardController = async (req: Request, res: Response) => {
   
 // get all awards
 const getAllAwardsController = async (req: Request, res: Response) => {
-    const awardRepo = dataSource.getRepository(Award);
+    const awardRepo = connectionSource.getRepository(Award);
   
     try {
       const awards = await awardRepo.find(); // Retrieve all awards
@@ -109,7 +108,7 @@ const getAllAwardsController = async (req: Request, res: Response) => {
   
     //Delete award by id
  const deleteAwardController = async (req: Request, res: Response) => {
-    const awardRepo = dataSource.getRepository(Award)
+    const awardRepo = connectionSource.getRepository(Award)
     // Find award by id
     try {
         const id = parseInt(req.params.id)
