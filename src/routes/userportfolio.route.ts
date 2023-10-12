@@ -93,6 +93,7 @@ router.get("/portfolioDetails", getAllPortfolioDetails);
  *         description: The ID of the user to update.
  *         required: true
  *         type: string
+ *         example: 6ba7b810-9dad-11d1-80b4-00c04fd430c8
  *       - in: body
  *         name: updateUserProfileDetails
  *         description: Data to update user's profile.
