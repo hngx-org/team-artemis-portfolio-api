@@ -130,12 +130,9 @@ export const createProject: RequestHandler = async (
 
     if (thumbnail) {
       const thumbnailId = thumbnail.id;
-      const projectUpdate = await projectRepository.findOneBy({
-        id: projectId,
-      });
       const data = await projectRepository.update(
-        { id: +projectId },
-        { thumbnail: +thumbnailId }
+        { id: projectId },
+        { thumbnail: thumbnailId }
       );
       const updatedProject = await projectRepository.findOneBy({
         id: +projectId,
