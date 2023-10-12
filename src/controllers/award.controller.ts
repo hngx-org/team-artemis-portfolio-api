@@ -4,6 +4,10 @@ import { AwardData } from '../interfaces/'
 import { User } from '../database/entity/user'
 import { connectionSource } from '../database/data-source'
 import { NotFoundError } from '../middlewares'
+import { Award } from '../database/entity/model'
+import { QueryFailedError } from 'typeorm'
+
+
 
 // Controller function to create an award
 const createAwardController = async (
@@ -56,8 +60,6 @@ const createAwardController = async (
       statusCode: 201,
       createdAward,
     }
-
-    res.status(201).json(response)
     return res.status(201).json(response)
   } catch (error) {
     console.error('Error creating award:', error.message)
@@ -65,4 +67,58 @@ const createAwardController = async (
   }
 }
 
-export { createAwardController }
+
+// update award
+const updateAwardController = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const awardId = parseInt(req.params.awardId)
+
+    const awardRepository = connectionSource.getRepository(Award)
+
+    const award = await awardRepository.findOne({
+      where: { id: awardId}
+    })
+
+    if (!award) {
+      throw new NotFoundError('Award not found')
+    }
+    
+    const updateAward = req.body;
+    
+    // fields that must be strings
+    const stringFields = ['year', 'title', 'description', 'presented_by', 'url'];
+
+
+
+    // update the award dynamically based on the data passed
+    for (const key in updateAward) {
+    if (updateAward.hasOwnProperty(key)) {
+      if (stringFields.includes(key) && typeof updateAward[key] !== 'string') {
+      return res.status(400).json({ 'Input Error': `Field '${key}' should be a string` });
+    }
+    award[key] = updateAward[key];
+  }
+}
+    
+    await awardRepository.save(award)
+
+    console.log('Award updated successfully');
+
+    res.status(200).json({
+      message: 'Award updated successfully',
+      award
+    });
+    
+  } catch (error) {
+    if(error instanceof QueryFailedError) {
+      res.status(400).json({ 'Input Error': error.message})
+    }
+    console.error('Error updating award details:', error.message)
+    next(error)
+  }
+}
+
+export {
+  createAwardController,
+  updateAwardController,
+}

@@ -3,3 +3,7 @@ export interface InterestsInterface {
   userId: string;
   sectionId: number;
 }
+
+export interface updateInterestsInterface {
+  interests: string[];
+}
