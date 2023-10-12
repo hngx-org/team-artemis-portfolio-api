@@ -7,6 +7,7 @@ import { validateCreateAwardData,
 
 const router = express.Router()
 
+
 router.post('/award/:userId', validateCreateAwardData, createAwardController)
 
 /**

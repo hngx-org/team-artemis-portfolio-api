@@ -60,22 +60,20 @@ const getPortfolioDetails = async (
     });
 
     const sections = await connectionSource.manager.find(Section);
-    res
-      .status(200)
-      .json([
-        workExperience,
-        education,
-        skills,
-        interests,
-        about,
-        projects,
-        sections,
-      ]);
+    res.status(200).json({
+      workExperience,
+      education,
+      skills,
+      interests,
+      about,
+      projects,
+      sections,
+    });
   } catch (error) {
     return next(error);
   }
 };
-
+//.
 const getAllPortfolioDetails = async (req: Request, res: Response) => {
   const PortfolioDetails = await portfolioRepository.find();
   return res.json({ PortfolioDetails });
