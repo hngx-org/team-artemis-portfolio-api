@@ -8,6 +8,7 @@ const swaggerUi = require("swagger-ui-express");
 const swaggerOptions = require("./swagger");
 const router = require("./routes/image-upload.route");
 import { errorHandler } from "./middlewares/index";
+import { authMiddleWare } from "./middlewares/auth";
 
 const app = express();
 
@@ -26,6 +27,9 @@ connectionSource
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());
+
+// comment out  to use as auth middleware
+// app.use(authMiddleWare)
 
 //serve all routes dynamically using readdirsync
 readdirSync("./src/routes").map((path) =>
