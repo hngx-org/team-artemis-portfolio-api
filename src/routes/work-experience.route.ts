@@ -13,6 +13,7 @@ const router = express.Router()
  * /api/create-work-experience:
  *   post:
  *     summary: Create a new work experience.
+ *     parameters:
  *     requestBody:
  *       required: true
  *       description: This will contain all the information that will be added to the new work experience.
@@ -41,6 +42,7 @@ const router = express.Router()
  *                 type: string  # Change 'uuid' to 'string' for consistency
  *               sectionId:
  *                 type: integer  # Change 'number' to 'integer'
+ *      
  *     responses:
  *       200:
  *         description: Added Work Experience Successfully
@@ -53,6 +55,28 @@ const router = express.Router()
  *                   type: string
  *                 data:
  *                   type: object
+ *                   properties:
+ *                     company:
+ *                       type: string
+ *                     role:
+ *                       type: string
+ *                     startMonth:
+ *                       type: string
+ *                     startYear:
+ *                       type: string
+ *                     endMonth:
+ *                       type: string
+ *                     endYear:
+ *                       type: string
+ *                     description:
+ *                       type: string
+ *                     isEmployee:
+ *                       type: boolean
+ *                     userId:
+ *                       type: string  # Change 'uuid' to 'string' for consistency
+ *                     sectionId:
+ *                       type: integer  # Change 'number' to 'integer'
+ *      
  *       400:
  *         description: Bad request
  *         content:
@@ -61,7 +85,9 @@ const router = express.Router()
  *               type: object
  *               properties:
  *                 message:
- *                   type: string
+ *                   type: array
+ *                   items:
+ *                      type: string
  *       500:
  *         description: Internal Server Error
  *         content:
