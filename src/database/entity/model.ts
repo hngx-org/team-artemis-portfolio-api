@@ -1340,36 +1340,6 @@ export class CustomUserSection {
   customFields: CustomField[];
 }
 
-@Entity({ name: "certification" })
-export class Certification {
-  @PrimaryGeneratedColumn()
-  id: number;
-
-  @Column("uuid")
-  userId: string;
-
-  @Column("text")
-  title: string;
-
-  @Column('int')
-  year: number;
-
-  @Column('text')
-  organization: string
-
-  @Column('varchar')
-  url: string
-
-  @Column('varchar')
-  description: string
-
-  // @ManyToOne(() => Section, (section) => section.customUserSections)
-  // section: Section;
-
-  // @OneToMany(() => CustomField, (customField) => customField.customUserSection)
-  // customFields: CustomField[];
-}
-
 @Entity({ name: "custom_field" })
 export class CustomField {
   @PrimaryGeneratedColumn()
