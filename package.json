@@ -12,7 +12,6 @@
     "@types/cors": "^2.8.14",
     "@types/uuid": "^9.0.5",
     "aws-sdk": "^2.1472.0",
-    "axios": "^1.5.1",
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.20.2",
     "cloudinary": "^1.41.0",
