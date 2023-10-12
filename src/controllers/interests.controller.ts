@@ -5,7 +5,6 @@ import {
   InterestsInterface,
   updateInterestsInterface,
 } from "../interfaces/interests.interface";
-import { string } from "joi";
 
 // Get the repository for the InterestDetail entity
 const interestRepository = connectionSource.getRepository(InterestDetail);

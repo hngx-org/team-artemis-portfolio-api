@@ -1,7 +1,8 @@
 import express from "express";
 import { z } from "zod";
 import {
-  createInterest, getInterests,
+  createInterest,
+  getInterests,
   updateInterest,
   deleteInterest,
 } from "../controllers/interests.controller";
