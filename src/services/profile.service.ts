@@ -11,14 +11,3 @@ export const uploadProfileImageService = async (
 
   return { profilePic: urls[0] };
 };
-
-export const uploadProfileCoverPhotoService = async (
-  userId: string,
-  urls: string[]
-): Promise<{ profilePic: string }> => {
-  const userRepo = connectionSource.getRepository(User);
-  const user = await userRepo.update(userId, { profileCoverPhoto: urls[0] });
-  console.log(user);
-
-  return { profilePic: urls[0] };
-};

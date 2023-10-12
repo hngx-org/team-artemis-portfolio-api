@@ -1,4 +1,4 @@
-import express, { Response, Request } from "express";
+import express, { Response, Request, NextFunction } from "express";
 import multer from "multer";
 import { error } from "../utils/response.util";
 import { ForbiddenError } from '../middlewares/index'
@@ -6,7 +6,15 @@ import { ForbiddenError } from '../middlewares/index'
 const router = express.Router();
 const storage = multer.memoryStorage();
 const uploads = multer({ storage }).array("images", 10);
-
+const uploadHandler = (req: Request, res: Response, next: NextFunction) => {
+  uploads(req, res, function (err) {
+    if (err) {
+      const newForbbidenError = new ForbiddenError("You can only upload a maximum of 10 images");
+      next(newForbbidenError);
+    }
+    next();
+  })
+}
 
 import {
   getAllProjects,
@@ -112,15 +120,7 @@ router.get("/projects/:id", getProjectById);
  *       - Project
  */
 
-router.post("/projects", function (req, res, next) {
-  uploads(req, res, function (err) {
-    if (err) {
-      const newForbbidenError = new ForbiddenError("You can only upload a maximum of 10 images");
-      res.status(newForbbidenError.statusCode).json({ error: newForbbidenError.message });
-    }
-    next();
-  })
-}, createProject);
+router.post("/projects", uploadHandler, createProject);
 
 /**
  * @swagger
@@ -243,6 +243,6 @@ router.delete("/projects/:id", deleteProjectController);
  *       - Project
  */
 
-router.put("/update-project/:project_id", uploads, updateProjectById);
+router.put("/update-project/:project_id", uploadHandler, updateProjectById);
 
 module.exports = router;
