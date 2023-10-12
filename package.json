@@ -1,7 +1,7 @@
 {
   "name": "team-artemis-portfolio-api",
   "version": "1.0.0",
-  "description": "",
+  "description": "Required: [Node](https://nodejs.org/) plus [npm](https://docs.npmjs.com/) and [Git](https://git-scm.com/downloads)",
   "main": "server.js",
   "scripts": {
     "start:dev": "ts-node-dev --respawn --transpile-only ./src/server"
@@ -53,5 +53,9 @@
     "ts-node-dev": "^2.0.0",
     "typeorm": "^0.3.17",
     "typescript": "^5.2.2"
-  }
+  },
+  "directories": {
+    "test": "tests"
+  },
+  "keywords": []
 }
