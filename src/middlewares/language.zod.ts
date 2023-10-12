@@ -7,13 +7,13 @@ export const postLanguageSchema = z.object({
   userId: z.string().refine((value) => {
     return isValidUUID(value);
   }, 'id must be a valid UUID string'),
+
   languages: z.array(z.string()).refine(
     (arr) => {
-      return arr.every((str) => str.length >= 2) && arr.length >= 1;
+      return arr.every((str) => str.length >= 1);
     },
     {
-      message:
-        'Each string in array must be at least 2 characters long and array cannot be empty',
+      message: 'Each string in array must be at least 2 characters long',
     }
   ),
 });

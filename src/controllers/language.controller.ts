@@ -2,6 +2,7 @@ import { Request, RequestHandler, Response } from 'express';
 import { connectionSource } from '../database/data-source';
 import { Language } from '../database/entity/model';
 import { User } from '../database/entity/user';
+import { validate as isValidUUID } from 'uuid';
 import responseHandler from '../services/language.service';
 
 const languageRepository = connectionSource.getRepository(Language);
@@ -17,14 +18,12 @@ const addLanguage: RequestHandler = async (req: Request, res: Response) => {
 
     await languageRepository.delete({ userId });
 
-    Promise.all(
-      languages.map(async (language: string) => {
-        const userLanguage = new Language();
-        userLanguage.userId = userId;
-        userLanguage.language = language;
-        await languageRepository.save(userLanguage);
-      })
-    );
+    languages.map(async (language: string) => {
+      const userLanguage = new Language();
+      userLanguage.userId = userId;
+      userLanguage.language = language;
+      await languageRepository.save(userLanguage);
+    });
 
     responseHandler.success(res, languages);
   } catch (error) {
@@ -38,6 +37,8 @@ const getUserLanguages: RequestHandler = async (
 ) => {
   try {
     const userId = req.params.userId;
+
+	if (!isValidUUID(userId)) return responseHandler.badRequest(res, "userId must be a valid UUID string")
 
     const user = await userRepository.findOneBy({ id: userId });
     if (!user) return responseHandler.notFound(res, 'User not found');
