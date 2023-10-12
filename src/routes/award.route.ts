@@ -1,13 +1,13 @@
 import express from 'express'
 import { 
-  createAwardsController,
-  updateAwardsController,
-  } from '../controllers/award.controller'
+  createAwardController,
+  updateAwardController,
+} from '../controllers/award.controller'
 
 const router = express.Router()
 
-router.post('awards/:id', createAwardsController)
+router.post('awards/:id', createAwardController)
 
-router.put('/updateAward/:awardId', updateAwardsController)
+router.put('/awards/:awardId', updateAwardController)
 
 module.exports = router
