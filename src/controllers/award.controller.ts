@@ -1,3 +1,4 @@
+import { Award} from '../database/entity/model';
 import { NextFunction, Request, Response } from 'express'
 import { createAwardService } from '../services/award.service'
 import { AwardData } from '../interfaces/'
@@ -6,7 +7,6 @@ import { connectionSource } from '../database/data-source'
 import { NotFoundError } from '../middlewares'
 import { Award } from '../database/entity/model'
 import { QueryFailedError } from 'typeorm'
-
 
 
 // Controller function to create an award
@@ -67,6 +67,67 @@ const createAwardController = async (
   }
 }
 
+// Get award by Id
+const getAwardController = async (req: Request, res: Response) => {
+    const awardRepo = connectionSource.getRepository(Award);
+  
+    try {
+      const id = parseInt(req.params.id);
+      const award = await awardRepo.findOne({ where: { id } });
+  
+      if (!award) {
+        return res.status(404).json({ message: 'Award not found' });
+      }
+  
+      res.status(200).json({
+        message: 'Award retrieved successfully',
+        award,
+      });
+    } catch (error) {
+      console.error('Error getting award', error);
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  };
+  
+  
+// get all awards
+const getAllAwardsController = async (req: Request, res: Response) => {
+    const awardRepo = connectionSource.getRepository(Award);
+  
+    try {
+      const awards = await awardRepo.find(); // Retrieve all awards
+  
+      res.status(200).json({
+        message: 'All awards retrieved successfully',
+        awards,
+      });
+    } catch (error) {
+      console.error('Error getting awards', error);
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  };
+  
+    //Delete award by id
+ const deleteAwardController = async (req: Request, res: Response) => {
+    const awardRepo = connectionSource.getRepository(Award)
+    // Find award by id
+    try {
+        const id = parseInt(req.params.id)
+        const award = await awardRepo.findOne({ 
+            where:{ id} });
+        if (!award) {
+            return res.status(404).json({message: 'Award not found'});
+        }
+        //Delete the award
+        await awardRepo.remove(award);
+
+        res.status(200).json({
+            message: 'Award deleted successfully',
+            award
+        })
+    } catch (error) {
+        console.error('Error deleting award', error);
+        res.status(500).json({message: 'Internal server error'})
 
 // update award
 const updateAwardController = async (req: Request, res: Response, next: NextFunction) => {
@@ -120,5 +181,8 @@ const updateAwardController = async (req: Request, res: Response, next: NextFunc
 
 export {
   createAwardController,
+  getAwardController,
+  getAllAwardsController,
+  deleteAwardController,
   updateAwardController,
 }
