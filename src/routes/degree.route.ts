@@ -4,7 +4,8 @@ import {
   fetchDegree,
   fetchAllDegree,
   updateExisitingDegree,
-} from "../controllers/degree.controller";
+  deleteDegree,
+} from '../controllers/degree.controller'
 
 const router = express.Router();
 
@@ -204,5 +205,50 @@ router.get("/degree", fetchAllDegree);
  *       - Degree
  */
 router.put("/degree/:id", updateExisitingDegree);
+
+/**
+ * @swagger
+ * /api/degree/{id}:
+ *   delete:
+ *     summary: Delete a degree by id
+ *     description: Delete a single degree by providing its ID.
+ *     tags: [Degree]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: The ID of the degree.
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Successful response
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *       404:
+ *         description: Not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *       500:
+ *         description: Internal error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ */
+router.delete('/degree/:degreeId', deleteDegree)
 
 module.exports = router;

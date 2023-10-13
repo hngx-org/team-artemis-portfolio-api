@@ -16,38 +16,24 @@ const router = express.Router();
 
 /**
  * @swagger
- * /api/education/:id:
+ * /api/education/{id}:
  *   get:
  *     summary: Get education detail(s) for a user who's id is in the params and returns an array of objects containing a user education details.
  *     description: Get education detail(s) for a user who's id is in the params and returns an array of objects containing a user education details.
  *     tags: [Education]
  *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The ID of the user for whom to get education details.
  *       - in: header
  *         name: Authorization
  *         type: string
  *         description: Optional authorization header
  *         schema:
- *           type: array
- *           items:
- *             type: object
- *             properties:
- *               userId:
- *                 type: string
- *               sectionId:
- *                 type: number
- *               degreeId:
- *                 type: number
- *               fieldOfStudy:
- *                 type: string
- *               school:
- *                 type: string
- *               description:
- *                 type: string
- *               from:
- *                 type: string
- *               to:
- *                 type: string
- *
+ *           type: string
  *     responses:
  *       200:
  *         educationDetails: Array of user education detail(s) or empty array if the user has no education detail.
@@ -110,8 +96,6 @@ router.get("/education/:id", fetchUserEducationDetail);
  *         schema:
  *           type: object
  *           properties:
- *             sectionId:
- *               type: number
  *             degreeId:
  *               type: number
  *             fieldOfStudy:
@@ -164,10 +148,9 @@ router.get("/education/:id", fetchUserEducationDetail);
  *                   type: null
  */
 router.post(
-  "/education/:id",
-  validateCreateData,
+  '/education/:id',
   createEducationDetailController
-);
+)
 
 /**
  * @swagger

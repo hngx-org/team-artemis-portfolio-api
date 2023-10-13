@@ -1,7 +1,11 @@
+export interface DegreeData {
+  type: string
+}
+
 export interface UpdateDegreeResponse {
-  message: string;
+  message: string
   data: {
-    id: number;
-    type: string;
-  };
+    id: number
+    type: string
+  }
 }

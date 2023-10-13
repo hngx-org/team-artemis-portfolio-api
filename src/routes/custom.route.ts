@@ -137,7 +137,7 @@ router.post("/custom", validateSchema(customUserSectionSchema), create);
  * @swagger
  * /api/custom:
  *   get:
- *     summary: Get all Custom records for  user
+ *     summary: Get all Custom records for user
  *     description: Get custom fields
  *     responses:
  *       200:
@@ -149,12 +149,10 @@ router.post("/custom", validateSchema(customUserSectionSchema), create);
  *               properties:
  *                 message:
  *                   type: string
- *                   description: A success message.
  *     tags:
  *       - custom
  */
 router.get("/custom", findAll);
-
 /**
  * @swagger
  * /api/section:
@@ -225,7 +223,6 @@ router.get("/section", validateQuery(getSectionSchema), getSection);
  *               properties:
  *                 message:
  *                   type: string
- *                   description: A success message.
  *     tags:
  *       - custom
  */
@@ -337,6 +334,7 @@ router.get("/section/:id", getSingleSection);
  *                   type: null
  *
  */
+
 router.post("/custom/field", validateSchema(fieldsSchema), createCustomField);
 
 /**
@@ -362,7 +360,6 @@ router.post("/custom/field", validateSchema(fieldsSchema), createCustomField);
  *               properties:
  *                 message:
  *                   type: string
- *                   description: A success message.
  *     tags:
  *       - custom
  */
@@ -444,8 +441,6 @@ router.get("/custom/field/:id", findOneCustomField);
  *                 message:
  *                   type: string
  *                   example: "Error deleting Custom Section"
- *                 data:
- *                   type: null
  *     tags:
  *       - custom
  */
