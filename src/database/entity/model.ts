@@ -1614,19 +1614,19 @@ export class References {
   id: number;
 
   @Column()
-  Name: string;
+  name: string;
 
   @Column()
-  Company: string;
+  company: string;
 
   @Column()
-  Position: string;
+  position: string;
 
   @Column()
-  EmailAddress: string;
+  emailAddress: string;
 
   @Column()
-  PhoneNumber: string;
+  phoneNumber: string;
 
   @ManyToOne(() => User, (user) => user.references)
   user: User;
