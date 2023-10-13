@@ -11,7 +11,7 @@ import {
   SkillsDetail,
   WorkExperienceDetail,
   UserTrack,
-  Tracks
+  Tracks,
 } from "../database/entity/model";
 import { NotFoundError, BadRequestError } from "../middlewares/index";
 import { User } from "../database/entity/user";
@@ -83,8 +83,11 @@ const getAllPortfolioDetails = async (req: Request, res: Response) => {
   return res.json({ PortfolioDetails });
 };
 
-
-const updatePortfolioDetails: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
+const updatePortfolioDetails: RequestHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const userId = req.params.userId;
     const { name, trackId, city, country } = req.body;
@@ -99,16 +102,21 @@ const updatePortfolioDetails: RequestHandler = async (req: Request, res: Respons
     const userTrackRepository = connectionSource.getRepository(UserTrack);
     const trackRepository = connectionSource.getRepository(Tracks);
 
-    const user = await userRepository.findOne({ where: { id: userId } });
+    let user = await userRepository.findOne({ where: { id: userId } });
 
     if (!user) {
       throw new NotFoundError("User Not Found");
     }
 
     if (name) {
-      let splitName = [];
-      splitName = name.split(" ");
-      userRepository.update(user.id, { firstName: splitName[0], lastName: splitName[1] });
+      const splitName = name.split(" ");
+      await userRepository.update(user.id, {
+        firstName: splitName[0],
+        lastName: splitName[1],
+      });
+
+      // Fetch the updated user immediately
+      user = await userRepository.findOne({ where: { id: userId } });
     }
 
     let track: Tracks;
@@ -120,43 +128,53 @@ const updatePortfolioDetails: RequestHandler = async (req: Request, res: Respons
         throw new NotFoundError("Track Not Found");
       }
 
-      const userTrack = await userTrackRepository.findOne({ where: { trackId: trackId, userId } });
+      const userTrack = await userTrackRepository.findOne({
+        where: { trackId: trackId, userId },
+      });
 
       if (!userTrack) {
-        const newUser = userTrackRepository.create({
+        const newUserTrack = userTrackRepository.create({
           trackId: trackId,
           userId,
         });
 
-        await userTrackRepository.save(newUser);
+        await userTrackRepository.save(newUserTrack);
       }
     }
 
-    // Fetch the portfolio
-    let portfolio = await portfolioDetailsRepository.findOne({ where: { userId: userId } });
+    let portfolio = await portfolioDetailsRepository.findOne({
+      where: { userId: userId },
+    });
+
     if (!portfolio) {
       throw new NotFoundError("Portfolio Not Found");
     }
-    portfolio.city = city;
-    portfolio.country = country;
+
+    if (city) {
+      portfolio.city = city;
+    }
+
+    if (country) {
+      portfolio.country = country;
+    }
 
     portfolio = await portfolioDetailsRepository.save(portfolio);
 
     console.log("Successfully updated user profile portfolio details");
     return success(
-      res, {
-      portfolio: portfolio,
-      track: track,
-      user: user
-    },
+      res,
+      {
+        portfolio: portfolio,
+        track: track,
+        user: user,
+      },
       "Successfully updated user profile portfolio details"
     );
-
   } catch (error) {
     console.log("Error updating profile detail:", error.message);
     next(error);
   }
-}
+};
 
 // delete Portfolio Profile details
 const deletePortfolioDetails: RequestHandler = async (
