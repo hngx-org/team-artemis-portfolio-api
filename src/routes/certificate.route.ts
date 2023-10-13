@@ -1,9 +1,17 @@
 import express from "express";
+<<<<<<< HEAD
 import { 
    addCertificateController, 
    deleteCertificate, 
    getAllCertificates,
    getCertificateById, 
+=======
+import {
+  addCertificateController,
+  deleteCertificate,
+  getAllCertificates,
+  getCertificateById,
+>>>>>>> 5a327a38ecdab11687bb5675b0a6cf385201b504
 } from "../controllers/certificate.controller";
 
 const router = express.Router();
@@ -95,7 +103,6 @@ const router = express.Router();
  */
 router.post("/add-certificate/:userId", addCertificateController);
 
-
 /**
  * @swagger
  * /api/certificates:
@@ -151,6 +158,7 @@ router.post("/add-certificate/:userId", addCertificateController);
  *                 error:
  *                   type: string
  */
+
 router.get("/certificates", getAllCertificates);
 
 
@@ -267,6 +275,4 @@ router.delete("/certificates/:certId", deleteCertificate);
  */
 router.get("/certificates/:certId", getCertificateById);
 
-
 module.exports = router;
-
