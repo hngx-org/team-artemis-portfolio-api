@@ -1,10 +1,4 @@
-import express, {
-  NextFunction,
-  Request,
-  RequestHandler,
-  Response,
-} from "express";
-import { AnyZodObject, z } from "zod";
+import { Request, RequestHandler, Response } from "express";
 import { connectionSource } from "../database/data-source";
 import { PortfolioDetails, Tracks, UserTrack } from "../database/entity/model";
 import { User } from "../database/entity/user";
@@ -14,7 +8,6 @@ import {
   uploadProfileImageService,
 } from "../services";
 import { error, success } from "../utils";
-import { authMiddleWare, validateUser } from "../middlewares/auth";
 
 // Get the repository for the PortfolioDetails entity
 const userRepository = connectionSource.getRepository(User);
@@ -22,18 +15,13 @@ const portfolioRepository = connectionSource.getRepository(PortfolioDetails);
 const userTrackRepository = connectionSource.getRepository(UserTrack);
 
 // Export the uploadProfileImageController function
-export const uploadProfileImageController: RequestHandler = async (
-  req: Request,
-  res: Response
-) => {
+export const uploadProfileImageController: RequestHandler = async (req: Request, res: Response) => {
   try {
     if (!req.files) return error(res, "add event image", 400);
     const { service, userId } = req.body;
     const files = req.files as any;
 
-
     const imagesRes = await cloudinaryService(files, req.body.service);
-
 
     const user = await userRepository.findOne({ where: { id: userId } });
     if (!user) {
@@ -42,7 +30,7 @@ export const uploadProfileImageController: RequestHandler = async (
     const { urls } = await cloudinaryService(req.files, service);
     const data = await uploadProfileImageService(user.id, urls);
 
-    console.log(urls)
+    console.log(urls);
     user.profilePic = imagesRes[0];
 
     return success(res, data, "Profile picture uploaded successfully");
@@ -51,32 +39,25 @@ export const uploadProfileImageController: RequestHandler = async (
   }
 };
 
-export const uploadProfileCoverController: RequestHandler = async (
-  req: Request,
-  res: Response
-) => {
+export const uploadProfileCoverController: RequestHandler = async (req: Request, res: Response) => {
   try {
     if (!req.files) return error(res, "add event image", 400);
     const { service, userId } = req.body;
 
     const files = req.files as any;
 
-
     const imagesRes = await cloudinaryService(files, req.body.service);
-
 
     const user = await userRepository.findOne({ where: { id: userId } });
     if (!user) {
       return error(res, "User Not found", 400);
     }
 
-
     const { urls } = await cloudinaryService(req.files, service);
     const data = await uploadProfileCoverPhotoService(user.id, urls);
 
-    console.log(urls)
+    console.log(urls);
     user.profileCoverPhoto = imagesRes[0];
-
 
     return success(res, data, "Cover photo uploaded successfully");
   } catch (err) {
@@ -119,19 +100,27 @@ export const createProfileController = async (req: Request, res: Response) => {
     const userId = req.params.userId;
 
     const userRepository = connectionSource.getRepository(User);
-    const portfolioDetailsRepository =
-      connectionSource.getRepository(PortfolioDetails);
+    const portfolioDetailsRepository = connectionSource.getRepository(PortfolioDetails);
     const userTrackRepository = connectionSource.getRepository(UserTrack);
     const trackRepository = connectionSource.getRepository(Tracks);
 
-    const user = await userRepository.findOne({ where: { id: userId } });
+    let user = await userRepository.findOne({ where: { id: userId } });
 
     if (!user) {
       return error(res, "User Not found", 400);
     }
 
     if (name) {
-      userRepository.update(user.id, { lastName: name });
+      const names = name.split(" ");
+
+      if (names.length > 1) {
+        await userRepository.update(user.id, {
+          lastName: names[1].trim().length > 1 ? names[1] : user.lastName,
+          firstName: names[0],
+        });
+      } else {
+        await userRepository.update(user.id, { firstName: name });
+      }
     }
 
     let track: Tracks;
@@ -164,6 +153,8 @@ export const createProfileController = async (req: Request, res: Response) => {
       userId,
     });
 
+    user = await userRepository.findOne({ where: { id: userId } });
+
     await portfolioDetailsRepository.save(portfolio);
 
     return success(
@@ -177,10 +168,7 @@ export const createProfileController = async (req: Request, res: Response) => {
 };
 
 // delete Portfolio Profile details
-export const deletePortfolioDetails: RequestHandler = async (
-  req: Request,
-  res: Response
-) => {
+export const deletePortfolioDetails: RequestHandler = async (req: Request, res: Response) => {
   try {
     // convert the id to number
     const id = parseInt(req.params.id);

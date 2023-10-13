@@ -1,20 +1,17 @@
-import express from "express";
+import express, { NextFunction, Request, Response } from "express";
 import multer from "multer";
 import {
   createProfileController,
   getAllUsers,
   getUserById,
-  uploadImageController,
   uploadProfileCoverController,
   uploadProfileImageController,
 } from "../controllers";
+import { ForbiddenError } from "../middlewares";
 import {
   createPorfolioDataSchema,
   validateCreatePortfolioDetails,
 } from "../middlewares/profile.zod";
-import { ForbiddenError } from "../middlewares";
-import { NextFunction, Request, Response } from "express";
-
 
 const storage = multer.memoryStorage();
 const uploads = multer({ storage }).array("images", 1);
@@ -25,9 +22,8 @@ const uploadHandler = (req: Request, res: Response, next: NextFunction) => {
       next(newForbbidenError);
     }
     next();
-  })
-}
-
+  });
+};
 
 const router = express.Router();
 
@@ -90,7 +86,7 @@ router.get("/users/:userId", getUserById);
  *     parameters:
  *       - in: path
  *         name: userId
- *         required: true
+ *         required: false
  *         description: The ID of the user.
  *         type: uuid
  *       - in: body
@@ -107,7 +103,7 @@ router.get("/users/:userId", getUserById);
  *             country:
  *               type: string
  *             trackId:
- *               type: string
+ *               type: number
  *     responses:
  *       200:
  *         description: Successful response
