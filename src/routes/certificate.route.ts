@@ -2,8 +2,8 @@ import express from "express";
 import { 
    addCertificateController, 
    deleteCertificate, 
-   getAllCertificates, 
-   getCertificateById
+   getAllCertificates,
+   getCertificateById, 
 } from "../controllers/certificate.controller";
 
 const router = express.Router();
@@ -202,7 +202,7 @@ router.get("/certificates", getAllCertificates);
  *                 error:
  *                   type: string
  */
-router.delete("/certificates/{certId}", deleteCertificate);
+router.delete("/certificates/:certId", deleteCertificate);
 
 
 /**
@@ -265,7 +265,7 @@ router.delete("/certificates/{certId}", deleteCertificate);
  *                 error:
  *                   type: string
  */
-router.get("/certificates/{certId}", getCertificateById);
+router.get("/certificates/:certId", getCertificateById);
 
 
 module.exports = router;
