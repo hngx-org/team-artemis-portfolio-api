@@ -93,8 +93,6 @@ router.post(
  */
 router.get('/references', getAllReference)
 
-
-
 /**
  * @swagger
  * /api/references/{id}:
