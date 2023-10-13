@@ -63,45 +63,58 @@ router.get("/contacts/:user_id", getContacts);
  *     summary: Create a new contact
  *     description: Create a new contact for a user.
  *     parameters:
- *       - name: name
- *         in: body
- *         description: The name of the contact.
+ *       - in: body
+ *         name: create contacts
+ *         description: creating new social media contact account
  *         required: true
- *         type: string
+ *         schema:
+ *            type: object
+ *            properties:
+ *              user_id:
+ *                  type: string
+ *              social_media_id:
+ *                  type: number
+ *              url:
+ *                  type: string
+ *
  *     responses:
  *       201:
- *         description: Contact created successfully.
- *         schema:
- *           type: object
- *           properties:
- *             successful:
- *               type: boolean
- *             message:
- *               type: string
- *             data:
+ *         description: Resource created successfully.
+ *         content:
+ *           application/json:
+ *             schema:
  *               type: object
  *               properties:
  *                 successful:
  *                   type: boolean
  *                 message:
  *                   type: string
- *         example:
- *           successful: true
- *           message: "Contact created successfully"
- *       500:
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     successful:
+ *                       type: boolean
+ *                     message:
+ *                       type: string
+ *       400:
  *         description: Failed to create contact.
- *         schema:
- *           type: object
- *           properties:
- *             successful:
- *               type: boolean
- *               example: false
- *             message:
- *               type: string
- *               example: "Failed to create contact"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 successful:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Failed to create contact"
+ *                 data:
+ *                   type: null
  *     tags:
  *       - Contacts
  */
+
 router.post("/contacts/", createContacts);
 
 /**

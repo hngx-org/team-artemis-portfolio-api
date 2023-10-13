@@ -96,8 +96,6 @@ router.get("/education/:id", fetchUserEducationDetail);
  *         schema:
  *           type: object
  *           properties:
- *             sectionId:
- *               type: number
  *             degreeId:
  *               type: number
  *             fieldOfStudy:
@@ -150,10 +148,9 @@ router.get("/education/:id", fetchUserEducationDetail);
  *                   type: null
  */
 router.post(
-  "/education/:id",
-  validateCreateData,
+  '/education/:id',
   createEducationDetailController
-);
+)
 
 /**
  * @swagger
