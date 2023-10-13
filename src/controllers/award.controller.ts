@@ -68,13 +68,13 @@ const createAwardController = async (
 // Get award by Id
 const getAwardController = async (req: Request, res: Response) => {
   const awardRepo = connectionSource.getRepository(Award);
-
+     
   try {
-    const id = parseInt(req.params.id);
+    const id = req.params.id;
     const award = await awardRepo.findOne({ where: { id } });
-
+    
     if (!award) {
-      return res.status(404).json({ message: "Award not found" });
+        return res.status(404).json({ message: "Award not found" });
     }
 
     res.status(200).json({
@@ -109,7 +109,7 @@ const deleteAwardController = async (req: Request, res: Response) => {
   const awardRepo = connectionSource.getRepository(Award);
   // Find award by id
   try {
-    const id = parseInt(req.params.id);
+    const id = req.params.id;
     const award = await awardRepo.findOne({
       where: { id },
     });
