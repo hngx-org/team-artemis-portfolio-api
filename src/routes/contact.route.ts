@@ -61,6 +61,18 @@ router.get('/contacts/:user_id', getContacts)
  *   post:
  *     summary: Create a new contact
  *     description: Create a new contact for a user.
+ *     parameters:
+ *        -in: body
+ *         name: create contacts
+ *         description: creating new social media contact account
+ *         required: true
+ *         schema:
+ *            user_id:
+ *                type:string
+ *            social_media_id:
+ *                type: number
+ *            url:
+ *                type:string
  *     requestBody:
  *       description: The data for the contact to be created.
  *       required: true
@@ -69,13 +81,15 @@ router.get('/contacts/:user_id', getContacts)
  *           schema:
  *             type: object
  *             properties:
- *               name:
+ *               user_id:
  *                 type: string
- *               email:
- *                 type: string
+ *               social_media_id:
+ *                 type: number
+ *               url:
+ *                 type:string
  *     responses:
  *       201:
- *         description: Contact created successfully.
+ *         description: Resource created successfully.
  *         content:
  *           application/json:
  *             schema:
@@ -92,7 +106,7 @@ router.get('/contacts/:user_id', getContacts)
  *                       type: boolean
  *                     message:
  *                       type: string
- *       500:
+ *       400:
  *         description: Failed to create contact.
  *         content:
  *           application/json:
