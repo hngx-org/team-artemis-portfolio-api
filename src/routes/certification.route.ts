@@ -20,7 +20,7 @@ const router = express.Router();
  *         name: userId
  *         description: A valid user id (uuid) 
  *         required: true
- *         type: uuid
+ *         type: string
  *       - in: body
  *         name: payload
  *         description: New certificate details.
