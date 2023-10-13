@@ -20,3 +20,18 @@ export interface ISection {
   description?: string;
   meta?: string;
 }
+
+export interface IUpdateSection {
+  name?: string;
+  description?: string;
+  meta?: string;
+}
+
+
+export interface IGetSection {
+  name?: string;
+}
+
+export interface IGetSingleSection {
+  id: number;
+}

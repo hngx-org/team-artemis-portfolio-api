@@ -14,7 +14,14 @@ import {
   InternalServerError,
   NotFoundError,
 } from "../middlewares";
-import { ICustomSection, ISection, IField } from "../interfaces";
+import {
+  ICustomSection,
+  ISection,
+  IField,
+  IGetSection,
+  IGetSingleSection,
+  IUpdateSection,
+} from "../interfaces";
 
 const customRepository = connectionSource.getRepository(CustomUserSection);
 const customFieldRepository = connectionSource.getRepository(CustomField);
@@ -122,6 +129,73 @@ const createSection = async (
       );
     const newRecord = await sectionRepository.save(req.body);
     return success(res, newRecord, "Success");
+  } catch (err) {
+    console.log(err);
+    return error(res, "An error occurred", 500);
+  }
+};
+
+const getSection = async (
+  req: Request<{}, {}, {}, IGetSection>,
+  res: Response
+) => {
+  const filter = req.query.name ? { where: { name: req.query.name } } : {};
+  try {
+    const section = await sectionRepository.find(filter);
+    return success(res, section, "Success");
+  } catch (err) {
+    console.log(err);
+    return error(res, "An error occurred", 500);
+  }
+};
+
+const getSingleSection = async (
+  req: Request<IGetSingleSection, {}, {}, {}>,
+  res: Response
+) => {
+  const { id } = req.params;
+  try {
+    const section = await sectionRepository.findOne({
+      where: { id },
+    });
+    if (!section) return error(res, "Section not found", 404);
+    return success(res, section, "Success");
+  } catch (err) {
+    console.log(err);
+    return error(res, "An error occurred", 500);
+  }
+};
+
+const UpdateSection = async (
+  req: Request<{ id: string }, {}, IUpdateSection, {}>,
+  res: Response
+) => {
+  const { id } = req.params;
+  try {
+    const section = await sectionRepository.findOne({
+      where: { id: Number(id) },
+    });
+    if (!section) return error(res, "Section not found", 404);
+    const newSection = await sectionRepository.update(id, req.body);
+    return success(res, newSection, "Success");
+  } catch (err) {
+    console.log(err);
+    return error(res, "An error occurred", 500);
+  }
+};
+
+const deleteSection = async (
+  req: Request<IGetSingleSection, {}, {}, {}>,
+  res: Response
+) => {
+  const { id } = req.params;
+  try {
+    const section = await sectionRepository.findOne({
+      where: { id },
+    });
+    if (!section) return error(res, "Section not found", 404);
+    await sectionRepository.delete(id);
+    return success(res, true, "Success");
   } catch (err) {
     console.log(err);
     return error(res, "An error occurred", 500);
@@ -275,6 +349,19 @@ const sectionSchema = z.object({
   meta: z.string().optional(),
 });
 
+const updateSectionSchema = z.object({
+  name: z
+    .string()
+    .min(3, { message: "name must have at least three characters " })
+    .optional(),
+  description: z.string().optional(),
+  meta: z.string().optional(),
+});
+
+const getSectionSchema = z.object({
+  name: z.string().optional(),
+});
+
 const validateSchema =
   (schema: AnyZodObject) => async (req: Request, res: Response, next: any) => {
     try {
@@ -330,4 +417,10 @@ export {
   createSection,
   sectionSchema,
   fieldsSchema,
+  getSection,
+  getSingleSection,
+  getSectionSchema,
+  UpdateSection,
+  deleteSection,
+  updateSectionSchema,
 };

@@ -13,7 +13,14 @@ import {
   customUserSectionSchema,
   customFieldSchema,
   fieldsSchema,
+  getSection,
+  getSingleSection,
+  getSectionSchema,
+  UpdateSection,
+  deleteSection,
+  updateSectionSchema,
 } from "../controllers/custom.controller";
+import { validateQuery, } from "../middlewares/custom.zod";
 
 const router = express.Router();
 
@@ -63,6 +70,10 @@ const router = express.Router();
  *       - custom
  */
 router.post("/section", validateSchema(sectionSchema), createSection);
+
+
+
+
 
 /**
  * @swagger
@@ -128,6 +139,8 @@ router.post("/custom", validateSchema(customUserSectionSchema), create);
  *       - custom
  */
 router.get("/custom", findAll);
+
+router.get("/section", validateQuery(getSectionSchema), getSection);
 /**
  * @swagger
  * /api/custom/{id}:
@@ -155,6 +168,8 @@ router.get("/custom", findAll);
  *       - custom
  */
 router.get("/custom/:id", findOne);
+
+router.get("/section/:id", getSingleSection);
 
 /**
  * @swagger
@@ -327,6 +342,8 @@ router.get("/custom/field/:id", findOneCustomField);
  */
 router.delete("/custom-section/:id", deleteCustomSection);
 
+router.delete("section", deleteSection)
+
 /**
  * @swagger
  * /api/custom/field/{id}:
@@ -412,5 +429,7 @@ router.delete("/custom-section/:id", deleteCustomSection);
  *       - custom
  */
 router.put("/custom/field/:id", updateCustomField);
+
+router.put("/section/:id", validateSchema(updateSectionSchema), UpdateSection);
 
 module.exports = router;
