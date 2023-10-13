@@ -8,8 +8,13 @@ import { AnyZodObject, z } from "zod";
 import { connectionSource } from "../database/data-source";
 import { PortfolioDetails, Tracks, UserTrack } from "../database/entity/model";
 import { User } from "../database/entity/user";
-import { cloudinaryService, uploadProfileImageService } from "../services";
+import {
+  cloudinaryService,
+  uploadProfileCoverPhotoService,
+  uploadProfileImageService,
+} from "../services";
 import { error, success } from "../utils";
+import { authMiddleWare, validateUser } from "../middlewares/auth";
 
 // Get the repository for the PortfolioDetails entity
 const userRepository = connectionSource.getRepository(User);
@@ -25,8 +30,16 @@ export const uploadProfileImageController: RequestHandler = async (
     if (!req.files) return error(res, "add event image", 400);
     const { service, userId } = req.body;
 
+    const response = await validateUser(
+      req.headers.authorization,
+      "portfolio.update.own"
+    );
+
+    if (!response.authorized)
+      return error(res, "Not authorized to perform action", 400);
+
     const { urls } = await cloudinaryService(req.files, service);
-    const data = await uploadProfileImageService(userId, urls);
+    const data = await uploadProfileImageService(response.user.id, urls);
     return success(res, data, "Profile picture uploaded successfully");
   } catch (err) {
     error(res, (err as Error).message); // Use type assertion to cast 'err' to 'Error' type
@@ -41,9 +54,17 @@ export const uploadProfileCoverController: RequestHandler = async (
     if (!req.files) return error(res, "add event image", 400);
     const { service, userId } = req.body;
 
+    const response = await validateUser(
+      req.headers.authorization,
+      "portfolio.update.own"
+    );
+
+    if (!response.authorized)
+      return error(res, "Not authorized to perform action", 400);
+
     const { urls } = await cloudinaryService(req.files, service);
-    const data = await uploadProfileImageService(userId, urls);
-    
+    const data = await uploadProfileCoverPhotoService(response.user.id, urls);
+
     return success(res, data, "Cover photo uploaded successfully");
   } catch (err) {
     if (err instanceof Error) {
@@ -53,7 +74,6 @@ export const uploadProfileCoverController: RequestHandler = async (
     }
   }
 };
-
 
 export const getAllUsers = async (req: Request, res: Response) => {
   const users = await userRepository.find();
@@ -125,7 +145,7 @@ export const createProfileController = async (req: Request, res: Response) => {
       }
     }
 
-     const portfolio = portfolioDetailsRepository.create({
+    const portfolio = portfolioDetailsRepository.create({
       city,
       country,
       userId,
@@ -164,9 +184,7 @@ export const deletePortfolioDetails: RequestHandler = async (
 
     // delete the porfolio
 
-    const portfolio = await portfolioRepository.remove(
-      portfolioToRemove
-    );
+    const portfolio = await portfolioRepository.remove(portfolioToRemove);
     res.status(200).json({
       message: "Portfolio profile details deleted successfully",
       portfolio,
@@ -174,4 +192,4 @@ export const deletePortfolioDetails: RequestHandler = async (
   } catch (error) {
     res.status(500).json(error as Error);
   }
-}
+};

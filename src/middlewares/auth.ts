@@ -7,23 +7,10 @@ export const authMiddleWare = async (
   res: Response,
   next: NextFunction
 ) => {
-  // const authorizationHeader = req.headers.authorization;
-
-  // console.log(authorizationHeader);
-
-  // let token: string;
-  // if (authorizationHeader) {
-  //   token = authorizationHeader.split(" ")[1];
-  // }
-
-  // token =
-  //   token || req.body.token || req.query.token || req.headers["x-access-token"];
-
   let response = await validateUser(
     req.headers.authorization,
     req.headers?.action
   );
-  console.log("response", response);
 
   if (!response.authorized) {
     return error(res, "not authorized", 400);
@@ -61,14 +48,7 @@ export const validateUser = async (authHeader: any, permission: any) => {
 
     console.log("test", responseData);
 
-    return (
-      responseData.data || {
-        authorized: true,
-        user: {
-          id: "67762b0e-c756-47a4-a965-9f62f82a7d33",
-        },
-      }
-    );
+    return responseData.data;
   } catch (error) {
     throw new Error();
   }
