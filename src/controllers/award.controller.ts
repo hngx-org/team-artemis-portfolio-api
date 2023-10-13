@@ -70,7 +70,7 @@ const getAwardController = async (req: Request, res: Response) => {
   const awardRepo = connectionSource.getRepository(Award);
      
   try {
-    const id = req.params.id;
+    const id = parseInt(req.params.id);
     const award = await awardRepo.findOne({ where: { id } });
     
     if (!award) {
@@ -109,7 +109,7 @@ const deleteAwardController = async (req: Request, res: Response) => {
   const awardRepo = connectionSource.getRepository(Award);
   // Find award by id
   try {
-    const id = req.params.id;
+    const id = parseInt(req.params.id);
     const award = await awardRepo.findOne({
       where: { id },
     });
