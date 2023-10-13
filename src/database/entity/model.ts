@@ -1105,6 +1105,9 @@ export class Section {
   @ManyToOne(() => Template, (template) => template.sections)
   @JoinColumn({ name: "templateId" }) // Specify the actual column name
   template: Template;
+
+  @OneToMany(() => References, (references) => references.section) // Use References here
+  references: References[]; // Assuming you want to reference multiple References
 }
 
 @Entity({ name: "tracks" })
@@ -1603,4 +1606,34 @@ export class Template {
   isSelected: boolean;
   @OneToMany(() => Section, (section) => section.template)
   sections: Section[];
+}
+
+@Entity()
+export class References {
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column()
+  Name: string;
+
+  @Column()
+  Company: string;
+
+  @Column()
+  Position: string;
+
+  @Column()
+  EmailAddress: string;
+
+  @Column()
+  PhoneNumber: string;
+
+  @ManyToOne(() => User, (user) => user.references)
+  user: User;
+
+  @ManyToOne(() => Section, (section) => section.references)
+  section: Section;
+
+  @Column()
+  userId: number; // Foreign key to the User entity
 }
