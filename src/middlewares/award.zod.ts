@@ -15,6 +15,17 @@ export const CreateAwardDataSchema = z.object({
   sectionId: z.number(),
 })
 
+
+export const UpdateAwardDataSchema = z.object({
+  title: z.string(),
+  year: z.string(),
+  presented_by: z.string(),
+  url: z.string().optional(),
+  userId: z.string().refine((value) => isUUID(value), {
+    message: 'userId has to be a valid UUID',
+  })
+})
+
 // Custom function to validate date strings in "yyyy" format
 function validateDateYYYY(dateString: string) {
   const datePattern = /^\d{4}$/;
@@ -64,6 +75,27 @@ async function validateCreateAwardData(
   }
 }
 
-// vaildateGetAwarddata
+async function validateUpdateAwardData(req: Request, res: Response, next: NextFunction) {
+  try {
+    const data = req.body;
 
-export { validateCreateAwardData }
+    // Validate date strings in "yyyy" format
+    if (data.year && !validateDateYYYY(data.year)) {
+      const err = new BadRequestError("Invalid 'year' date format, it must be 'yyyy'");
+      return res.status(err.statusCode).json({ error: err.message });
+    }
+
+    // Validate the data against the schema
+    const result = await parseAsync(UpdateAwardDataSchema, data, options);
+
+    
+    const validatedData = result;
+    console.log(validatedData)
+    next(); 
+  } catch (error) {
+    const err = new BadRequestError(error.message);
+    console.error(err.message);
+    res.status(err.statusCode).json({ error: err.message });
+  }
+}
+export { validateCreateAwardData, validateUpdateAwardData }

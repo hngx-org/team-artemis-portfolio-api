@@ -11,6 +11,7 @@ import {
   validateSchema,
   sectionSchema,
   customUserSectionSchema,
+  // updateCustomSection,
   customFieldSchema,
   fieldsSchema,
 } from "../controllers/custom.controller";
@@ -326,6 +327,7 @@ router.get("/custom/field/:id", findOneCustomField);
  *       - custom
  */
 router.delete("/custom-section/:id", deleteCustomSection);
+
 
 /**
  * @swagger

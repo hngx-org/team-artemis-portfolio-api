@@ -50,7 +50,7 @@ const router = express.Router();
  *
  *     responses:
  *       200:
- *         educationDetails: Array of user education detail(s).
+ *         educationDetails: Array of user education detail(s) or empty array if the user has no education detail.
  *         content:
  *           application/json:
  *             schema:
