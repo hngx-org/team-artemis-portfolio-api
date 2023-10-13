@@ -1,6 +1,11 @@
 import express from "express";
-import { createReference, deleteReferenceDetail, getAllReference } from "../controllers/reference.controller"; 
-import { validateCreateReferenceData } from "../middlewares/reference.zod"; 
+import {
+  createReference,
+  deleteReferenceDetail,
+  getAllReference,
+  getReferenceById,
+} from "../controllers/reference.controller";
+import { validateCreateReferenceData } from "../middlewares/reference.zod";
 
 const router = express.Router();
 
@@ -91,9 +96,7 @@ router.post(
  *     tags:
  *       - References
  */
-router.get('/references', getAllReference)
-
-
+router.get("/references", getAllReference);
 
 /**
  * @swagger
@@ -133,5 +136,40 @@ router.get('/references', getAllReference)
  *               error: "Reference detail not found"
  */
 router.delete("/references/:id", deleteReferenceDetail);
+
+/**
+ * @swagger
+ * /api/references/{id}:
+ *   get:
+ *     summary: fetch reference Details by user ID.
+ *     description: fetch a reference detail from the database by its user ID.
+ *     tags:
+ *       - References
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         description: ID of the reference detail to
+ *         required: true
+ *         schema:
+ *           type: string
+ *           minimum: 1
+ *         example: "6ba7b810-9dad-11d1-80b4-00c04fd430c8"
+ *     responses:
+ *       200:
+ *         description: Reference detail fetched successfully
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: " reference detail fetched  successfully"
+ *
+ *       404:
+ *         description: Reference detail not found
+ *         content:
+ *           application/json:
+ *             example:
+ *               error: "invalid user id "
+ */
+
+router.get("/references/:id", getReferenceById);
 
 module.exports = router;

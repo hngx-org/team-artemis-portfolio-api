@@ -1,16 +1,13 @@
 import { Request, Response, NextFunction } from "express";
 import { connectionSource } from "../database/data-source";
 import { References } from "../database/entity/model";
-import {
-  CustomError,
-  NotFoundError,
-  BadRequestError,
-} from "../middlewares";
+import { CustomError, NotFoundError, BadRequestError } from "../middlewares";
+import { error, success } from "../utils/response.util";
 
 const referenceRepository = connectionSource.getRepository(References);
 export const createReference = async (req: Request, res: Response) => {
   try {
-      const validatedData = req.body; // Assuming that the validation middleware stored the validated data
+    const validatedData = req.body; // Assuming that the validation middleware stored the validated data
     const userIdFromURL = req.params.userId; // Extract user ID from the URL
 
     // If the user ID is not provided in the URL, check if it's in the request body
@@ -33,10 +30,7 @@ export const createReference = async (req: Request, res: Response) => {
   }
 };
 
-export const getAllReference = async (
-  req: Request,
-  res: Response,
-) => {
+export const getAllReference = async (req: Request, res: Response) => {
   try {
     const references = await referenceRepository.find();
     res.json({ references });
@@ -45,8 +39,6 @@ export const getAllReference = async (
     res.status(500).json({ error: "Internal server error" });
   }
 };
-
-
 
 export const deleteReferenceDetail = async (
   req: Request,
@@ -71,11 +63,27 @@ export const deleteReferenceDetail = async (
 
     await referenceRepository.remove(referenceDetail);
 
-     res.status(200).json({
-      message: "Reference detail deleted successfully"  });
+    res.status(200).json({
+      message: "Reference detail deleted successfully",
+    });
   } catch (error) {
     console.error("Error deleting reference detail:", error);
     next(error);
   }
 };
 
+export const getReferenceById = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const userRepository = connectionSource.getRepository(References);
+    const refByid = await userRepository.findOneBy({
+      userId: id,
+    });
+    if (!refByid) {
+      return error(res);
+    }
+    return success(res, refByid);
+  } catch (err) {
+    error(res, "invalid userid");
+  }
+};
