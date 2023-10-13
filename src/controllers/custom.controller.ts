@@ -388,7 +388,7 @@ const sectionSchema = z.object({
   meta: z.string().optional(),
 });
 
-const updateSectionSchema = z
+const updateSectionSchema: AnyZodObject = z
   .object({
     name: z
       .string()
@@ -411,7 +411,7 @@ const updateSectionSchema = z
       message:
         "At least one of the fields (name, description, meta, position) is required",
     }
-  );
+  ); ;
 
 const getSectionSchema = z.object({
   name: z.string().optional(),
