@@ -73,20 +73,7 @@ router.get('/contacts/:user_id', getContacts)
  *                type: number
  *            url:
  *                type:string
- *     requestBody:
- *       description: The data for the contact to be created.
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               user_id:
- *                 type: string
- *               social_media_id:
- *                 type: number
- *               url:
- *                 type:string
+ *     
  *     responses:
  *       201:
  *         description: Resource created successfully.
