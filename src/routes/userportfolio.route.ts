@@ -5,6 +5,7 @@ import {
   deletePortfolioDetails,
 } from "../controllers/userportfolio.controller";
 import { Router } from "express";
+import { updatePortfolioDataSchema, validateUpdatePortfolioDetails } from "../middlewares/profile.zod";
 
 const router = Router();
 
@@ -78,54 +79,99 @@ router.get("/getPortfolioDetails/:userId", getPortfolioDetails);
  */
 router.get("/portfolioDetails", getAllPortfolioDetails);
 
+
 /**
  * @swagger
- * /api/profile-details/{id}:
+ * /api/update-profile-details/{userId}:
  *   put:
- *     summary: Update portfolio details by ID
- *     description: Update a user's portfolio details by providing its ID.
+ *     summary: Update User's Profile Portfolio Details
+ *     description: Update a user's portfolio details by providing its ID and the required data in json format in the body of the request.
  *     tags: [User Portfolio Details]
  *     parameters:
  *       - in: path
- *         name: id
+ *         name: userId
+ *         description: The ID of the user to update.
  *         required: true
- *         description: The ID of the portfolio details to update.
+ *         type: string
+ *         example: 6ba7b810-9dad-11d1-80b4-00c04fd430c8
+ *       - in: body
+ *         name: updateUserProfileDetails
+ *         description: Data to update user's profile.
+ *         required: true
  *         schema:
- *           type: string
- *     requestBody:
- *       description: Updated portfolio detail data
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               field1:
- *                 type: string
- *               field2:
- *                 type: number
+ *           type: object
+ *           properties:
+ *             name:
+ *               type: string
+ *               required: true
+ *             trackId:
+ *               type: number
+ *               required: true
+ *             city:
+ *               type: string
+ *             country:
+ *               type: string
+ *           example:
+ *               name: "Joe King"
+ *               trackId: 2
+ *               city: "Lome"
+ *               country: "Togo"
  *     responses:
- *       200:
- *         description: Portfolio details updated successfully.
+ *       '200':
+ *         description: Successful response
  *         content:
  *           application/json:
  *             schema:
  *               type: object
  *               properties:
+ *                 successful:
+ *                   type: boolean
  *                 message:
  *                   type: string
- *       404:
- *         description: Portfolio details not found.
+ *                 data:
+ *                   type: object
+ *       '400':
+ *         description: Bad request
  *         content:
  *           application/json:
  *             schema:
  *               type: object
  *               properties:
- *                 error:
+ *                 successful:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
  *                   type: string
+ *       '404':
+ *         description: Not Found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 successful:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *       '500':
+ *         description: Internal Server Error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 successful:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Failed to update Work Experience"
+ *                 data:
+ *                   type: null
  */
 
-router.put("/profile-details/:id", updatePortfolioDetails);
+router.put("/update-profile-details/:userId", validateUpdatePortfolioDetails(updatePortfolioDataSchema), updatePortfolioDetails);
 
 /**
  * @swagger

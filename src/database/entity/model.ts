@@ -1093,6 +1093,9 @@ export class Section {
   @Column("text", { nullable: true })
   meta: string;
 
+  @Column("int") // Add a position field to keep track of the order
+  position: number;
+
   @OneToMany(
     () => CustomUserSection,
     (customUserSection) => customUserSection.section
@@ -1100,9 +1103,12 @@ export class Section {
   customUserSections: CustomUserSection[];
 
   @ManyToOne(() => Template, (template) => template.sections)
-  template: Template; // This establishes the relationship with the Template entity
-}
+  @JoinColumn({ name: "templateId" }) // Specify the actual column name
+  template: Template;
 
+  @OneToMany(() => References, (references) => references.section) // Use References here
+  references: References[]; // Assuming you want to reference multiple References
+}
 
 @Entity({ name: "tracks" })
 export class Tracks {
@@ -1234,17 +1240,17 @@ export class EducationDetail {
   @UpdateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
   updatedAt: Date;
 
-  // @ManyToOne(() => Section, (section) => section.id)
-  // @JoinColumn({ name: "sectionId" })
-  // section: Section;
+  @ManyToOne(() => Section, (section) => section.id)
+  @JoinColumn({ name: "sectionId" })
+  section: Section;
 
-  // @ManyToOne(() => Degree, (degree) => degree.id)
-  // @JoinColumn({ name: "degreeId" })
-  // degree: Degree;
+  @ManyToOne(() => Degree, (degree) => degree.id)
+  @JoinColumn({ name: "degreeId" })
+  degree: Degree;
 
-  //   @ManyToOne(() => User, (user) => user.id)
-  //   @JoinColumn({ name: "userId" })
-  //   user: User;
+  @ManyToOne(() => User, (user) => user.id)
+  @JoinColumn({ name: "userId" })
+  user: User;
 }
 
 @Entity({ name: "degree" })
@@ -1600,4 +1606,34 @@ export class Template {
   isSelected: boolean;
   @OneToMany(() => Section, (section) => section.template)
   sections: Section[];
+}
+
+@Entity()
+export class References {
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column()
+  name: string;
+
+  @Column()
+  company: string;
+
+  @Column()
+  position: string;
+
+  @Column()
+  emailAddress: string;
+
+  @Column()
+  phoneNumber: string;
+
+  @ManyToOne(() => User, (user) => user.references)
+  user: User;
+
+  @ManyToOne(() => Section, (section) => section.references)
+  section: Section;
+
+  @Column()
+  userId: number; // Foreign key to the User entity
 }

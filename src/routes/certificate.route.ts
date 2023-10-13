@@ -1,11 +1,16 @@
 import express from "express";
-import { addCertificateController,deleteCertificate,getAllCertificates,getCertificateById } from "../controllers/certificate.controller";
+import {
+  addCertificateController,
+  deleteCertificate,
+  getAllCertificates,
+  getCertificateById,
+} from "../controllers/certificate.controller";
 
 const router = express.Router();
 
 /**
  * @swagger
- * /add-certificate/{userId}:
+ * /api/add-certificate/{userId}:
  *   post:
  *     summary: Create certificate details for a user with a specified ID.
  *     description: Create certificate details for a user.
@@ -90,13 +95,13 @@ const router = express.Router();
  */
 router.post("/add-certificate/:userId", addCertificateController);
 
-
 /**
  * @swagger
- * /certifications:
+ * /api/certifications:
  *   get:
  *     summary: Get all certificates.
  *     description: Get a list of all certificates.
+ *     tags: [Certificates]
  *     responses:
  *       200:
  *         description: Successfully retrieved the list of certificates.
@@ -118,14 +123,15 @@ router.post("/add-certificate/:userId", addCertificateController);
  *       500:
  *         description: Internal Server Error.
  */
-router.get("/certifications", getAllCertificates)
+router.get("/certifications", getAllCertificates);
 
 /**
  * @swagger
- * /certifications/{certId}:
+ * /api/certifications/{certId}:
  *   delete:
  *     summary: Delete a certificate by ID.
  *     description: Delete a certificate by its unique ID.
+ *     tags: [Certificates]
  *     parameters:
  *       - in: path
  *         name: certId
@@ -154,15 +160,15 @@ router.get("/certifications", getAllCertificates)
  *         description: Internal Server Error.
 
  */
-router.delete('/certifications/:certId', deleteCertificate);
-
+router.delete("/certifications/:certId", deleteCertificate);
 
 /**
  * @swagger
- * /certifications/{certId}:
+ * /api/certifications/{certId}:
  *   get:
  *     summary: Get a certificate by ID.
  *     description: Get a certificate by its unique ID.
+ *     tags: [Certificates]
  *     parameters:
  *       - in: path
  *         name: certId
@@ -185,6 +191,6 @@ router.delete('/certifications/:certId', deleteCertificate);
  *       500:
  *         description: Internal Server Error.
  */
-router.get('/certifications/:certId', getCertificateById);
+router.get("/certifications/:certId", getCertificateById);
 
-module.exports = router
+module.exports = router;

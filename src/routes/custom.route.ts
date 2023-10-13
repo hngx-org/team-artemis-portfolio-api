@@ -11,6 +11,7 @@ import {
   validateSchema,
   sectionSchema,
   customUserSectionSchema,
+  // updateCustomSection,
   customFieldSchema,
   fieldsSchema,
 } from "../controllers/custom.controller";
@@ -23,21 +24,40 @@ const router = express.Router();
  *   post:
  *     summary: Add section
  *     description: Add a new section
- *     requestBody:
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               name:
- *                 type: string
- *                 description: required
- *               description:
- *                 type: string
- *                 description: optional
- *               meta:
- *                 type: string
- *                 description: optional
+ *     parameters:
+ *       - in: header
+ *         name: Authorization
+ *         type: string
+ *         description: Optional authorization header
+ *       - in: body
+ *         name: sectionDetails
+ *         description: The data for the section to be created.
+ *         required: true
+ *         schema:
+ *           type: object
+ *           properties:
+ *             sectionId:
+ *               type: number
+ *             degreeId:
+ *               type: number
+ *             fieldOfStudy:
+ *               type: string
+ *             school:
+ *               type: string
+ *             description:
+ *               type: string
+ *             from:
+ *               type: string
+ *             to:
+ *               type: string
+ *         example:
+ *           sectionId: 1
+ *           degreeId: 1
+ *           fieldOfStudy: "Engineering"
+ *           school: "Unilag"
+ *           description: "Description"
+ *           from: "2017"
+ *           to: "2020"
  *     responses:
  *       200:
  *         description: Success
@@ -48,7 +68,6 @@ const router = express.Router();
  *               properties:
  *                 message:
  *                   type: string
- *                   description: A success message
  *       400:
  *         description: Bad request. Please fill all fields
  *         content:
@@ -58,7 +77,6 @@ const router = express.Router();
  *               properties:
  *                 error:
  *                   type: string
- *                   description: An error message
  *     tags:
  *       - custom
  */
@@ -70,48 +88,44 @@ router.post("/section", validateSchema(sectionSchema), createSection);
  *   post:
  *     summary: Add custom user section
  *     description: Add a new custom user section
- *     requestBody:
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               userId:
- *                 type: string
- *                 description: required must be a uuid
- *               sectionId:
- *                 type: number
- *                 description: required must be an integer
+ *     parameters:
+ *       - name: userId
+ *         in: body
+ *         required: true
+ *         schema:
+ *           type: object
+ *           properties:
+ *             userId:
+ *               type: string
+ *               description: required must be a uuid
+ *             sectionId:
+ *               type: number
+ *               description: required must be an integer
  *     responses:
  *       200:
  *         description: Success
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   description: A success message
+ *         schema:
+ *           type: object
+ *           properties:
+ *             message:
+ *               type: string
  *       400:
  *         description: Bad request. Please fill all fields
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 error:
- *                   type: string
- *                   description: An error message
+ *         schema:
+ *           type: object
+ *           properties:
+ *             error:
+ *               type: string
  *     tags:
  *       - custom
  */
 router.post("/custom", validateSchema(customUserSectionSchema), create);
+
 /**
  * @swagger
  * /api/custom:
  *   get:
- *     summary: Get all Custom records for  user
+ *     summary: Get all Custom records for user
  *     description: Get custom fields
  *     responses:
  *       200:
@@ -123,11 +137,11 @@ router.post("/custom", validateSchema(customUserSectionSchema), create);
  *               properties:
  *                 message:
  *                   type: string
- *                   description: A success message.
  *     tags:
  *       - custom
  */
 router.get("/custom", findAll);
+
 /**
  * @swagger
  * /api/custom/{id}:
@@ -150,7 +164,6 @@ router.get("/custom", findAll);
  *               properties:
  *                 message:
  *                   type: string
- *                   description: A success message.
  *     tags:
  *       - custom
  */
@@ -162,57 +175,51 @@ router.get("/custom/:id", findOne);
  *   post:
  *     summary: Add custom field section
  *     description: Add custom fields in a section using an array
- *     requestBody:
- *       content:
- *         application/json:
- *           schema:
+ *     parameters:
+ *       - in: body
+ *         name: fields
+ *         description: An array of custom field objects.
+ *         required: true
+ *         schema:
+ *           type: array
+ *           items:
  *             type: object
  *             properties:
- *               fields:
- *                 type: array
- *                 items:
- *                   type: object
- *                   properties:
- *                     fieldType:
- *                       type: string
- *                       description: Must be a string
- *                     customSectionId:
- *                       type: number
- *                       description: Must be a number
- *                     customUserSectionId:
- *                       type: number
- *                       description: Must be a number
- *                     fieldName:
- *                       type: string
- *                       description: Must be a string
- *                     value:
- *                       type: string
- *                       nullable: true
- *                       description: Must be a string (nullable)
+ *               fieldType:
+ *                 type: string
+ *                 description: Must be a string
+ *               customSectionId:
+ *                 type: number
+ *                 description: Must be a number
+ *               customUserSectionId:
+ *                 type: number
+ *                 description: Must be a number
+ *               fieldName:
+ *                 type: string
+ *                 description: Must be a string
+ *               value:
+ *                 type: string
+ *                 nullable: true
+ *                 description: Must be a string (nullable)
  *     responses:
  *       200:
  *         description: Success
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   description: A success message
+ *         schema:
+ *           type: object
+ *           properties:
+ *             message:
+ *               type: string
  *       400:
  *         description: Bad request. Please fill all fields
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 error:
- *                   type: string
- *                   description: An error message
+ *         schema:
+ *           type: object
+ *           properties:
+ *             error:
+ *               type: string
  *     tags:
  *       - custom
  */
+
 router.post("/custom/field", validateSchema(fieldsSchema), createCustomField);
 
 /**
@@ -238,7 +245,6 @@ router.post("/custom/field", validateSchema(fieldsSchema), createCustomField);
  *               properties:
  *                 message:
  *                   type: string
- *                   description: A success message.
  *     tags:
  *       - custom
  */
@@ -320,8 +326,6 @@ router.get("/custom/field/:id", findOneCustomField);
  *                 message:
  *                   type: string
  *                   example: "Error deleting Custom Section"
- *                 data:
- *                   type: null
  *     tags:
  *       - custom
  */

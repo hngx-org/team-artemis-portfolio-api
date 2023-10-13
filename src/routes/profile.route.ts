@@ -5,14 +5,29 @@ import {
   getAllUsers,
   getUserById,
   uploadImageController,
+  uploadProfileCoverController,
+  uploadProfileImageController,
 } from "../controllers";
 import {
   createPorfolioDataSchema,
   validateCreatePortfolioDetails,
 } from "../middlewares/profile.zod";
+import { ForbiddenError } from "../middlewares";
+import { NextFunction, Request, Response } from "express";
+
 
 const storage = multer.memoryStorage();
 const uploads = multer({ storage }).array("images", 1);
+const uploadHandler = (req: Request, res: Response, next: NextFunction) => {
+  uploads(req, res, function (err) {
+    if (err) {
+      const newForbbidenError = new ForbiddenError("You can only upload a maximum of 10 images");
+      next(newForbbidenError);
+    }
+    next();
+  })
+}
+
 
 const router = express.Router();
 
@@ -118,5 +133,91 @@ router.post(
   validateCreatePortfolioDetails(createPorfolioDataSchema),
   createProfileController
 );
+
+/**
+ * @swagger
+ * /api/profile/cover/upload:
+ *   post:
+ *     summary: Upload user cover photo
+ *     description: Upload multiple cover photos using a POST request.
+ *     tags: [User Portfolio Details]
+ *     parameters:
+ *       - in: formData
+ *         name: images
+ *         type: file
+ *         description: The cover photos to upload (up to 10 files).
+ *     responses:
+ *       200:
+ *         description: Cover photos uploaded successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: A success message.
+ *       400:
+ *         description: Bad request. One or more files may not be valid.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: An error message.
+ *     multipart: true
+ * securityDefinitions:
+ *   BearerAuth:
+ *     type: apiKey
+ *     name: Authorization
+ *     in: header
+ */
+router.post("/profile/cover/upload", uploadHandler, uploadProfileCoverController);
+
+/**
+ * @swagger
+ * /api/profile/image/upload:
+ *   post:
+ *     summary: Upload a profile image
+ *     description: Upload a user's profile image using a POST request.
+ *     tags: [User Portfolio Details]
+ *     consumes:
+ *       - multipart/form-data
+ *     parameters:
+ *       - in: formData
+ *         name: images
+ *         type: file
+ *         description: The profile image to upload (one file allowed).
+ *     responses:
+ *       200:
+ *         description: Profile image uploaded successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: A success message.
+ *       400:
+ *         description: Bad request. The uploaded file may not be valid.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: An error message.
+ *     multipart: true
+ * securityDefinitions:
+ *   BearerAuth:
+ *     type: apiKey
+ *     name: Authorization
+ *     in: header
+ */
+router.post("/profile/image/upload", uploadHandler, uploadProfileImageController);
 
 module.exports = router;
