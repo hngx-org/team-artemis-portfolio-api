@@ -18,7 +18,7 @@ const router = express.Router();
  *       - in: body
  *         name: body
  *         required: true
- *         description: Body of request
+ *         description: Body of request takes a userId (uuid) and languages (array of strings) in the body
  *         schema:
  *           type: object
  *           properties:
