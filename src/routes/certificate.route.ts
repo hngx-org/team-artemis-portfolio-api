@@ -8,13 +8,15 @@ import {
 
 const router = express.Router();
 
+
 /**
  * @swagger
  * /api/add-certificate/{userId}:
  *   post:
  *     summary: Create certificate details for a user with a specified ID.
  *     description: Create certificate details for a user.
- *     tags: [Certificates]
+ *     tags:
+ *       - Certification
  *     parameters:
  *       - in: path
  *         name: userId
@@ -92,16 +94,20 @@ const router = express.Router();
  *                   example: "User not found."
  *                 data:
  *                   type: null
+ * 
  */
 router.post("/add-certificate/:userId", addCertificateController);
 
 
+
 /**
  * @swagger
- * /certifications:
+ * /api/certifications:
  *   get:
  *     summary: Get all certificates.
  *     description: Get a list of all certificates.
+ *     tags:
+ *       - Certification
  *     responses:
  *       200:
  *         description: Successfully retrieved the list of certificates.
@@ -122,15 +128,20 @@ router.post("/add-certificate/:userId", addCertificateController);
  *         description: No certificates found.
  *       500:
  *         description: Internal Server Error.
+ * 
+ * 
  */
+
 router.get("/certifications", getAllCertificates)
 
 /**
  * @swagger
- * /certifications/{certId}:
+ * /api/certifications/{certId}:
  *   delete:
  *     summary: Delete a certificate by ID.
  *     description: Delete a certificate by its unique ID.
+ *     tags:
+ *       - Certification
  *     parameters:
  *       - in: path
  *         name: certId
@@ -157,17 +168,18 @@ router.get("/certifications", getAllCertificates)
  *         description: Certificate not found.
  *       500:
  *         description: Internal Server Error.
-
  */
 router.delete('/certifications/:certId', deleteCertificate);
 
 
 /**
  * @swagger
- * /certifications/{certId}:
+ * /api/certifications/{certId}:
  *   get:
  *     summary: Get a certificate by ID.
  *     description: Get a certificate by its unique ID.
+ *     tags:
+ *       - Certification
  *     parameters:
  *       - in: path
  *         name: certId
