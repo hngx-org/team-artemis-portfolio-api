@@ -1,17 +1,9 @@
 import express from "express";
-<<<<<<< HEAD
 import { 
    addCertificateController, 
    deleteCertificate, 
    getAllCertificates,
    getCertificateById, 
-=======
-import {
-  addCertificateController,
-  deleteCertificate,
-  getAllCertificates,
-  getCertificateById,
->>>>>>> 5a327a38ecdab11687bb5675b0a6cf385201b504
 } from "../controllers/certificate.controller";
 
 const router = express.Router();
