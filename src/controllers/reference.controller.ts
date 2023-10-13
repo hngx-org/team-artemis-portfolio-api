@@ -33,6 +33,20 @@ export const createReference = async (req: Request, res: Response) => {
   }
 };
 
+export const getAllReference = async (
+  req: Request,
+  res: Response,
+) => {
+  try {
+    const references = await referenceRepository.find();
+    res.json({ references });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+
 
 export const deleteReferenceDetail = async (
   req: Request,

@@ -1,5 +1,5 @@
 import express from "express";
-import { createReference, deleteReferenceDetail } from "../controllers/reference.controller"; 
+import { createReference, deleteReferenceDetail, getAllReference } from "../controllers/reference.controller"; 
 import { validateCreateReferenceData } from "../middlewares/reference.zod"; 
 
 const router = express.Router();
@@ -62,6 +62,38 @@ router.post(
   validateCreateReferenceData,
   createReference
 );
+
+/**
+ * @swagger
+ * /api/references:
+ *   get:
+ *     summary: Get all references.
+ *     description: Get all reference sections from Database.
+ *     responses:
+ *       200:
+ *         description: Successful response
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *       500:
+ *         description: Internal Server Error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *     tags:
+ *       - References
+ */
+router.get('/references', getAllReference)
+
+
 
 /**
  * @swagger
