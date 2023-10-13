@@ -1092,6 +1092,9 @@ export class Section {
 
   @Column("text", { nullable: true })
   meta: string;
+  
+  @Column("int") // Add a position field to keep track of the order
+  position: number;
 
   @OneToMany(
     () => CustomUserSection,

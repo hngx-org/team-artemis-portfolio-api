@@ -14,6 +14,7 @@ class CustomError extends Error {
 class NotFoundError extends CustomError {
   constructor(message: string) {
     super(message, 404);
+    this.name = this.constructor.name;
   }
 }
 
@@ -90,7 +91,7 @@ const errorHandler = (
   if (err instanceof CustomError) {
     res.status(err.statusCode).json({ message: err.message });
   }
-    res.status(err.statusCode || 500).json({ message: err.message });
+  res.status(err.statusCode || 500).json({ message: err.message });
 
 };
 

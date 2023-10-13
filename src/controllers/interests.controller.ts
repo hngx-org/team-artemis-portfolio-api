@@ -16,6 +16,19 @@ export const createInterest: RequestHandler = async (req, res) => {
     // Convert the interests array to a string
     const intrestsString = interests.toString();
 
+    // Check if the interest exists
+    const interestExists = await interestRepository.findOne({
+      where: { userId },
+    });
+
+    // If the interest exists, return an error
+    if (interestExists) {
+      return res.status(409).json({
+        successful: false,
+        message: "This user already has an interest section created.",
+      });
+    }
+
     // Create the interest
     const interestResponse = interestRepository.create({
       interest: intrestsString,
@@ -123,30 +136,28 @@ export const deleteInterest: RequestHandler = async (req, res) => {
 
 export const getInterests: RequestHandler = async (req, res) => {
   try {
-      const { userId } = req.params;
-  
-      const userIdRegex = /^[A-Fa-f0-9\-]+$/
+    const { userId } = req.params;
+
+    const userIdRegex = /^[A-Fa-f0-9\-]+$/;
     if (!userIdRegex.test(userId)) {
-      return res.status(400).json({ message: 'Invalid userId format' })
+      return res.status(400).json({ message: "Invalid userId format" });
     }
-  
-      // Retrieve interests from the database for the specific userId
-      const interests = await interestRepository.findOne({ 
-        where: { userId: String(userId) },
-       });
-      const interestArray = interests.interest.split(",")
-    res
-      .status(200).json({
-        successful: true,
-        data: interests,
-        interestArray
+
+    // Retrieve interests from the database for the specific userId
+    const interests = await interestRepository.findOne({
+      where: { userId: String(userId) },
+    });
+    const interestArray = interests.interest.split(",");
+    res.status(200).json({
+      successful: true,
+      data: interests,
+      interestArray,
     });
   } catch (err) {
     console.error(err);
-    res
-      .status(500).json({
-        successful: false,
-        message: "Could not retrieve interests.",
+    res.status(500).json({
+      successful: false,
+      message: "Could not retrieve interests.",
       error: err.message,
     });
   }
