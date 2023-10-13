@@ -81,21 +81,29 @@ async function validateUpdateData(
   }
 }
 
-async function validateCreateData(data: any, userId: string) {
-  // Validate date strings in "yy-mm-dd" format
-  if (data.from && !validateDateYYMMDD(data.from)) {
-    throw new BadRequestError("Invalid 'from' date format")
-  }
+async function validateCreateData(data: any, userId: string, res: Response) {
 
-  if (data.to && !validateDateYYMMDD(data.to)) {
-    throw new BadRequestError("Invalid 'to' date format")
-  }
+  try {
+    // Validate date strings in "yy-mm-dd" format
+    if (data.from && !validateDateYYMMDD(data.from)) {
+      return res.status(400).json({ errors: "Invalid 'from' date format" })
+      // throw new BadRequestError("Invalid 'from' date format")
+    }
 
-  // Validate the data against the schema
-  await CreateEducationDetailDataSchema.parseAsync({
-    ...data,
-    userId,
-  })
+    if (data.to && !validateDateYYMMDD(data.to)) {
+      // throw new BadRequestError("Invalid 'to' date format")
+      return res.status(400).json({ errors: "Invalid 'to' date format" })
+    }
+
+    // Validate the data against the schema
+    await CreateEducationDetailDataSchema.parseAsync({
+      ...data,
+      userId,
+    })
+  } catch (error) {
+    res.status(500).json({ error: 'Internal server error' })
+  }
+  
 }
 
 export { validateUpdateData, validateCreateData, EducationDetailDataSchema }
