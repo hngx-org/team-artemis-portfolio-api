@@ -15,7 +15,10 @@ import {
   MethodNotAllowedError,
   errorHandler,
 } from '../middlewares'
-import { CreateEducationDetailDataSchema, validateCreateData } from '../middlewares/education.zod'
+import {
+  CreateEducationDetailDataSchema,
+  validateCreateData,
+} from '../middlewares/education.zod'
 import { z } from 'zod'
 
 // Custom function to validate date strings in "yy-mm-dd" format
@@ -93,7 +96,8 @@ const createEducationDetailController = async (
       description,
       to,
     }
-    await validateCreateData(data, userId)
+    await validateCreateData(data, userId, res)
+    
 
     // Define an array of required fields
     const requiredFields = [
@@ -120,9 +124,9 @@ const createEducationDetailController = async (
     if (!user) {
       // Create a CustomError with a 404 status code
       const err = new NotFoundError(
-        "Error creating education detail: User not found"
-      );
-      res.status(err.statusCode).json({ error: err.message });
+        'Error creating education detail: User not found'
+      )
+      res.status(err.statusCode).json({ error: err.message })
     }
 
     // Call the service function to create an education detail
@@ -134,7 +138,7 @@ const createEducationDetailController = async (
       description,
       to,
       userId,
-      sectionId : 1,
+      sectionId: 1,
     })
 
     const response = {
@@ -149,6 +153,7 @@ const createEducationDetailController = async (
     if (error instanceof z.ZodError) {
       res.status(400).json({ errors: error.errors })
     } else {
+      console.error('An error occurred:', error)
       res.status(500).json({ error: 'Internal server error' })
       next(error)
     }

@@ -13,11 +13,83 @@ import {
 
 const router = express.Router();
 
+/**
+ * @swagger
+ * /api/award/{userId}:
+ *   post:
+ *     summary: Create a new award for a user.
+ *     description: Create a new award for a user by providing the user's ID.
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         description: The ID of the user for whom to create an award.
+ *         required: true
+ *         type: integer
+ *       - in: body
+ *         name: createAward
+ *         description: Award data to be created
+ *         required: true
+ *         schema:
+ *           type: object
+ *           properties:
+ *             title:
+ *               type: string
+ *             year:
+ *               type: string
+ *             presented_by:
+ *               type: string
+ *             url:
+ *               type: string
+ *             description:
+ *               type: string
+ *         example:
+ *           title: "New Award Title"
+ *           year: "2023"
+ *           presented_by: "Company X"
+ *           url: "https://example.com"
+ *           description: "Award description"
+ *     responses:
+ *       '201':
+ *         description: Successful creation
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 status:
+ *                   type: string
+ *                 statusCode:
+ *                   type: integer
+ *                 createdAward:
+ *                   type: object
+ *       '400':
+ *         description: Bad request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 'Input Error':
+ *                   type: string
+ *       '404':
+ *         description: Not Found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 'Input Error':
+ *                   type: string
+ *     tags:
+ *       - Award
+ */
 router.post("/award/:userId", validateCreateAwardData, createAwardController);
 
 /**
  * @swagger
- * /api/update-award/{awardId}:
+ * /api/award/{awardId}:
  *   put:
  *     summary: Update an award by ID.
  *     description: Update an award's information by providing its ID.
@@ -62,6 +134,19 @@ router.post("/award/:userId", validateCreateAwardData, createAwardController);
  *                   type: string
  *                 award:
  *                   type: object
+ *                   properties:
+ *                     title:
+ *                       type: string
+ *                     year:
+ *                       type: string
+ *                     presented_by:
+ *                       type: string
+ *                     url:
+ *                       type: string
+ *                     description:
+ *                       type: string
+ *                 statusCode:
+ *                   type: integer
  *       '400':
  *         description: Bad request
  *         content:
@@ -90,7 +175,7 @@ router.post("/award/:userId", validateCreateAwardData, createAwardController);
  *                 'Input Error':
  *                   type: string
  *     tags:
- *       - Awards
+ *       - Award
  */
 router.put("/award/:awardId", updateAwardController);
 
@@ -101,14 +186,14 @@ router.put("/award/:awardId", updateAwardController);
  *     summary: Fetch user award by ID.
  *     description: Fetch the award of a user.
  *     tags:
- *       - Awards
+ *       - Award
  *     parameters:
  *       - in: path
  *         name: id
  *         description: The ID of the user whose awards are to be fetched.
  *         required: true
  *         schema:
- *           type: number
+ *           type: string
  *     responses:
  *       200:
  *         description: Award retrieved successfully.
@@ -170,7 +255,7 @@ router.get("/award/:id", getAwardController);
  *     summary: Fetch all user award.
  *     description: Fetch the award of all user.
  *     tags:
- *       - Awards
+ *       - Award
  *     responses:
  *       200:
  *         description: Award retrieved successfully.
@@ -200,7 +285,7 @@ router.get("/award/:id", getAwardController);
  *                     createdAt:
  *                       type: string                
  *       500:
- *         description: Internal server error.
+ *         description: Internal server error
  *         content:
  *           application/json:
  *             schema:
@@ -208,7 +293,6 @@ router.get("/award/:id", getAwardController);
  *               properties:
  *                 message:
  *                   type: string
- *                   example: "Internal server error."                               
  */
 router.get("/awards", getAllAwardsController);
 
@@ -234,36 +318,6 @@ router.get("/awards", getAllAwardsController);
  *               properties:
  *                 message:
  *                   type: string
- *                 award:
- *                   type: object
- *                   properties:
- *                     id:
- *                       type: number
- *                     title:
- *                       type: string
- *                     year:
- *                       type: string
- *                     user_id:
- *                       type: string
- *                     presented_by:
- *                       type: string
- *                     url:
- *                       type: string
- *                     description:
- *                       type: string
- *                     createdAt:
- *                       type: string
- *           example:
- *             message: "Award deleted successfully"
- *             award:
- *               id: 3
- *               title: "string"
- *               year: "string"
- *               user_id: "f8e1d17d-0d9e-4d21-89c5-7a564f8a1e90"
- *               presented_by: "string"
- *               url: "string"
- *               description: "dev of the month award"
- *               createdAt: "2023-10-11T23:08:19.159Z"
  *       404:
  *         description: Award not found.
  *         content:
@@ -273,7 +327,7 @@ router.get("/awards", getAllAwardsController);
  *               properties:
  *                 message:
  *                   type: string
- *                   example: "Award not found."
+ *                   example: "Award not found." 
  *       500:
  *         description: Internal Server Error.
  *         content:
@@ -285,9 +339,8 @@ router.get("/awards", getAllAwardsController);
  *                   type: string
  *                   example: "Internal server error."  
  *     tags:
- *       - Awards
+ *       - Award
  */
-
 
 router.delete("/award/:id", deleteAwardController);
 
