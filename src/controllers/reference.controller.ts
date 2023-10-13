@@ -1,24 +1,20 @@
 import { Request, Response, NextFunction } from "express";
 import { connectionSource } from "../database/data-source";
-import { CreateReferenceDetailSchema } from "../middlewares/reference.zod";
 import { References } from "../database/entity/model";
-import { Reference } from "../interfaces/reference.interface";
 import {
   CustomError,
   NotFoundError,
   BadRequestError,
-  UnauthorizedError,
-  ForbiddenError,
-  InternalServerError,
-  MethodNotAllowedError,
-  errorHandler,
 } from "../middlewares";
 
 const referenceRepository = connectionSource.getRepository(References);
 export const createReference = async (req: Request, res: Response) => {
   try {
-    const validatedData = req.body; // Assuming that the validation middleware stored the validated data
+      const validatedData = req.body; // Assuming that the validation middleware stored the validated data
+    const userIdFromURL = req.params.userId; // Extract user ID from the URL
 
+    // If the user ID is not provided in the URL, check if it's in the request body
+    let userId = userIdFromURL || validatedData.userId;
     // Create a new References object with the validated data
     const reference = new References();
     reference.name = validatedData.name;
@@ -26,7 +22,7 @@ export const createReference = async (req: Request, res: Response) => {
     reference.position = validatedData.position;
     reference.emailAddress = validatedData.emailAddress;
     reference.phoneNumber = validatedData.phoneNumber;
-    reference.userId = validatedData.userId; // Assuming you have the user ID
+    reference.userId = userId;
 
     // Save the reference to the database
     await referenceRepository.save(reference);

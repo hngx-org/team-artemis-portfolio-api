@@ -1,31 +1,45 @@
-import { z } from "zod";
+import { object, string, ZodIssue, ZodError } from "zod";
 import { NextFunction, Request, Response } from "express";
 import { BadRequestError } from "../middlewares";
 import { parseAsync, ErrorMessageOptions } from "zod-error";
 
-// export const CreateReferenceDetailSchema = z.object({
-//   name: z.string(),
-//   company: z.string(),
-//   position: z.string(),
-//   emailAddress: z.string().email(),
-//   phoneNumber: z.string().optional(),
-//   userId: z.string(), // You can customize the validation based on your entity
-//   sectionId: z.number().optional(),
-// });
-export const CreateReferenceDetailSchema = z.object({
-  name: z.string().min(1, { message: "Name is required" }),
-  company: z.string().min(1, { message: "Company is required" }),
-  position: z.string().min(1, { message: "Position is required" }),
-  emailAddress: z.string().email({ message: "Invalid email address format" }),
-  phoneNumber: z
-    .string()
-    .optional()
-    .refine((value) => value === "" || /^[0-9]+$/.test(value), {
-      message: "Invalid phone number format",
+export const CreateReferenceDetailSchema = object({
+  name: string()
+    .min(1, { message: "Name must not be an empty string" })
+    .refine((name) => !!name, {
+      message: "Name is required in the request body",
     }),
-  userId: z.string().min(1, { message: "User ID is required" }),
-  sectionId: z.number().optional(),
+
+  company: string()
+    .min(1, { message: "Company must not be an empty string" })
+    .refine((company) => !!company, {
+      message: "Company is required in the request body",
+    }),
+
+  position: string()
+    .min(1, { message: "Position must not be an empty string" })
+    .refine((position) => !!position, {
+      message: "Position is required in the request body",
+    }),
+
+  emailAddress: string()
+    .min(1, { message: "Email address must not be an empty string" })
+    .refine((emailAddress) => !!emailAddress, {
+      message: "Email address is required in the request body",
+    }),
+
+  phoneNumber: string()
+    .min(1, { message: "Phone number must not be an empty string" })
+    .refine((phoneNumber) => !!phoneNumber, {
+      message: "Phone number is required in the request body",
+    }),
+
+  userId: string()
+    .min(1, { message: "User ID must not be an empty string" })
+    .optional()
+    .nullish(),
 });
+
 
 // Custom function to validate email addresses
 function validateEmail(email: string) {
@@ -43,19 +57,26 @@ async function validateCreateReferenceData(
       throw new BadRequestError("Invalid email address format");
     }
     // Retrieve the "userId" from request parameters
-    const userId = req.params.id;
-
+    let userId = req.params.id;
+      if (!userId) {
+        userId = req.body.userId;
+      }
+      
     // Validate the rest of the data against the schema
     const result = await parseAsync(CreateReferenceDetailSchema, {
-      ...data,
-      userId,
+      ...data, userId,
     });
-
+    
     // Store the validated data in the request object if needed
     const validatedData = result;
     next(); // Continue to the next middleware or route handler
   } catch (error) {
-    throw new BadRequestError(error.message);
+      if (error instanceof ZodError) {
+          const errorMessages = (error.issues as ZodIssue[]).map((issue) => issue.message);
+          res.status(400).json({ errors: errorMessages });
+      } else {
+          next(error);
+      }
   }
 }
 

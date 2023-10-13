@@ -6,13 +6,20 @@ const router = express.Router();
 
 /**
  * @swagger
- * /api/references:
+ * /api/references/{userId}:
  *   post:
  *     summary: Create a new reference.
  *     description: Create a new reference detail for a user.
  *     tags:
  *       - References
  *     parameters:
+ *       - in: path
+ *         name: userId
+ *         description: The ID of the user for whom the reference is created.
+ *         required: false
+ *         schema:
+ *           type: string
+ *         example: "6ba7b810-9dad-11d1-80b4-00c04fd430c8"
  *       - in: body
  *         name: body
  *         description: Data for creating a reference detail.
@@ -30,22 +37,31 @@ const router = express.Router();
  *               type: string
  *             phoneNumber:
  *               type: string
- *             userId:
- *               type: string
  *           example:
  *             name: "Sapphire"
  *             company: "Zuri"
  *             position: "Backend Developer"
  *             emailAddress: "sofiyyahabidoye@gmail.com"
  *             phoneNumber: "08101695397"
- *             userId: "6ba7b810-9dad-11d1-80b4-00c04fd430c8"
  *     responses:
  *       201:
  *         description: Reference created successfully
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: "Reference created successfully"
  *       400:
  *         description: Bad request
+ *         content:
+ *           application/json:
+ *             example:
+ *               error: "Invalid request"
  */
-router.post("/references", validateCreateReferenceData, createReference);
+router.post(
+  "/references/:userId",
+  validateCreateReferenceData,
+  createReference
+);
 
 /**
  * @swagger
@@ -63,13 +79,26 @@ router.post("/references", validateCreateReferenceData, createReference);
  *         schema:
  *           type: integer
  *           minimum: 1
+ *         example: 1
  *     responses:
  *       200:
  *         description: Reference detail deleted successfully
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: "Reference detail deleted successfully"
  *       400:
  *         description: Bad request
+ *         content:
+ *           application/json:
+ *             example:
+ *               error: "Invalid ID Format"
  *       404:
  *         description: Reference detail not found
+ *         content:
+ *           application/json:
+ *             example:
+ *               error: "Reference detail not found"
  */
 router.delete("/references/:id", deleteReferenceDetail);
 
