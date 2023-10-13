@@ -6,8 +6,7 @@ export const uploadProfileImageService = async (
   urls: string[]
 ): Promise<{ profilePic: string }> => {
   const userRepo = connectionSource.getRepository(User);
-  const user = await userRepo.update(userId, { profilePic: urls[0] });
-  console.log(user);
+  await userRepo.update(userId, { profilePic: urls[0] });
 
   return { profilePic: urls[0] };
 };
@@ -17,8 +16,7 @@ export const uploadProfileCoverPhotoService = async (
   urls: string[]
 ): Promise<{ profilePic: string }> => {
   const userRepo = connectionSource.getRepository(User);
-  const user = await userRepo.update(userId, { profileCoverPhoto: urls[0] });
-  console.log(user);
+  await userRepo.update(userId, { profileCoverPhoto: urls[0] });
 
   return { profilePic: urls[0] };
 };

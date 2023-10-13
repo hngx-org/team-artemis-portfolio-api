@@ -41,7 +41,12 @@ export class User {
   })
   isVerified: boolean;
 
-  @Column({ type: "boolean", nullable: true, name: "2fa", default: false })
+  @Column({
+    type: "boolean",
+    nullable: true,
+    name: "two_factor_auth",
+    default: false,
+  })
   twoFactorAuth: boolean;
 
   @Column({ type: "text", nullable: true, name: "profile_pic" })
@@ -67,7 +72,7 @@ export class User {
   @CreateDateColumn({
     type: "timestamp",
     default: () => "CURRENT_TIMESTAMP",
-    name: "created_at",
+    name: "createdAt",
   })
   createdAt: Date;
   socialUsers: string;

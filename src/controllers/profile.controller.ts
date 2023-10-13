@@ -27,23 +27,16 @@ export const uploadProfileImageController: RequestHandler = async (
   res: Response
 ) => {
   try {
-    if (!req.files) return error(res, "add event image", 400);
-    const { service, userId } = req.body;
-    const files = req.files as any;
+    if (!req.files) return error(res, "add profile image", 400);
 
+    const response = await validateUser(req.headers.authorization, null);
 
-    const imagesRes = await cloudinaryService(files, req.body.service);
+    if (!response.authorized)
+      return error(res, "Not authorized to perform action", 400);
 
+    const { urls } = await cloudinaryService(req.files, "");
 
-    const user = await userRepository.findOne({ where: { id: userId } });
-    if (!user) {
-      return error(res, "User Not found", 400);
-    }
-    const { urls } = await cloudinaryService(req.files, service);
-    const data = await uploadProfileImageService(user.id, urls);
-
-    console.log(urls)
-    user.profilePic = imagesRes[0];
+    const data = await uploadProfileImageService(response.user.id, urls);
 
     return success(res, data, "Profile picture uploaded successfully");
   } catch (err) {
@@ -56,27 +49,16 @@ export const uploadProfileCoverController: RequestHandler = async (
   res: Response
 ) => {
   try {
-    if (!req.files) return error(res, "add event image", 400);
+    if (!req.files) return error(res, "add cover image", 400);
     const { service, userId } = req.body;
 
-    const files = req.files as any;
+    const response = await validateUser(req.headers.authorization, null);
 
-
-    const imagesRes = await cloudinaryService(files, req.body.service);
-
-
-    const user = await userRepository.findOne({ where: { id: userId } });
-    if (!user) {
-      return error(res, "User Not found", 400);
-    }
-
+    if (!response.authorized)
+      return error(res, "Not authorized to perform action", 400);
 
     const { urls } = await cloudinaryService(req.files, service);
-    const data = await uploadProfileCoverPhotoService(user.id, urls);
-
-    console.log(urls)
-    user.profileCoverPhoto = imagesRes[0];
-
+    const data = await uploadProfileCoverPhotoService(response.user.id, urls);
 
     return success(res, data, "Cover photo uploaded successfully");
   } catch (err) {
