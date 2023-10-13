@@ -6,7 +6,6 @@ import { sayHelloController } from "./controllers/greeting.controller";
 import cors from "cors";
 const swaggerUi = require("swagger-ui-express");
 const swaggerOptions = require("./swagger");
-const router = require("./routes/image-upload.route");
 import { errorHandler } from "./middlewares/index";
 
 const app = express();
