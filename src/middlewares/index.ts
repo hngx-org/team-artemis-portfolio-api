@@ -66,11 +66,11 @@ const errorHandler = (
   }
 
   if (err instanceof NotFoundError) {
-    res.status(err.statusCode).json({ message: err.message });
+    return res.status(err.statusCode).json({ message: err.message });
   }
 
   if (err instanceof BadRequestError) {
-    res.status(err.statusCode).json({ message: err.message });
+    return res.status(err.statusCode).json({ message: err.message });
   }
 
   if (err instanceof UnauthorizedError) {
@@ -81,7 +81,7 @@ const errorHandler = (
   }
 
   if (err instanceof InternalServerError) {
-    res.status(err.statusCode).json({ message: err.message });
+    return res.status(err.statusCode).json({ message: err.message });
   }
 
   if (err instanceof MethodNotAllowedError) {
@@ -89,7 +89,7 @@ const errorHandler = (
   }
 
   if (err instanceof CustomError) {
-    res.status(err.statusCode).json({ message: err.message });
+    return res.status(err.statusCode).json({ message: err.message });
   }
   res.status(err.statusCode || 500).json({ message: err.message });
 

@@ -6,7 +6,7 @@ export interface EducationDetailData {
   description: string
   to: string
   userId: string
-  sectionId: number
+  sectionId?: number
 }
 
 export interface UpdateEducationDetailDTO {
