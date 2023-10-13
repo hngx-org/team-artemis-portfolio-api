@@ -15,12 +15,10 @@ const router = express.Router();
  *         name: id
  *         description: The id of the certificate to be updated
  *         required: true
- *         type: integer
  *       - in: path
  *         name: userId
  *         description: A valid user id (uuid)
  *         required: true
- *         type: uuid
  *       - in: body
  *         name: payload
  *         description: New certificate details.
