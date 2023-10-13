@@ -47,7 +47,8 @@ export const updateUserAccountSettingController = async (
       });
     }
 
-    const verifyCurrentPassword = verifyPassword(
+    const verifyCurrentPassword = await verifyPassword(
+      //bugfix
       currentPassword,
       user.password
     );

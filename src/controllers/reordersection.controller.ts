@@ -9,8 +9,24 @@ class SectionPositionController {
 
   static async storeSectionPositions(req: Request, res: Response) {
     try {
-      const { sectionData } = req.body;
-      //   console.log(sectionData);
+      const sectionData  = req.body;
+        console.log(sectionData);
+
+      const existingSections = await sectionRepository.find();
+      if (existingSections.length === 0) {
+        // If no existing sections, set the position to 1
+        sectionData.forEach((section) => {
+          section.position = 1;
+        });
+      } else {
+        // Find the highest position among existing sections and increment it
+        const highestPosition = Math.max(
+          ...existingSections.map((s) => s.position)
+        );
+        sectionData.forEach((section) => {
+          section.position = highestPosition + 1;
+        });
+      }
 
       const section = sectionRepository.create(sectionData);
       const savedSection = await sectionRepository.save(section);
