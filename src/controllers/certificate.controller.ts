@@ -22,17 +22,6 @@ const addCertificateController = async (req: Request, res: Response) => {
       return error(res, "User not found. Please provide a valid User ID", 404);
     }
 
-    // Create the certificate information
-    const certificateInfo = {
-      title,
-      year,
-      organization,
-      url,
-      description,
-      userId,
-      sectionId,
-    };
-
     const certificateDataIsValid = await validateCertificateData(req, res);
 
     if (certificateDataIsValid) {
