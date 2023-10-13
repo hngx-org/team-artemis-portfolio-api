@@ -15,7 +15,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /api/create-award/{userId}:
+ * /api/award/{userId}:
  *   post:
  *     summary: Create an award for a user.
  *     description: Create a new award for a user by providing the user's ID.
