@@ -32,7 +32,6 @@ const MAX_ID_LENGTH = 10;
 const sectionIdSchema = z
   .number()
   .int()
-  .positive()
   .refine((value) => {
     if (value <= 0) {
       throw new Error("Number must be greater than 0");
@@ -42,16 +41,21 @@ const sectionIdSchema = z
 
 export const validateSectionId = (sectionId: any, res: Response) => {
   try {
-    const parsedSectionId = sectionIdSchema.parse(sectionId);
+    const parsedSectionId = parseInt(sectionId);
 
-    if (!Number.isInteger(parsedSectionId)) {
-      throw new Error("Section ID must be a whole number (integer)");
+    if (isNaN(parsedSectionId) || !Number.isInteger(parsedSectionId)) {
+      throw new Error("Invalid section ID. Must be a valid integer.");
     }
+
+    sectionIdSchema.parse(parsedSectionId);
+
     if (parsedSectionId.toString().length > MAX_ID_LENGTH) {
       throw new Error(`Section ID must have at most ${MAX_ID_LENGTH} digits`);
     }
+
     return true;
   } catch (error: any) {
+    console.error(error);
     return res.status(400).json({
       success: false,
       message: error.message,
@@ -127,6 +131,11 @@ const createSection = async (
         "A section with this name has already been created",
         400
       );
+    const positionExists = await sectionRepository.findOne({
+      where: { position: req.body.position },
+    });
+    if (positionExists)
+      return error(res, "A section with this position already exist", 400);
     const newRecord = await sectionRepository.save(req.body);
     return success(res, newRecord, "Success");
   } catch (err) {
@@ -176,8 +185,18 @@ const UpdateSection = async (
       where: { id: Number(id) },
     });
     if (!section) return error(res, "Section not found", 404);
-    const newSection = await sectionRepository.update(id, req.body);
-    return success(res, newSection, "Success");
+    if (req.body.position) {
+      const positionExists = await sectionRepository.findOne({
+        where: { position: req.body.position },
+      });
+      if (positionExists)
+        return error(res, "A section with this position already exist", 400);
+    }
+    await sectionRepository.update(id, req.body);
+    const newsection = await sectionRepository.findOne({
+      where: { id: Number(id) },
+    });
+    return success(res, newsection, "Success");
   } catch (err) {
     console.log(err);
     return error(res, "An error occurred", 500);
@@ -310,14 +329,33 @@ const findOneCustomField = async (req: Request, res: Response) => {
     if (record) {
       return success(res, record, "Success");
     } else {
-      return error(res, "Record not found", 400);
+      return res.status(400).json({
+        successful: false,
+        message: "Record not found",
+        data: null,
+      });
     }
-  } catch (err) {
-    console.log(err);
-    return error(res, "An error occurred", 500);
+  } catch (error) {
+    if (error instanceof Error) {
+      return res.status(400).json({
+        successful: false,
+        message: "Invalid request data",
+        data: {
+          error: error.message,
+          statusCode: 400,
+          timestamp: new Date().toISOString(),
+        },
+      });
+    } else {
+      console.error(error);
+      return res.status(500).json({
+        successful: false,
+        message: "An error occurred",
+        data: null,
+      });
+    }
   }
 };
-
 const customUserSectionSchema = z.object({
   userId: z.string().uuid(),
   sectionId: z.number(),
@@ -345,18 +383,35 @@ const sectionSchema = z.object({
   name: z
     .string()
     .min(3, { message: "name must have at least three characters " }),
+  position: z.number().positive(),
   description: z.string().optional(),
   meta: z.string().optional(),
 });
 
-const updateSectionSchema = z.object({
-  name: z
-    .string()
-    .min(3, { message: "name must have at least three characters " })
-    .optional(),
-  description: z.string().optional(),
-  meta: z.string().optional(),
-});
+const updateSectionSchema = z
+  .object({
+    name: z
+      .string()
+      .min(3, { message: "name must have at least three characters " })
+      .optional(),
+    description: z.string().optional(),
+    meta: z.string().optional(),
+    position: z.number().positive().optional(),
+  })
+  .refine(
+    (data) => {
+      return (
+        data.name !== undefined ||
+        data.description !== undefined ||
+        data.meta !== undefined ||
+        data.position !== undefined
+      );
+    },
+    {
+      message:
+        "At least one of the fields (name, description, meta, position) is required",
+    }
+  );
 
 const getSectionSchema = z.object({
   name: z.string().optional(),
@@ -365,7 +420,6 @@ const getSectionSchema = z.object({
 const validateSchema =
   (schema: AnyZodObject) => async (req: Request, res: Response, next: any) => {
     try {
-      console.log(req.body);
       await schema.parseAsync(req.body);
       return next();
     } catch (error: any) {
@@ -383,24 +437,61 @@ const validateSchema =
 
 // updated customsection field
 const updateCustomField = async (req: Request, res: Response) => {
-  const { id } = req.params;
   try {
+    const id = parseInt(req.params.id);
+
+    const customFieldSchema = z.object({
+      fieldType: z.string({ invalid_type_error: "fieldType must be a string" }),
+      fieldName: z.string({ invalid_type_error: "fieldName must be a string" }),
+      customSectionId: z
+        .number()
+        .int({ message: "customSectionId must be an integer" }),
+      value: z.string({ invalid_type_error: "value must be a string" }),
+    });
+
+    const data = customFieldSchema.safeParse(req.body);
+
+    if (data.success === false) {
+      const err = new BadRequestError(data.error.message);
+      return res
+        .status(err.statusCode)
+        .json({ err: JSON.parse(err.message)[0].message });
+    }
+
+    // validator for idValidator
+    const idValidator = z
+      .number({
+        required_error: "id is required",
+        invalid_type_error: "id must be a number",
+      })
+      .int({ message: "id must be an integer" })
+      .positive({ message: "id must be a positive integer" });
+
+    const idValidate = idValidator.safeParse(id);
+
+    if (idValidate.success === false) {
+      const err = new BadRequestError(idValidate.error.message);
+      return res
+        .status(err.statusCode)
+        .json({ err: JSON.parse(err.message)[0].message });
+    }
+
     const existingRecord = await customFieldRepository.findOne({
       where: { id: Number(id) },
     });
     if (!existingRecord) {
-      return error(res, "Record not found", 400);
+      return error(res, "Record not found", 404);
     }
-    // Update the existing record with the new data from the request body
+
     existingRecord.fieldType = req.body.fieldType;
     existingRecord.fieldName = req.body.fieldName;
     existingRecord.customSectionId = req.body.customSectionId;
     existingRecord.value = req.body.value;
     const updatedRecord = await customFieldRepository.save(existingRecord);
     return success(res, updatedRecord, "Success");
-  } catch (err) {
-    console.log(err);
-    return error(res, "An error occurred while updating the record", 500);
+  } catch (error: any) {
+    const err = new InternalServerError(error.message);
+    return res.status(err.statusCode).json({ err: err.message });
   }
 };
 
@@ -415,6 +506,7 @@ export {
   customUserSectionSchema,
   customFieldSchema,
   createSection,
+  // updateCustomSection,
   sectionSchema,
   fieldsSchema,
   getSection,

@@ -1,9 +1,8 @@
 import express from 'express';
 import languageController from '../controllers/language.controller';
-import { validateSchema } from '../middlewares/language.zod';
 import {
   postLanguageSchema,
-  updatelanguageSchema,
+  validateSchema,
 } from '../middlewares/language.zod';
 
 const router = express.Router();
@@ -19,98 +18,86 @@ const router = express.Router();
  *       - in: body
  *         name: body
  *         required: true
- *         description: Body of request
+ *         description: Body of request takes a userId (uuid) and languages (array of strings) in the body
  *         schema:
  *           type: object
  *           properties:
  *             userId:
  *               type: string
  *               format: uuid
- *             language:
- *               type: string
- *           required:
- *             - userId
- *             - language
+ *               example: "f8e1d17d-0d9e-4d21-89c5-7a564f8a1e90"
+ *             languages:
+ *               type: array
+ *               items:
+ *                type: string
+ *               example: ["Python", "Javascript"]
  *     responses:
  *       200:
- *         description: Success.
+ *         description: Successful response
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: integer
+ *                   example: 200
+ *                 message:
+ *                   type: string
+ *                   example: success
+ *                 data:
+ *                   type: string
  *       404:
  *         description: Not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: integer
+ *                   example: 404
+ *                 message:
+ *                   type: string
+ *                   example: Not found
+ *                 data:
+ *                   type: object
  *       400:
- *         description: Bad Request
+ *         description: Bad request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: integer
+ *                   example: 400
+ *                 message:
+ *                   type: string
+ *                   example: Bad Request
+ *                 data:
+ *                   type: object
  *       500:
- *         description: Internal server error.
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: integer
+ *                   example: 500
+ *                 message:
+ *                   type: string
+ *                   example: Internal server error
+ *                 data:
+ *                   type: object
  */
 router.post(
   '/language',
   validateSchema(postLanguageSchema),
   languageController.addLanguage
 );
-
-/**
- * @swagger
- * /api/language:
- *   put:
- *     summary: Update a users language
- *     description: Update one of the user's language
- *     tags: [Language]
- *     parameters:
- *       - in: body
- *         name: body
- *         required: true
- *         description: Body of request
- *         schema:
- *           type: object
- *           properties:
- *             id:
- *               type: string
- *               format: uuid
- *             userId:
- *               type: string
- *               format: uuid
- *             preferred:
- *               type: boolean
- *             language:
- *               type: string
- *           required:
- *             - id
- *             - userId
- *             - language
- *             - preferred
- *     responses:
- *       200:
- *         description: Success.
- *       404:
- *         description: Not found
- *       400:
- *         description: Bad Request
- *       500:
- *         description: Internal server error.
- */
-router.put(
-  '/language',
-  validateSchema(updatelanguageSchema),
-  languageController.updateLanguage
-);
-
-/**
- * @swagger
- * /api/all-languages:
- *   get:
- *     summary: Get all languages that can be selected
- *     description: Returns a list of all the languages that can be selected
- *     tags: [Language]
- *     responses:
- *       200:
- *         description: Success.
- *       404:
- *         description: Not found
- *       400:
- *         description: Bad Request
- *       500:
- *         description: Internal server error.
- */
-router.get('/all-languages', languageController.getLanguages);
 
 /**
  * @swagger
@@ -127,73 +114,69 @@ router.get('/all-languages', languageController.getLanguages);
  *         schema:
  *           type: string
  *           format: uuid
+ *           example: f8e1d17d-0d9e-4d21-89c5-7a564f8a1e90
  *     responses:
  *       200:
- *         description: Success.
+ *         description: Successful response
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: integer
+ *                   example: 200
+ *                 message:
+ *                   type: string
+ *                   example: success
+ *                 data:
+ *                   type: string
  *       404:
  *         description: Not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: integer
+ *                   example: 404
+ *                 message:
+ *                   type: string
+ *                   example: Not found
+ *                 data:
+ *                   type: object
  *       400:
- *         description: Bad Request
+ *         description: Bad request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: integer
+ *                   example: 400
+ *                 message:
+ *                   type: string
+ *                   example: Bad Request
+ *                 data:
+ *                   type: object
  *       500:
- *         description: Internal server error.
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: integer
+ *                   example: 500
+ *                 message:
+ *                   type: string
+ *                   example: Internal server error
+ *                 data:
+ *                   type: object
  */
 router.get('/language/:userId', languageController.getUserLanguages);
-
-/**
- * @swagger
- * /api/language-preferred/{userId}:
- *   get:
- *     summary: Get preferred language owned by the user
- *     description: Get user's preffered language
- *     tags: [Language]
- *     parameters:
- *       - in: path
- *         name: userId
- *         required: true
- *         description: Id of requesting user
- *         schema:
- *           type: string
- *           format: uuid
- *     responses:
- *       200:
- *         description: Success.
- *       404:
- *         description: Not found
- *       400:
- *         description: Bad Request
- *       500:
- *         description: Internal server error.
- */
-router.get(
-  '/language-preferred/:userId',
-  languageController.getPreferredUserLanguage
-);
-
-/**
- * @swagger
- * /api/language/{id}:
- *   delete:
- *     summary: Delete given language for a user
- *     description: Deletes the given language for the user
- *     tags: [Language]
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         description: Body of request
- *         schema:
- *           type: string
- *           format: uuid
- *     responses:
- *       200:
- *         description: Success.
- *       404:
- *         description: Not found
- *       400:
- *         description: Bad Request
- *       500:
- *         description: Internal server error.
- */
-router.delete('/language/:id', languageController.deleteUserLanguage);
 
 module.exports = router;

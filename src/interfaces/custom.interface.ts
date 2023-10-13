@@ -19,12 +19,14 @@ export interface ISection {
   name: string;
   description?: string;
   meta?: string;
+  position: number
 }
 
 export interface IUpdateSection {
   name?: string;
   description?: string;
   meta?: string;
+  position?: number;
 }
 
 

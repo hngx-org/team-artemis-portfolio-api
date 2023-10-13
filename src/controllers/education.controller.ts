@@ -20,32 +20,44 @@ import {
 const fetchUserEducationDetail: RequestHandler = async (req, res, next) => {
   // Add 'next' parameter
   const educationRepository = connectionSource.getRepository(EducationDetail);
+  const userRepository = connectionSource.getRepository(User);
 
   try {
     const id = req.params.id;
 
     if (!id) {
-      throw new Error("User ID is required");
+      throw new BadRequestError("User ID is required");
     }
 
-    try {
-      const educationDetails = await educationRepository.find({
-        where: { userId: id },
-        // Relationship has not been modeled yet... Uncomment the code once the relationship between education detail and degree, section, and user tables have been established
-        // relations: ["degree", "section", "user"],
-      });
+    const isUser = await userRepository.findOne({ where: { id } });
 
-      // Send a success response
-      res.status(200).json({ educationDetails });
-    } catch (error) {
-      // Handle the database query error (e.g., QueryFailedError)
-      console.log("Error fetching education details:", error.message);
-      const customError = new CustomError(error.message, 500);
-      res.status(customError.statusCode).json({ err: customError.message });
-      next(customError); // Pass the custom error to the error handler
+    if (!isUser) {
+      const error = new NotFoundError("A user with this ID does not exist");
+      throw error;
     }
+
+    const educationDetails = await educationRepository.find({
+      where: { userId: id },
+      relations: ["degree", "section", "user"],
+    });
+
+    if (!educationDetails) {
+      const error = new InternalServerError(
+        "An error occurred while fetching the education details, please try again"
+      );
+      throw error;
+    }
+
+    // Send a success response
+    res.status(200).json({ educationDetails });
   } catch (error) {
-    // Handle other types of errors or pass them to the error handler
+    // Handle errors
+    if (error.message.includes("invalid input syntax for type uuid")) {
+      error.message = "Invalid UUID format. Please provide a valid UUID.";
+    }
+    res
+      .status(error.statusCode || 500)
+      .json({ error: error.message || "An unknown error occurred" });
     next(error);
   }
 };
@@ -57,6 +69,7 @@ const educationDetailRepository =
 const createEducationDetailController = async (req, res, next) => {
   try {
     const userId = req.params.id;
+
     const { degreeId, fieldOfStudy, school, from, description, to, sectionId } =
       req.body as EducationDetailData;
 
@@ -76,11 +89,7 @@ const createEducationDetailController = async (req, res, next) => {
 
     if (missingFields.length > 0) {
       // Create a CustomError with a 400 status code
-      const err = new CustomError(
-        `Missing fields: ${missingFields.join(", ")}`,
-        400
-      );
-      res.status(err.statusCode).json({ err: err.message });
+      throw new CustomError(`Missing fields: ${missingFields.join(", ")}`, 400);
     }
 
     // Get the user by userId
@@ -130,6 +139,10 @@ const getEducationDetailById = async (
   try {
     const id = parseInt(req.params.id);
 
+    if (isNaN(id) || id < 1) {
+      throw new BadRequestError("Invalid ID Format");
+    }
+
     // Attempt to fetch education details
     const educationDetail = await educationDetailRepository.findOne({
       where: { id },
@@ -155,6 +168,20 @@ const updateEducationDetail = async (
 ) => {
   try {
     const id = parseInt(req.params.id);
+
+    if (isNaN(id) || id < 1) {
+      throw new BadRequestError("Invalid ID Format");
+    }
+
+    // convert the date objects to date strings
+    if (req.body.from && req.body.to) {
+      req.body.from = new Date(req.body.from);
+      req.body.to = new Date(req.body.to);
+    }
+
+    if (!req.body) {
+      throw new BadRequestError("No data provided");
+    }
 
     const educationDetail = await educationDetailRepository.findOne({
       where: { id },
@@ -197,6 +224,10 @@ const deleteEducationDetail = async (
   try {
     const id = parseInt(req.params.id);
 
+    if (isNaN(id) || id < 1) {
+      throw new BadRequestError("Invalid ID Format");
+    }
+
     // Find the existing education detail by ID
     const educationDetail = await educationDetailRepository.findOne({
       where: { id },
@@ -206,7 +237,6 @@ const deleteEducationDetail = async (
       throw new NotFoundError("Education detail not found");
     }
 
-    // Delete the education detail
     await educationDetailRepository.remove(educationDetail);
 
     res.status(204).json({
@@ -216,6 +246,7 @@ const deleteEducationDetail = async (
     console.log("Education detail deleted successfully");
   } catch (error) {
     console.error("Error deleting education detail:", error);
+    // errorHandler(error, req, res, next);
     next(error);
   }
 };

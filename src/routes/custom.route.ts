@@ -11,6 +11,7 @@ import {
   validateSchema,
   sectionSchema,
   customUserSectionSchema,
+  // updateCustomSection,
   customFieldSchema,
   fieldsSchema,
   getSection,
@@ -342,7 +343,7 @@ router.get("/custom/field/:id", findOneCustomField);
  */
 router.delete("/custom-section/:id", deleteCustomSection);
 
-router.delete("section", deleteSection)
+router.delete("/section/:id", deleteSection)
 
 /**
  * @swagger
