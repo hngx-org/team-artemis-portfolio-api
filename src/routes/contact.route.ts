@@ -62,17 +62,19 @@ router.get('/contacts/:user_id', getContacts)
  *     summary: Create a new contact
  *     description: Create a new contact for a user.
  *     parameters:
- *        -in: body
+ *       - in: body
  *         name: create contacts
  *         description: creating new social media contact account
  *         required: true
  *         schema:
- *            user_id:
- *                type:string
- *            social_media_id:
- *                type: number
- *            url:
- *                type:string
+ *            type: object
+ *            properties:
+ *              user_id:
+ *                  type: string
+ *              social_media_id:
+ *                  type: number
+ *              url:
+ *                  type: string
  *     
  *     responses:
  *       201:
