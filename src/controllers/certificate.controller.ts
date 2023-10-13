@@ -36,18 +36,24 @@ const addCertificateController = async (req: Request, res: Response) => {
     const certificateDataIsValid = await validateCertificateData(req, res);
 
     if (certificateDataIsValid) {
+      const certificate = new Certificate();
+
+      certificate.title = title;
+      certificate.year = year;
+      certificate.organization = organization;
+      certificate.url = url;
+      certificate.description = description;
+      certificate.userId = userId;
+      certificate.sectionId = sectionId;
+
       // Save the certificate to the database
-      const savedCertificate = await certificateRepo.save(certificateInfo);
+      const savedCertificate = await certificateRepo.save(certificate);
 
       if (!savedCertificate) {
         return error(res, "Error creating certificate", 400);
       }
 
-      return success(
-        res,
-        { ...savedCertificate },
-        "Certificate created successfully"
-      );
+      return success(res, savedCertificate, "Certificate created successfully");
     }
   } catch (err) {
     console.error("Error creating certificate:", err);

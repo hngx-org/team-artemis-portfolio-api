@@ -221,7 +221,20 @@ router.delete(
  *                 message:
  *                   type: string
  *                 data:
- *                   $ref: '#/components/schemas/NotificationSettings'
+ *                   type: object
+ *                   properties:
+ *                     emailSummary:
+ *                       type: boolean
+ *                     specialOffers:
+ *                       type: boolean
+ *                     communityUpdate:
+ *                       type: boolean
+ *                     followUpdate:
+ *                       type: boolean
+ *                     newMessages:
+ *                       type: boolean
+ *                     userId:
+ *                       type: string
  *       400:
  *         description: Bad request. Invalid input or user not found.
  *         content:
@@ -276,7 +289,20 @@ router.patch(
  *             schema:
  *               type: array
  *               items:
- *                 $ref: '#/components/schemas/NotificationSettings'
+ *                 type: object
+ *                 properties:
+ *                   emailSummary:
+ *                     type: boolean
+ *                   specialOffers:
+ *                     type: boolean
+ *                   communityUpdate:
+ *                     type: boolean
+ *                   followUpdate:
+ *                     type: boolean
+ *                   newMessages:
+ *                     type: boolean
+ *                   userId:
+ *                     type: string
  *       400:
  *         description: Bad request. User or notification settings do not exist.
  *         content:
