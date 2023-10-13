@@ -1093,11 +1093,18 @@ export class Section {
   @Column("text", { nullable: true })
   meta: string;
 
+  @Column("int") // Add a position field to keep track of the order
+  position: number;
+
   @OneToMany(
     () => CustomUserSection,
     (customUserSection) => customUserSection.section
   )
   customUserSections: CustomUserSection[];
+
+  @ManyToOne(() => Template, (template) => template.sections)
+  @JoinColumn({ name: "templateId" }) // Specify the actual column name
+  template: Template;
 }
 
 @Entity({ name: "tracks" })
@@ -1230,17 +1237,17 @@ export class EducationDetail {
   @UpdateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
   updatedAt: Date;
 
-  // @ManyToOne(() => Section, (section) => section.id)
-  // @JoinColumn({ name: "sectionId" })
-  // section: Section;
+  @ManyToOne(() => Section, (section) => section.id)
+  @JoinColumn({ name: "sectionId" })
+  section: Section;
 
-  // @ManyToOne(() => Degree, (degree) => degree.id)
-  // @JoinColumn({ name: "degreeId" })
-  // degree: Degree;
+  @ManyToOne(() => Degree, (degree) => degree.id)
+  @JoinColumn({ name: "degreeId" })
+  degree: Degree;
 
-  //   @ManyToOne(() => User, (user) => user.id)
-  //   @JoinColumn({ name: "userId" })
-  //   user: User;
+  @ManyToOne(() => User, (user) => user.id)
+  @JoinColumn({ name: "userId" })
+  user: User;
 }
 
 @Entity({ name: "degree" })
@@ -1541,12 +1548,11 @@ export class Certificate {
   @CreateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
   created_at: Date;
 
-  @Column({name: "user_id"})
+  @Column({ name: "user_id" })
   userId: string;
 
-  @Column({name: "section_id"})
+  @Column({ name: "section_id" })
   sectionId: number;
-
 
   @ManyToOne(() => User)
   @JoinColumn({ name: "user_id" })
@@ -1578,4 +1584,23 @@ export class Language {
   Languageuser: User;
 }
 
-//language entity
+@Entity({ name: "templates" })
+export class Template {
+  @PrimaryGeneratedColumn()
+  id: number;
+  @Column()
+  name: string;
+  @Column({ nullable: true })
+  description: string;
+  @CreateDateColumn()
+  createdAt: Date;
+  @UpdateDateColumn()
+  updatedAt: Date;
+  @ManyToOne(() => User, { eager: true })
+  @JoinColumn({ name: "createdBy" })
+  createdBy: User;
+  @Column({ default: false })
+  isSelected: boolean;
+  @OneToMany(() => Section, (section) => section.template)
+  sections: Section[];
+}

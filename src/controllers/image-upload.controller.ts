@@ -7,7 +7,7 @@ export const uploadImageController: RequestHandler = async (
   res: Response
 ) => {
   try {
-    if (!req.files) return error(res, "add event image", 400);
+    if (!req.files) return error(res, "please upload image", 400);
 
     const data = await cloudinaryService(req.files, req.body.service);
     return success(res, data.urls, data.message);

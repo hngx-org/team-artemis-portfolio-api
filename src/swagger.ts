@@ -2,7 +2,7 @@ import swaggerJsdoc from "swagger-jsdoc";
 
 const options = {
   swaggerDefinition: {
-    openapi: "3.1.0",
+    swagger: "2.0",
     info: {
       title: "Zuri Portfolio End Point Documentation",
       version: "1.0.0",
