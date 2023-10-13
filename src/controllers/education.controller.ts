@@ -20,6 +20,7 @@ import {
 const fetchUserEducationDetail: RequestHandler = async (req, res, next) => {
   // Add 'next' parameter
   const educationRepository = connectionSource.getRepository(EducationDetail);
+  const userRepository = connectionSource.getRepository(User);
 
   try {
     const id = req.params.id;
@@ -28,20 +29,35 @@ const fetchUserEducationDetail: RequestHandler = async (req, res, next) => {
       throw new BadRequestError("User ID is required");
     }
 
-    try {
-      const educationDetails = await educationRepository.find({
-        where: { userId: id },
-        // Relationship has not been modeled yet... Uncomment the code once the relationship between education detail and degree, section, and user tables have been established
-        // relations: ["degree", "section", "user"],
-      });
+    const isUser = await userRepository.findOne({ where: { id } });
 
-      // Send a success response
-      res.status(200).json({ educationDetails });
-    } catch (error) {
-      throw new CustomError("Database Error", 500);
+    if (!isUser) {
+      const error = new NotFoundError("A user with this ID does not exist");
+      throw error;
     }
+
+    const educationDetails = await educationRepository.find({
+      where: { userId: id },
+      relations: ["degree", "section", "user"],
+    });
+
+    if (!educationDetails) {
+      const error = new InternalServerError(
+        "An error occurred while fetching the education details, please try again"
+      );
+      throw error;
+    }
+
+    // Send a success response
+    res.status(200).json({ educationDetails });
   } catch (error) {
-    // Handle other types of errors or pass them to the error handler
+    // Handle errors
+    if (error.message.includes("invalid input syntax for type uuid")) {
+      error.message = "Invalid UUID format. Please provide a valid UUID.";
+    }
+    res
+      .status(error.statusCode || 500)
+      .json({ error: error.message || "An unknown error occurred" });
     next(error);
   }
 };
