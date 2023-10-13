@@ -96,8 +96,18 @@ const createEducationDetailController = async (
       description,
       to,
     }
+
+    // Validate date strings in "yy-mm-dd" format
+    if (data.from && !validateDateYYMMDD(data.from)) {
+      return res.status(400).json({ errors: "Invalid 'from' date format" })
+      // throw new BadRequestError("Invalid 'from' date format")
+    }
+
+    if (data.to && !validateDateYYMMDD(data.to)) {
+      // throw new BadRequestError("Invalid 'to' date format")
+      return res.status(400).json({ errors: "Invalid 'to' date format" })
+    }
     await validateCreateData(data, userId, res)
-    
 
     // Define an array of required fields
     const requiredFields = [
@@ -126,7 +136,7 @@ const createEducationDetailController = async (
       const err = new NotFoundError(
         'Error creating education detail: User not found'
       )
-      res.status(err.statusCode).json({ error: err.message })
+      return res.status(err.statusCode).json({ error: err.message })
     }
 
     // Call the service function to create an education detail
@@ -148,13 +158,13 @@ const createEducationDetailController = async (
       educationDetail,
     }
 
-    res.status(201).json(response)
+    return res.status(201).json(response)
   } catch (error) {
     if (error instanceof z.ZodError) {
-      res.status(400).json({ errors: error.errors })
+      return res.status(400).json({ errors: error.errors })
     } else {
       console.error('An error occurred:', error)
-      res.status(500).json({ error: 'Internal server error' })
+      return res.status(500).json({ error: 'Internal server error' })
       next(error)
     }
   }

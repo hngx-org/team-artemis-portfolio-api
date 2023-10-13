@@ -84,24 +84,13 @@ async function validateUpdateData(
 async function validateCreateData(data: any, userId: string, res: Response) {
 
   try {
-    // Validate date strings in "yy-mm-dd" format
-    if (data.from && !validateDateYYMMDD(data.from)) {
-      return res.status(400).json({ errors: "Invalid 'from' date format" })
-      // throw new BadRequestError("Invalid 'from' date format")
-    }
-
-    if (data.to && !validateDateYYMMDD(data.to)) {
-      // throw new BadRequestError("Invalid 'to' date format")
-      return res.status(400).json({ errors: "Invalid 'to' date format" })
-    }
-
     // Validate the data against the schema
     await CreateEducationDetailDataSchema.parseAsync({
       ...data,
       userId,
     })
   } catch (error) {
-    res.status(500).json({ error: 'Internal server error' })
+    return res.status(500).json({ error: 'Internal server error' })
   }
   
 }
