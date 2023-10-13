@@ -47,6 +47,9 @@ export class User {
   @Column({ type: "text", nullable: true, name: "profile_pic" })
   profilePic: string;
 
+  @Column({ type: "text", nullable: true, name: "profile_cover_photo" })
+  profileCoverPhoto: string;
+
   @Column({
     type: "varchar",
     length: 255,
