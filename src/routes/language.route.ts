@@ -25,11 +25,12 @@ const router = express.Router();
  *             userId:
  *               type: string
  *               format: uuid
+ *               example: "f8e1d17d-0d9e-4d21-89c5-7a564f8a1e90"
  *             languages:
  *               type: array
- *           required:
- *             - userId
- *             - languages
+ *               items:
+ *                type: string
+ *               example: ["Python", "Javascript"]
  *     responses:
  *       200:
  *         description: Successful response
@@ -40,8 +41,10 @@ const router = express.Router();
  *               properties:
  *                 status:
  *                   type: integer
+ *                   example: 200
  *                 message:
  *                   type: string
+ *                   example: success
  *                 data:
  *                   type: string
  *       404:
@@ -53,8 +56,10 @@ const router = express.Router();
  *               properties:
  *                 status:
  *                   type: integer
+ *                   example: 404
  *                 message:
  *                   type: string
+ *                   example: Not found
  *                 data:
  *                   type: object
  *       400:
@@ -66,8 +71,10 @@ const router = express.Router();
  *               properties:
  *                 status:
  *                   type: integer
+ *                   example: 400
  *                 message:
  *                   type: string
+ *                   example: Bad Request
  *                 data:
  *                   type: object
  *       500:
@@ -79,8 +86,10 @@ const router = express.Router();
  *               properties:
  *                 status:
  *                   type: integer
+ *                   example: 500
  *                 message:
  *                   type: string
+ *                   example: Internal server error
  *                 data:
  *                   type: object
  */
@@ -105,6 +114,7 @@ router.post(
  *         schema:
  *           type: string
  *           format: uuid
+ *           example: f8e1d17d-0d9e-4d21-89c5-7a564f8a1e90
  *     responses:
  *       200:
  *         description: Successful response
@@ -115,8 +125,10 @@ router.post(
  *               properties:
  *                 status:
  *                   type: integer
+ *                   example: 200
  *                 message:
  *                   type: string
+ *                   example: success
  *                 data:
  *                   type: string
  *       404:
@@ -128,10 +140,12 @@ router.post(
  *               properties:
  *                 status:
  *                   type: integer
+ *                   example: 404
  *                 message:
  *                   type: string
+ *                   example: Not found
  *                 data:
- *                   type: string
+ *                   type: object
  *       400:
  *         description: Bad request
  *         content:
@@ -141,10 +155,12 @@ router.post(
  *               properties:
  *                 status:
  *                   type: integer
+ *                   example: 400
  *                 message:
  *                   type: string
+ *                   example: Bad Request
  *                 data:
- *                   type: string
+ *                   type: object
  *       500:
  *         description: Internal server error
  *         content:
@@ -154,10 +170,12 @@ router.post(
  *               properties:
  *                 status:
  *                   type: integer
+ *                   example: 500
  *                 message:
  *                   type: string
+ *                   example: Internal server error
  *                 data:
- *                   type: string
+ *                   type: object
  */
 router.get('/language/:userId', languageController.getUserLanguages);
 
