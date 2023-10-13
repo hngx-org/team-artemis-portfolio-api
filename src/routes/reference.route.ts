@@ -32,8 +32,6 @@ const router = express.Router();
  *               type: string
  *             userId:
  *               type: string
- *             sectionId:
- *               type: integer
  *           example:
  *             name: "Sapphire"
  *             company: "Zuri"
@@ -41,7 +39,6 @@ const router = express.Router();
  *             emailAddress: "sofiyyahabidoye@gmail.com"
  *             phoneNumber: "08101695397"
  *             userId: "6ba7b810-9dad-11d1-80b4-00c04fd430c8"
- *             sectionId: 1
  *     responses:
  *       201:
  *         description: Reference created successfully

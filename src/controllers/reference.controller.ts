@@ -27,7 +27,6 @@ export const createReference = async (req: Request, res: Response) => {
     reference.emailAddress = validatedData.emailAddress;
     reference.phoneNumber = validatedData.phoneNumber;
     reference.userId = validatedData.userId; // Assuming you have the user ID
-    reference.sectionId = validatedData.sectionId;
 
     // Save the reference to the database
     await referenceRepository.save(reference);
