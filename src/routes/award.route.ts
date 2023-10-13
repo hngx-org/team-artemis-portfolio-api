@@ -7,12 +7,92 @@ import { validateCreateAwardData,
 
 const router = express.Router();
 
-
+/**
+ * @swagger
+ * /api/create-award/{userId}:
+ *   post:
+ *     summary: Create an award for a user.
+ *     description: Create a new award for a user by providing the user's ID.
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         description: The ID of the user for whom the award is being created.
+ *         required: true
+ *         type: string
+ *       - in: body
+ *         name: createAward
+ *         description: Award data to create.
+ *         required: true
+ *         schema:
+ *           type: object
+ *           properties:
+ *             title:
+ *               type: string
+ *             year:
+ *               type: string
+ *             presented_by:
+ *               type: string
+ *             url:
+ *               type: string
+ *             description:
+ *               type: string
+ *         example:
+ *           title: "Outstanding Achievement"
+ *           year: "2023"
+ *           presented_by: "Company XYZ"
+ *           url: "https://example.com"
+ *           description: "Received an award for outstanding performance."
+ *     responses:
+ *       '201':
+ *         description: Award created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 status:
+ *                   type: string
+ *                 statusCode:
+ *                   type: integer
+ *                 createdAward:
+ *                   type: object
+ *       '400':
+ *         description: Bad request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 err:
+ *                   type: string
+ *       '404':
+ *         description: Not Found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 err:
+ *                   type: string
+ *       '500':
+ *         description: Internal Server Error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 err:
+ *                   type: string
+ *     tags:
+ *       - Awards
+ */
 router.post('/award/:userId', validateCreateAwardData, createAwardController)
 
 /**
  * @swagger
- * /api/update-award/{awardId}:
+ * /api/award/{awardId}:
  *   put:
  *     summary: Update an award by ID.
  *     description: Update an award's information by providing its ID.
