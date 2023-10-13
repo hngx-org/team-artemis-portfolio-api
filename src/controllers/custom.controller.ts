@@ -7,7 +7,7 @@ import {
   Section,
 } from "../database/entity/model";
 import { success, error } from "../utils/response.util";
-import { deleteCustomSectionService } from "../services/custom.service";
+import { deleteCustomSectionService} from "../services/custom.service";
 import {
   BadRequestError,
   CustomError,
@@ -302,7 +302,6 @@ const sectionSchema = z.object({
 const validateSchema =
   (schema: AnyZodObject) => async (req: Request, res: Response, next: any) => {
     try {
-      console.log(req.body);
       await schema.parseAsync(req.body);
       return next();
     } catch (error: any) {
@@ -320,26 +319,63 @@ const validateSchema =
 
 // updated customsection field
 const updateCustomField = async (req: Request, res: Response) => {
-  const { id } = req.params;
   try {
+    const id = parseInt(req.params.id);
+
+
+    const customFieldSchema = z.object({
+      fieldType: z.string({ message: "fieldType must be a string"}),
+      fieldName: z.string({ message: "fieldName must be a string"}),
+      customSectionId: z.number().int({ message: "customSectionId must be an integer"}),
+      value: z.string({ message: "value must be a string"})
+    })
+
+    const data = customFieldSchema.safeParse(req.body)
+
+    if(data.success === false){
+      const err = new BadRequestError(data.error.message);
+      return res
+      .status(err.statusCode)
+      .json({ err: JSON.parse(err.message)[0].message})
+    }
+
+    // validator for idValidator
+    const idValidator = z.number({
+      required_error: "id is required",
+      invalid_type_error: "id must be a number"
+    })
+    .int({ message: "id must be an integer"})
+    .positive({ message: "id must be a positive integer"})
+
+    const idValidate = idValidator.safeParse(id)
+  
+    if(idValidate.success === false){
+      const err = new BadRequestError(idValidate.error.message);
+      return res
+      .status(err.statusCode)
+      .json({ err: JSON.parse(err.message)[0].message})
+    }
+    
     const existingRecord = await customFieldRepository.findOne({
       where: { id: Number(id) },
     });
     if (!existingRecord) {
-      return error(res, "Record not found", 400);
+      return error(res, "Record not found", 404);
     }
-    // Update the existing record with the new data from the request body
+    
     existingRecord.fieldType = req.body.fieldType;
     existingRecord.fieldName = req.body.fieldName;
     existingRecord.customSectionId = req.body.customSectionId;
     existingRecord.value = req.body.value;
     const updatedRecord = await customFieldRepository.save(existingRecord);
     return success(res, updatedRecord, "Success");
-  } catch (err) {
-    console.log(err);
-    return error(res, "An error occurred while updating the record", 500);
+  } catch (error: any) {
+    const err = new InternalServerError(error.message)
+    return res.status(err.statusCode).json({ err: err.message})
   }
 };
+
+
 
 export {
   create,
@@ -352,6 +388,7 @@ export {
   customUserSectionSchema,
   customFieldSchema,
   createSection,
+  // updateCustomSection,
   sectionSchema,
   fieldsSchema,
 };

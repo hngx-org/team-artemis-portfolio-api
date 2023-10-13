@@ -50,7 +50,7 @@ const router = express.Router();
  *
  *     responses:
  *       200:
- *         educationDetails: Array of user education detail(s).
+ *         educationDetails: Array of user education detail(s) or empty array if the user has no education detail.
  *         content:
  *           application/json:
  *             schema:
@@ -110,8 +110,6 @@ router.get("/education/:id", fetchUserEducationDetail);
  *         schema:
  *           type: object
  *           properties:
- *             sectionId:
- *               type: number
  *             degreeId:
  *               type: number
  *             fieldOfStudy:
@@ -164,10 +162,9 @@ router.get("/education/:id", fetchUserEducationDetail);
  *                   type: null
  */
 router.post(
-  "/education/:id",
-  validateCreateData,
+  '/education/:id',
   createEducationDetailController
-);
+)
 
 /**
  * @swagger

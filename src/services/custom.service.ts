@@ -1,5 +1,6 @@
 import { connectionSource } from "../database/data-source";
 import { CustomUserSection } from "../database/entity/model";
+import { ICustomSection } from "../interfaces"
 
 export const deleteCustomSectionService = async (
   customSectionId: any,
@@ -31,3 +32,4 @@ export const deleteCustomSectionService = async (
     throw new Error("Error deleting Custom Section");
   }
 };
+
