@@ -2,7 +2,7 @@ import { updateContact, findUser } from '../services'
 import { ContactBody } from '../interfaces'
 import { Request, Response, RequestHandler, NextFunction } from 'express'
 import { SocialUser } from '../database/entity/model'
-import { SocialUserService, createContact } from '../services/contact.service'
+import { deleteContactService, createContact } from '../services/contact.service'
 import constant from '../constants/constant';
 import {z} from 'zod';
 
@@ -13,24 +13,53 @@ import { SocialMedia } from '../database/entity/model'
 const MESSAGES = constant.MESSAGES;
 const contactsRepo = dataSource.getRepository(SocialUser)
 
-const socialUserService = new SocialUserService()
+import {
+  CustomError,
+  NotFoundError,
+  BadRequestError,
+  UnauthorizedError,
+  ForbiddenError,
+  InternalServerError,
+  MethodNotAllowedError,
+} from "../middlewares";
 
+
+
+// Protected endpoint!!! only user with admin privilegdes  can access this.
 export const createSocials = async (req: Request, res: Response) => {
-  try {
-    const { name } = req.body
+  const createSocialsSchema = z.object({
+  name: z.string().min(1).max(50),
+  });
 
-    const contactsRepo = dataSource.getRepository(SocialMedia)
-    const contact = contactsRepo.create({
-      name,
-    })
-    await contactsRepo.save(contact)
-    return res
+  try {
+    const validatedData = createSocialsSchema.parse(req.body);
+    const { name } = validatedData;
+
+    if (!name) {
+      throw new BadRequestError("Social media name is required");
+    }
+     const response = {
+      message: 'Social Media type created successfully',
+      status: "success",
+      statusCode: 201,
+    };
+       return res
       .status(201)
-      .json({ message: 'Social Media type created successfully' })
-  } catch (error) {
-    console.error('Error creating contact:', error)
-    return res.status(400).json({ message: 'Invalid input data' })
-  }
+      .json(response);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+      const fieldErrors = error.errors.map((err) => ({
+        field: err.path.join('.'),
+        message: err.message,
+      }));
+        
+      return res.status(400).json({ message: "Invalid input data", errors: fieldErrors });
+    }
+    else {
+      console.error("Error creating contact:", error);
+      return res.status(500).json({ message: "Internal server error" });
+    }
+    }
 }
 
 
@@ -91,55 +120,52 @@ export const getContacts = async (req: Request, res: Response) => {
 //deleteContact controller
 export const deleteContact = async (req: Request, res: Response) => {
   try {
-    const socialUserIdString = req.params.id
-    const socialUserId = parseInt(socialUserIdString, 10)
-
-    if (isNaN(socialUserId)) {
-      return res.status(400).json({ message: 'Invalid socialUserId' })
+    const id = parseInt(req.params.id);
+   
+    if (isNaN(id) || !id) {
+      throw new BadRequestError("Social user id is required or invalid");
+    }
+      await deleteContactService(id);
+      return res.status(200).json({ message: 'Contact deleted successfully' });
+    }
+   catch (error) {
+    if (error.message.includes("SocialUser with ID")) {
+      return res.status(404).json({ message: error.message });
     }
 
-    await socialUserService.deleteContact(socialUserId)
-
-    return res.status(200).json({ message: 'Contact deleted successfully' })
-  } catch (error) {
-    console.error('Error deleting contact:', error)
-
-    if (error.message === 'Social User not found') {
-      return res.status(404).json({ message: 'Social User not found' })
-    }
-
-    return res.status(500).json({ message: 'Internal server error' })
+    // Handle other errors, including those from the service
+    console.error("Error deleting contact: " + error.message);
+    return res.status(500).json({ message: 'Internal server error' });
+         
   }
 }
+  //update Contact controller
+  export const updateContactController: RequestHandler = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const { socialMediaId, url, userId }: ContactBody = req.body
+      const socialId: number = Number(req.params.Id)
 
+      const user = await findUser(userId)
 
-//update Contact controller
-export const updateContactController: RequestHandler = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const { socialMediaId, url, userId }: ContactBody = req.body
-    const socialId: number = Number(req.params.Id)
+      if (!user) {
+        return res.status(404).json('user not found')
+      }
 
-    const user = await findUser(userId)
+      const contact = await updateContact(socialMediaId, url, socialId, userId)
 
-    if (!user) {
-      return res.status(404).json('user not found')
+      if (!contact) {
+        return res.status(404).json('can not update contact')
+      }
+
+      return res.status(200).json({
+        message: 'new contact updated',
+      })
+    } catch (error) {
+      console.log(error)
+      return res.status(500).json('internal server error')
     }
-
-    const contact = await updateContact(socialMediaId, url, socialId, userId)
-
-    if (!contact) {
-      return res.status(404).json('can not update contact')
-    }
-
-    return res.status(200).json({
-      message: 'new contact updated',
-    })
-  } catch (error) {
-    console.log(error)
-    return res.status(500).json('internal server error')
   }
-}

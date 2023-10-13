@@ -105,32 +105,18 @@ export const createContact = async (
   }
 };
 
-export class SocialUserService {
-  async deleteContact(socialUserId: number) {
-    const socialUserRepository = connectionSource.getRepository(SocialUser);
-    const socialMediaRepository = connectionSource.getRepository(SocialMedia);
-
-    console.log(typeof socialUserId);
-
-    const socialUser = await socialUserRepository.findOne({
-      where: { id: socialUserId },
-    });
-
-    if (!socialUser) {
-      throw new Error("Social User not found");
+export const deleteContactService = async (
+  id: number
+) => {
+  try {
+    const socialUserRepo = connectionSource.getRepository(SocialUser);
+    const contactToDelete = await socialUserRepo.findOne({ where: { id: id } });
+    if (contactToDelete === null || contactToDelete === undefined) {
+      const error = new Error(`SocialUser with ID ${id} not found`);
+      return Promise.reject(error);
     }
-
-    const socialMedia = socialUser.socialMedia;
-    console.log(socialMedia);
-
-    await socialUserRepository.remove(socialUser);
-
-    const usersCount = await socialMediaRepository.count({
-      where: { id: socialMedia.id },
-    });
-
-    if (usersCount === 0) {
-      await socialMediaRepository.remove(socialMedia);
-    }
+  await socialUserRepo.remove(contactToDelete);
+  } catch (error) {
+    console.error("Error deleting skill: "+ error.message);
   }
 }

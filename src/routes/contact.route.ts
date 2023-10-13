@@ -150,9 +150,60 @@ router.post('/contacts/', createContacts)
  *       - Contacts
  */
 router.delete('/contacts/:id', deleteContact)
-
+/**
+ * @swagger
+ * /api/socials:
+ *   post:
+ *     summary: Create a Social Media type 'requires admin privilegdes'
+ *     description: Create a new Social Media type.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: Social Media type created successfully
+ *       400:
+ *         description: Invalid input data
+ */
 router.post('/socials', createSocials)
-
+/**
+ * @swagger
+ * /update-contact/{Id}:
+ *   put:
+ *     summary: Update a contact
+ *     description: Update a contact for a specific user.
+ *     parameters:
+ *       - in: path
+ *         name: Id
+ *         required: true
+ *         type: integer
+ *         description: The ID of the contact to update.
+ *       - in: body
+ *         name: Contact
+ *         required: true
+ *         schema:
+ *           type: object
+ *           properties:
+ *             socialMediaId:
+ *               type: integer
+ *             url:
+ *               type: string
+ *             userId:
+ *               type: string
+ *     responses:
+ *       200:
+ *         description: Contact updated successfully.
+ *       404:
+ *         description: User not found or unable to update contact.
+ *       500:
+ *         description: Internal server error.
+ */
 router.patch('/contact/:Id', updateContactController)
 
 module.exports = router
