@@ -1,6 +1,6 @@
 import { connectionSource } from "../database/data-source";
-import { CustomUserSection } from "../database/entity/model";
-import { ICustomSection } from "../interfaces"
+import { CustomField, CustomUserSection } from "../database/entity/model";
+import { ICustomSection } from "../interfaces";
 
 export const deleteCustomSectionService = async (
   customSectionId: any,
@@ -9,6 +9,16 @@ export const deleteCustomSectionService = async (
   try {
     const customSectionRepository =
       connectionSource.getRepository(CustomUserSection);
+    
+      const customFieldRepository = connectionSource.getRepository(CustomField);
+
+
+      const customFieldToBeDeleted =await customFieldRepository.find({where: {
+        customUserSectionId: customSectionId     }})
+
+      if (customFieldToBeDeleted) {
+        await customFieldRepository.remove(customFieldToBeDeleted);
+      }
 
     const sectionToBeDeleted = await customSectionRepository.findOne({
       where: { id: customSectionId, userId: userId },
@@ -32,4 +42,3 @@ export const deleteCustomSectionService = async (
     throw new Error("Error deleting Custom Section");
   }
 };
-
