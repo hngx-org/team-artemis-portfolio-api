@@ -1,56 +1,76 @@
 import { Router } from "express";
+import multer from "multer";
 import {
   createNotificationSettingController,
   deleteUserAccount,
   updateUserAccountSettingController,
   updateNotificationSettings,
   getUserNotificationSettings,
+  uploadUserProfileImageController,
 } from "../controllers/settings.controller";
 import { validateUserId, validate } from "../services";
 
+import { ForbiddenError } from "../middlewares";
+import { NextFunction, Request, Response } from "express";
+
 const router = Router();
+
+
+
+const storage = multer.memoryStorage();
+const uploads = multer({ storage }).array("images", 1);
+const uploadHandler = (req: Request, res: Response, next: NextFunction) => {
+  uploads(req, res, function (err) {
+    if (err) {
+      const newForbbidenError = new ForbiddenError("You can only upload a maximum of 10 images");
+      next(newForbbidenError);
+    }
+    next();
+  })
+}
 
 /**
  * @swagger
  * /api/update-user-account-settings:
  *   patch:
- *     summary: update account settings
- *     description: update user account password settings.
- *     requestBody:
- *       description: New account settings
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               email:
- *                 type: string
- *               currentPassword:
- *                 type: string
- *               newPassword:
- *                 type: string
- *               confirmNewPassword:
- *                 type: string
+ *     summary: Update account settings
+ *     description: Update user account password settings.
+ *     parameters:
+ *       - in: body
+ *         name: email
+ *         description: Email address
+ *         required: true
+ *         type: string
+ *       - in: body
+ *         name: currentPassword
+ *         description: Current password
+ *         required: true
+ *         type: string
+ *       - in: body
+ *         name: newPassword
+ *         description: New password
+ *         required: true
+ *         type: string
+ *       - in: body
+ *         name: confirmNewPassword
+ *         description: Confirm new password
+ *         required: true
+ *         type: string
  *     responses:
  *       200:
  *         description: Successful response
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
+ *         schema:
+ *           type: object
+ *           properties:
+ *             message:
+ *               type: string
  *       400:
  *         description: Bad request
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 error:
- *                   type: string
+ *         schema:
+ *           type: object
+ *           properties:
+ *             error:
+ *               type: string
  *     tags:
  *       - Settings
  */
@@ -71,45 +91,39 @@ router.patch(
  *         name: userId
  *         required: true
  *         description: The unique ID of the user for whom to create notification settings.
+ *         type: string
+ *       - in: body
+ *         name: notificationSettings
+ *         description: Notification settings detail data
+ *         required: true
  *         schema:
- *           type: string
- *     requestBody:
- *       description: Notification settings detail data
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               communityUpdate:
- *                 type: boolean
- *               emailSummary:
- *                 type: boolean
- *               newMessages:
- *                 type: boolean
- *               followUpdate:
- *                 type: boolean
- *               specialOffers:
- *                 type: boolean
+ *           type: object
+ *           properties:
+ *             communityUpdate:
+ *               type: boolean
+ *             emailSummary:
+ *               type: boolean
+ *             newMessages:
+ *               type: boolean
+ *             followUpdate:
+ *               type: boolean
+ *             specialOffers:
+ *               type: boolean
  *     responses:
  *       200:
  *         description: Successful response
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
+ *         schema:
+ *           type: object
+ *           properties:
+ *             message:
+ *               type: string
  *       400:
  *         description: Bad request
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 error:
- *                   type: string
+ *         schema:
+ *           type: object
+ *           properties:
+ *             error:
+ *               type: string
  *     tags:
  *       - Settings
  */
@@ -132,25 +146,22 @@ router.post(
  *         name: userId
  *         required: true
  *         description: The unique ID of the user for whom to delete the account.
+ *         type: string
  *     responses:
  *       200:
  *         description: Successful response
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
+ *         schema:
+ *           type: object
+ *           properties:
+ *             message:
+ *               type: string
  *       400:
  *         description: Bad request
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 error:
- *                   type: string
+ *         schema:
+ *           type: object
+ *           properties:
+ *             error:
+ *               type: string
  *     tags:
  *       - Settings
  */
@@ -173,8 +184,7 @@ router.delete(
  *       - in: path
  *         name: userId
  *         required: true
- *         schema:
- *           type: string
+ *         type: string
  *         description: The ID of the user for whom to update notification settings.
  *       - in: body
  *         name: notificationSettings
@@ -201,53 +211,38 @@ router.delete(
  *             userId:
  *               type: string
  *               description: The ID of the user for whom the notification settings are being updated.
- *         example:
- *           emailSummary: true
- *           specialOffers: false
- *           communityUpdate: true
- *           followUpdate: false
- *           newMessages: true
- *           userId: "user123"
  *     responses:
  *       200:
  *         description: Notification settings updated successfully.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 successful:
- *                   type: boolean
- *                 message:
- *                   type: string
- *                 data:
- *                   $ref: '#/components/schemas/NotificationSettings'
+ *         schema:
+ *           type: object
+ *           properties:
+ *             successful:
+ *               type: boolean
+ *             message:
+ *               type: string
  *       400:
  *         description: Bad request. Invalid input or user not found.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 successful:
- *                   type: boolean
- *                 message:
- *                   type: string
- *                 data:
- *                   type: null
+ *         schema:
+ *           type: object
+ *           properties:
+ *             successful:
+ *               type: boolean
+ *             message:
+ *               type: string
+ *             data:
+ *               type: null
  *       404:
  *         description: User not found. Please provide a valid User ID.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 successful:
- *                   type: boolean
- *                 message:
- *                   type: string
- *                 data:
- *                   type: null
+ *         schema:
+ *           type: object
+ *           properties:
+ *             successful:
+ *               type: boolean
+ *             message:
+ *               type: string
+ *             data:
+ *               type: null
  */
 
 router.patch(
@@ -266,19 +261,52 @@ router.patch(
  *         name: userId
  *         required: true
  *         description: The User's ID for which notification settings are to be retrieved.
- *         schema:
- *           type: string
+ *         type: string
  *     responses:
  *       200:
  *         description: Notification settings retrieved successfully.
+ *         schema:
+ *           type: array
+ *       400:
+ *         description: Bad request. User or notification settings do not exist.
+ *         schema:
+ *           type: object
+ *           properties:
+ *             error:
+ *               type: string
+ *     tags:
+ *       - Settings
+ */
+
+router.get("/get-notification-settings/:userId", getUserNotificationSettings);
+
+/**
+ * @swagger
+ * /api/userprofile/image/upload:
+ *   post:
+ *     summary: Upload a profile image
+ *     description: Upload a user's profile image using a POST request.
+ *     tags: [User Portfolio Details]
+ *     consumes:
+ *       - multipart/form-data
+ *     parameters:
+ *       - in: formData
+ *         name: images
+ *         type: file
+ *         description: The profile image to upload (one file allowed).
+ *     responses:
+ *       200:
+ *         description: Profile image uploaded successfully.
  *         content:
  *           application/json:
  *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/NotificationSettings'
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: A success message.
  *       400:
- *         description: Bad request. User or notification settings do not exist.
+ *         description: Bad request. The uploaded file may not be valid.
  *         content:
  *           application/json:
  *             schema:
@@ -286,10 +314,14 @@ router.patch(
  *               properties:
  *                 error:
  *                   type: string
- *     tags:
- *       - Settings
+ *                   description: An error message.
+ *     multipart: true
+ * securityDefinitions:
+ *   BearerAuth:
+ *     type: apiKey
+ *     name: Authorization
+ *     in: header
  */
 
-router.get("/get-notification-settings/:userId", getUserNotificationSettings);
-
+router.post("/userprofile/image/upload", uploadHandler, uploadUserProfileImageController);
 module.exports = router;

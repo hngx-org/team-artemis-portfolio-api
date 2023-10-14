@@ -7,14 +7,28 @@ import {
   uploadImageController,
   uploadProfileCoverController,
   uploadProfileImageController,
+  deleteAllSectionEntries
 } from "../controllers";
 import {
   createPorfolioDataSchema,
   validateCreatePortfolioDetails,
 } from "../middlewares/profile.zod";
+import { ForbiddenError } from "../middlewares";
+import { NextFunction, Request, Response } from "express";
+
 
 const storage = multer.memoryStorage();
 const uploads = multer({ storage }).array("images", 1);
+const uploadHandler = (req: Request, res: Response, next: NextFunction) => {
+  uploads(req, res, function (err) {
+    if (err) {
+      const newForbbidenError = new ForbiddenError("You can only upload a maximum of 10 images");
+      next(newForbbidenError);
+    }
+    next();
+  })
+}
+
 
 const router = express.Router();
 
@@ -161,7 +175,7 @@ router.post(
  *     name: Authorization
  *     in: header
  */
-router.post("/profile/cover/upload", uploads, uploadProfileCoverController);
+router.post("/profile/cover/upload", uploadHandler, uploadProfileCoverController);
 
 /**
  * @swagger
@@ -205,6 +219,11 @@ router.post("/profile/cover/upload", uploads, uploadProfileCoverController);
  *     name: Authorization
  *     in: header
  */
-router.post("/profile/image/upload", uploads, uploadProfileImageController);
+router.post("/profile/image/upload", uploadHandler, uploadProfileImageController);
+
+
+
+
+router.delete("/profile/details/:userId", deleteAllSectionEntries);
 
 module.exports = router;

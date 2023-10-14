@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from "express";
+import { Request, Response, RequestHandler, NextFunction } from "express";
 import { success, error } from "../utils";
 import { ZodError } from "zod";
 import { NotificationSetting, UserTrack } from "../database/entity/model";
@@ -10,6 +10,10 @@ import {
   notificationSettingSchema,
   verifyPassword,
 } from "../services/settings.service";
+import {
+  cloudinaryService,
+  uploadProfileImageService,
+} from "../services";
 import { NotificationSettings } from "../interfaces/settings.interface";
 const userRespository = connectionSource.getRepository(User);
 
@@ -320,5 +324,35 @@ export const getUserNotificationSettings = async (
   } catch (err) {
     console.log("error", err?.message);
     return error(res, (err as Error)?.message);
+  }
+};
+
+
+export const uploadUserProfileImageController: RequestHandler = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    if (!req.files) return error(res, "add profile image", 400);
+    const { service, userId } = req.body;
+    const files = req.files as any;
+
+
+    const imagesRes = await cloudinaryService(files, req.body.service);
+
+
+    const user = await userRespository.findOne({ where: { id: userId } });
+    if (!user) {
+      return error(res, "User Not found", 400);
+    }
+    const { urls } = await cloudinaryService(req.files, service);
+    const data = await uploadProfileImageService(user.id, urls);
+
+    console.log(urls)
+    user.profilePic = imagesRes[0];
+
+    return success(res, data, "Profile picture uploaded successfully");
+  } catch (err) {
+    error(res, (err as Error).message); // Use type assertion to cast 'err' to 'Error' type
   }
 };
