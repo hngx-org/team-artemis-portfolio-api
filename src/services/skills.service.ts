@@ -10,7 +10,7 @@ export const createSkillsService = async (
   for (const data of skillData) {
     const newSkill = skillsDetailRepository.create(data);
     const skillexist = await skillsDetailRepository.find({
-      where: { skills: data.skills },
+      where: { skills: data.skills, userId: data.userId },
     });
 
     if (skillexist.length == 0) {
