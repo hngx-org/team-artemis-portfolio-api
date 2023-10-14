@@ -47,7 +47,8 @@ export const updateUserAccountSettingController = async (
       });
     }
 
-    const verifyCurrentPassword = verifyPassword(
+    const verifyCurrentPassword = await verifyPassword(
+      //bugfix
       currentPassword,
       user.password
     );
@@ -194,7 +195,6 @@ export const deleteUserAccount = async (
         success: false,
       });
     }
-    
 
     try {
       // Wait for the delete operation to complete
@@ -249,30 +249,23 @@ export const updateNotificationSettings = async (
       followUpdate,
       newMessages,
     }: NotificationSettings = req.body;
-    const notificationModel =
-      connectionSource.getRepository(NotificationSetting);
-
     const userId = req.params.userId;
 
     if (!userId) {
       return error(res, "Please provide a valid User ID", 400);
     }
 
-    const userModel = connectionSource.getRepository(User);
-    const user = await userModel.findOneBy({ id: userId });
+    const user = await userRespository.findOneBy({ id: userId });
 
     if (!user) {
       return error(res, "User does not exist", 400);
     }
 
-    const notificationId = Number(req.params.id);
-
-    if (!notificationId) {
-      return error(res, "Please provide a valid Notification ID", 400);
-    }
+    const notificationModel =
+      connectionSource.getRepository(NotificationSetting);
 
     const notification = await notificationModel.findOneBy({
-      id: notificationId,
+      userId,
     });
 
     if (!notification) {
@@ -290,6 +283,8 @@ export const updateNotificationSettings = async (
     notification.newMessages = newMessages;
     notification.userId = userId;
 
+    const notificationId = notification.id;
+
     const updateNotification = await notificationModel.update(
       notificationId,
       notification
@@ -303,5 +298,27 @@ export const updateNotificationSettings = async (
   } catch (err) {
     console.log("error", err?.message);
     return error(res, err?.message);
+  }
+};
+
+export const getUserNotificationSettings = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const userId = req.params.userId;
+    if (!userId) {
+      return error(res, "Please provide a valid User ID", 400);
+    }
+
+    const notificationModel =
+      connectionSource.getRepository(NotificationSetting);
+
+    const notifications = await notificationModel.findBy({ userId });
+
+    return success(res, notifications, "Notifications fetched successfully");
+  } catch (err) {
+    console.log("error", err?.message);
+    return error(res, (err as Error)?.message);
   }
 };

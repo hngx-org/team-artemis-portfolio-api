@@ -6,7 +6,7 @@ import {
   OneToMany,
 } from "typeorm";
 
-import { Language, SocialUser } from "./model";
+import { Language, SocialUser, References } from "./model";
 @Entity({ name: "user" })
 export class User {
   @PrimaryGeneratedColumn("uuid")
@@ -47,6 +47,9 @@ export class User {
   @Column({ type: "text", nullable: true, name: "profile_pic" })
   profilePic: string;
 
+  @Column({ type: "text", nullable: true, name: "profile_cover_photo" })
+  profileCoverPhoto: string;
+
   @Column({
     type: "varchar",
     length: 255,
@@ -57,6 +60,9 @@ export class User {
 
   @OneToMany(() => Language, (language) => language.user, { cascade: true })
   languages: Language[];
+
+  @OneToMany(() => References, (references) => references.user) // Use References here
+  references: References[]; // Assuming you want to reference multiple References
 
   @CreateDateColumn({
     type: "timestamp",
