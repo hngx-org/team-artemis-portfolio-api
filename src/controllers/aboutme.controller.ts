@@ -8,24 +8,45 @@ import {
 
 const AboutRepository = connectionSource.getRepository(AboutDetail);
 
+
 export const createAboutMe: RequestHandler = async (req, res) => {
   try {
+    // Get the data from the request body
     const { bio, userId, sectionId } = req.body as AboutMeInterface;
 
-    const aboutMe = AboutRepository.create({ bio, userId, sectionId });
-    const savedAboutMe = await AboutRepository.save(aboutMe);
+    // Check if the interest exists
+    const aboutMeExists = await AboutRepository.findOne({
+      where: { userId },
+    });
+
+    // If the about me exists, return an error
+    if (aboutMeExists) {
+      return res.status(409).json({
+        successful: false,
+        message: "This user already has an about me section created.",
+      });
+    }
+
+    // Create the interest
+    const aboutMeResponse = AboutRepository.create({
+      bio,
+      userId,
+      sectionId,
+    });
+    // Save the interest to the database
+    const data = await AboutRepository.save(aboutMeResponse);
 
     res.status(201).json({
       successful: true,
-      message: 'About me created successfully',
-      data: savedAboutMe,
+      message: "Interest created successfully",
+      data,
     });
-  } catch (error) {
-    console.error(error);
+  } catch (err) {
+    console.error(err);
     res.status(500).json({
       successful: false,
-      message: 'Could not create about me.',
-      error: error.message,
+      message: "Could not create interest.",
+      error: err.message,
     });
   }
 };
