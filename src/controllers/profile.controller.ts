@@ -6,7 +6,7 @@ import express, {
 } from "express";
 import { AnyZodObject, z } from "zod";
 import { connectionSource } from "../database/data-source";
-import { PortfolioDetails, Tracks, UserTrack } from "../database/entity/model";
+import { PortfolioDetails, Tracks, UserTrack, WorkExperienceDetail, Section, AboutDetail, EducationDetail, Project, InterestDetail, Skill, SkillsDetail } from "../database/entity/model";
 import { User } from "../database/entity/user";
 import {
   cloudinaryService,
@@ -15,11 +15,22 @@ import {
 } from "../services";
 import { error, success } from "../utils";
 import { authMiddleWare, validateUser } from "../middlewares/auth";
+import { BadRequestError, InternalServerError } from "../middlewares";
+
 
 // Get the repository for the PortfolioDetails entity
 const userRepository = connectionSource.getRepository(User);
 const portfolioRepository = connectionSource.getRepository(PortfolioDetails);
 const userTrackRepository = connectionSource.getRepository(UserTrack);
+const workExperienceRepositry = connectionSource.getRepository(WorkExperienceDetail);
+const sectionRepository = connectionSource.getRepository(Section);
+const aboutRepository = connectionSource.getRepository(AboutDetail);
+const educationRepository = connectionSource.getRepository(EducationDetail);
+const projectRepository = connectionSource.getRepository(Project);
+const interestRepository = connectionSource.getRepository(InterestDetail);
+const skillRepository = connectionSource.getRepository(Skill);
+const skillsDetailRepository = connectionSource.getRepository(SkillsDetail);
+
 
 // Export the uploadProfileImageController function
 export const uploadProfileImageController: RequestHandler = async (
@@ -29,17 +40,22 @@ export const uploadProfileImageController: RequestHandler = async (
   try {
     if (!req.files) return error(res, "add event image", 400);
     const { service, userId } = req.body;
+    const files = req.files as any;
 
-    const response = await validateUser(
-      req.headers.authorization,
-      "portfolio.update.own"
-    );
 
-    if (!response.authorized)
-      return error(res, "Not authorized to perform action", 400);
+    const imagesRes = await cloudinaryService(files, req.body.service);
 
+
+    const user = await userRepository.findOne({ where: { id: userId } });
+    if (!user) {
+      return error(res, "User Not found", 400);
+    }
     const { urls } = await cloudinaryService(req.files, service);
-    const data = await uploadProfileImageService(response.user.id, urls);
+    const data = await uploadProfileImageService(user.id, urls);
+
+    console.log(urls)
+    user.profilePic = imagesRes[0];
+
     return success(res, data, "Profile picture uploaded successfully");
   } catch (err) {
     error(res, (err as Error).message); // Use type assertion to cast 'err' to 'Error' type
@@ -54,16 +70,24 @@ export const uploadProfileCoverController: RequestHandler = async (
     if (!req.files) return error(res, "add event image", 400);
     const { service, userId } = req.body;
 
-    const response = await validateUser(
-      req.headers.authorization,
-      "portfolio.update.own"
-    );
+    const files = req.files as any;
 
-    if (!response.authorized)
-      return error(res, "Not authorized to perform action", 400);
+
+    const imagesRes = await cloudinaryService(files, req.body.service);
+
+
+    const user = await userRepository.findOne({ where: { id: userId } });
+    if (!user) {
+      return error(res, "User Not found", 400);
+    }
+
 
     const { urls } = await cloudinaryService(req.files, service);
-    const data = await uploadProfileCoverPhotoService(response.user.id, urls);
+    const data = await uploadProfileCoverPhotoService(user.id, urls);
+
+    console.log(urls)
+    user.profileCoverPhoto = imagesRes[0];
+
 
     return success(res, data, "Cover photo uploaded successfully");
   } catch (err) {
@@ -111,7 +135,16 @@ export const createProfileController = async (req: Request, res: Response) => {
     const userTrackRepository = connectionSource.getRepository(UserTrack);
     const trackRepository = connectionSource.getRepository(Tracks);
 
+    //find or create user profile
+
     const user = await userRepository.findOne({ where: { id: userId } });
+
+    // const userProfile = await userRepository.upsert({
+    //   id: userId,
+    //   firstName: name,
+
+    // });
+
 
     if (!user) {
       return error(res, "User Not found", 400);
@@ -191,5 +224,52 @@ export const deletePortfolioDetails: RequestHandler = async (
     });
   } catch (error) {
     res.status(500).json(error as Error);
+  }
+};
+
+export const deleteAllSectionEntries: RequestHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+
+
+    const dynamicSection = {
+      about: aboutRepository,
+      education: educationRepository,
+      workExperience: workExperienceRepositry,
+      skills: skillsDetailRepository,
+      projects: projectRepository,
+      interests: interestRepository,
+      sections: sectionRepository
+    }
+
+
+    const { userId } = req.params;
+    const { sectionName } = req.body;
+
+
+    const currentRepo = dynamicSection[sectionName];
+
+    if (currentRepo === undefined) {
+      return next(new BadRequestError("Invalid or missing section name"));
+    }
+
+    const user = await userRepository.findOne({ where: { id: userId } });
+    if (!user) {
+      return next(new BadRequestError("User not found"));
+    }
+    const alluserEntries = await currentRepo.find({ where: { userId: userId } });
+    if (alluserEntries.length === 0) {
+      return next(new BadRequestError("No entries to delete"));
+    }
+    const response = await currentRepo.remove(alluserEntries);
+    if (response.affected === 0) {
+      return next(new BadRequestError("No entries to delete"));
+    }
+    return success(res, "Successfully deleted all entries");
+  } catch (err) {
+    return next(new InternalServerError(err.message));
   }
 };
