@@ -22,6 +22,15 @@ export const createSkills: RequestHandler = async (
   try {
     const { skills, sectionId, userId } = skillsSchema.parse(req.body);
 
+    const existingData = await getSkillsService(userId);
+    const existingSkills = existingData.map((record) => record.skills);
+
+    skills.forEach((skill) => {
+      if (existingSkills.includes(skill)) {
+        error(res, 'A skill already exists', 400);
+      }
+    })
+
     const skillData = skills.map((skill) => ({
       skills: skill,
       sectionId,
@@ -82,7 +91,7 @@ export const getSkillsDetails: RequestHandler = async (
   res: Response
 ) => {
   try {
-    const { userId } = req.body;
+    const { userId } = req.params;
     // Fetch skills for the logged-in user based on their user ID
     const result = await getSkillsService(userId);
 
