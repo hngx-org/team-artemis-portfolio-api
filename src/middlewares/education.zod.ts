@@ -77,25 +77,23 @@ async function validateUpdateData(
     console.log(validatedData)
     next() // Continue to the next middleware or route handler
   } catch (error) {
-    throw new BadRequestError(error.message)
+    const err = new BadRequestError(error.message);
+    return res.status(err.statusCode).json({ message: err.message });
   }
 }
 
-async function validateCreateData(data: any, userId: string) {
-  // Validate date strings in "yy-mm-dd" format
-  if (data.from && !validateDateYYMMDD(data.from)) {
-    throw new BadRequestError("Invalid 'from' date format")
-  }
+async function validateCreateData(data: any, userId: string, res: Response) {
 
-  if (data.to && !validateDateYYMMDD(data.to)) {
-    throw new BadRequestError("Invalid 'to' date format")
+  try {
+    // Validate the data against the schema
+    await CreateEducationDetailDataSchema.parseAsync({
+      ...data,
+      userId,
+    })
+  } catch (error) {
+    return res.status(500).json({ error: 'Internal server error' })
   }
-
-  // Validate the data against the schema
-  await CreateEducationDetailDataSchema.parseAsync({
-    ...data,
-    userId,
-  })
+  
 }
 
 export { validateUpdateData, validateCreateData, EducationDetailDataSchema }
