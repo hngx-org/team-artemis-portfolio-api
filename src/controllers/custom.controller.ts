@@ -388,7 +388,7 @@ const sectionSchema = z.object({
   meta: z.string().optional(),
 });
 
-const updateSectionSchema: AnyZodObject = z
+const updateSectionSchema: any = z
   .object({
     name: z
       .string()
