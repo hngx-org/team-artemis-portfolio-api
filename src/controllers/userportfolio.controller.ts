@@ -12,6 +12,10 @@ import {
   WorkExperienceDetail,
   UserTrack,
   Tracks,
+  Language,
+  Certificate,
+  Award,
+  References
 } from "../database/entity/model";
 import { NotFoundError, BadRequestError } from "../middlewares/index";
 import { User } from "../database/entity/user";
@@ -63,6 +67,26 @@ const getPortfolioDetails = async (
       where: { userId },
     });
 
+    const languages = await connectionSource.manager.find(Language, {
+      where: { userId },
+    });
+
+    const awards = await connectionSource.manager.find(Award, {
+      where: { user_id: userId },
+    });
+
+    const certifications = await connectionSource.manager.find(Certificate, {
+      where: { userId },
+    });
+
+    const user = await connectionSource.manager.find(User, {
+      where: { id: userId },
+    });
+
+    const references = await connectionSource.manager.find(References, {
+      where: { user },
+    });
+
     const sections = await connectionSource.manager.find(Section);
     res.status(200).json({
       workExperience,
@@ -72,12 +96,16 @@ const getPortfolioDetails = async (
       about,
       projects,
       sections,
+      languages,
+      awards,
+      certifications,
+      references,
     });
   } catch (error) {
     return next(error);
   }
 };
-//.
+
 const getAllPortfolioDetails = async (req: Request, res: Response) => {
   const PortfolioDetails = await portfolioRepository.find();
   return res.json({ PortfolioDetails });
