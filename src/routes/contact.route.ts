@@ -189,7 +189,7 @@ router.post("/socials", createSocials);
 
 /**
  * @swagger
- * /api/contact/{Id}:
+ * /api/contact/{id}:
  *   patch:
  *     summary: Update a contact by ID
  *     description: Update a contact by providing its ID.
@@ -250,6 +250,6 @@ router.post("/socials", createSocials);
  *     tags:
  *       - Contacts
  */
-router.patch("/contact/:Id", updateContactController);
+router.patch("/contact/:id", updateContactController);
 
 module.exports = router;
