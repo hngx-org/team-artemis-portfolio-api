@@ -9,22 +9,27 @@ export const createSkillsService = async (
 
   for (const data of skillData) {
     const newSkill = skillsDetailRepository.create(data);
-    skills.push(newSkill);
-  }
+    const skillexist = await skillsDetailRepository.find({
+      where: { skills: data.skills },
+    });
 
+    if (skillexist.length == 0) {
+      skills.push(newSkill);
+    }
+  }
   const savedskill = await skillsDetailRepository.save(skills);
 
   return { successful: true, message: "skills successfully saved" };
 };
-export const getSkillsService = async (userId: string
-): Promise<Skill[]> => {
+export const getSkillsService = async (userId: string): Promise<Skill[]> => {
   const skillsDetailRepository = connectionSource.getRepository(SkillsDetail);
 
-  const savedskilldetials = await skillsDetailRepository.find({where:{userId: userId}});
+  const savedskilldetials = await skillsDetailRepository.find({
+    where: { userId: userId },
+  });
 
   return savedskilldetials;
 };
-
 
 export const updateSkillsService = async (
   skillId: number,
@@ -60,7 +65,9 @@ export const deleteSkillsService = async (
 ): Promise<{ successful: boolean; message: string }> => {
   try {
     const skillsDetailRepository = connectionSource.getRepository(SkillsDetail);
-    const skillToDelete = await skillsDetailRepository.findOne({ where: { id: skillId } });
+    const skillToDelete = await skillsDetailRepository.findOne({
+      where: { id: skillId },
+    });
 
     if (!skillToDelete) {
       return { successful: false, message: "Skill not found" };
