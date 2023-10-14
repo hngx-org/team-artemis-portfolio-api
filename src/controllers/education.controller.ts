@@ -1,6 +1,6 @@
 import { Request, RequestHandler, Response, NextFunction } from 'express'
 import { connectionSource } from '../database/data-source'
-import { EducationDetail } from '../database/entity/model'
+import { Degree, EducationDetail, Section } from '../database/entity/model'
 import { createEducationDetail } from '../services/education.service'
 import { EducationDetailData } from '../interfaces/education.interface'
 import { User } from '../database/entity/user'
@@ -85,7 +85,7 @@ const createEducationDetailController = async (
   try {
     const userId = req.params.id
 
-    const { degreeId, fieldOfStudy, school, from, description, to } =
+    const { degreeId, fieldOfStudy, school, from, description, to, sectionId } =
       req.body as EducationDetailData
 
     const data = {
@@ -95,9 +95,20 @@ const createEducationDetailController = async (
       from,
       description,
       to,
+      sectionId,
+    }
+
+    // Validate date strings in "yy-mm-dd" format
+    if (data.from && !validateDateYYMMDD(data.from)) {
+      return res.status(400).json({ errors: "Invalid 'from' date format" })
+      // throw new BadRequestError("Invalid 'from' date format")
+    }
+
+    if (data.to && !validateDateYYMMDD(data.to)) {
+      // throw new BadRequestError("Invalid 'to' date format")
+      return res.status(400).json({ errors: "Invalid 'to' date format" })
     }
     await validateCreateData(data, userId, res)
-    
 
     // Define an array of required fields
     const requiredFields = [
@@ -107,6 +118,7 @@ const createEducationDetailController = async (
       'from',
       'description',
       'to',
+      'sectionId',
     ]
 
     // Check for missing fields
@@ -121,12 +133,33 @@ const createEducationDetailController = async (
     const userRepository = connectionSource.getRepository(User)
     const user = await userRepository.findOne({ where: { id: userId } })
 
+    const sectionRepository = connectionSource.getRepository(Section)
+    const degreeRepository = connectionSource.getRepository(Degree)
+    const section = await sectionRepository.findOne({
+      where: { id: sectionId },
+    })
+    const degree = await degreeRepository.findOne({ where: { id: degreeId } })
+
     if (!user) {
       // Create a CustomError with a 404 status code
       const err = new NotFoundError(
         'Error creating education detail: User not found'
       )
-      res.status(err.statusCode).json({ error: err.message })
+      return res.status(err.statusCode).json({ error: err.message })
+    }
+    if (!section) {
+      // Create a CustomError with a 404 status code
+      const err = new NotFoundError(
+        'Error creating education detail: Section not found'
+      )
+      return res.status(err.statusCode).json({ error: err.message })
+    }
+    if (!degree) {
+      // Create a CustomError with a 404 status code
+      const err = new NotFoundError(
+        'Error creating education detail: Degree not found'
+      )
+      return res.status(err.statusCode).json({ error: err.message })
     }
 
     // Call the service function to create an education detail
@@ -138,7 +171,7 @@ const createEducationDetailController = async (
       description,
       to,
       userId,
-      sectionId: 1,
+      sectionId,
     })
 
     const response = {
@@ -148,15 +181,15 @@ const createEducationDetailController = async (
       educationDetail,
     }
 
-    res.status(201).json(response)
+    return res.status(201).json(response)
   } catch (error) {
     if (error instanceof z.ZodError) {
-      res.status(400).json({ errors: error.errors })
+      return res.status(400).json({ errors: error.errors })
     } else {
       console.error('An error occurred:', error)
-      res.status(500).json({ error: 'Internal server error' })
-      next(error)
+      return res.status(500).json({ error: 'Internal server error' })
     }
+    next(error)
   }
 }
 
