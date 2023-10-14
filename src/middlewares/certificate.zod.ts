@@ -8,30 +8,37 @@ import {
 } from "zod-error";
 
 const certificateDataSchema = z.object({
-  title: z.string().trim(),
-  year: z.string().trim().optional(),
-  organization: z.string().trim().optional(),
-  url: z.string().url().trim().optional(),
-  description: z.string().trim().optional(),
-  userId: z.string().uuid().trim(),
-  sectionId: z.number().optional(),
+  title: z.string().min(1, { message: "Title is required" }).trim(),
+  year: z
+    .string()
+    .min(4, { message: "Year should be a 4-digit number" })
+    .optional(),
+  organization: z
+    .string()
+    .min(1, { message: "Organization is required" })
+    .optional(),
+  url: z.string().url({ message: "Invalid URL format" }).trim().optional(),
+  description: z
+    .string()
+    .min(1, { message: "Description is required" })
+    .optional(),
+  sectionId: z
+    .number()
+    .int({ message: "Section ID should be an integer" })
+    .optional(),
 });
 
-const options: ErrorMessageOptions = {
-  delimiter: {
-    error: " 🔥 ",
-  },
-  transform: (error: TransformErrorParams) => `${error?.errorMessage}`,
-};
+// const options: ErrorMessageOptions = {
+//   delimiter: {
+//     error: " 🔥 ",
+//   },
+//   transform: (error: TransformErrorParams) => `${error?.errorMessage}`,
+// };
 
-async function validateUpdateData(
-  req: Request,
-  res: Response,
-  next: NextFunction
-) {
+async function validateCertificateData(req: Request, res: Response) {
   try {
-    await parseAsync(certificateDataSchema, req.body, options);
-    next();
+    const isValidData = await parseAsync(certificateDataSchema, req.body);
+    return isValidData;
   } catch (error) {
     const err = new BadRequestError(error.message);
     console.log(err.message);
@@ -39,4 +46,4 @@ async function validateUpdateData(
   }
 }
 
-export { validateUpdateData, certificateDataSchema };
+export { validateCertificateData, certificateDataSchema };
