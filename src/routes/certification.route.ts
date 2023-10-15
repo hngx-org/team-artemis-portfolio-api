@@ -5,7 +5,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /api/update-certification/{userId}/{id}:
+ * /api/update-certification/{userId}/{id}/{section_id}:
  *   put:
  *     summary: Update a user's certificate by ID
  *     description: Update a user's certificate by providing its ID.
@@ -125,6 +125,6 @@ const router = express.Router();
  *                   type: null
  */
 
-router.put("/update-certification/:userId/:id", updateCertificate);
+router.put("/update-certification/:userId/:id/:section_id", updateCertificate);
 
 module.exports = router;
