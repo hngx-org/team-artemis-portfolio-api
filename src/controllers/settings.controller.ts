@@ -1,9 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { success, error } from "../utils";
 import { ZodError } from "zod";
-import { NotificationSetting, UserTrack } from "../database/entity/model";
 import { connectionSource } from "../database/data-source";
-import { User } from "../database/entity/user";
 import {
   accountSettingSchema,
   hashPassword,
@@ -11,6 +9,7 @@ import {
   verifyPassword,
 } from "../services/settings.service";
 import { NotificationSettings } from "../interfaces/settings.interface";
+import { NotificationSetting, User } from "../database/entities";
 const userRespository = connectionSource.getRepository(User);
 
 export const updateUserAccountSettingController = async (
@@ -255,7 +254,9 @@ export const updateNotificationSettings = async (
       return error(res, "Please provide a valid User ID", 400);
     }
 
-    const user = await userRespository.findOneBy({ id: userId });
+    const user = await userRespository.findOne({
+      where: { id: userId },
+    });
 
     if (!user) {
       return error(res, "User does not exist", 400);
@@ -264,37 +265,38 @@ export const updateNotificationSettings = async (
     const notificationModel =
       connectionSource.getRepository(NotificationSetting);
 
-    const notification = await notificationModel.findOneBy({
-      userId,
+    const notification = await notificationModel.find({
+      order: { id: "DESC" },
+      take: 1,
     });
 
     if (!notification) {
       return error(
         res,
-        "Cannot find notification. Please provide a valid Notification ID",
+        "Cannot find notification. Please provide a valid User ID",
         400
       );
     }
 
-    notification.emailSummary = emailSummary;
-    notification.specialOffers = specialOffers;
-    notification.communityUpdate = communityUpdate;
-    notification.followUpdate = followUpdate;
-    notification.newMessages = newMessages;
-    notification.userId = userId;
+    const latestNotification = notification[0];
 
-    const notificationId = notification.id;
+    latestNotification.emailSummary = emailSummary;
+    latestNotification.specialOffers = specialOffers;
+    latestNotification.communityUpdate = communityUpdate;
+    latestNotification.followUpdate = followUpdate;
+    latestNotification.newMessages = newMessages;
 
-    const updateNotification = await notificationModel.update(
-      notificationId,
-      notification
-    );
+    const updateNotification = await notificationModel.save(latestNotification);
 
     if (!updateNotification) {
       return error(res, "Error updating notification", 400);
     }
 
-    return success(res, notification, "Notification updated successfully");
+    return success(
+      res,
+      updateNotification,
+      "Notification updated successfully"
+    );
   } catch (err) {
     console.log("error", err?.message);
     return error(res, err?.message);
@@ -313,8 +315,10 @@ export const getUserNotificationSettings = async (
 
     const notificationModel =
       connectionSource.getRepository(NotificationSetting);
-
-    const notifications = await notificationModel.findBy({ userId });
+    const notifications = await notificationModel.find({
+      order: { id: "DESC" },
+      take: 1,
+    });
 
     return success(res, notifications, "Notifications fetched successfully");
   } catch (err) {
