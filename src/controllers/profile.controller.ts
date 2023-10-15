@@ -4,7 +4,7 @@ import express, {
   RequestHandler,
   Response,
 } from "express";
-import { AnyZodObject, z } from "zod";
+import { AnyZodObject, ZodError, z } from "zod";
 import { connectionSource } from "../database/data-source";
 import {
   PortfolioDetail,
@@ -28,6 +28,7 @@ import {
 import { error, success } from "../utils";
 import { authMiddleWare, validateUser } from "../middlewares/auth";
 import { BadRequestError, InternalServerError } from "../middlewares";
+import { createPorfolioDataSchema } from "../middlewares/profile.zod";
 
 // Get the repository for the PortfolioDetails entity
 const userRepository = connectionSource.getRepository(User);
@@ -55,7 +56,6 @@ export const uploadProfileImageController: RequestHandler = async (
     if (!req.files) return error(res, "add event image", 400);
     const { service, userId } = req.body;
     const files = req.files as any;
-
     const imagesRes = await cloudinaryService(files, req.body.service);
 
     const user = await userRepository.findOne({ where: { id: userId } });
@@ -113,27 +113,58 @@ export const getAllUsers = async (req: Request, res: Response) => {
 };
 
 export const getUserById = async (req: Request, res: Response) => {
-  let tracks: any[] = [];
   try {
-    const { userId } = req.params;
+    const { userId: id } = req.params;
+    const userId = id.trim();
     const user = await userRepository.findOne({ where: { id: userId } });
-    const portfolio = await portfolioRepository.findOne({ where: { user } });
+
+    if(!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    /*
     const userTracks = await userTrackRepository
-      .createQueryBuilder("userTrack")
-      .innerJoinAndSelect("userTrack.track", "track")
-      .where("userTrack.userId = :userId", { userId: userId })
-      .getMany();
+    .createQueryBuilder("userTrack")
+    .innerJoinAndSelect("userTrack.track", "track")
+    .where("userTrack.userId = :userId", { userId: userId })
+    .getMany();
     for (let userTrack of userTracks) {
       tracks.push(userTrack.track);
-    }
-    res.status(200).json({ user, portfolio, tracks });
+    }*/
+
+    const [portfolio, userTracks] = await Promise.all([
+      await portfolioRepository.findOne({ where: { user } }),
+      await userTrackRepository.find({
+        where: { user }
+      })
+    ])
+    return res.json({ user, portfolio, tracks: userTracks });
   } catch (error) {
-    res.status(404).json({ message: "User not found" });
+    console.error(error)
+    return res.status(500).json({ message: "Internal Server Error" });
   }
 };
 
 export const createProfileController = async (req: Request, res: Response) => {
   try {
+
+    try {
+      await createPorfolioDataSchema.parse({
+        body: req.body,
+        params: req.params
+      })
+    } catch (err) {
+      const { errors } = err as ZodError;
+      res.statusCode = 400;
+      return res.json({
+        message: errors.map((error) => {
+          return error.message;
+        })
+      })
+
+    }
+
+
     const { name, trackId, city, country } = req.body;
     const { userId } = req.params;
 
@@ -142,18 +173,20 @@ export const createProfileController = async (req: Request, res: Response) => {
     );
     const otherDetailsJson: any = await otherDetails.json();
 
-    let { firstName, lastName, track, profilePictureUrl } =
-      otherDetailsJson.data;
-
+    if (!otherDetailsJson.data) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    
     const user = await userRepository.findOneBy({ id: userId });
+    let { firstName, lastName, track, profilePictureUrl } = otherDetailsJson.data;
+    
+    
+    console.log(user)
     if (!user) {
-      if (!otherDetailsJson) {
-        res.status(400).json({ message: "Check User ID" });
-      }
 
       console.log(profilePictureUrl);
       if (!firstName || !lastName || !profilePictureUrl) {
-        return error(res, "Failed to create ser", 400);
+        return error(res, "Failed to create user", 400);
       }
 
       const newUser = await userRepository.upsert(
@@ -176,7 +209,7 @@ export const createProfileController = async (req: Request, res: Response) => {
       track = await trackRepository.findOne({ where: { id: trackId } });
 
       if (!track) {
-        return error(res, "Track Not found", 400);
+        return error(res, "Track Not found. Remove Track from request body if unsure", 400);
       }
 
       const userTrack = await userTrackRepository.findOne({
@@ -206,6 +239,7 @@ export const createProfileController = async (req: Request, res: Response) => {
       { portfolio: portfolio, user: user },
       "Successfully Created Portfolio profile"
     );
+
   } catch (err) {
     return error(res, err.message, 500);
   }
