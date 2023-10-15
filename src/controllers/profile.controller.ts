@@ -8,6 +8,7 @@ import { AnyZodObject, ZodError, z } from "zod";
 import { connectionSource } from "../database/data-source";
 import {
   PortfolioDetail,
+  Award,
   Tracks,
   UserTrack,
   WorkExperienceDetail,
@@ -19,6 +20,7 @@ import {
   Skill,
   SkillsDetail,
   User,
+  Certificate
 } from "../database/entities";
 import {
   cloudinaryService,
@@ -46,6 +48,8 @@ const skillsDetailRepository = connectionSource.getRepository(SkillsDetail);
 const portfolioDetailsRepository =
   connectionSource.getRepository(PortfolioDetail);
 const trackRepository = connectionSource.getRepository(Tracks);
+const certificateRepository = connectionSource.getRepository(Certificate);
+const awardRepository = connectionSource.getRepository(Award);
 
 // Export the uploadProfileImageController function
 export const uploadProfileImageController: RequestHandler = async (
@@ -117,28 +121,15 @@ export const getUserById = async (req: Request, res: Response) => {
     const { userId: id } = req.params;
     const userId = id.trim();
     const user = await userRepository.findOne({ where: { id: userId } });
-
-    if(!user) {
+     if(!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    /*
-    const userTracks = await userTrackRepository
-    .createQueryBuilder("userTrack")
-    .innerJoinAndSelect("userTrack.track", "track")
-    .where("userTrack.userId = :userId", { userId: userId })
-    .getMany();
-    for (let userTrack of userTracks) {
-      tracks.push(userTrack.track);
-    }*/
+    const portfolio = await portfolioRepository.findOne({ where: { user } });
+    const userTracks = await userTrackRepository.find({ where: { user }, relations: ['track'] });
+    const { track } = userTracks[0];
+    res.status(200).json({ user, portfolio, track });
 
-    const [portfolio, userTracks] = await Promise.all([
-      await portfolioRepository.findOne({ where: { user } }),
-      await userTrackRepository.find({
-        where: { user }
-      })
-    ])
-    return res.json({ user, portfolio, tracks: userTracks });
   } catch (error) {
     console.error(error)
     return res.status(500).json({ message: "Internal Server Error" });
@@ -290,6 +281,9 @@ export const deleteAllSectionEntries: RequestHandler = async (
       projects: projectRepository,
       interests: interestRepository,
       sections: sectionRepository,
+      certificates: certificateRepository,
+      skill: skillRepository,
+      award: awardRepository
     };
 
     const { userId } = req.params;
@@ -300,13 +294,13 @@ export const deleteAllSectionEntries: RequestHandler = async (
     if (currentRepo === undefined) {
       return next(new BadRequestError("Invalid or missing section name"));
     }
-
+    console.log(userId)
     const user = await userRepository.findOne({ where: { id: userId } });
     if (!user) {
       return next(new BadRequestError("User not found"));
     }
     const alluserEntries = await currentRepo.find({
-      where: { userId: userId },
+      where: { user },
     });
     if (alluserEntries.length === 0) {
       return next(new BadRequestError("No entries to delete"));

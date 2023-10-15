@@ -57,6 +57,8 @@ export class Section {
   @OneToMany(() => Project, (project) => project.section)
   projects: Project[];
 
+
+
   @OneToMany(() => SkillsDetail, (skillsDetail) => skillsDetail.section)
   skillsDetails: SkillsDetail[];
 

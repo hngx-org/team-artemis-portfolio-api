@@ -1,6 +1,6 @@
 import { connectionSource } from "../database/data-source";
 import { error, success } from "../utils";
-import { Images, Project, ProjectsImage } from "../database/entity/model";
+import { Images, Project, ProjectsImage } from "../database/entities";
 import { cloudinaryService } from "./image-upload.service";
 import { NotFoundError, CustomError } from "../middlewares";
 
@@ -19,7 +19,7 @@ export const updateProjectService = async (
 
         throw new NotFoundError("Project not found!!");
     }
-    if(JSON.stringify(data) === '{}'){
+    if (JSON.stringify(data) === '{}') {
         throw new CustomError("No data to update", 400);
     }
 
@@ -35,15 +35,28 @@ export const updateProjectService = async (
                 image.url = urls[i];
                 await imagesRepository.save(image);
                 const projectImage = new ProjectsImage();
-                projectImage.projectId = id;
-                projectImage.imageId = image.id;
+                projectImage.project = updatedProject;
+                projectImage.image = image;
                 await projectsImageRepository.save(projectImage);
             }
         } else {
             throw new CustomError(message, 400);
         }
     }
+    const newProject = await projectRepository.findOne({
+        where: {
+            id: +updatedProject.id,
+        },
+        relations: ['projectsImages'],
+    });
+    const allThumbnails = await projectsImageRepository.find({ where: { project: newProject } });
 
-    return updatedProject;
+    const thumbnail = await imagesRepository.findOne({ where: { id: allThumbnails[0].id } });
+    newProject.thumbnail = thumbnail.url as any;
+    const imageUrlsPromises = newProject.projectsImages.map(async (image) => {
+        const imageEntity = await imagesRepository.findOne({ where: { id: image.id } });
+        return imageEntity ? imageEntity.url : null;
+    });
+    newProject.projectsImages = await Promise.all(imageUrlsPromises) as any;
+    return newProject
 }
-
