@@ -19,7 +19,7 @@ import { NextFunction, Request, Response } from "express";
 
 const storage = multer.memoryStorage();
 const uploads = multer({ storage }).array("images", 1);
-const uploadHandler = (req: Request, res: Response, next: NextFunction) => {
+const uploadHandler = (req: Request, res: Response, next: NextFunction) => {  
   uploads(req, res, function (err) {
     if (err) {
       const newForbbidenError = new ForbiddenError("You can only upload a maximum of 10 images");
