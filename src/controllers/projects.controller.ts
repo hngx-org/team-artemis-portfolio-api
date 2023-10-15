@@ -114,24 +114,16 @@ export const createProject: RequestHandler = async (
     project.section = section;
     project.thumbnail = 0;
 
-    const newProject = await projectRepository.create({
-      title,
-      year,
-      url,
-      tags,
-      description,
-      user,
-      section,
-      thumbnail: 0,
-    });
-    console.log(newProject)
 
-
+    const newProject = await projectRepository.save(project);
+    if (!newProject.id) {
+      throw new CustomError('Project not created', 400);
+    }
     const files = req.files as any;
     if (!files.length) {
       throw new BadRequestError('Add thumbnail image');
     }
-    console.log(files.length)
+
     if (files.length > 10) {
       throw new BadRequestError('You can only upload a maximum of 10 images');
     }
@@ -155,7 +147,7 @@ export const createProject: RequestHandler = async (
 
         const savedImage = await imageRepository.findOne({ where: { id: imageResponse.id } });
 
-        console.log(newProject, savedImage);
+
         projectImage.project = newProject;
         projectImage.image = savedImage;
 
@@ -171,11 +163,9 @@ export const createProject: RequestHandler = async (
     if (allThumbnails.length === 0) {
       return success(res, updatedProject, "Created without thumbnail");
     }
-    console.log(allThumbnails);
 
-    const thumbnail = await imageRepository.findOneBy({
-      id: allThumbnails[0].image.id,
-    });
+    const thumbnail = await imageRepository.findOne({ where: { id: allThumbnails[0].id } });
+
     let data;
     if (thumbnail) {
       const thumbnailId = thumbnail.id;
