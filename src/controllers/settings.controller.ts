@@ -144,13 +144,13 @@ export const createNotificationSettingController = async (
       });
     }
 
-    const notificationSetting: NotificationSettings = new NotificationSetting();
-    notificationSetting.userId = userId;
+    const notificationSetting = new NotificationSetting();
     notificationSetting.communityUpdate = communityUpdate || false;
     notificationSetting.emailSummary = emailSummary || false;
     notificationSetting.newMessages = newMessages || false;
     notificationSetting.followUpdate = followUpdate || false;
     notificationSetting.specialOffers = specialOffers || false;
+    notificationSetting.user = isExistingUser;
 
     const notificationInfo = await notificationSettingRepository.save(
       notificationSetting
@@ -266,6 +266,7 @@ export const updateNotificationSettings = async (
       connectionSource.getRepository(NotificationSetting);
 
     const notification = await notificationModel.find({
+      where: { user: user },
       order: { id: "DESC" },
       take: 1,
     });
@@ -309,13 +310,20 @@ export const getUserNotificationSettings = async (
 ) => {
   try {
     const userId = req.params.userId;
-    if (!userId) {
+
+    const user = await userRespository.findOne({
+      where: { id: userId },
+    });
+
+    if (!user) {
       return error(res, "Please provide a valid User ID", 400);
     }
 
     const notificationModel =
       connectionSource.getRepository(NotificationSetting);
+
     const notifications = await notificationModel.find({
+      where: { user: user },
       order: { id: "DESC" },
       take: 1,
     });
