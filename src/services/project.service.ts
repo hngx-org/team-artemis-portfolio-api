@@ -60,4 +60,3 @@ export const updateProjectService = async (
     newProject.projectsImages = await Promise.all(imageUrlsPromises) as any;
     return newProject
 }
-

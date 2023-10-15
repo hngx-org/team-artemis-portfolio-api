@@ -1,12 +1,6 @@
-<<<<<<< HEAD
-import { connectionSource } from '../database/data-source'
-import { Award } from '../database/entities'
-import { AwardData } from '../interfaces/'
-=======
 import { connectionSource } from "../database/data-source";
 import { Award, User, Section } from "../database/entities";
 import { AwardData } from "../interfaces/";
->>>>>>> 0c932f8cffc8479934ddf2bc3ac90f4ef2ad1490
 
 // Service function to create an award
 export const createAwardService = async (award: AwardData) => {
