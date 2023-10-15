@@ -14,10 +14,7 @@ export const connectionSource = new DataSource({
   database: process.env.DB_NAME,
   synchronize: false,
   logging: false,
-  entities: [ ...Object.values(entities)],
+  entities: [...Object.values(entities)],
   migrations: [],
   subscribers: [],
 });
-
-
-

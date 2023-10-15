@@ -22,7 +22,7 @@ const certificateDataSchema = z.object({
     .string()
     .min(1, { message: "Description is required" })
     .optional(),
-  sectionId: z
+  section_id: z
     .number()
     .int({ message: "Section ID should be an integer" })
     .optional(),

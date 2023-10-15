@@ -17,11 +17,12 @@ const isValidCertification = (payload: any): payload is UpdateCertificateInterfa
  
 export const updateCertificate = async (req: Request, res: Response) => {
    try {
-      const id = parseInt(req.params.id)
-      const userId = req.params.userId
+      const id = parseInt(req.params.id);
+      const section_id = parseInt(req.params.section_id);
+      const user_id = req.params.userId
       const payload = req.body
 
-      if (!id || typeof id !== "number" || !userId || !uuidPattern.test(userId)) {
+      if (!id || typeof id !== "number" || !user_id || !uuidPattern.test(user_id)) {
          return res.status(400).json({
            success: false, 
            message: "Please provide an integer id and a valid UUID user id as parameters"
@@ -42,7 +43,7 @@ export const updateCertificate = async (req: Request, res: Response) => {
          });
       };
 
-      const data = await updateACertificate(id, userId, payload)
+      const data = await updateACertificate(id, user_id, section_id, payload)
       if (data.successful) {
          success(res, data.data[0], "Certificate updated successfully")
       } else {

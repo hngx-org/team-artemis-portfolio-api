@@ -33,6 +33,33 @@ export const createSocials = async (req: Request, res: Response) => {
   }
 }
 
+// get all social media types
+  export const getSocials = async (req: Request, res: Response) => {
+  
+    try {
+      
+  
+      const socialsRepo = dataSource.getRepository(SocialMedia)
+     
+      const data = await socialsRepo.find()
+      const response = {
+        status: "success",
+        statusCode: 200,
+        data :  data
+      };
+      if(response.data.length > 0){
+        return res
+          .status(200)
+          .json(response);
+  
+      }
+      return res.status(200).json({ statusCode:200, status:"No social media type found", data: [] })
+    } catch (error) {
+  
+        return res.status(500).json({ message: "Oops something happened" });
+    }
+  }
+  
 
 
 // creates new contacts socials
@@ -46,7 +73,7 @@ export const createContacts = async (req: Request, res: Response, next:NextFunct
   const { url, user_id, social_media_id }:Icontacts = req.body;
   const formattedId = Number(social_media_id);
    const isValid = schema.safeParse({url,user_id,social_media_id:formattedId})
-   console.log(isValid)
+   
   try {
     if(isValid.success){// check if request body details is a valid data
       await createContact(social_media_id, url, user_id);
@@ -57,7 +84,7 @@ export const createContacts = async (req: Request, res: Response, next:NextFunct
     }
   } catch (error) {
     console.error("Error creating contact:", error);
-    next(error)
+    throw new BadRequestError(constant.MESSAGES.BAD_REQUEST)
   }
 };
 
@@ -69,17 +96,15 @@ export const getContacts = async (req: Request, res: Response) => {
     const { user_id } = req.params
     const schema = z.object({user_id:z.string().uuid()})
     const parsedUserId = schema.safeParse({user_id})
-    console.log(parsedUserId)
    // const userIdRegex = /^[A-Fa-f0-9\-]+$/
     if ( !parsedUserId.success) {
-      console.log('in')
+     
       return res.status(400).json({ message: MESSAGES.INVALID_INPUT })
     }
 
     const contacts = await contactsRepo.find({
       where: { userId: String(user_id) },
     })
-    console.log(contacts)
     return res.status(200).json(contacts)
   } catch (error) {
     console.error('Error getting contacts:', error)
