@@ -2,6 +2,7 @@ import express from "express";
 // import { updateContactController } from '../controllers/contact.controller'
 import {
   createSocials,
+  getSocials,
   createContacts,
   getContacts,
   deleteContact,
@@ -186,6 +187,37 @@ router.delete("/contacts/:id", deleteContact);
  *       - Contacts
  */
 router.post("/socials", createSocials);
+
+/**
+ * @swagger
+ * /api/socials:
+ *   get:
+ *     summary: fetches all social media types 
+ *     description: Create a new social media type.
+ *     responses:
+ *       200:
+ *         description: Social Media types fetched successfully.
+ *         schema:
+ *           type: object
+ *           properties:
+ *            data:
+ *               type: object
+ *         example:
+ *           {statusCode: 200, status:'success', data:data}
+ *       500:
+ *         description: error fetching data.
+ *         schema:
+ *           type: object
+ *           properties:
+ *             message:
+ *               type: string
+ *         example:
+ *           message: "oops something happened"
+ *     tags:
+ *       - Contacts
+ */
+
+router.get('/socials/', getSocials)
 
 /**
  * @swagger
