@@ -1,9 +1,9 @@
 import { Request, RequestHandler, Response, NextFunction } from 'express'
 import { connectionSource } from '../database/data-source'
-import { Degree, EducationDetail, Section } from '../database/entity/model'
+import { Degree, EducationDetail, Section, User } from '../database/entities'
 import { createEducationDetail } from '../services/education.service'
 import { EducationDetailData } from '../interfaces/education.interface'
-import { User } from '../database/entity/user'
+
 
 import {
   CustomError,
@@ -21,6 +21,11 @@ import {
 } from '../middlewares/education.zod'
 import { z } from 'zod'
 
+const educationDetailRepository = connectionSource.getRepository(EducationDetail)
+const userRepository = connectionSource.getRepository(User)
+
+
+
 // Custom function to validate date strings in "yy-mm-dd" format
 function validateDateYYMMDD(dateString: string) {
   const datePattern = /^\d{4}-\d{2}-\d{2}$/
@@ -30,8 +35,6 @@ function validateDateYYMMDD(dateString: string) {
 // Endpoint to fetch the education section
 const fetchUserEducationDetail: RequestHandler = async (req, res, next) => {
   // Add 'next' parameter
-  const educationRepository = connectionSource.getRepository(EducationDetail)
-  const userRepository = connectionSource.getRepository(User)
 
   try {
     const id = req.params.id
@@ -40,16 +43,15 @@ const fetchUserEducationDetail: RequestHandler = async (req, res, next) => {
       throw new BadRequestError('User ID is required')
     }
 
-    const isUser = await userRepository.findOne({ where: { id } })
+    const user = await userRepository.findOne({ where: { id } })
 
-    if (!isUser) {
+    if (!user) {
       const error = new NotFoundError('A user with this ID does not exist')
       throw error
     }
 
-    const educationDetails = await educationRepository.find({
-      where: { userId: id },
-      relations: ['degree', 'section', 'user'],
+    const educationDetails = await educationDetailRepository.find({
+      where: { user }
     })
 
     if (!educationDetails) {
@@ -74,8 +76,7 @@ const fetchUserEducationDetail: RequestHandler = async (req, res, next) => {
 }
 
 // Get the repository for the EducationDetail entity
-const educationDetailRepository =
-  connectionSource.getRepository(EducationDetail)
+
 
 const createEducationDetailController = async (
   req: Request,

@@ -131,7 +131,6 @@ router.get("/users/:userId", getUserById);
  */
 router.post(
   "/profile/:userId",
-  validateCreatePortfolioDetails(createPorfolioDataSchema),
   createProfileController
 );
 
