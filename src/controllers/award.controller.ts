@@ -4,8 +4,8 @@ import { AwardData } from "../interfaces/";
 import { connectionSource } from "../database/data-source";
 import { NotFoundError } from "../middlewares";
 import { QueryFailedError } from "typeorm";
-import { Award } from "../database/entities/Award";
-import { User } from "../database/entities/User";
+import { Award, User } from "../database/entities";
+
 
 // Controller function to create an award
 const createAwardController = async (

@@ -1,5 +1,5 @@
 import { connectionSource } from '../database/data-source'
-import { Award } from '../database/entity/model'
+import { Award } from '../database/entities'
 import { AwardData } from '../interfaces/'
 
 // Service function to create an award
