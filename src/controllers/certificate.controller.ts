@@ -3,24 +3,32 @@ import { connectionSource as dataSource } from "../database/data-source";
 import { success, error } from "../utils";
 import { updateACertificate } from "../services/certificate.service";
 import { UpdateCertificateInterface } from "../interfaces/certification.interface";
-import { Certificate } from "../database/entity/model";
-import { User } from "../database/entity/user";
+import { Certificate, Section } from "../database/entities";
+import { User } from "../database/entities";
 import { validateCertificateData } from "../middlewares/certificate.zod";
 
 const certificateRepo = dataSource.getRepository(Certificate);
+const userRepository = dataSource.getRepository(User);
+const sectionRepository = dataSource.getRepository(Section)
 
 const addCertificateController = async (req: Request, res: Response) => {
   try {
-    const { title, year, organization, url, description, sectionId } = req.body;
+    const { title, year, organization, url, description, section_id } = req.body;
     const userId = req.params.userId;
 
-    const userRepository = dataSource.getRepository(User);
+    
     // Check if the user with userId exists
-    const isExistingUser = await userRepository.findOneBy({ id: userId });
+    const user = await userRepository.findOneBy({ id: userId });
 
-    if (!isExistingUser) {
+    if (!user) {
       return error(res, "User not found. Please provide a valid User ID", 404);
     }
+
+   const section = await sectionRepository.findOneBy({ id: section_id})
+   if (!section) {
+    return error(res, "Section not found. Please provide a valid section ID", 404);
+  }
+
 
     const certificateDataIsValid = await validateCertificateData(req, res);
 
@@ -32,8 +40,8 @@ const addCertificateController = async (req: Request, res: Response) => {
       certificate.organization = organization;
       certificate.url = url;
       certificate.description = description;
-      certificate.userId = userId;
-      certificate.sectionId = sectionId;
+      certificate.user = user;
+      certificate.section = section;
 
       // Save the certificate to the database
       const savedCertificate = await certificateRepo.save(certificate);
@@ -134,10 +142,11 @@ const isValidCertificate = (
 const updateCertificate = async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id);
-    const userId = req.params.userId;
+    const user_id = req.params.userId;
+    const section_id = parseInt(req.params.section_id);
     const payload = req.body;
 
-    if (!id || typeof id !== "number" || !userId || !uuidPattern.test(userId)) {
+    if (!id || typeof id !== "number" || !user_id || !uuidPattern.test(user_id)) {
       return res.status(400).json({
         success: false,
         message:
@@ -159,7 +168,7 @@ const updateCertificate = async (req: Request, res: Response) => {
       });
     }
 
-    const data = await updateACertificate(id, userId, payload);
+    const data = await updateACertificate(id, user_id, section_id, payload);
     if (data.successful) {
       success(res, data.data[0], "Certificate updated successfully");
     } else {
