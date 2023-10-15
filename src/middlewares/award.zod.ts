@@ -12,7 +12,7 @@ export const CreateAwardDataSchema = z.object({
   userId: z.string().refine((value) => isUUID(value), {
     message: 'userId has to be a valid UUID',
   }),
-  sectionId: z.number(),
+  section_id: z.number(),
 })
 
 
