@@ -6,8 +6,20 @@ import express, {
 } from "express";
 import { AnyZodObject, z } from "zod";
 import { connectionSource } from "../database/data-source";
-import { PortfolioDetails, Tracks, UserTrack, WorkExperienceDetail, Section, AboutDetail, EducationDetail, Project, InterestDetail, Skill, SkillsDetail } from "../database/entity/model";
-import { User } from "../database/entity/user";
+import {
+  PortfolioDetail,
+  Tracks,
+  UserTrack,
+  WorkExperienceDetail,
+  Section,
+  AboutDetail,
+  EducationDetail,
+  Project,
+  InterestDetail,
+  Skill,
+  SkillsDetail,
+  User,
+} from "../database/entities";
 import {
   cloudinaryService,
   uploadProfileCoverPhotoService,
@@ -17,12 +29,12 @@ import { error, success } from "../utils";
 import { authMiddleWare, validateUser } from "../middlewares/auth";
 import { BadRequestError, InternalServerError } from "../middlewares";
 
-
 // Get the repository for the PortfolioDetails entity
 const userRepository = connectionSource.getRepository(User);
-const portfolioRepository = connectionSource.getRepository(PortfolioDetails);
+const portfolioRepository = connectionSource.getRepository(PortfolioDetail);
 const userTrackRepository = connectionSource.getRepository(UserTrack);
-const workExperienceRepositry = connectionSource.getRepository(WorkExperienceDetail);
+const workExperienceRepositry =
+  connectionSource.getRepository(WorkExperienceDetail);
 const sectionRepository = connectionSource.getRepository(Section);
 const aboutRepository = connectionSource.getRepository(AboutDetail);
 const educationRepository = connectionSource.getRepository(EducationDetail);
@@ -30,9 +42,9 @@ const projectRepository = connectionSource.getRepository(Project);
 const interestRepository = connectionSource.getRepository(InterestDetail);
 const skillRepository = connectionSource.getRepository(Skill);
 const skillsDetailRepository = connectionSource.getRepository(SkillsDetail);
-const portfolioDetailsRepository = connectionSource.getRepository(PortfolioDetails);
+const portfolioDetailsRepository =
+  connectionSource.getRepository(PortfolioDetail);
 const trackRepository = connectionSource.getRepository(Tracks);
-
 
 // Export the uploadProfileImageController function
 export const uploadProfileImageController: RequestHandler = async (
@@ -44,9 +56,7 @@ export const uploadProfileImageController: RequestHandler = async (
     const { service, userId } = req.body;
     const files = req.files as any;
 
-
     const imagesRes = await cloudinaryService(files, req.body.service);
-
 
     const user = await userRepository.findOne({ where: { id: userId } });
     if (!user) {
@@ -55,7 +65,7 @@ export const uploadProfileImageController: RequestHandler = async (
     const { urls } = await cloudinaryService(req.files, service);
     const data = await uploadProfileImageService(user.id, urls);
 
-    console.log(urls)
+    console.log(urls);
     user.profilePic = imagesRes[0];
 
     return success(res, data, "Profile picture uploaded successfully");
@@ -74,22 +84,18 @@ export const uploadProfileCoverController: RequestHandler = async (
 
     const files = req.files as any;
 
-
     const imagesRes = await cloudinaryService(files, req.body.service);
-
 
     const user = await userRepository.findOne({ where: { id: userId } });
     if (!user) {
       return error(res, "User Not found", 400);
     }
 
-
     const { urls } = await cloudinaryService(req.files, service);
     const data = await uploadProfileCoverPhotoService(user.id, urls);
 
-    console.log(urls)
+    console.log(urls);
     user.profileCoverPhoto = imagesRes[0];
-
 
     return success(res, data, "Cover photo uploaded successfully");
   } catch (err) {
@@ -111,7 +117,7 @@ export const getUserById = async (req: Request, res: Response) => {
   try {
     const { userId } = req.params;
     const user = await userRepository.findOne({ where: { id: userId } });
-    const portfolio = await portfolioRepository.findOne({ where: { userId } });
+    const portfolio = await portfolioRepository.findOne({ where: { user } });
     const userTracks = await userTrackRepository
       .createQueryBuilder("userTrack")
       .innerJoinAndSelect("userTrack.track", "track")
@@ -131,32 +137,39 @@ export const createProfileController = async (req: Request, res: Response) => {
     const { name, trackId, city, country } = req.body;
     const { userId } = req.params;
 
-    const otherDetails = await fetch(`https://hngstage6-eagles.azurewebsites.net/api/explore/getPortfolio/${userId}`)
+    const otherDetails = await fetch(
+      `https://hngstage6-eagles.azurewebsites.net/api/explore/getPortfolio/${userId}`
+    );
     const otherDetailsJson: any = await otherDetails.json();
 
-    let { firstName, lastName, track, profilePictureUrl } = otherDetailsJson.data;
+    let { firstName, lastName, track, profilePictureUrl } =
+      otherDetailsJson.data;
 
     const user = await userRepository.findOneBy({ id: userId });
     if (!user) {
-
       if (!otherDetailsJson) {
         res.status(400).json({ message: "Check User ID" });
       }
 
-      console.log(profilePictureUrl)
+      console.log(profilePictureUrl);
       if (!firstName || !lastName || !profilePictureUrl) {
         return error(res, "Failed to create ser", 400);
       }
 
-      const newUser = await userRepository.upsert({ id: userId, profilePic: profilePictureUrl, firstName, lastName }, ["id"]);
+      const newUser = await userRepository.upsert(
+        { id: userId, profilePic: profilePictureUrl, firstName, lastName },
+        ["id"]
+      );
       return success(res, newUser, "Successfully Created Portfolio profile");
-
     }
 
     if (user) {
-      userRepository.update(user.id, { lastName: name, firstName: name, profilePic: user.profilePic });
+      userRepository.update(user.id, {
+        lastName: name,
+        firstName: name,
+        profilePic: user.profilePic,
+      });
     }
-
 
     if (trackId) {
       // first  check if the track exists
@@ -167,13 +180,13 @@ export const createProfileController = async (req: Request, res: Response) => {
       }
 
       const userTrack = await userTrackRepository.findOne({
-        where: { trackId: trackId, userId },
+        where: { track, user },
       });
 
       if (!userTrack) {
         const newUser = userTrackRepository.create({
-          trackId: trackId,
-          userId,
+          track,
+          user,
         });
 
         await userTrackRepository.save(newUser);
@@ -183,7 +196,7 @@ export const createProfileController = async (req: Request, res: Response) => {
     const portfolio = portfolioDetailsRepository.create({
       city,
       country,
-      userId,
+      user,
     });
 
     await portfolioDetailsRepository.save(portfolio);
@@ -235,8 +248,6 @@ export const deleteAllSectionEntries: RequestHandler = async (
   next: NextFunction
 ) => {
   try {
-
-
     const dynamicSection = {
       about: aboutRepository,
       education: educationRepository,
@@ -244,13 +255,11 @@ export const deleteAllSectionEntries: RequestHandler = async (
       skills: skillsDetailRepository,
       projects: projectRepository,
       interests: interestRepository,
-      sections: sectionRepository
-    }
-
+      sections: sectionRepository,
+    };
 
     const { userId } = req.params;
     const { sectionName } = req.body;
-
 
     const currentRepo = dynamicSection[sectionName];
 
@@ -262,7 +271,9 @@ export const deleteAllSectionEntries: RequestHandler = async (
     if (!user) {
       return next(new BadRequestError("User not found"));
     }
-    const alluserEntries = await currentRepo.find({ where: { userId: userId } });
+    const alluserEntries = await currentRepo.find({
+      where: { userId: userId },
+    });
     if (alluserEntries.length === 0) {
       return next(new BadRequestError("No entries to delete"));
     }
