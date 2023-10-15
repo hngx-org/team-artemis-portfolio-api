@@ -245,7 +245,11 @@ const create = async (
         "A custom section for this user has already been created",
         400
       );
-    const newRecord = await customRepository.create({ user_id, section_id });
+    const newRecord = new CustomUserSection();
+    newRecord.user = user;
+    newRecord.section = section;
+
+    const resNewRecord = await customRepository.save(newRecord);
     return success(res, newRecord, "Success");
   } catch (err) {
     console.log(err);
@@ -481,17 +485,18 @@ const updateCustomField = async (req: Request, res: Response) => {
         .status(err.statusCode)
         .json({ err: JSON.parse(err.message)[0].message });
     }
-
+    const { customSectionId } = req.body;
     const existingRecord = await customFieldRepository.findOne({
       where: { id: Number(id) },
     });
     if (!existingRecord) {
       return error(res, "Record not found", 404);
     }
+    const currCustomUserSection = await customRepository.findOne({ where: { id: customSectionId } })
 
     existingRecord.fieldType = req.body.fieldType;
     existingRecord.fieldName = req.body.fieldName;
-    existingRecord.customSectionId = req.body.customSectionId;
+    existingRecord.customSection = currCustomUserSection;
     existingRecord.value = req.body.value;
     const updatedRecord = await customFieldRepository.save(existingRecord);
     return success(res, updatedRecord, "Success");
