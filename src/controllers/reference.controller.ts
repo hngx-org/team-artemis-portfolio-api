@@ -74,7 +74,7 @@ export const deleteReferenceDetail = async (
 
 export const getReferenceById = async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
+    const { id }:any = req.params;
     const userRepository = connectionSource.getRepository(References);
     const refByid = await userRepository.findOneBy({
       userId: id,
@@ -85,5 +85,23 @@ export const getReferenceById = async (req: Request, res: Response) => {
     return success(res, refByid);
   } catch (err) {
     error(res, "invalid userid");
+  }
+};
+export const updateReference = async (req: Request, res: Response) => {
+  try {
+    const { userid }:any = req.params;
+     await connectionSource
+      .createQueryBuilder()
+      .update(References)
+      .set(req.body)
+      .where("userId = :id", { id: userid })
+      .execute();
+      const userRepository = connectionSource.getRepository(References);
+      const refByid = await userRepository.findOneBy({
+        userId: userid,
+      });
+    res.send(refByid);
+  } catch (err) {
+    res.send(err.message);
   }
 };
