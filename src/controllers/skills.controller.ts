@@ -24,14 +24,15 @@ export const createSkills: RequestHandler = async (
 
     const existingData = await getSkillsService(userId);
     const existingSkills = existingData.map((record) => record.skills);
+    const newSkills = [];
 
     skills.forEach((skill) => {
-      if (existingSkills.includes(skill)) {
-        error(res, 'A skill already exists', 400);
+      if (!existingSkills.includes(skill)) {
+        newSkills.push(skill);
       }
     })
 
-    const skillData = skills.map((skill) => ({
+    const skillData = newSkills.map((skill) => ({
       skills: skill,
       sectionId,
       userId,

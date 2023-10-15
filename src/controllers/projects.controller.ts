@@ -253,7 +253,7 @@ export const updateProjectById: RequestHandler = async (
     }
 
     const response = errors.join(', ');
-    return next(new BadRequestError(response));
+    throw new BadRequestError(response);
   }
 
   try {
