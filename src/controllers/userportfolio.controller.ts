@@ -2,24 +2,30 @@ import { Request, Response, RequestHandler, NextFunction } from "express";
 import { connectionSource } from "../database/data-source";
 import { validate as isValidUUID } from "uuid";
 import {
-  PortfolioDetails,
+  PortfolioDetail,
+  User,
+  WorkExperienceDetail,
   AboutDetail,
   EducationDetail,
   InterestDetail,
+  Skill,
   Project,
   Section,
   SkillsDetail,
-  WorkExperienceDetail,
-  UserTrack,
   Tracks,
-} from "../database/entity/model";
+} from "../database/entities";
 import { NotFoundError, BadRequestError } from "../middlewares/index";
-import { User } from "../database/entity/user";
-import { success } from "../utils";
 
 const portfolioDetailsRepository =
-  connectionSource.getRepository(PortfolioDetails);
-const portfolioRepository = connectionSource.getRepository(PortfolioDetails);
+  connectionSource.getRepository(PortfolioDetail);
+const portfolioRepository = connectionSource.getRepository(PortfolioDetail);
+const userRepository = connectionSource.getRepository(User);
+const workExperienceRepository =
+  connectionSource.getRepository(WorkExperienceDetail);
+const interestRepository = connectionSource.getRepository(InterestDetail);
+const skillRepository = connectionSource.getRepository(Skill);
+const projectRepository = connectionSource.getRepository(Project);
+const sectionRepository = connectionSource.getRepository(Section);
 
 export interface UpdatePortfolioDetailsDTO {
   name?: string;
@@ -38,34 +44,35 @@ const getPortfolioDetails = async (
       throw new BadRequestError(`${userId} is not a valid UUID`);
     }
 
+    const user = await userRepository.findOne({ where: { id: userId } });
     const workExperience = await connectionSource.manager.find(
       WorkExperienceDetail,
-      { where: { userId } }
+      { where: { user: { id: userId } } }
     );
 
     const education = await connectionSource.manager.find(EducationDetail, {
-      where: { userId },
+      where: { user },
     });
 
     const skills = await connectionSource.manager.find(SkillsDetail, {
-      where: { userId },
+      where: { user },
     });
 
     const interests = await connectionSource.manager.find(InterestDetail, {
-      where: { userId },
+      where: { user },
     });
 
     const about = await connectionSource.manager.find(AboutDetail, {
-      where: { userId },
+      where: { user },
     });
 
     const projects = await connectionSource.manager.find(Project, {
-      where: { userId },
+      where: { user },
     });
 
     const sections = await connectionSource.manager.find(Section);
     res.status(200).json({
-      workExperience,
+      user,
       education,
       skills,
       interests,
@@ -77,7 +84,7 @@ const getPortfolioDetails = async (
     return next(error);
   }
 };
-//.
+
 const getAllPortfolioDetails = async (req: Request, res: Response) => {
   const PortfolioDetails = await portfolioRepository.find();
   return res.json({ PortfolioDetails });
@@ -98,8 +105,8 @@ const updatePortfolioDetails: RequestHandler = async (
 
     const userRepository = connectionSource.getRepository(User);
     const portfolioDetailsRepository =
-      connectionSource.getRepository(PortfolioDetails);
-    const userTrackRepository = connectionSource.getRepository(UserTrack);
+      connectionSource.getRepository(PortfolioDetail);
+    const userTrackRepository = connectionSource.getRepository(Tracks);
     const trackRepository = connectionSource.getRepository(Tracks);
 
     let user = await userRepository.findOne({ where: { id: userId } });
@@ -128,9 +135,7 @@ const updatePortfolioDetails: RequestHandler = async (
         throw new NotFoundError("Track Not Found");
       }
 
-      const userTrack = await userTrackRepository.findOne({
-        where: { trackId: trackId, userId },
-      });
+      const userTrack = await userTrackRepository.find({where:{user}});
 
       if (!userTrack) {
         const newUserTrack = userTrackRepository.create({
@@ -143,7 +148,7 @@ const updatePortfolioDetails: RequestHandler = async (
     }
 
     let portfolio = await portfolioDetailsRepository.findOne({
-      where: { userId: userId },
+      where: { user {id: user_id} },
     });
 
     if (!portfolio) {
@@ -165,7 +170,7 @@ const updatePortfolioDetails: RequestHandler = async (
       res,
       {
         portfolio: portfolio,
-        track: track,
+        // track: track,
         user: user,
       },
       "Successfully updated user profile portfolio details"
@@ -210,7 +215,7 @@ const deletePortfolioDetails: RequestHandler = async (
 
 export {
   getPortfolioDetails,
-  getAllPortfolioDetails,
-  updatePortfolioDetails,
+  // getAllPortfolioDetails,
+  // updatePortfolioDetails,
   deletePortfolioDetails,
 };
