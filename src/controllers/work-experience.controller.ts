@@ -1,6 +1,6 @@
 import { Request, RequestHandler, Response } from "express";
 import { connectionSource } from "../database/data-source";
-import { WorkExperienceDetail } from "../database/entity/model";
+import { WorkExperienceDetail } from "../database/entities";
 import { error, success } from "../utils";
 import { ZodError, boolean, number, object, string } from "zod";
 
@@ -32,52 +32,52 @@ export const createWorkExperience: RequestHandler = async (
       required_error: "company is required in request body",
       invalid_type_error: "company must be type string"
     })
-    .trim()
-    .min(1, "company must not be an empty string"),
+      .trim()
+      .min(1, "company must not be an empty string"),
 
     role: string({
       required_error: "role is required in request body",
       invalid_type_error: "role must be type string"
     })
-    .trim()
-    .min(1, "role must not be an empty string"),
+      .trim()
+      .min(1, "role must not be an empty string"),
 
     startMonth: string({
       required_error: "startMonth is required in request body",
       invalid_type_error: "startMonth must be type string"
     })
-    .trim()
-    .min(1, "startMonth must not be an empty string"),
+      .trim()
+      .min(1, "startMonth must not be an empty string"),
 
     startYear: string({
       required_error: "startYear is required in request body",
       invalid_type_error: "startYear must be type string"
     })
-    .trim()
-    .min(1, "startYear must not be an empty string")
-    .length(4, "startYear must be 4 digits"),
+      .trim()
+      .min(1, "startYear must not be an empty string")
+      .length(4, "startYear must be 4 digits"),
 
     endMonth: string({
       required_error: "endMonth is required in request body",
       invalid_type_error: "endMonth must be type string"
     })
-    .trim()
-    .min(1, "endMonth must not be an empty string"),
+      .trim()
+      .min(1, "endMonth must not be an empty string"),
 
     endYear: string({
       required_error: "endYear is required in request body",
       invalid_type_error: "endYear must be type string"
     })
-    .trim()
-    .min(1, "endYear must not be an empty string")
-    .length(4, "endYear must be 4 digits"),
+      .trim()
+      .min(1, "endYear must not be an empty string")
+      .length(4, "endYear must be 4 digits"),
 
     description: string({
       required_error: "description is required in request body",
       invalid_type_error: "description must be type string"
     })
-    .trim()
-    .min(1, "description must not be an empty string"),
+      .trim()
+      .min(1, "description must not be an empty string"),
 
     isEmployee: boolean({
       required_error: "isEmployee is required in request body",
@@ -88,32 +88,38 @@ export const createWorkExperience: RequestHandler = async (
       required_error: "userId is required in request body",
       invalid_type_error: "userId must be type string"
     })
-    .trim()
-    .min(1, "userId must not be an empty string")
-    .uuid("userId must be in uuid format"),
+      .trim()
+      .min(1, "userId must not be an empty string")
+      .uuid("userId must be in uuid format"),
 
     sectionId: number({
       required_error: "sectionId is required in request body",
       invalid_type_error: "sectionId must be type number"
     })
   })
-  
 
-  
+
+
   try {
-    
+
     try {
       workExperienceSchema.parse(req.body);
-    } catch (error: unknown){
+    } catch (error: unknown) {
       const { errors } = error as ZodError;
       res.statusCode = 400;
       return res.json({
         message: errors.map((error) => {
-          return error.message; 
+          return error.message;
         })
       })
     }
-    
+    if (endYear < startYear) {
+      res.statusCode = 400;
+      return res.json({
+        message: "EndYear must be greater than startYear"
+      })
+    }
+
     const workExperience = new WorkExperienceDetail();
     workExperience.company = company;
     workExperience.role = role;
@@ -123,8 +129,8 @@ export const createWorkExperience: RequestHandler = async (
     workExperience.endYear = endYear;
     workExperience.description = description;
     workExperience.isEmployee = isEmployee;
-    workExperience.userId = userId;
-    workExperience.sectionId = sectionId;
+    workExperience.user = userId;
+    workExperience.section = sectionId;
 
     await workExperienceRepository.save(workExperience);
     return res.json({
@@ -229,6 +235,13 @@ export const updateWorkExperience: RequestHandler = async (
       res.statusCode = 404;
       return res.json({ message: "Work Experience not found" });
     }
+    if (endYear && startYear && endYear < startYear) {
+      res.statusCode = 400;
+      return res.json({
+        message: "EndYear must be greater than startYear"
+      })
+    }
+
 
     // Update the work experience details
     workExperienceToUpdate.company = company;
@@ -239,8 +252,8 @@ export const updateWorkExperience: RequestHandler = async (
     workExperienceToUpdate.endYear = endYear;
     workExperienceToUpdate.description = description;
     workExperienceToUpdate.isEmployee = isEmployee;
-    workExperienceToUpdate.userId = userId;
-    workExperienceToUpdate.sectionId = sectionId;
+    workExperienceToUpdate.user = userId;
+    workExperienceToUpdate.section = sectionId;
 
     // Save the updated work experience
     await workExperienceRepository.save(workExperienceToUpdate);
