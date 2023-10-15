@@ -122,15 +122,9 @@ export const getUserById = async (req: Request, res: Response) => {
     const { userId } = req.params;
     const user = await userRepository.findOne({ where: { id: userId } });
     const portfolio = await portfolioRepository.findOne({ where: { user } });
-    const userTracks = await userTrackRepository
-      .createQueryBuilder("userTrack")
-      .innerJoinAndSelect("userTrack.track", "track")
-      .where("userTrack.userId = :userId", { userId: userId })
-      .getMany();
-    for (let userTrack of userTracks) {
-      tracks.push(userTrack.track);
-    }
-    res.status(200).json({ user, portfolio, tracks });
+    const userTracks = await userTrackRepository.find({ where: { user }, relations: ['track'] });
+    const { track } = userTracks[0];
+    res.status(200).json({ user, portfolio, track });
   } catch (error) {
     res.status(404).json({ message: "User not found" });
   }

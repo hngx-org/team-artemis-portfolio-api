@@ -15,7 +15,8 @@ import {
   Tracks,
   UserTrack,
   Award,
-  Certificate
+  Certificate,
+  CustomUserSection
 } from "../database/entities";
 import { NotFoundError, BadRequestError } from "../middlewares/index";
 import { error, success } from "../utils/response.util";
@@ -77,11 +78,17 @@ const getPortfolioDetails = async (
     const projects = await connectionSource.manager.find(Project, {
       where: { user },
     });
+    const sections = await connectionSource.manager.find(CustomUserSection, {
+      where: { user },
+    });
+
+    const tracks = await userTrackRepository.findOne({ where: { user }, relations: ['track'] });
 
     const workExperience = await workExperienceRepository.find({ where: { user } })
 
     const awards = await awardRepository.find({ where: { user } })
     const certificates = await certificateRepository.find({ where: { user } })
+    const { track } = tracks;
 
     res.status(200).json({
       user,
@@ -92,7 +99,11 @@ const getPortfolioDetails = async (
       projects,
       workExperience,
       awards,
-      certificates
+      certificates,
+      sections,
+      track
+
+
     });
   } catch (error) {
     return next(error);

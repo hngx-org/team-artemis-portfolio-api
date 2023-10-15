@@ -87,7 +87,14 @@ export const createProject: RequestHandler = async (
     for (const key in jsonData) {
       if (Object.hasOwnProperty.call(jsonData, key)) {
         const normalizedKey = key.toLowerCase();
-        normalizedData[normalizedKey] = jsonData[key];
+        if (normalizedKey === 'userid') {
+          normalizedData["userId"] = jsonData[key];
+        } else if (normalizedKey === 'sectionid') {
+          normalizedData["sectionId"] = +jsonData[key];
+        } else {
+          normalizedData[normalizedKey] = jsonData[key];
+        }
+
       }
     }
 
@@ -106,7 +113,13 @@ export const createProject: RequestHandler = async (
       throw new BadRequestError(response);
     }
     const { title, year, url, tags, description, userId, sectionId } = normalizedData;
+    console.log(normalizedData)
+
+    if (!userId || !sectionId) {
+      throw new BadRequestError('Please provide user and section');
+    }
     const user = await userRepository.findOneBy({ id: userId });
+
     if (!user) {
       throw new NotFoundError('User not found');
     }
