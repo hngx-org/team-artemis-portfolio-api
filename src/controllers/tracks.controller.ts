@@ -22,9 +22,10 @@ export const getAllTracks = async (req: Request, res: Response) => {
 
 export const getTrackById = async (req: Request, res: Response) => {
     try {
-        const trackRepository = connectionSource.getRepository(Tracks);
 
-        const track = await trackRepository.findOne(req.params.id);
+
+
+        const track = await trackRepository.findOne({ where: { id: +req.params.id } });
 
         if (!track) {
             return error(res, "Track not found");

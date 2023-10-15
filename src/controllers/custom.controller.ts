@@ -5,7 +5,8 @@ import {
   CustomUserSection,
   CustomField,
   Section,
-} from "../database/entity/model";
+  User
+} from "../database/entities";
 import { success, error } from "../utils/response.util";
 import { deleteCustomSectionService } from "../services/custom.service";
 import {
@@ -26,6 +27,7 @@ import {
 const customRepository = connectionSource.getRepository(CustomUserSection);
 const customFieldRepository = connectionSource.getRepository(CustomField);
 const sectionRepository = connectionSource.getRepository(Section);
+const userRepositoy = connectionSource.getRepository(User);
 
 const MAX_ID_LENGTH = 10;
 
@@ -226,12 +228,16 @@ const create = async (
   res: Response
 ) => {
   try {
+
+    const { user_id, section_id } = req.body as any;
     const section = await sectionRepository.findOne({
-      where: { id: req.body.sectionId },
+      where: { id: section_id },
     });
     if (!section) return error(res, "SectionId does not exist", 400);
+    const user = await userRepositoy.findOne({ where: { id: user_id } })
+
     const alreadyCreated = await customRepository.findOne({
-      where: { userId: req.body.userId },
+      where: { user },
     });
     if (alreadyCreated)
       return error(
@@ -239,7 +245,7 @@ const create = async (
         "A custom section for this user has already been created",
         400
       );
-    const newRecord = await customRepository.save(req.body);
+    const newRecord = await customRepository.create({ user_id, section_id });
     return success(res, newRecord, "Success");
   } catch (err) {
     console.log(err);
@@ -411,7 +417,7 @@ const updateSectionSchema: any = z
       message:
         "At least one of the fields (name, description, meta, position) is required",
     }
-  ); ;
+  );;
 
 const getSectionSchema = z.object({
   name: z.string().optional(),

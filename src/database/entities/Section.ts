@@ -24,6 +24,9 @@ export class Section {
   @Column("character varying", { name: "name", nullable: true })
   name: string | null;
 
+  @Column("text", { name: "position" })
+  position: number;
+
   @Column("text", { name: "description", nullable: true })
   description: string | null;
 
@@ -56,6 +59,8 @@ export class Section {
 
   @OneToMany(() => Project, (project) => project.section)
   projects: Project[];
+
+
 
   @OneToMany(() => SkillsDetail, (skillsDetail) => skillsDetail.section)
   skillsDetails: SkillsDetail[];
