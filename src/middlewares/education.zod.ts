@@ -5,7 +5,7 @@ import { parseAsync, ErrorMessageOptions } from 'zod-error'
 import { validate as isUUID } from 'uuid'
 
 export const CreateEducationDetailDataSchema = z.object({
-  degreeId: z.number(),
+  degreeId: z.number().nullable(),
   fieldOfStudy: z.string(),
   school: z.string(),
   from: z.string(),
@@ -93,7 +93,7 @@ async function validateCreateData(data: any, userId: string, res: Response) {
   } catch (error) {
     return res.status(500).json({ error: 'Internal server error' })
   }
-  
+
 }
 
 export { validateUpdateData, validateCreateData, EducationDetailDataSchema }
