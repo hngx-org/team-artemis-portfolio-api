@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { connectionSource } from "../database/data-source";
-import { Tracks } from "../database/entity/model";
+import { Tracks } from "../database/entities";
 import { error, success } from "../utils";
 
 export const getAllTracks = async (req: Request, res: Response) => {
