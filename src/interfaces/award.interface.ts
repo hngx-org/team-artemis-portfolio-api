@@ -5,4 +5,5 @@ export interface AwardData {
   presented_by: string
   url: string | null
   description: string
+  section_id: number
 }
