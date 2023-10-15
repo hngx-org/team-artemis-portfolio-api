@@ -1,4 +1,4 @@
-import { Project, Images, ProjectsImage } from "../database/entity/model";
+import { Project, Images, ProjectsImage, User, Section } from "../database/entities";
 import { connectionSource } from "../database/data-source";
 import express, { NextFunction, Request, RequestHandler, Response } from "express";
 import { error, success } from "../utils";
@@ -16,6 +16,8 @@ import {
 const projectRepository = connectionSource.getRepository(Project);
 const imageRepository = connectionSource.getRepository(Images);
 const projectImageRepository = connectionSource.getRepository(ProjectsImage);
+const userRepository = connectionSource.getRepository(User);
+const sectionRepositoty = connectionSource.getRepository(Section);
 
 interface ProjectModel {
   title: string;
@@ -70,14 +72,6 @@ export const createProject: RequestHandler = async (
     for (const key in jsonData) {
       if (Object.hasOwnProperty.call(jsonData, key)) {
         const normalizedKey = key.toLowerCase();
-        if (key === 'userid') {
-          normalizedData["userId"] = jsonData[key];
-          continue;
-        }
-        if (key === 'sectionid') {
-          normalizedData["sectionId"] = +jsonData[key];
-          continue;
-        }
         normalizedData[normalizedKey] = jsonData[key];
       }
     }
@@ -97,21 +91,41 @@ export const createProject: RequestHandler = async (
       throw new BadRequestError(response);
     }
     const { title, year, url, tags, description, userId, sectionId } = normalizedData;
+    const user = await userRepository.findOneBy({ id: userId });
+    if (!user) {
+      throw new NotFoundError('User not found');
+    }
+
+    const section = await sectionRepositoty.findOneBy({ id: sectionId });
+    {
+      if (!section) {
+        throw new NotFoundError('Section not found');
+      }
+    }
 
 
-
-    const project = new Project() as unknown as ProjectModel;
+    const project = new Project();
     project.title = title;
     project.year = year;
     project.url = url;
     project.tags = tags;
     project.description = description;
-    project.userId = userId;
-    project.sectionId = sectionId;
+    project.user = user;
+    project.section = section;
     project.thumbnail = 0;
 
-    const data = await projectRepository.save(project);
-    const projectId = data.id;
+    const newProject = await projectRepository.create({
+      title,
+      year,
+      url,
+      tags,
+      description,
+      user,
+      section,
+      thumbnail: 0,
+    });
+    console.log(newProject)
+
 
     const files = req.files as any;
     if (!files.length) {
@@ -122,7 +136,13 @@ export const createProject: RequestHandler = async (
       throw new BadRequestError('You can only upload a maximum of 10 images');
     }
 
-    const imagesRes = await cloudinaryService(files, req.body.service);
+    // const imagesRes = await cloudinaryService(files, req.body.service);
+    const imagesRes = {
+      urls: [
+        'https://res.cloudinary.com/ol4juwon/image/upload/v1697351080/test/ggogjzsezo6fwzod5re7.png',
+        'https://res.cloudinary.com/ol4juwon/image/upload/v1697351082/test/mwcv2fp9yis7tmh8b1no.jpg'
+      ]
+    }
 
     for (const url of imagesRes.urls) {
       const image = new Images() as Images;
@@ -131,36 +151,40 @@ export const createProject: RequestHandler = async (
       try {
         const imageResponse = await imageRepository.save(image);
 
-        const projectImage = new ProjectsImage() as ProjectsImage;
-        projectImage.projectId = projectId;
-        projectImage.imageId = imageResponse.id;
+        const projectImage = new ProjectsImage();
 
-        await projectImageRepository.save(projectImage);
-      } catch (error) {
-        throw new CustomError('Error saving image', 400);
+        const savedImage = await imageRepository.findOne({ where: { id: imageResponse.id } });
+
+        console.log(newProject, savedImage);
+        projectImage.project = newProject;
+        projectImage.image = savedImage;
+
+        const out = await projectImageRepository.save(projectImage);
+
+      } catch (err) {
+        throw new CustomError(err.message, 400);
       }
     }
 
-    const allThumbnails = await projectImageRepository.findBy({
-      projectId: projectId,
-    });
-
+    const allThumbnails = await projectImageRepository.find({ where: { project } });
+    const updatedProject = await projectRepository.find({ where: { id: newProject.id } });
     if (allThumbnails.length === 0) {
-      return success(res, data, "Created without thumbnail");
+      return success(res, updatedProject, "Created without thumbnail");
     }
+    console.log(allThumbnails);
 
     const thumbnail = await imageRepository.findOneBy({
-      id: allThumbnails[0].imageId,
+      id: allThumbnails[0].image.id,
     });
-
+    let data;
     if (thumbnail) {
       const thumbnailId = thumbnail.id;
-      const data = await projectRepository.update(
-        { id: projectId },
+      data = await projectRepository.update(
+        { id: newProject.id },
         { thumbnail: thumbnailId }
       );
       const updatedProject = await projectRepository.findOneBy({
-        id: +projectId,
+        id: +newProject.id,
       });
       success(res, updatedProject, "Successfully created");
     } else {
@@ -253,7 +277,7 @@ export const updateProjectById: RequestHandler = async (
     }
 
     const response = errors.join(', ');
-    return next(new BadRequestError(response));
+    throw new BadRequestError(response);
   }
 
   try {
