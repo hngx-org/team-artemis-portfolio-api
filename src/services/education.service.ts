@@ -1,11 +1,11 @@
 import { connectionSource } from '../database/data-source'
-import { EducationDetail } from '../database/entity/model'
+import { Degree, EducationDetail, Section } from '../database/entity/model'
 import { EducationDetailData } from '../interfaces'
 import { User } from '../database/entity/user'
 
 const createEducationDetail = async (data: EducationDetailData) => {
   try {
-    const { userId } = data
+    const { userId, degreeId, sectionId } = data
 
     // Get the education detail repository
     const educationDetailRepository =
@@ -13,10 +13,22 @@ const createEducationDetail = async (data: EducationDetailData) => {
 
     // Check if the user exists
     const userRepository = connectionSource.getRepository(User)
+    const sectionRepository = connectionSource.getRepository(Section)
+    const degreeRepository = connectionSource.getRepository(Degree)
     const user = await userRepository.findOne({ where: { id: userId } })
+    const section = await sectionRepository.findOne({
+      where: { id: sectionId },
+    })
+    const degree = await degreeRepository.findOne({ where: { id: degreeId } })
 
     if (!user) {
-      return ('User not found')
+      return 'User not found'
+    }
+    if (!section) {
+      throw new Error('Section not found')
+    }
+    if (!degree) {
+      throw new Error('Degree not found')
     }
 
     // Create a new education detail instance

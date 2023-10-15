@@ -110,7 +110,7 @@ router.patch(
  */
 
 router.post(
-  "/set-notification-settings/{userId}",
+  "/set-notification-settings/:userId",
   validateUserId,
   validate,
   createNotificationSettingController
@@ -148,7 +148,7 @@ router.post(
  */
 
 router.delete(
-  "/delete-user-account/{userId}",
+  "/delete-user-account/:userId",
   validateUserId,
   validate,
   deleteUserAccount
@@ -202,8 +202,6 @@ router.delete(
  *               type: boolean
  *             message:
  *               type: string
- *             data:
- *               $ref: '#/components/schemas/NotificationSettings'
  *       400:
  *         description: Bad request. Invalid input or user not found.
  *         schema:
@@ -229,7 +227,7 @@ router.delete(
  */
 
 router.patch(
-  "/update-notification-settings/{userId}",
+  "/update-notification-settings/:userId",
   updateNotificationSettings
 );
 
@@ -250,8 +248,6 @@ router.patch(
  *         description: Notification settings retrieved successfully.
  *         schema:
  *           type: array
- *           items:
- *             $ref: '#/components/schemas/NotificationSettings'
  *       400:
  *         description: Bad request. User or notification settings do not exist.
  *         schema:
@@ -263,6 +259,6 @@ router.patch(
  *       - Settings
  */
 
-router.get("/get-notification-settings/{userId}", getUserNotificationSettings);
+router.get("/get-notification-settings/:userId", getUserNotificationSettings);
 
 module.exports = router;
