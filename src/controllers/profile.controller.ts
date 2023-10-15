@@ -30,6 +30,8 @@ const projectRepository = connectionSource.getRepository(Project);
 const interestRepository = connectionSource.getRepository(InterestDetail);
 const skillRepository = connectionSource.getRepository(Skill);
 const skillsDetailRepository = connectionSource.getRepository(SkillsDetail);
+const portfolioDetailsRepository = connectionSource.getRepository(PortfolioDetails);
+const trackRepository = connectionSource.getRepository(Tracks);
 
 
 // Export the uploadProfileImageController function
@@ -127,34 +129,34 @@ export const getUserById = async (req: Request, res: Response) => {
 export const createProfileController = async (req: Request, res: Response) => {
   try {
     const { name, trackId, city, country } = req.body;
-    const userId = req.params.userId;
+    const { userId } = req.params;
 
-    const userRepository = connectionSource.getRepository(User);
-    const portfolioDetailsRepository =
-      connectionSource.getRepository(PortfolioDetails);
-    const userTrackRepository = connectionSource.getRepository(UserTrack);
-    const trackRepository = connectionSource.getRepository(Tracks);
+    const otherDetails = await fetch(`https://hngstage6-eagles.azurewebsites.net/api/explore/getPortfolio/${userId}`)
+    const otherDetailsJson: any = await otherDetails.json();
 
-    //find or create user profile
+    let { firstName, lastName, track, profilePictureUrl } = otherDetailsJson.data;
 
-    const user = await userRepository.findOne({ where: { id: userId } });
-
-    // const userProfile = await userRepository.upsert({
-    //   id: userId,
-    //   firstName: name,
-
-    // });
-
-
+    const user = await userRepository.findOneBy({ id: userId });
     if (!user) {
-      return error(res, "User Not found", 400);
+
+      if (!otherDetailsJson) {
+        res.status(400).json({ message: "Check User ID" });
+      }
+
+      console.log(profilePictureUrl)
+      if (!firstName || !lastName || !profilePictureUrl) {
+        return error(res, "Failed to create ser", 400);
+      }
+
+      const newUser = await userRepository.upsert({ id: userId, profilePic: profilePictureUrl, firstName, lastName }, ["id"]);
+      return success(res, newUser, "Successfully Created Portfolio profile");
+
     }
 
-    if (name) {
-      userRepository.update(user.id, { lastName: name });
+    if (user) {
+      userRepository.update(user.id, { lastName: name, firstName: name, profilePic: user.profilePic });
     }
 
-    let track: Tracks;
 
     if (trackId) {
       // first  check if the track exists
