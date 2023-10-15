@@ -100,8 +100,8 @@ export const updateReference = async (req: Request, res: Response) => {
       const refByid = await userRepository.findOneBy({
         userId: userid,
       });
-    res.send(refByid);
+    success(res,refByid);
   } catch (err) {
-    res.send(err.message);
+    error(res,"invalid userid");
   }
 };
