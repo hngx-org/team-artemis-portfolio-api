@@ -1551,19 +1551,11 @@ export class Certificate {
   @CreateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
   created_at: Date;
 
-  @Column({ name: "user_id" })
+  @Column("uuid", { name: "user_id" })
   userId: string;
 
-  @Column({ name: "section_id" })
+  @Column("int", { name: "section_id" })
   sectionId: number;
-
-  @ManyToOne(() => User)
-  @JoinColumn({ name: "user_id" })
-  user: User;
-
-  @ManyToOne(() => Section)
-  @JoinColumn({ name: "section_id" })
-  section: Section;
 }
 
 @Entity()

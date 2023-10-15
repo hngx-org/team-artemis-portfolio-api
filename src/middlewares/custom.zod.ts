@@ -18,7 +18,27 @@ export const validateSchema =
         },
       });
     }
-  };
+    };
+  
+    export const validateQuery =
+      (schema: AnyZodObject) =>
+      async (req: Request, res: Response, next: NextFunction) => {
+        try {
+          console.log(req.query);
+          await schema.parseAsync(req.query);
+          return next();
+        } catch (error: any) {
+          return res.status(400).json({
+            status: "error",
+            message: `invalid request data`,
+            data: {
+              error: error.issues,
+              statusCode: 400,
+              timestamp: new Date().toISOString(),
+            },
+          });
+        }
+      };
 const MAX_ID_LENGTH = 10;
 
 const sectionIdSchema = z
