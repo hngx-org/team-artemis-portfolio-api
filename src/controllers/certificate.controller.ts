@@ -9,14 +9,14 @@ import { validateCertificateData } from "../middlewares/certificate.zod";
 
 const certificateRepo = dataSource.getRepository(Certificate);
 const userRepository = dataSource.getRepository(User);
-const sectionRepository = dataSource.getRepository(Section)
+const sectionRepository = dataSource.getRepository(Section);
 
 const addCertificateController = async (req: Request, res: Response) => {
   try {
-    const { title, year, organization, url, description, section_id } = req.body;
+    const { title, year, organization, url, description, section_id } =
+      req.body;
     const userId = req.params.userId;
 
-    
     // Check if the user with userId exists
     const user = await userRepository.findOneBy({ id: userId });
 
@@ -24,11 +24,14 @@ const addCertificateController = async (req: Request, res: Response) => {
       return error(res, "User not found. Please provide a valid User ID", 404);
     }
 
-   const section = await sectionRepository.findOneBy({ id: section_id})
-   if (!section) {
-    return error(res, "Section not found. Please provide a valid section ID", 404);
-  }
-
+    const section = await sectionRepository.findOneBy({ id: section_id });
+    if (!section) {
+      return error(
+        res,
+        "Section not found. Please provide a valid section ID",
+        404
+      );
+    }
 
     const certificateDataIsValid = await validateCertificateData(req, res);
 
@@ -146,7 +149,12 @@ const updateCertificate = async (req: Request, res: Response) => {
     const section_id = parseInt(req.params.section_id);
     const payload = req.body;
 
-    if (!id || typeof id !== "number" || !user_id || !uuidPattern.test(user_id)) {
+    if (
+      !id ||
+      typeof id !== "number" ||
+      !user_id ||
+      !uuidPattern.test(user_id)
+    ) {
       return res.status(400).json({
         success: false,
         message:

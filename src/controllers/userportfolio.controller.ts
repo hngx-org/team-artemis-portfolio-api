@@ -19,9 +19,6 @@ import {
   CustomUserSection,
 } from "../database/entities";
 import { NotFoundError, BadRequestError } from "../middlewares/index";
-import { error, success } from "../utils/response.util";
-
-import { getRepository } from "typeorm";
 
 const portfolioDetailsRepository =
   connectionSource.getRepository(PortfolioDetail);
@@ -29,13 +26,9 @@ const portfolioRepository = connectionSource.getRepository(PortfolioDetail);
 const userRepository = connectionSource.getRepository(User);
 const workExperienceRepository =
   connectionSource.getRepository(WorkExperienceDetail);
-const interestRepository = connectionSource.getRepository(InterestDetail);
-const skillRepository = connectionSource.getRepository(Skill);
-const projectRepository = connectionSource.getRepository(Project);
-const sectionRepository = connectionSource.getRepository(Section);
+
 const userTrackRepository = connectionSource.getRepository(UserTrack);
-const trackRepository = connectionSource.getRepository(Tracks);
-const aboutRepositiory = connectionSource.getRepository(AboutDetail);
+
 const awardRepository = connectionSource.getRepository(Award);
 const certificateRepository = connectionSource.getRepository(Certificate);
 
@@ -155,9 +148,4 @@ const deletePortfolioDetails: RequestHandler = async (
   }
 };
 
-export {
-  getPortfolioDetails,
-  // getAllPortfolioDetails,
-  // updatePortfolioDetail,
-  deletePortfolioDetails,
-};
+export { getPortfolioDetails, deletePortfolioDetails };
