@@ -115,79 +115,42 @@ const getAllPortfolioDetails = async (req: Request, res: Response) => {
   return res.json({ PortfolioDetails });
 };
 
-const updatePortfolioDetails: RequestHandler = async (
+import { Request, Response, NextFunction } from 'express';
+import { getRepository } from 'typeorm';
+import { PortfolioDetail } from '../path-to-your-portfolio-detail-model/PortfolioDetail';
+
+const updatePortfolioDetail = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    const userId = req.params.userId;
-    const { name, trackId, city, country } = req.body;
+    // Extract the portfolio detail ID from the request parameters.
+    const { portfolioDetailId } = req.params;
 
-    if (!req.body) {
-      throw new BadRequestError("No data provided");
+    // Validate the portfolioDetailId, ensure it's a valid number or handle validation as needed.
+    if (!portfolioDetailId || isNaN(Number(portfolioDetailId))) {
+      throw new BadRequestError(`${portfolioDetailId} is not a valid ID`);
     }
 
+    // Get the updated data for the portfolio detail from the request body.
+    const { city, country } = req.body;
 
+    // Find the portfolio detail by ID.
+    const portfolioDetailRepository = getRepository(PortfolioDetail);
+    const existingPortfolioDetail = await portfolioDetailRepository.findOne(Number(portfolioDetailId));
 
-    let user = await userRepository.findOne({ where: { id: userId } });
-
-    if (!user) {
-      throw new NotFoundError("User Not Found");
+    // Check if the portfolio detail with the provided ID exists.
+    if (!existingPortfolioDetail) {
+      throw new NotFoundError(`Portfolio detail with ID ${portfolioDetailId} not found`);
     }
 
-    if (name) {
-      const splitName = name.split(" ");
-      await userRepository.update(user.id, {
-        firstName: splitName[0],
-        lastName: splitName[1],
-      });
+    // Update the portfolio detail properties with the new data.
+    existingPortfolioDetail.city = city;
+    existingPortfolioDetail.country = country;
 
-      // Fetch the updated user immediately
-      user = await userRepository.findOne({ where: { id: userId } });
-    }
-
-    let track: Tracks;
-
-    if (trackId) {
-      track = await trackRepository.findOne({ where: { id: trackId } });
-
-      if (!track) {
-        throw new NotFoundError("Track Not Found");
-      }
-
-      const userTrack = await userTrackRepository.find({ where: { user } });
-
-      if (!userTrack) {
-        const newUserTrack = userTrackRepository.create({
-          user,
-          track,
-        });
-
-        await userTrackRepository.save(newUserTrack);
-      }
-    }
-
-    let portfolio = await portfolioDetailsRepository.findOne({
-      where: { user },
-    });
-
-    if (!portfolio) {
-      console.log("User ID:", userId);
-      console.log("User:", user);
-      console.log("Portfolio not found for user:", userId);
-      throw new NotFoundError("Portfolio Not Found");
-    }
-
-    if (city) {
-      portfolio.city = city;
-    }
-
-    if (country) {
-      portfolio.country = country;
-    }
-
-    portfolio = await portfolioDetailsRepository.save(portfolio);
+    // Save the updated portfolio detail to the database.
+    await portfolioDetailRepository.save(existingPortfolioDetail);
 
     console.log("Successfully updated user profile portfolio details");
     return success(
