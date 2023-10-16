@@ -11,7 +11,7 @@ import {
     updateAboutMeSchema,
     validateCreateAboutMeSchema, 
     validateUpdateAboutMe, 
-    validateUserId 
+    validateUser_id 
 } from '../middlewares/aboutme.zod';
 
 const router = express.Router();
@@ -50,7 +50,7 @@ router.post(
 
 /**
  * @swagger
- * /api/about-me/{userId}:
+ * /api/about-me/{user_id}:
  *   get:
  *     summary: Get "About Me" information
  *     tags: [AboutMe]
@@ -72,8 +72,8 @@ router.post(
  */
 
 router.get(
-    "/about-me/:userId",
-    validateUserId(z.string().uuid({ message: 'userId must be a valid uuid' })),
+    "/about-me/:user_id",
+    validateUser_id(z.string().uuid({ message: 'userId must be a valid uuid' })),
      getAboutMe
 );
 
@@ -81,7 +81,7 @@ router.get(
 
 /**
  * @swagger
- * /api/about-me/{userId}:
+ * /api/about-me/{user_id}:
  *   put:
  *     summary: Update "About Me" information
  *     tags: [AboutMe]
@@ -108,7 +108,7 @@ router.get(
  */
 
 router.put(
-    "/about-me/:userId",
+    "/about-me/:user_id",
     validateUpdateAboutMe(updateAboutMeSchema),
     updateAboutMe
 );
@@ -117,7 +117,7 @@ router.put(
 
 /**
  * @swagger
- * /api/about-me/{userId}:
+ * /api/about-me/{user_id}:
  *   delete:
  *     summary: Delete "About Me" information
  *     tags: [AboutMe]
@@ -139,8 +139,8 @@ router.put(
  */
 
 router.delete(
-    "/about-me/:userId",
-    validateUserId(z.string().uuid({ message: 'userId must be a valid uuid' })),
+    "/about-me/:user_id",
+    validateUser_id(z.string().uuid({ message: 'userId must be a valid uuid' })),
     deleteAboutMe
 );
 
