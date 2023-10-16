@@ -24,7 +24,7 @@ const router = express.Router();
  *         name: userId
  *         description: The ID of the user for whom to create an award.
  *         required: true
- *         type: integer
+ *         type: string
  *       - in: body
  *         name: createAward
  *         description: Award data to be created
@@ -98,7 +98,7 @@ router.post("/award/:userId", validateCreateAwardData, createAwardController);
  *         name: awardId
  *         description: The ID of the award to update.
  *         required: true
- *         type: integer
+ *         type: string
  *       - in: body
  *         name: updateAward
  *         description: Updated award data
