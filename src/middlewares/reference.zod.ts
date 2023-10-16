@@ -4,7 +4,7 @@ import { BadRequestError } from "../middlewares";
 import { parseAsync, ErrorMessageOptions } from "zod-error";
 
 export const CreateReferenceDetailSchema = object({
-  name: string()
+  referer: string()
     .min(1, { message: "Name must not be an empty string" })
     .refine((name) => !!name, {
       message: "Name is required in the request body",
@@ -18,7 +18,7 @@ export const CreateReferenceDetailSchema = object({
 
   position: string().optional(),
 
-  emailAddress: string()
+  email: string()
     .min(1, { message: "Email address must not be an empty string" })
     .refine((emailAddress) => !!emailAddress, {
       message: "Email address is required in the request body",
@@ -44,7 +44,7 @@ async function validateCreateReferenceData(
   try {
     const data = req.body;
 
-    if (data.emailAddress && !validateEmail(data.emailAddress)) {
+    if (data.email && !validateEmail(data.email)) {
       throw new BadRequestError("Invalid email address format");
     }
     // Retrieve the "userId" from request parameters
