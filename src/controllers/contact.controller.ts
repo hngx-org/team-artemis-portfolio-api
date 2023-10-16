@@ -4,25 +4,26 @@ import { Request, Response, RequestHandler, NextFunction } from 'express'
 import { SocialUserService, createContact } from '../services/contact.service'
 import constant from '../constants/constant';
 import { z } from 'zod';
-
 // import { Request, Response } from 'express'
 import { connectionSource as dataSource } from '../database/data-source'
 import { SocialMedia, SocialUser, User } from '../database/entities'
+import { parse } from 'path';
 
 
 const MESSAGES = constant.MESSAGES;
 const contactsRepo = dataSource.getRepository(SocialUser)
-
+const userRepository = dataSource.getRepository(User)
 const socialUserService = new SocialUserService()
 
 export const createSocials = async (req: Request, res: Response) => {
   try {
     const { name } = req.body
-
+    if (!name) {
+      return res.status(400).json({ message: 'Invalid input data' })
+    }
     const contactsRepo = dataSource.getRepository(SocialMedia)
-    const contact = contactsRepo.create({
-      name,
-    })
+    const contact = new SocialMedia()
+    contact.name = name
     await contactsRepo.save(contact)
     return res
       .status(201)
@@ -83,8 +84,7 @@ export const createContacts = async (req: Request, res: Response, next: NextFunc
       return res.status(400).json({ message: MESSAGES.INVALID_INPUT })
     }
   } catch (error) {
-    console.error("Error creating contact:", error);
-    throw new BadRequestError(constant.MESSAGES.BAD_REQUEST)
+    return res.status(500).json({ error })
   }
 };
 
@@ -101,9 +101,14 @@ export const getContacts = async (req: Request, res: Response) => {
 
       return res.status(400).json({ message: MESSAGES.INVALID_INPUT })
     }
-
+    const user = await userRepository.findOne({
+      where: { id: user_id },
+    })
+    if (!user) {
+      return res.status(404).json({ message: MESSAGES.NOT_FOUND })
+    }
     const contacts = await contactsRepo.find({
-      where: { User },
+      where: { user },
     })
     return res.status(200).json(contacts)
   } catch (error) {
@@ -116,24 +121,15 @@ export const getContacts = async (req: Request, res: Response) => {
 //deleteContact controller
 export const deleteContact = async (req: Request, res: Response) => {
   try {
-    const socialUserIdString = req.params.id
-    const socialUserId = parseInt(socialUserIdString, 10)
-
-    if (isNaN(socialUserId)) {
-      return res.status(400).json({ message: 'Invalid socialUserId' })
-    }
-
-    await socialUserService.deleteContact(socialUserId)
-
-    return res.status(200).json({ message: 'Contact deleted successfully' })
+    let { id } = req.params
+    const contact_id = parseInt(id)
+    console.log(contact_id)
+    // const userIdRegex = /^[A-Fa-f0-9\-]+$/
+    const contacts = await contactsRepo.delete(contact_id)
+    return res.status(200).json(contacts)
   } catch (error) {
-    console.error('Error deleting contact:', error)
-
-    if (error.message === 'Social User not found') {
-      return res.status(404).json({ message: 'Social User not found' })
-    }
-
-    return res.status(500).json({ message: 'Internal server error' })
+    console.error('Error getting contacts:', error)
+    return res.status(404).json({ message: MESSAGES.NOT_FOUND })
   }
 }
 
@@ -165,6 +161,6 @@ export const updateContactController: RequestHandler = async (
     })
   } catch (error) {
     console.log(error)
-    return res.status(500).json('internal server error')
+    return res.status(500).json({ message: 'Failed to update contact' })
   }
 }
