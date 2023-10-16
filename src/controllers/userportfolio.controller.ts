@@ -16,17 +16,19 @@ import {
   UserTrack,
   Award,
   Certificate,
-  CustomUserSection
+  CustomUserSection,
 } from "../database/entities";
 import { NotFoundError, BadRequestError } from "../middlewares/index";
 import { error, success } from "../utils/response.util";
 
+import { getRepository } from "typeorm";
 
-
-const portfolioDetailsRepository = connectionSource.getRepository(PortfolioDetail);
+const portfolioDetailsRepository =
+  connectionSource.getRepository(PortfolioDetail);
 const portfolioRepository = connectionSource.getRepository(PortfolioDetail);
 const userRepository = connectionSource.getRepository(User);
-const workExperienceRepository = connectionSource.getRepository(WorkExperienceDetail);
+const workExperienceRepository =
+  connectionSource.getRepository(WorkExperienceDetail);
 const interestRepository = connectionSource.getRepository(InterestDetail);
 const skillRepository = connectionSource.getRepository(Skill);
 const projectRepository = connectionSource.getRepository(Project);
@@ -36,8 +38,6 @@ const trackRepository = connectionSource.getRepository(Tracks);
 const aboutRepositiory = connectionSource.getRepository(AboutDetail);
 const awardRepository = connectionSource.getRepository(Award);
 const certificateRepository = connectionSource.getRepository(Certificate);
-
-
 
 export interface UpdatePortfolioDetailsDTO {
   name?: string;
@@ -57,8 +57,6 @@ const getPortfolioDetails = async (
     }
 
     const user = await userRepository.findOne({ where: { id: userId } });
-
-
 
     const education = await connectionSource.manager.find(EducationDetail, {
       where: { user },
@@ -83,14 +81,19 @@ const getPortfolioDetails = async (
       where: { user },
     });
 
-    const tracks = await userTrackRepository.findOne({ where: { user }, relations: ['track'] });
+    const tracks = await userTrackRepository.findOne({
+      where: { user },
+      relations: ["track"],
+    });
 
-    const workExperience = await workExperienceRepository.find({ where: { user } })
+    const workExperience = await workExperienceRepository.find({
+      where: { user },
+    });
 
-    const awards = await awardRepository.find({ where: { user } })
-    const certificates = await certificateRepository.find({ where: { user } })
+    const awards = await awardRepository.find({ where: { user } });
+    const certificates = await certificateRepository.find({ where: { user } });
     const track = tracks?.track;
-    console.log(track)
+    console.log(track);
 
     res.status(200).json({
       user,
@@ -103,7 +106,7 @@ const getPortfolioDetails = async (
       awards,
       certificates,
       sections,
-      track
+      track,
     });
   } catch (error) {
     return next(error);
@@ -114,10 +117,6 @@ const getAllPortfolioDetails = async (req: Request, res: Response) => {
   const PortfolioDetails = await portfolioRepository.find();
   return res.json({ PortfolioDetails });
 };
-
-import { Request, Response, NextFunction } from 'express';
-import { getRepository } from 'typeorm';
-import { PortfolioDetail } from '../path-to-your-portfolio-detail-model/PortfolioDetail';
 
 const updatePortfolioDetail = async (
   req: Request,
@@ -138,11 +137,15 @@ const updatePortfolioDetail = async (
 
     // Find the portfolio detail by ID.
     const portfolioDetailRepository = getRepository(PortfolioDetail);
-    const existingPortfolioDetail = await portfolioDetailRepository.findOne(Number(portfolioDetailId));
+    const existingPortfolioDetail = await portfolioDetailRepository.findOne(
+      Number(portfolioDetailId)
+    );
 
     // Check if the portfolio detail with the provided ID exists.
     if (!existingPortfolioDetail) {
-      throw new NotFoundError(`Portfolio detail with ID ${portfolioDetailId} not found`);
+      throw new NotFoundError(
+        `Portfolio detail with ID ${portfolioDetailId} not found`
+      );
     }
 
     // Update the portfolio detail properties with the new data.
@@ -203,6 +206,6 @@ const deletePortfolioDetails: RequestHandler = async (
 export {
   getPortfolioDetails,
   // getAllPortfolioDetails,
-  updatePortfolioDetails,
+  updatePortfolioDetail,
   deletePortfolioDetails,
 };

@@ -14,6 +14,8 @@ import { InterestDetail } from "./InterestDetail";
 import { Project } from "./Project";
 import { SkillsDetail } from "./SkillsDetail";
 import { WorkExperienceDetail } from "./WorkExperienceDetail";
+import { LanguageDetail } from "./LanguageDetail";
+import { ReferenceDetail } from "./Reference";
 
 @Index("section_pkey", ["id"], { unique: true })
 @Entity("section", { schema: "public" })
@@ -57,7 +59,11 @@ export class Section {
   @OneToMany(() => Project, (project) => project.section)
   projects: Project[];
 
+  @OneToMany(() => LanguageDetail, (languageDetail) => languageDetail.section)
+  languageDetail: LanguageDetail[];
 
+  @OneToMany(() => ReferenceDetail, (reference) => reference.section)
+  reference: ReferenceDetail[];
 
   @OneToMany(() => SkillsDetail, (skillsDetail) => skillsDetail.section)
   skillsDetails: SkillsDetail[];
