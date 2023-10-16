@@ -38,6 +38,9 @@ export const getTrackById = async (req: Request, res: Response) => {
 export const createUserTrack = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { user_id, track_id } = req.body;
+        if (!user_id || !track_id) {
+            throw new BadRequestError("User id or Track id is missing");
+        }
 
         const user = await userRepository.findOne({ where: { id: user_id } });
         if (!user) {
@@ -45,17 +48,16 @@ export const createUserTrack = async (req: Request, res: Response, next: NextFun
         }
 
         const track = await trackRepository.findOne({ where: { id: track_id } });
-        if (!track) {
-            throw new NotFoundError("Track not found");
-        }
+
 
         const userTrack = await userTrackRepository.findOne({ where: { user }, relations: ['track'] });
 
-        if (userTrack.track.id === track_id) {
+        if (userTrack?.track && userTrack?.track?.id === track_id) {
             throw new BadRequestError("User already has track");
         }
-
-        const deleteResponse = await userTrackRepository.delete({ user });
+        if (track) {
+            const deleteResponse = await userTrackRepository.delete({ user });
+        }
 
         const newUserTrack = new UserTrack();
         newUserTrack.user = user;
