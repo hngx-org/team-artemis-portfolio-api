@@ -237,6 +237,6 @@ const deletePortfolioDetails: RequestHandler = async (
 export {
   getPortfolioDetails,
   // getAllPortfolioDetails,
-  // updatePortfolioDetails,
+  updatePortfolioDetails,
   deletePortfolioDetails,
 };
