@@ -173,6 +173,9 @@ const updatePortfolioDetails: RequestHandler = async (
     });
 
     if (!portfolio) {
+      console.log("User ID:", userId);
+      console.log("User:", user);
+      console.log("Portfolio not found for user:", userId);
       throw new NotFoundError("Portfolio Not Found");
     }
 
