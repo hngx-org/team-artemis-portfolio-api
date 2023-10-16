@@ -16,11 +16,7 @@ export const CreateReferenceDetailSchema = object({
       message: "Company is required in the request body",
     }),
 
-  position: string()
-    .min(1, { message: "Position must not be an empty string" })
-    .refine((position) => !!position, {
-      message: "Position is required in the request body",
-    }),
+  position: string().optional(),
 
   emailAddress: string()
     .min(1, { message: "Email address must not be an empty string" })
@@ -28,18 +24,13 @@ export const CreateReferenceDetailSchema = object({
       message: "Email address is required in the request body",
     }),
 
-  phoneNumber: string()
-    .min(1, { message: "Phone number must not be an empty string" })
-    .refine((phoneNumber) => !!phoneNumber, {
-      message: "Phone number is required in the request body",
-    }),
+  phoneNumber: string().optional(),
 
   userId: string()
     .min(1, { message: "User ID must not be an empty string" })
     .optional()
     .nullish(),
 });
-
 
 // Custom function to validate email addresses
 function validateEmail(email: string) {
@@ -58,25 +49,28 @@ async function validateCreateReferenceData(
     }
     // Retrieve the "userId" from request parameters
     let userId = req.params.id;
-      if (!userId) {
-        userId = req.body.userId;
-      }
-      
+    if (!userId) {
+      userId = req.body.userId;
+    }
+
     // Validate the rest of the data against the schema
     const result = await parseAsync(CreateReferenceDetailSchema, {
-      ...data, userId,
+      ...data,
+      userId,
     });
-    
+
     // Store the validated data in the request object if needed
     const validatedData = result;
     next(); // Continue to the next middleware or route handler
   } catch (error) {
-      if (error instanceof ZodError) {
-          const errorMessages = (error.issues as ZodIssue[]).map((issue) => issue.message);
-          res.status(400).json({ errors: errorMessages });
-      } else {
-          next(error);
-      }
+    if (error instanceof ZodError) {
+      const errorMessages = (error.issues as ZodIssue[]).map(
+        (issue) => issue.message
+      );
+      res.status(400).json({ errors: errorMessages });
+    } else {
+      next(error);
+    }
   }
 }
 
