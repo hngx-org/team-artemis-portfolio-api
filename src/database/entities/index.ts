@@ -20,3 +20,6 @@ export * from "./SocialUser";
 export * from "./Tracks";
 export * from "./UserTrack";
 export * from "./WorkExperienceDetail";
+export * from "./Language";
+export * from "./LanguageDetail";
+export * from "./Reference";

@@ -2,7 +2,6 @@ import "reflect-metadata";
 import { DataSource } from "typeorm";
 import * as entities from "./entities";
 import dotenv from "dotenv";
-import { User } from "./entity/user";
 dotenv.config();
 
 export const connectionSource = new DataSource({
