@@ -1,5 +1,3 @@
-
-
 import { Request, Response, RequestHandler, NextFunction } from "express";
 import { connectionSource } from "../database/data-source";
 import { validate as isValidUUID } from "uuid";
@@ -21,7 +19,6 @@ import {
   CustomUserSection,
 } from "../database/entities";
 import { NotFoundError, BadRequestError } from "../middlewares/index";
-
 
 const portfolioDetailsRepository =
   connectionSource.getRepository(PortfolioDetail);
@@ -155,8 +152,4 @@ const deletePortfolioDetails: RequestHandler = async (
   }
 };
 
-export {
-  getPortfolioDetails,
-  deletePortfolioDetails,
-};
-
+export { getAllPortfolioDetails, getPortfolioDetails, deletePortfolioDetails };
