@@ -1,7 +1,11 @@
 import {
-  // getAllPortfolioDetails,
+  getAllPortfolioDetails,
   getPortfolioDetails,
+<<<<<<< HEAD
   // updatePortfolioDetail,
+=======
+  updatePortfolioDetails,
+>>>>>>> 1429d35cd3418f40fed0cb8b697850fed722800d
   deletePortfolioDetails,
 } from "../controllers/userportfolio.controller";
 import { Router } from "express";

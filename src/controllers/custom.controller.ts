@@ -134,7 +134,7 @@ const createSection = async (
         400
       );
     const positionExists = await sectionRepository.findOne({
-      where: { position: req.body.position },
+      // where: { position: req.body.position },
     });
     if (positionExists)
       return error(res, "A section with this position already exist", 400);
@@ -189,7 +189,7 @@ const UpdateSection = async (
     if (!section) return error(res, "Section not found", 404);
     if (req.body.position) {
       const positionExists = await sectionRepository.findOne({
-        where: { position: req.body.position },
+        // where: { position: req.body.position },
       });
       if (positionExists)
         return error(res, "A section with this position already exist", 400);

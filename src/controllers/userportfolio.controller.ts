@@ -148,4 +148,13 @@ const deletePortfolioDetails: RequestHandler = async (
   }
 };
 
+<<<<<<< HEAD
 export { getPortfolioDetails, deletePortfolioDetails };
+=======
+export {
+  getPortfolioDetails,
+  getAllPortfolioDetails,
+  updatePortfolioDetails,
+  deletePortfolioDetails,
+};
+>>>>>>> 1429d35cd3418f40fed0cb8b697850fed722800d
