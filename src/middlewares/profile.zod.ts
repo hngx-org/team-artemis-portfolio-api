@@ -6,17 +6,16 @@ import { parseAsync } from "zod-error";
 export const createPorfolioDataSchema = z.object({
   body: z.object({
     name: z.optional(z.string({ invalid_type_error: "Name should be a string" }).trim(), {}),
-    city: z.string({
+    city: z.optional(z.string({
       required_error: "City is required",
       invalid_type_error: "City should be type string"
     })
-    .trim(),
-    country: z.string({ 
+      .trim()),
+    country: z.optional(z.string({
       required_error: "Country is Required",
-      invalid_type_error: "Country must be type string" 
-    })
-    .trim(),
-    trackId: z.optional(z.number({ invalid_type_error: "TrackId must be a number" }), {}),
+      invalid_type_error: "Country must be type string"
+    }).trim()),
+    trackId: z.optional(z.number({ invalid_type_error: "TrackId must be a number" }), {}).nullable(),
   }),
   params: z.object({
     userId: z
