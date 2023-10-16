@@ -48,8 +48,23 @@ export const getProjectById: RequestHandler = async (
 ) => {
   try {
     const { id } = req.params;
-    const data = await projectRepository.findOneBy({ id: +id });
-    success(res, data);
+    const project = await projectRepository.findOne({
+      where: {
+        id: +id,
+      },
+      relations: ['projectsImages'],
+    });
+    const allThumbnails = await projectImageRepository.find({ where: { project } });
+
+    const thumbnail = await imageRepository.findOne({ where: { id: allThumbnails[0].id } });
+
+    project.thumbnail = thumbnail.url as any;
+    const imageUrlsPromises = project.projectsImages.map(async (image) => {
+      const imageEntity = await imageRepository.findOne({ where: { id: image.id } });
+      return imageEntity ? imageEntity.url : null;
+    });
+    project.projectsImages = await Promise.all(imageUrlsPromises) as any;
+    success(res, project, "Successfully Retrieved");
   } catch (err) {
     error(res, (err as Error).message);
   }
@@ -72,7 +87,14 @@ export const createProject: RequestHandler = async (
     for (const key in jsonData) {
       if (Object.hasOwnProperty.call(jsonData, key)) {
         const normalizedKey = key.toLowerCase();
-        normalizedData[normalizedKey] = jsonData[key];
+        if (normalizedKey === 'userid') {
+          normalizedData["userId"] = jsonData[key];
+        } else if (normalizedKey === 'sectionid') {
+          normalizedData["sectionId"] = +jsonData[key];
+        } else {
+          normalizedData[normalizedKey] = jsonData[key];
+        }
+
       }
     }
 
@@ -91,7 +113,13 @@ export const createProject: RequestHandler = async (
       throw new BadRequestError(response);
     }
     const { title, year, url, tags, description, userId, sectionId } = normalizedData;
+
+
+    if (!userId || !sectionId) {
+      throw new BadRequestError('Please provide user and section');
+    }
     const user = await userRepository.findOneBy({ id: userId });
+
     if (!user) {
       throw new NotFoundError('User not found');
     }
@@ -114,35 +142,22 @@ export const createProject: RequestHandler = async (
     project.section = section;
     project.thumbnail = 0;
 
-    const newProject = await projectRepository.create({
-      title,
-      year,
-      url,
-      tags,
-      description,
-      user,
-      section,
-      thumbnail: 0,
-    });
-    console.log(newProject)
 
-
+    const newProject = await projectRepository.save(project);
+    if (!newProject.id) {
+      throw new CustomError('Project not created', 400);
+    }
     const files = req.files as any;
     if (!files.length) {
       throw new BadRequestError('Add thumbnail image');
     }
-    console.log(files.length)
+
     if (files.length > 10) {
       throw new BadRequestError('You can only upload a maximum of 10 images');
     }
 
-    // const imagesRes = await cloudinaryService(files, req.body.service);
-    const imagesRes = {
-      urls: [
-        'https://res.cloudinary.com/ol4juwon/image/upload/v1697351080/test/ggogjzsezo6fwzod5re7.png',
-        'https://res.cloudinary.com/ol4juwon/image/upload/v1697351082/test/mwcv2fp9yis7tmh8b1no.jpg'
-      ]
-    }
+    const imagesRes = await cloudinaryService(files, req.body.service);
+
 
     for (const url of imagesRes.urls) {
       const image = new Images() as Images;
@@ -155,7 +170,7 @@ export const createProject: RequestHandler = async (
 
         const savedImage = await imageRepository.findOne({ where: { id: imageResponse.id } });
 
-        console.log(newProject, savedImage);
+
         projectImage.project = newProject;
         projectImage.image = savedImage;
 
@@ -166,16 +181,14 @@ export const createProject: RequestHandler = async (
       }
     }
 
-    const allThumbnails = await projectImageRepository.find({ where: { project } });
+    const allThumbnails = await projectImageRepository.find({ where: { project: { id: project.id } } });
     const updatedProject = await projectRepository.find({ where: { id: newProject.id } });
     if (allThumbnails.length === 0) {
       return success(res, updatedProject, "Created without thumbnail");
     }
-    console.log(allThumbnails);
 
-    const thumbnail = await imageRepository.findOneBy({
-      id: allThumbnails[0].image.id,
-    });
+    const thumbnail = await imageRepository.findOne({ where: { id: allThumbnails[0].id } });
+
     let data;
     if (thumbnail) {
       const thumbnailId = thumbnail.id;
@@ -183,12 +196,22 @@ export const createProject: RequestHandler = async (
         { id: newProject.id },
         { thumbnail: thumbnailId }
       );
-      const updatedProject = await projectRepository.findOneBy({
-        id: +newProject.id,
+
+      const updatedProject = await projectRepository.findOne({
+        where: {
+          id: +newProject.id,
+        },
+        relations: ['projectsImages'],
       });
+      updatedProject.thumbnail = thumbnail.url as any;
+      const imageUrlsPromises = updatedProject.projectsImages.map(async (image) => {
+        const imageEntity = await imageRepository.findOne({ where: { id: image.id } });
+        return imageEntity ? imageEntity.url : null;
+      });
+      updatedProject.projectsImages = await Promise.all(imageUrlsPromises) as any;
       success(res, updatedProject, "Successfully created");
     } else {
-      success(res, data, "Created without thumbnail");
+      success(res, { thumbnail: thumbnail.url, ...data }, "Created without thumbnail");
     }
   } catch (err) {
     return next(err);
@@ -213,7 +236,7 @@ export const updateProjectController: RequestHandler = async (
   }
 
   try {
-    console.log(id);
+
     const updatedProject = await updateProjectService(
       parseInt(id),
       data,
@@ -225,7 +248,7 @@ export const updateProjectController: RequestHandler = async (
       `Project with id: ${id} updated successfully`
     );
   } catch (error) {
-    console.log(error);
+
     return error(res, "Project update failed");
   }
 };
@@ -246,10 +269,10 @@ export const deleteProjectController: RequestHandler = async (req: Request, res:
         message: 'Project deleted successfully',
         deletedProject: projectDetail,
       });
-      console.log('Project deleted successfully');
+
     }
   } catch (error) {
-    console.error('Error deleting project detail', error);
+
     next(error);
   }
 };

@@ -8,6 +8,7 @@ import { AnyZodObject, ZodError, z } from "zod";
 import { connectionSource } from "../database/data-source";
 import {
   PortfolioDetail,
+  Award,
   Tracks,
   UserTrack,
   WorkExperienceDetail,
@@ -19,6 +20,7 @@ import {
   Skill,
   SkillsDetail,
   User,
+  Certificate
 } from "../database/entities";
 import {
   cloudinaryService,
@@ -27,7 +29,7 @@ import {
 } from "../services";
 import { error, success } from "../utils";
 import { authMiddleWare, validateUser } from "../middlewares/auth";
-import { BadRequestError, InternalServerError } from "../middlewares";
+import { BadRequestError, InternalServerError, NotFoundError } from "../middlewares";
 import { createPorfolioDataSchema } from "../middlewares/profile.zod";
 
 // Get the repository for the PortfolioDetails entity
@@ -46,6 +48,8 @@ const skillsDetailRepository = connectionSource.getRepository(SkillsDetail);
 const portfolioDetailsRepository =
   connectionSource.getRepository(PortfolioDetail);
 const trackRepository = connectionSource.getRepository(Tracks);
+const certificateRepository = connectionSource.getRepository(Certificate);
+const awardRepository = connectionSource.getRepository(Award);
 
 // Export the uploadProfileImageController function
 export const uploadProfileImageController: RequestHandler = async (
@@ -116,36 +120,25 @@ export const getUserById = async (req: Request, res: Response) => {
   try {
     const { userId: id } = req.params;
     const userId = id.trim();
-    const user = await userRepository.findOne({ where: { id: userId } });
 
-    if(!user) {
+    const user = await userRepository.findOne({ where: { id: userId } });
+    if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    /*
-    const userTracks = await userTrackRepository
-    .createQueryBuilder("userTrack")
-    .innerJoinAndSelect("userTrack.track", "track")
-    .where("userTrack.userId = :userId", { userId: userId })
-    .getMany();
-    for (let userTrack of userTracks) {
-      tracks.push(userTrack.track);
-    }*/
+    const portfolio = await portfolioRepository.findOne({ where: { user: { id: user.id } } });
+    const userTracks = await userTrackRepository.findOne({ where: { user: { id: user.id } }, relations: ['track'] });
 
-    const [portfolio, userTracks] = await Promise.all([
-      await portfolioRepository.findOne({ where: { user } }),
-      await userTrackRepository.find({
-        where: { user }
-      })
-    ])
-    return res.json({ user, portfolio, tracks: userTracks });
+    // const track = userTracks[0]?.track;
+    res.status(200).json({ user, portfolio, userTracks: userTracks?.track });
+
   } catch (error) {
     console.error(error)
     return res.status(500).json({ message: "Internal Server Error" });
   }
 };
 
-export const createProfileController = async (req: Request, res: Response) => {
+export const updateProfileController = async (req: Request, res: Response, Next: NextFunction) => {
   try {
 
     try {
@@ -164,80 +157,67 @@ export const createProfileController = async (req: Request, res: Response) => {
 
     }
 
-
     const { name, trackId, city, country } = req.body;
+    if (!name && !trackId && !city && !country) {
+      throw new BadRequestError("No data to update");
+    }
     const { userId } = req.params;
 
-    const otherDetails = await fetch(
-      `https://hngstage6-eagles.azurewebsites.net/api/explore/getPortfolio/${userId}`
-    );
-    const otherDetailsJson: any = await otherDetails.json();
-
-    if (!otherDetailsJson.data) {
-      return res.status(404).json({ message: "User not found" });
-    }
-    
     const user = await userRepository.findOneBy({ id: userId });
-    let { firstName, lastName, track, profilePictureUrl } = otherDetailsJson.data;
-    
-    
-    console.log(user)
+
     if (!user) {
-
-      console.log(profilePictureUrl);
-      if (!firstName || !lastName || !profilePictureUrl) {
-        return error(res, "Failed to create user", 400);
-      }
-
-      const newUser = await userRepository.upsert(
-        { id: userId, profilePic: profilePictureUrl, firstName, lastName },
-        ["id"]
-      );
-      return success(res, newUser, "Successfully Created Portfolio profile");
+      throw new NotFoundError("User not found");
     }
 
-    if (user) {
-      userRepository.update(user.id, {
-        lastName: name,
-        firstName: name,
-        profilePic: user.profilePic,
+    if (name) {
+      await userRepository.update(user.id, {
+        firstName: name?.split(" ")[0],
+        lastName: name?.split(" ")[1] || "",
       });
+
+    }
+
+    if (city || country) {
+      const userPortfolio = await portfolioDetailsRepository.findOne({ where: { user: { id: user.id } } });
+      await portfolioDetailsRepository.update(
+        userPortfolio.id, { city: city || userPortfolio.city, country: country || userPortfolio.country }
+      )
     }
 
     if (trackId) {
       // first  check if the track exists
-      track = await trackRepository.findOne({ where: { id: trackId } });
-
+      const track = await trackRepository.findOne({ where: { id: trackId } });
       if (!track) {
-        return error(res, "Track Not found. Remove Track from request body if unsure", 400);
+        throw new NotFoundError("Track not found");
       }
 
-      const userTrack = await userTrackRepository.findOne({
-        where: { track, user },
-      });
+      const userTrack = await userTrackRepository.findOne({ where: { user: { id: user.id } }, relations: ['track'] });
 
-      if (!userTrack) {
-        const newUser = userTrackRepository.create({
-          track,
-          user,
-        });
-
-        await userTrackRepository.save(newUser);
+      if (!userTrack && !userTrack?.track?.id === trackId) {
+        const newUserTrack = new UserTrack();
+        newUserTrack.user = user;
+        newUserTrack.track = track;
+        const res = await userTrackRepository.save(newUserTrack);
+      } else {
+        const response = await userTrackRepository.update(userTrack?.id, { track });
+        if (response.affected === 0) {
+          console.log("could not update user track")
+          throw new InternalServerError("Could not update user track")
+        }
       }
     }
-
+    const updatedUser = await userRepository.findOne({ where: { id: user.id } });
     const portfolio = portfolioDetailsRepository.create({
       city,
       country,
-      user,
+      user: updatedUser,
     });
 
-    await portfolioDetailsRepository.save(portfolio);
-
+    const userTrack = await userTrackRepository.findOne({ where: { user: { id: user.id } }, relations: ['track'] });
     return success(
       res,
-      { portfolio: portfolio, user: user },
-      "Successfully Created Portfolio profile"
+      { portfolio: portfolio, userTrack: userTrack?.track },
+      "Successfully Updated Portfolio profile"
     );
 
   } catch (err) {
@@ -290,6 +270,9 @@ export const deleteAllSectionEntries: RequestHandler = async (
       projects: projectRepository,
       interests: interestRepository,
       sections: sectionRepository,
+      certificates: certificateRepository,
+      skill: skillRepository,
+      award: awardRepository
     };
 
     const { userId } = req.params;
@@ -300,13 +283,13 @@ export const deleteAllSectionEntries: RequestHandler = async (
     if (currentRepo === undefined) {
       return next(new BadRequestError("Invalid or missing section name"));
     }
-
+    console.log(userId)
     const user = await userRepository.findOne({ where: { id: userId } });
     if (!user) {
       return next(new BadRequestError("User not found"));
     }
     const alluserEntries = await currentRepo.find({
-      where: { userId: userId },
+      where: { user },
     });
     if (alluserEntries.length === 0) {
       return next(new BadRequestError("No entries to delete"));
