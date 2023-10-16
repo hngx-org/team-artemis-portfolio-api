@@ -113,7 +113,7 @@ export const createProject: RequestHandler = async (
       throw new BadRequestError(response);
     }
     const { title, year, url, tags, description, userId, sectionId } = normalizedData;
-    console.log(normalizedData)
+
 
     if (!userId || !sectionId) {
       throw new BadRequestError('Please provide user and section');
@@ -181,7 +181,7 @@ export const createProject: RequestHandler = async (
       }
     }
 
-    const allThumbnails = await projectImageRepository.find({ where: { project } });
+    const allThumbnails = await projectImageRepository.find({ where: { project: { id: project.id } } });
     const updatedProject = await projectRepository.find({ where: { id: newProject.id } });
     if (allThumbnails.length === 0) {
       return success(res, updatedProject, "Created without thumbnail");
@@ -236,7 +236,7 @@ export const updateProjectController: RequestHandler = async (
   }
 
   try {
-    console.log(id);
+
     const updatedProject = await updateProjectService(
       parseInt(id),
       data,
@@ -248,7 +248,7 @@ export const updateProjectController: RequestHandler = async (
       `Project with id: ${id} updated successfully`
     );
   } catch (error) {
-    console.log(error);
+
     return error(res, "Project update failed");
   }
 };
@@ -269,10 +269,10 @@ export const deleteProjectController: RequestHandler = async (req: Request, res:
         message: 'Project deleted successfully',
         deletedProject: projectDetail,
       });
-      console.log('Project deleted successfully');
+
     }
   } catch (error) {
-    console.error('Error deleting project detail', error);
+
     next(error);
   }
 };
