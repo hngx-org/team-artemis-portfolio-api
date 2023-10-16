@@ -1,3 +1,5 @@
+
+
 import { Request, Response, RequestHandler, NextFunction } from "express";
 import { connectionSource } from "../database/data-source";
 import { validate as isValidUUID } from "uuid";
@@ -19,9 +21,7 @@ import {
   CustomUserSection,
 } from "../database/entities";
 import { NotFoundError, BadRequestError } from "../middlewares/index";
-import { error, success } from "../utils/response.util";
 
-import { getRepository } from "typeorm";
 
 const portfolioDetailsRepository =
   connectionSource.getRepository(PortfolioDetail);
@@ -90,10 +90,15 @@ const getPortfolioDetails = async (
       where: { user: { id: user.id } },
     });
 
-    const awards = await awardRepository.find({ where: { user: { id: user.id } } });
-    const certificates = await certificateRepository.find({ where: { user: { id: user.id } } });
+    const awards = await awardRepository.find({
+      where: { user: { id: user.id } },
+    });
+    const certificates = await certificateRepository.find({
+      where: { user: { id: user.id } },
+    });
     const track = tracks?.track;
 
+    console.log(awards, certificates, track);
 
     res.status(200).json({
       user,
@@ -117,59 +122,6 @@ const getAllPortfolioDetails = async (req: Request, res: Response) => {
   const PortfolioDetails = await portfolioRepository.find();
   return res.json({ PortfolioDetails });
 };
-
-// const updatePortfolioDetail = async (
-//   req: Request,
-//   res: Response,
-//   next: NextFunction
-// ) => {
-//   try {
-//     // Extract the portfolio detail ID from the request parameters.
-//     const { userId } = req.params;
-
-//     // Validate the portfolioDetailId, ensure it's a valid number or handle validation as needed.
-//     if (!userId || isNaN(Number(userId))) {
-//       throw new BadRequestError(`${userId} is not a valid ID`);
-//     }
-
-//     // Get the updated data for the portfolio detail from the request body.
-//     const { city, country } = req.body;
-
-//     // Find the portfolio detail by ID.
-//     const portfolioDetailRepository = getRepository(PortfolioDetail);
-//     const existingPortfolioDetail = await portfolioDetailRepository.findOne(
-//       Number(portfolioDetailId)
-//     );
-
-//     // Check if the portfolio detail with the provided ID exists.
-//     if (!existingPortfolioDetail) {
-//       throw new NotFoundError(
-//         `Portfolio detail with ID ${portfolioDetailId} not found`
-//       );
-//     }
-
-//     // Update the portfolio detail properties with the new data.
-//     existingPortfolioDetail.city = city;
-//     existingPortfolioDetail.country = country;
-
-//     // Save the updated portfolio detail to the database.
-//     await portfolioDetailRepository.save(existingPortfolioDetail);
-
-//     console.log("Successfully updated user profile portfolio details");
-//     return success(
-//       res,
-//       {
-//         portfolio: portfolio,
-//         // track: track,
-//         user: user,
-//       },
-//       "Successfully updated user profile portfolio details"
-//     );
-//   } catch (error) {
-//     console.log("Error updating profile detail:", error.message);
-//     next(error);
-//   }
-// };
 
 // delete Portfolio Profile details
 const deletePortfolioDetails: RequestHandler = async (
@@ -205,7 +157,6 @@ const deletePortfolioDetails: RequestHandler = async (
 
 export {
   getPortfolioDetails,
-  // getAllPortfolioDetails,
-  //updatePortfolioDetail,
   deletePortfolioDetails,
 };
+
