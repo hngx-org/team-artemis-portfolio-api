@@ -67,9 +67,9 @@ const getPortfolioDetails = async (
       where: { user: { id: user.id } },
     });
 
-    const about = await connectionSource.manager.find(AboutDetail, {
+    const about = await aboutRepositiory.findOne({
       where: { user: { id: user.id } },
-    });
+    })
 
     const projects = await connectionSource.manager.find(Project, {
       where: { user: { id: user.id } },
