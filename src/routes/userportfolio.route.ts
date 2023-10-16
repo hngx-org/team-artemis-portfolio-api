@@ -1,7 +1,7 @@
 import {
   // getAllPortfolioDetails,
   getPortfolioDetails,
-  updatePortfolioDetail,
+  // updatePortfolioDetail,
   deletePortfolioDetails,
 } from "../controllers/userportfolio.controller";
 import { Router } from "express";
@@ -173,7 +173,7 @@ router.get("/getPortfolioDetails/:userId", getPortfolioDetails);
  *                   type: null
  */
 
-router.put("/update-profile-details/:userId", validateUpdatePortfolioDetails(updatePortfolioDataSchema), updatePortfolioDetail);
+// router.put("/update-profile-details/:userId", validateUpdatePortfolioDetails(updatePortfolioDataSchema), updatePortfolioDetail);
 
 /**
  * @swagger

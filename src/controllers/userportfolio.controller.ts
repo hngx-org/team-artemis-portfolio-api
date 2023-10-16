@@ -59,41 +59,41 @@ const getPortfolioDetails = async (
     const user = await userRepository.findOne({ where: { id: userId } });
 
     const education = await connectionSource.manager.find(EducationDetail, {
-      where: { user },
+      where: { user: { id: user.id } },
     });
 
     const skills = await connectionSource.manager.find(SkillsDetail, {
-      where: { user },
+      where: { user: { id: user.id } },
     });
 
     const interests = await connectionSource.manager.find(InterestDetail, {
-      where: { user },
+      where: { user: { id: user.id } },
     });
 
     const about = await connectionSource.manager.find(AboutDetail, {
-      where: { user },
+      where: { user: { id: user.id } },
     });
 
     const projects = await connectionSource.manager.find(Project, {
-      where: { user },
+      where: { user: { id: user.id } },
     });
     const sections = await connectionSource.manager.find(CustomUserSection, {
-      where: { user },
+      where: { user: { id: user.id } },
     });
 
     const tracks = await userTrackRepository.findOne({
-      where: { user },
+      where: { user: { id: user.id } },
       relations: ["track"],
     });
 
     const workExperience = await workExperienceRepository.find({
-      where: { user },
+      where: { user: { id: user.id } },
     });
 
-    const awards = await awardRepository.find({ where: { user } });
-    const certificates = await certificateRepository.find({ where: { user } });
+    const awards = await awardRepository.find({ where: { user: { id: user.id } } });
+    const certificates = await certificateRepository.find({ where: { user: { id: user.id } } });
     const track = tracks?.track;
-    console.log(track);
+
 
     res.status(200).json({
       user,
@@ -118,58 +118,58 @@ const getAllPortfolioDetails = async (req: Request, res: Response) => {
   return res.json({ PortfolioDetails });
 };
 
-const updatePortfolioDetail = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    // Extract the portfolio detail ID from the request parameters.
-    const { userId } = req.params;
+// const updatePortfolioDetail = async (
+//   req: Request,
+//   res: Response,
+//   next: NextFunction
+// ) => {
+//   try {
+//     // Extract the portfolio detail ID from the request parameters.
+//     const { userId } = req.params;
 
-    // Validate the portfolioDetailId, ensure it's a valid number or handle validation as needed.
-    if (!userId || isNaN(Number(userId))) {
-      throw new BadRequestError(`${userId} is not a valid ID`);
-    }
+//     // Validate the portfolioDetailId, ensure it's a valid number or handle validation as needed.
+//     if (!userId || isNaN(Number(userId))) {
+//       throw new BadRequestError(`${userId} is not a valid ID`);
+//     }
 
-    // Get the updated data for the portfolio detail from the request body.
-    const { city, country } = req.body;
+//     // Get the updated data for the portfolio detail from the request body.
+//     const { city, country } = req.body;
 
-    // Find the portfolio detail by ID.
-    const portfolioDetailRepository = getRepository(PortfolioDetail);
-    const existingPortfolioDetail = await portfolioDetailRepository.findOne(
-      Number(portfolioDetailId)
-    );
+//     // Find the portfolio detail by ID.
+//     const portfolioDetailRepository = getRepository(PortfolioDetail);
+//     const existingPortfolioDetail = await portfolioDetailRepository.findOne(
+//       Number(portfolioDetailId)
+//     );
 
-    // Check if the portfolio detail with the provided ID exists.
-    if (!existingPortfolioDetail) {
-      throw new NotFoundError(
-        `Portfolio detail with ID ${portfolioDetailId} not found`
-      );
-    }
+//     // Check if the portfolio detail with the provided ID exists.
+//     if (!existingPortfolioDetail) {
+//       throw new NotFoundError(
+//         `Portfolio detail with ID ${portfolioDetailId} not found`
+//       );
+//     }
 
-    // Update the portfolio detail properties with the new data.
-    existingPortfolioDetail.city = city;
-    existingPortfolioDetail.country = country;
+//     // Update the portfolio detail properties with the new data.
+//     existingPortfolioDetail.city = city;
+//     existingPortfolioDetail.country = country;
 
-    // Save the updated portfolio detail to the database.
-    await portfolioDetailRepository.save(existingPortfolioDetail);
+//     // Save the updated portfolio detail to the database.
+//     await portfolioDetailRepository.save(existingPortfolioDetail);
 
-    console.log("Successfully updated user profile portfolio details");
-    return success(
-      res,
-      {
-        portfolio: portfolio,
-        // track: track,
-        user: user,
-      },
-      "Successfully updated user profile portfolio details"
-    );
-  } catch (error) {
-    console.log("Error updating profile detail:", error.message);
-    next(error);
-  }
-};
+//     console.log("Successfully updated user profile portfolio details");
+//     return success(
+//       res,
+//       {
+//         portfolio: portfolio,
+//         // track: track,
+//         user: user,
+//       },
+//       "Successfully updated user profile portfolio details"
+//     );
+//   } catch (error) {
+//     console.log("Error updating profile detail:", error.message);
+//     next(error);
+//   }
+// };
 
 // delete Portfolio Profile details
 const deletePortfolioDetails: RequestHandler = async (
@@ -206,6 +206,6 @@ const deletePortfolioDetails: RequestHandler = async (
 export {
   getPortfolioDetails,
   // getAllPortfolioDetails,
-  updatePortfolioDetail,
+  //updatePortfolioDetail,
   deletePortfolioDetails,
 };
