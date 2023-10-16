@@ -126,11 +126,11 @@ const updatePortfolioDetail = async (
 ) => {
   try {
     // Extract the portfolio detail ID from the request parameters.
-    const { portfolioDetailId } = req.params;
+    const { userId } = req.params;
 
     // Validate the portfolioDetailId, ensure it's a valid number or handle validation as needed.
-    if (!portfolioDetailId || isNaN(Number(portfolioDetailId))) {
-      throw new BadRequestError(`${portfolioDetailId} is not a valid ID`);
+    if (!userId || isNaN(Number(userId))) {
+      throw new BadRequestError(`${userId} is not a valid ID`);
     }
 
     // Get the updated data for the portfolio detail from the request body.
