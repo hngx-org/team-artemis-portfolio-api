@@ -40,7 +40,7 @@ export const createSkillsService = async (
 export const getSkillsService = async (userId: string
 ) => {
   const user = await userRepository.findOneBy({ id: userId });
-  const savedskilldetails = await skillsDetailRepository.find({ where: { user: { id: user.id } } });
+  const savedskilldetails = await skillsDetailRepository.find({where:{ user: {id: user.id} }});
 
   return savedskilldetails;
 };

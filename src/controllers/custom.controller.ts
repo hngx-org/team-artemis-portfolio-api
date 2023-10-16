@@ -5,7 +5,7 @@ import {
   CustomUserSection,
   CustomField,
   Section,
-  User
+  User,
 } from "../database/entities";
 import { success, error } from "../utils/response.util";
 import { deleteCustomSectionService } from "../services/custom.service";
@@ -134,7 +134,7 @@ const createSection = async (
         400
       );
     const positionExists = await sectionRepository.findOne({
-      where: { position: req.body.position },
+      // where: { position: req.body.position },
     });
     if (positionExists)
       return error(res, "A section with this position already exist", 400);
@@ -189,7 +189,7 @@ const UpdateSection = async (
     if (!section) return error(res, "Section not found", 404);
     if (req.body.position) {
       const positionExists = await sectionRepository.findOne({
-        where: { position: req.body.position },
+        // where: { position: req.body.position },
       });
       if (positionExists)
         return error(res, "A section with this position already exist", 400);
@@ -228,13 +228,12 @@ const create = async (
   res: Response
 ) => {
   try {
-
     const { user_id, section_id } = req.body as any;
     const section = await sectionRepository.findOne({
       where: { id: section_id },
     });
     if (!section) return error(res, "SectionId does not exist", 400);
-    const user = await userRepositoy.findOne({ where: { id: user_id } })
+    const user = await userRepositoy.findOne({ where: { id: user_id } });
 
     const alreadyCreated = await customRepository.findOne({
       where: { user },
@@ -421,7 +420,7 @@ const updateSectionSchema: any = z
       message:
         "At least one of the fields (name, description, meta, position) is required",
     }
-  );;
+  );
 
 const getSectionSchema = z.object({
   name: z.string().optional(),
@@ -492,7 +491,9 @@ const updateCustomField = async (req: Request, res: Response) => {
     if (!existingRecord) {
       return error(res, "Record not found", 404);
     }
-    const currCustomUserSection = await customRepository.findOne({ where: { id: customSectionId } })
+    const currCustomUserSection = await customRepository.findOne({
+      where: { id: customSectionId },
+    });
 
     existingRecord.fieldType = req.body.fieldType;
     existingRecord.fieldName = req.body.fieldName;
