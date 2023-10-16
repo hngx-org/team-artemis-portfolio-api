@@ -250,7 +250,7 @@ export const updateProfileController = async (
     });
     return success(
       res,
-      { portfolio: portfolio, userTrack: userTrack?.track },
+      { portfolio: portfolio, track: userTrack?.track },
       "Successfully Updated Portfolio profile"
     );
   } catch (err) {
