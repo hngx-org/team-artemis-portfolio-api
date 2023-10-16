@@ -16,12 +16,7 @@ export const CreateReferenceDetailSchema = object({
       message: "Company is required in the request body",
     }),
 
-  position: string()
-    .min(1, { message: "Position must not be an empty string" })
-    .refine((position) => !!position, {
-      message: "Position is required in the request body",
-    })
-    .optional(),
+  position: string().optional(),
 
   emailAddress: string()
     .min(1, { message: "Email address must not be an empty string" })
@@ -29,12 +24,7 @@ export const CreateReferenceDetailSchema = object({
       message: "Email address is required in the request body",
     }),
 
-  phoneNumber: string()
-    .min(1, { message: "Phone number must not be an empty string" })
-    .refine((phoneNumber) => !!phoneNumber, {
-      message: "Phone number is required in the request body",
-    })
-    .optional(),
+  phoneNumber: string().optional(),
   
   userId: string()
     .min(1, { message: "User ID must not be an empty string" })
