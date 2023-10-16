@@ -120,15 +120,17 @@ export const getUserById = async (req: Request, res: Response) => {
   try {
     const { userId: id } = req.params;
     const userId = id.trim();
+
     const user = await userRepository.findOne({ where: { id: userId } });
-     if(!user) {
+    if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
     const portfolio = await portfolioRepository.findOne({ where: { user } });
-    const userTracks = await userTrackRepository.find({ where: { user }, relations: ['track'] });
-    const { track } = userTracks[0];
-    res.status(200).json({ user, portfolio, track });
+    const userTracks = await userTrackRepository.find({ where: { user } });
+
+    // const track = userTracks[0]?.track;
+    res.status(200).json({ user, portfolio, userTracks });
 
   } catch (error) {
     console.error(error)
@@ -167,11 +169,11 @@ export const createProfileController = async (req: Request, res: Response) => {
     if (!otherDetailsJson.data) {
       return res.status(404).json({ message: "User not found" });
     }
-    
+
     const user = await userRepository.findOneBy({ id: userId });
     let { firstName, lastName, track, profilePictureUrl } = otherDetailsJson.data;
-    
-    
+
+
     console.log(user)
     if (!user) {
 

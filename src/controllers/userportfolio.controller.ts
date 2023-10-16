@@ -59,6 +59,7 @@ const getPortfolioDetails = async (
     const user = await userRepository.findOne({ where: { id: userId } });
 
 
+
     const education = await connectionSource.manager.find(EducationDetail, {
       where: { user },
     });
@@ -88,7 +89,8 @@ const getPortfolioDetails = async (
 
     const awards = await awardRepository.find({ where: { user } })
     const certificates = await certificateRepository.find({ where: { user } })
-    const { track } = tracks;
+    const track = tracks?.track;
+    console.log(track)
 
     res.status(200).json({
       user,
@@ -102,8 +104,6 @@ const getPortfolioDetails = async (
       certificates,
       sections,
       track
-
-
     });
   } catch (error) {
     return next(error);
