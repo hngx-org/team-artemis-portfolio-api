@@ -12,7 +12,7 @@ export const CreateAwardDataSchema = z.object({
   userId: z.string().refine((value) => isUUID(value), {
     message: 'userId has to be a valid UUID',
   }),
-  sectionId: z.number(),
+  section_id: z.number(),
 })
 
 
@@ -49,13 +49,13 @@ async function validateCreateAwardData(
     const data = req.body
 
     // Validate date strings in "yy-mm-dd" format
-    if (data.year && !validateDateYYYY(data.from)) {
+    if (data.year && !validateDateYYYY(data.year)) {
       const err = new BadRequestError("Invalid 'year' date format, it must be 'yyyy' ")
       return res.status(err.statusCode).json({ error: err.message })
     }
 
     // Retrieve the "userId" from request parameters
-    const userId = req.params.id
+    const userId = req.params.userId
 
     // Validate the rest of the data against the schema
     const result = await parseAsync(CreateAwardDataSchema, {

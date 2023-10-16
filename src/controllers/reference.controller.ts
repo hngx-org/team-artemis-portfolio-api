@@ -1,33 +1,33 @@
 import { Request, Response, NextFunction } from "express";
 import { connectionSource } from "../database/data-source";
-import { References } from "../database/entity/model";
+// import { References } from "../database/entity/model";
 import {
   CustomError,
   NotFoundError,
   BadRequestError,
 } from "../middlewares";
 
-const referenceRepository = connectionSource.getRepository(References);
+// const referenceRepository = connectionSource.getRepository(References);
 export const createReference = async (req: Request, res: Response) => {
   try {
-      const validatedData = req.body; // Assuming that the validation middleware stored the validated data
-    const userIdFromURL = req.params.userId; // Extract user ID from the URL
+    // const validatedData = req.body; // Assuming that the validation middleware stored the validated data
+    // const userIdFromURL = req.params.userId; // Extract user ID from the URL
 
-    // If the user ID is not provided in the URL, check if it's in the request body
-    let userId = userIdFromURL || validatedData.userId;
-    // Create a new References object with the validated data
-    const reference = new References();
-    reference.name = validatedData.name;
-    reference.company = validatedData.company;
-    reference.position = validatedData.position;
-    reference.emailAddress = validatedData.emailAddress;
-    reference.phoneNumber = validatedData.phoneNumber;
-    reference.userId = userId;
+    // // If the user ID is not provided in the URL, check if it's in the request body
+    // let userId = userIdFromURL || validatedData.userId;
+    // // Create a new References object with the validated data
+    // // const reference = new References();
+    // // reference.name = validatedData.name;
+    // // reference.company = validatedData.company;
+    // // reference.position = validatedData.position;
+    // // reference.emailAddress = validatedData.emailAddress;
+    // // reference.phoneNumber = validatedData.phoneNumber;
+    // // reference.userId = userId;
 
-    // Save the reference to the database
-    await referenceRepository.save(reference);
+    // // Save the reference to the database
+    // // await referenceRepository.save(reference);
 
-    res.status(201).json({ message: "Reference created successfully" });
+    // res.status(201).json({ message: "Reference created successfully" });
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
@@ -38,8 +38,8 @@ export const getAllReference = async (
   res: Response,
 ) => {
   try {
-    const references = await referenceRepository.find();
-    res.json({ references });
+    // const references = await referenceRepository.find();
+    // res.json({ references });
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: "Internal server error" });
@@ -61,18 +61,19 @@ export const deleteReferenceDetail = async (
     }
 
     // Find the existing reference detail by ID
-    const referenceDetail = await referenceRepository.findOne({
-      where: { id },
+    // const referenceDetail = await referenceRepository.findOne({
+    //   where: { id },
+    // });
+
+    // if (!referenceDetail) {
+    //   throw new NotFoundError("Reference detail not found");
+    // }
+
+    //await referenceRepository.remove(referenceDetail);
+
+    res.status(200).json({
+      message: "Reference detail deleted successfully"
     });
-
-    if (!referenceDetail) {
-      throw new NotFoundError("Reference detail not found");
-    }
-
-    await referenceRepository.remove(referenceDetail);
-
-     res.status(200).json({
-      message: "Reference detail deleted successfully"  });
   } catch (error) {
     console.error("Error deleting reference detail:", error);
     next(error);

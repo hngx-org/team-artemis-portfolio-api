@@ -254,6 +254,6 @@ router.delete("/projects/:id", deleteProjectController);
  *       - Project
  */
 
-router.put("/update-project/:project_id", uploadHandler, updateProjectById);
+router.put("/projects/:project_id", uploadHandler, updateProjectById);
 
 module.exports = router;

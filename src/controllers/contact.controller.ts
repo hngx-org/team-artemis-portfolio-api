@@ -1,14 +1,14 @@
 import { updateContact, findUser } from '../services'
 import { ContactBody } from '../interfaces'
 import { Request, Response, RequestHandler, NextFunction } from 'express'
-import { SocialUser } from '../database/entity/model'
 import { SocialUserService, createContact } from '../services/contact.service'
 import constant from '../constants/constant';
-import {z} from 'zod';
+import { z } from 'zod';
 
 // import { Request, Response } from 'express'
 import { connectionSource as dataSource } from '../database/data-source'
-import { SocialMedia } from '../database/entity/model'
+import { SocialMedia, SocialUser, User } from '../database/entities'
+
 
 const MESSAGES = constant.MESSAGES;
 const contactsRepo = dataSource.getRepository(SocialUser)
@@ -33,31 +33,58 @@ export const createSocials = async (req: Request, res: Response) => {
   }
 }
 
+// get all social media types
+export const getSocials = async (req: Request, res: Response) => {
+
+  try {
+
+
+    const socialsRepo = dataSource.getRepository(SocialMedia)
+
+    const data = await socialsRepo.find()
+    const response = {
+      status: "success",
+      statusCode: 200,
+      data: data
+    };
+    if (response.data.length > 0) {
+      return res
+        .status(200)
+        .json(response);
+
+    }
+    return res.status(200).json({ statusCode: 200, status: "No social media type found", data: [] })
+  } catch (error) {
+
+    return res.status(500).json({ message: "Oops something happened" });
+  }
+}
+
 
 
 // creates new contacts socials
-export const createContacts = async (req: Request, res: Response, next:NextFunction) => {
+export const createContacts = async (req: Request, res: Response, next: NextFunction) => {
   interface Icontacts {
-   url: string,
-   user_id: string,
-   social_media_id:number|number
+    url: string,
+    user_id: string,
+    social_media_id: number | number
   }
-  const schema= z.object({url: z.string(),user_id: z.string().uuid(),social_media_id:z.number()})
-  const { url, user_id, social_media_id }:Icontacts = req.body;
+  const schema = z.object({ url: z.string(), user_id: z.string().uuid(), social_media_id: z.number() })
+  const { url, user_id, social_media_id }: Icontacts = req.body;
   const formattedId = Number(social_media_id);
-   const isValid = schema.safeParse({url,user_id,social_media_id:formattedId})
-   console.log(isValid)
-  try {
-    if(isValid.success){// check if request body details is a valid data
-      await createContact(social_media_id, url, user_id);
-      return res.status(201).json({ message:MESSAGES.CREATED });
+  const isValid = schema.safeParse({ url, user_id, social_media_id: formattedId })
 
-    }else{
+  try {
+    if (isValid.success) {// check if request body details is a valid data
+      await createContact(social_media_id, url, user_id);
+      return res.status(201).json({ message: MESSAGES.CREATED });
+
+    } else {
       return res.status(400).json({ message: MESSAGES.INVALID_INPUT })
     }
   } catch (error) {
     console.error("Error creating contact:", error);
-    next(error)
+    throw new BadRequestError(constant.MESSAGES.BAD_REQUEST)
   }
 };
 
@@ -67,19 +94,17 @@ export const createContacts = async (req: Request, res: Response, next:NextFunct
 export const getContacts = async (req: Request, res: Response) => {
   try {
     const { user_id } = req.params
-    const schema = z.object({user_id:z.string().uuid()})
-    const parsedUserId = schema.safeParse({user_id})
-    console.log(parsedUserId)
-   // const userIdRegex = /^[A-Fa-f0-9\-]+$/
-    if ( !parsedUserId.success) {
-      console.log('in')
+    const schema = z.object({ user_id: z.string().uuid() })
+    const parsedUserId = schema.safeParse({ user_id })
+    // const userIdRegex = /^[A-Fa-f0-9\-]+$/
+    if (!parsedUserId.success) {
+
       return res.status(400).json({ message: MESSAGES.INVALID_INPUT })
     }
 
     const contacts = await contactsRepo.find({
-      where: { userId: String(user_id) },
+      where: { User },
     })
-    console.log(contacts)
     return res.status(200).json(contacts)
   } catch (error) {
     console.error('Error getting contacts:', error)
