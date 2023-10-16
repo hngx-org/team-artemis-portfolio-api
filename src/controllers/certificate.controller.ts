@@ -1,4 +1,4 @@
-import { NextFunction, Request, Response } from "express";
+import { Request, Response } from "express";
 import { connectionSource as dataSource } from "../database/data-source";
 import { success, error } from "../utils";
 import { updateACertificate } from "../services/certificate.service";
@@ -65,7 +65,9 @@ const getAllCertificates = async (req: Request, res: Response) => {
   const certificateRepository = dataSource.getRepository(Certificate);
 
   try {
-    const certificates = await certificateRepository.find();
+    const certificates = await certificateRepository.find({
+      relations: ["section", "user"],
+    });
 
     if (!certificates) {
       return error(res, "Error fetching certificates", 400);
@@ -83,17 +85,21 @@ const getCertificateById = async (req: Request, res: Response) => {
 
   try {
     const certificate = await certificateRepository
-      .createQueryBuilder()
-      .where("id = :id", { id })
+      .createQueryBuilder("certificate")
+      .where("certificate.id = :id", { id })
+      .leftJoinAndSelect("certificate.section", "section")
+      .leftJoinAndSelect("certificate.user", "user")
       .getOne();
 
-    if (certificate) {
-      res.json(certificate);
-    } else {
-      res.status(404).json({ error: "Certificate not found" });
+    if (!certificate) {
+      return error(res, "Certificate not found", 404);
     }
+
+    return success(res, certificate, "Certificate fetched successfully");
   } catch (error) {
-    res.status(500).json({ error: "Internal Server Error" });
+    return res
+      .status(500)
+      .json({ error: (error as Error)?.message ?? "Internal server error" });
   }
 };
 
