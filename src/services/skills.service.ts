@@ -9,7 +9,7 @@ const userRepository = connectionSource.getRepository(User);
 export const createSkillsService = async (
   skillData: Skill[]
 ): Promise<{ successful: boolean; message: string }> => {
-  try { 
+  try {
     const newSkills = [];
     for (const data of skillData) {
       const { skills, sectionId, userId } = data;
@@ -30,7 +30,7 @@ export const createSkillsService = async (
     }
 
     await skillsDetailRepository.save(newSkills);
-    
+
     return { successful: true, message: "skills successfully saved" };
   } catch (error) {
     console.error("Error creating skills:", error);
@@ -38,9 +38,9 @@ export const createSkillsService = async (
   }
 };
 export const getSkillsService = async (userId: string
- ) => {
+) => {
   const user = await userRepository.findOneBy({ id: userId });
-  const savedskilldetails = await skillsDetailRepository.find({where:{ user }});
+  const savedskilldetails = await skillsDetailRepository.find({where:{ user: {id: user.id} }});
 
   return savedskilldetails;
 };

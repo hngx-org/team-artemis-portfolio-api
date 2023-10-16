@@ -1,8 +1,8 @@
-import { Request, RequestHandler, Response } from 'express';
-import { connectionSource } from '../database/data-source';
-import { User } from '../database/entities';
-import { validate as isValidUUID } from 'uuid';
-import responseHandler from '../services/language.service';
+import { Request, RequestHandler, Response } from "express";
+import { connectionSource } from "../database/data-source";
+import { User } from "../database/entities";
+import { validate as isValidUUID } from "uuid";
+import responseHandler from "../services/language.service";
 
 // const languageRepository = connectionSource.getRepository(Language);
 const userRepository = connectionSource.getRepository(User);
@@ -13,7 +13,7 @@ const addLanguage: RequestHandler = async (req: Request, res: Response) => {
 
     const user = await userRepository.findOneBy({ id: userId });
 
-    if (!user) return responseHandler.notFound(res, 'User not found');
+    if (!user) return responseHandler.notFound(res, "User not found");
 
     // await languageRepository.delete({ userId });
 
@@ -37,10 +37,14 @@ const getUserLanguages: RequestHandler = async (
   try {
     const userId = req.params.userId;
 
-    if (!isValidUUID(userId)) return responseHandler.badRequest(res, "userId must be a valid UUID string")
+    if (!isValidUUID(userId))
+      return responseHandler.badRequest(
+        res,
+        "userId must be a valid UUID string"
+      );
 
     const user = await userRepository.findOneBy({ id: userId });
-    if (!user) return responseHandler.notFound(res, 'User not found');
+    if (!user) return responseHandler.notFound(res, "User not found");
 
     // const userLanguages = await languageRepository.find({
     //   where: { userId: userId },
