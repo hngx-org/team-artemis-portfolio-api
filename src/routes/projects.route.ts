@@ -288,6 +288,6 @@ router.put("/projects/:project_id", uploadHandler, updateProjectById);
  *       - Project
  */
 
-router.get("/user/:id/projects/", getAllProjectsForUser);
+router.get("/users/:user_id/projects", getAllProjectsForUser);
 
 module.exports = router;

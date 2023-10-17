@@ -361,9 +361,33 @@ export const getAllProjectsForUser: RequestHandler = async (
     const projects = await projectRepository.find({
       where: {
         user: { id: user_id }
-      }
+      }, relations: ["projectsImages"]
     });
-    success(res, projects, "Successfully Retrieved");
+
+    const projectsWithImageUrls = [];
+
+    for (const project of projects) {
+      const imageUrlsPromises = project.projectsImages.map(
+        async (image) => {
+          const imageEntity = await imageRepository.findOne({
+            where: { id: image.id },
+          });
+          return imageEntity ? imageEntity.url : null;
+        }
+      );
+
+      const imageUrls = await Promise.all(imageUrlsPromises);
+
+      projectsWithImageUrls.push({
+        ...project,
+        projectsImages: imageUrls,
+        thumbnail: imageUrls[0]
+      });
+    }
+
+
+
+    success(res, projectsWithImageUrls, "Successfully Retrieved");
   } catch (err) {
     return next(err)
   }
