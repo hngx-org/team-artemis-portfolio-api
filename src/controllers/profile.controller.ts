@@ -21,6 +21,9 @@ import {
   SkillsDetail,
   User,
   Certificate,
+  SocialUser,
+  Language,
+  ReferenceDetail
 } from "../database/entities";
 import {
   cloudinaryService,
@@ -54,7 +57,9 @@ const portfolioDetailsRepository =
 const trackRepository = connectionSource.getRepository(Tracks);
 const certificateRepository = connectionSource.getRepository(Certificate);
 const awardRepository = connectionSource.getRepository(Award);
-
+const contactRepository = connectionSource.getRepository(SocialUser);
+const languageRepository = connectionSource.getRepository(Language);
+const referenceRepository = connectionSource.getRepository(ReferenceDetail);
 // Export the uploadProfileImageController function
 export const uploadProfileImageController: RequestHandler = async (
   req: Request,
@@ -300,13 +305,16 @@ export const deleteAllSectionEntries: RequestHandler = async (
       about: aboutRepository,
       education: educationRepository,
       workExperience: workExperienceRepositry,
-      skills: skillsDetailRepository,
-      projects: projectRepository,
+      project: projectRepository,
       interests: interestRepository,
       sections: sectionRepository,
-      certificates: certificateRepository,
+      certificate: certificateRepository,
       skill: skillRepository,
       award: awardRepository,
+      contact: contactRepository,
+      awards: awardRepository,
+      language: languageRepository,
+      reference: referenceRepository,
     };
 
     const { userId } = req.params;
