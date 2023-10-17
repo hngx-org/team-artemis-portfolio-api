@@ -103,10 +103,14 @@ const getPortfolioDetails = async (
       where: { user: { id: user.id } },
     });
 
-    const langauge = await connectionSource.manager.find(SocialUser, {
-      where: { user: { id: user.id } },
-    });
+    // const langauge = await connectionSource.manager.find(LanguageDetail, {
+    //   where: { user: { id: user.id } },
+    // });
 
+    const projectwithImages = await connectionSource.manager.find(Project, {
+      where: { user: { id: user.id } },
+      relations: ["projectsImages"]
+    })
     res.status(200).json({
       user,
       education,
@@ -120,7 +124,8 @@ const getPortfolioDetails = async (
       sections,
       track,
       reference,
-      langauge
+      projectwithImages
+      // langauge
     });
   } catch (error) {
     return next(error);
