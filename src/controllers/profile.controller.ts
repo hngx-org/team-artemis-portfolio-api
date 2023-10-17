@@ -310,9 +310,12 @@ export const deleteAllSectionEntries: RequestHandler = async (
     };
 
     const { userId } = req.params;
-    const { sectionName } = req.body;
+    const { section } = req.body;
+    if (!userId) {
+      return next(new BadRequestError("User id is missing"));
+    }
 
-    const currentRepo = dynamicSection[sectionName];
+    const currentRepo = dynamicSection[section];
 
     if (currentRepo === undefined) {
       return next(new BadRequestError("Invalid or missing section name"));
@@ -323,7 +326,7 @@ export const deleteAllSectionEntries: RequestHandler = async (
       return next(new BadRequestError("User not found"));
     }
     const alluserEntries = await currentRepo.find({
-      where: { user },
+      where: { user: { id: user.id } },
     });
     if (alluserEntries.length === 0) {
       return next(new BadRequestError("No entries to delete"));
