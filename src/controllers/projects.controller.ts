@@ -345,3 +345,50 @@ export const updateProjectById: RequestHandler = async (
     return next(err);
   }
 };
+
+
+export const getAllProjectsForUser: RequestHandler = async (
+  req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { user_id } = req.params;
+    if (!user_id) {
+      throw new BadRequestError("Please provide user id");
+    }
+    const user = await userRepository.findOneBy({ id: user_id });
+    if (!user) {
+      throw new NotFoundError("User not found");
+    }
+    const projects = await projectRepository.find({
+      where: {
+        user: { id: user_id }
+      }, relations: ["projectsImages"]
+    });
+
+    const projectsWithImageUrls = [];
+
+    for (const project of projects) {
+      const imageUrlsPromises = project.projectsImages.map(
+        async (image) => {
+          const imageEntity = await imageRepository.findOne({
+            where: { id: image.id },
+          });
+          return imageEntity ? imageEntity.url : null;
+        }
+      );
+
+      const imageUrls = await Promise.all(imageUrlsPromises);
+
+      projectsWithImageUrls.push({
+        ...project,
+        projectsImages: imageUrls,
+        thumbnail: imageUrls[0]
+      });
+    }
+
+
+
+    success(res, projectsWithImageUrls, "Successfully Retrieved");
+  } catch (err) {
+    return next(err)
+  }
+}
