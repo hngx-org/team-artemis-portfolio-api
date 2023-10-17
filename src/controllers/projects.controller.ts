@@ -345,3 +345,26 @@ export const updateProjectById: RequestHandler = async (
     return next(err);
   }
 };
+
+
+export const getAllProjectsForUser: RequestHandler = async (
+  req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { user_id } = req.params;
+    if (!user_id) {
+      throw new BadRequestError("Please provide user id");
+    }
+    const user = await userRepository.findOneBy({ id: user_id });
+    if (!user) {
+      throw new NotFoundError("User not found");
+    }
+    const projects = await projectRepository.find({
+      where: {
+        user: { id: user_id }
+      }
+    });
+    success(res, projects, "Successfully Retrieved");
+  } catch (err) {
+    return next(err)
+  }
+}
