@@ -302,18 +302,17 @@ export const deleteAllSectionEntries: RequestHandler = async (
   try {
     const dynamicSection = {
       about: aboutRepository,
-      education: educationRepository,
-      workExperience: workExperienceRepositry,
-      project: projectRepository,
+      educations: educationRepository,
+      workExperiences: workExperienceRepositry,
+      projects: projectRepository,
       interests: interestRepository,
       sections: sectionRepository,
-      certificate: certificateRepository,
-      skill: skillsDetailRepository,
-      award: awardRepository,
-      contact: contactRepository,
+      certificates: certificateRepository,
+      skills: skillsDetailRepository,
       awards: awardRepository,
-      language: languageRepository,
-      reference: referenceRepository,
+      contacts: contactRepository,
+      languages: languageRepository,
+      references: referenceRepository,
     };
 
     const { userId } = req.params;
