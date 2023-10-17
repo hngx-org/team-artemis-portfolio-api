@@ -74,3 +74,55 @@ export const createReferenceService = async (
     throw new Error(error.message);
   }
 };
+
+export const getAllUserReferenceService = async (
+  userId: string
+): Promise<{ successful: boolean; data: any; message: string }> => {
+  try {
+    let user = await userRepository.findOne({
+      where: { id: userId },
+      relations: ["references"],
+    });
+
+    if (!user) {
+      return { successful: false, message: "User not found", data: null }; // User not found.
+    }
+
+    return {
+      data: user.references,
+      successful: true,
+      message: "user's references retrieved successfully",
+    };
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+
+export const deleteReferenceDetailService = async (
+  id: number
+): Promise<{ successful: boolean; data: any; message: string }> => {
+  try {
+    if (isNaN(id) || id < 1) {
+      throw new BadRequestError("Invalid ID Format");
+    }
+
+    // Find the existing reference detail by ID
+    const referenceDetail = await referenceRepository.findOne({
+      where: { id },
+    });
+
+    if (!referenceDetail) {
+      throw new NotFoundError("Reference detail not found");
+    }
+
+    await referenceRepository.remove(referenceDetail);
+
+    return {
+      data: null,
+      successful: true,
+      message: "user's references deleted successfully",
+    };
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
