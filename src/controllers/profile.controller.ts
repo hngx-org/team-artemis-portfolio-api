@@ -327,7 +327,7 @@ export const deleteAllSectionEntries: RequestHandler = async (
     if (currentRepo === undefined) {
       return next(new BadRequestError("Invalid or missing section name"));
     }
-    console.log(userId);
+
     const user = await userRepository.findOne({ where: { id: userId } });
     if (!user) {
       return next(new BadRequestError("User not found"));

@@ -17,6 +17,9 @@ import {
   Award,
   Certificate,
   CustomUserSection,
+  ReferenceDetail,
+  SocialUser,
+  LanguageDetail,
 } from "../database/entities";
 import { NotFoundError, BadRequestError } from "../middlewares/index";
 
@@ -27,11 +30,11 @@ const userRepository = connectionSource.getRepository(User);
 const workExperienceRepository =
   connectionSource.getRepository(WorkExperienceDetail);
 const interestRepository = connectionSource.getRepository(InterestDetail);
-const skillRepository = connectionSource.getRepository(Skill);
+const referenceRepository = connectionSource.getRepository(ReferenceDetail);
 const projectRepository = connectionSource.getRepository(Project);
 const sectionRepository = connectionSource.getRepository(Section);
 const userTrackRepository = connectionSource.getRepository(UserTrack);
-const trackRepository = connectionSource.getRepository(Tracks);
+const languageDetailRepository = connectionSource.getRepository(LanguageDetail);
 const aboutRepositiory = connectionSource.getRepository(AboutDetail);
 const awardRepository = connectionSource.getRepository(Award);
 const certificateRepository = connectionSource.getRepository(Certificate);
@@ -67,6 +70,7 @@ const getPortfolioDetails = async (
       where: { user: { id: user.id } },
     });
 
+
     const about = await aboutRepositiory.findOne({
       where: { user: { id: user.id } },
     })
@@ -95,7 +99,13 @@ const getPortfolioDetails = async (
     });
     const track = tracks?.track;
 
-    console.log(awards, certificates, track);
+    const reference = await connectionSource.manager.find(ReferenceDetail, {
+      where: { user: { id: user.id } },
+    });
+
+    const langauge = await connectionSource.manager.find(SocialUser, {
+      where: { user: { id: user.id } },
+    });
 
     res.status(200).json({
       user,
@@ -109,6 +119,8 @@ const getPortfolioDetails = async (
       certificates,
       sections,
       track,
+      reference,
+      langauge
     });
   } catch (error) {
     return next(error);
