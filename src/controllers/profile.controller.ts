@@ -21,6 +21,9 @@ import {
   SkillsDetail,
   User,
   Certificate,
+  SocialUser,
+  Language,
+  ReferenceDetail,
 } from "../database/entities";
 import {
   cloudinaryService,
@@ -47,14 +50,15 @@ const aboutRepository = connectionSource.getRepository(AboutDetail);
 const educationRepository = connectionSource.getRepository(EducationDetail);
 const projectRepository = connectionSource.getRepository(Project);
 const interestRepository = connectionSource.getRepository(InterestDetail);
-const skillRepository = connectionSource.getRepository(Skill);
 const skillsDetailRepository = connectionSource.getRepository(SkillsDetail);
 const portfolioDetailsRepository =
   connectionSource.getRepository(PortfolioDetail);
 const trackRepository = connectionSource.getRepository(Tracks);
 const certificateRepository = connectionSource.getRepository(Certificate);
 const awardRepository = connectionSource.getRepository(Award);
-
+const contactRepository = connectionSource.getRepository(SocialUser);
+const languageRepository = connectionSource.getRepository(Language);
+const referenceRepository = connectionSource.getRepository(ReferenceDetail);
 // Export the uploadProfileImageController function
 export const uploadProfileImageController: RequestHandler = async (
   req: Request,
@@ -300,19 +304,25 @@ export const deleteAllSectionEntries: RequestHandler = async (
       about: aboutRepository,
       education: educationRepository,
       workExperience: workExperienceRepositry,
-      skills: skillsDetailRepository,
-      projects: projectRepository,
+      project: projectRepository,
       interests: interestRepository,
       sections: sectionRepository,
-      certificates: certificateRepository,
-      skill: skillRepository,
+      certificate: certificateRepository,
+      skill: skillsDetailRepository,
       award: awardRepository,
+      contact: contactRepository,
+      awards: awardRepository,
+      language: languageRepository,
+      reference: referenceRepository,
     };
 
     const { userId } = req.params;
-    const { sectionName } = req.body;
+    const { section } = req.body;
+    if (!userId) {
+      return next(new BadRequestError("User id is missing"));
+    }
 
-    const currentRepo = dynamicSection[sectionName];
+    const currentRepo = dynamicSection[section];
 
     if (currentRepo === undefined) {
       return next(new BadRequestError("Invalid or missing section name"));
@@ -323,7 +333,7 @@ export const deleteAllSectionEntries: RequestHandler = async (
       return next(new BadRequestError("User not found"));
     }
     const alluserEntries = await currentRepo.find({
-      where: { user },
+      where: { user: { id: user.id } },
     });
     if (alluserEntries.length === 0) {
       return next(new BadRequestError("No entries to delete"));
