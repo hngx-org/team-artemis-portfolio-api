@@ -8,8 +8,9 @@ import {
   createReferenceService,
   deleteReferenceDetailService,
   getAllUserReferenceService,
+  updateReferenced,
 } from "../services/reference.service";
-
+const referenceRepository = connectionSource.getRepository(ReferenceDetail);
 
 export const createReference = async (req: Request, res: Response) => {
   try {
@@ -76,5 +77,24 @@ export const deleteReferenceDetail = async (
   } catch (err) {
     console.error("Error deleting reference detail:", error);
     error(res, (err as Error).message); // Use type assertion to cast 'err' to 'Error' type
+  }
+};
+
+export const updateReference = async (req: Request, res: Response) => {
+  try {
+    const { id }: any = req.params;
+    await connectionSource
+      .createQueryBuilder()
+      .update(ReferenceDetail)
+      .set(req.body)
+      .where("id = :id", { id: id})
+      .execute();
+    const userRepository = connectionSource.getRepository(ReferenceDetail);
+    const refByid = await userRepository.findOneBy({
+      id: id,
+    });
+    success(res, refByid);
+  } catch (err) {
+    error(res, "invalid userid");
   }
 };
