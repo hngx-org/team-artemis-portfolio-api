@@ -22,7 +22,7 @@ export const createAwardService = async (award: AwardData) => {
       section,
       title,
       year,
-      presentedBy: presented_by,
+      presented_by,
       description,
       url,
     });
