@@ -23,7 +23,7 @@ import {
   Certificate,
   SocialUser,
   Language,
-  ReferenceDetail
+  ReferenceDetail,
 } from "../database/entities";
 import {
   cloudinaryService,
@@ -50,7 +50,6 @@ const aboutRepository = connectionSource.getRepository(AboutDetail);
 const educationRepository = connectionSource.getRepository(EducationDetail);
 const projectRepository = connectionSource.getRepository(Project);
 const interestRepository = connectionSource.getRepository(InterestDetail);
-const skillRepository = connectionSource.getRepository(Skill);
 const skillsDetailRepository = connectionSource.getRepository(SkillsDetail);
 const portfolioDetailsRepository =
   connectionSource.getRepository(PortfolioDetail);
