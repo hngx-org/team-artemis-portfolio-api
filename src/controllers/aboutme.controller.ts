@@ -16,6 +16,13 @@ export const createAboutMe: RequestHandler = async (req, res) => {
     // Get the data from the request body
     const { bio, userId, sectionId } = req.body as AboutMeInterface;
 
+    if (bio.length > 250){
+      return res.status(400).json({
+        successful: false,
+        message: "Bio exceeds the character limit (250 characters)."
+      });
+    }
+
     const user = await userRepository.findOne({
       where: { id: userId },
     });
@@ -138,6 +145,13 @@ export const updateAboutMe: RequestHandler = async (req, res) => {
     const { userId } = req.params;
     const { bio } = req.body as updateAboutMeInterface;
 
+    if (bio.length > 250) {
+      return res.status(400).json({
+        successful: false,
+        message: "Bio exceeds the character limit (250 characters).",
+      });
+    }
+    
     const user = await userRepository.findOne({ where: { id: userId }  });
 
     if (!user) {
