@@ -29,9 +29,9 @@ export const createWorkExperience: RequestHandler = async (
   console.log(req.body);
   // change isEmployee to boolean
   req.body.isEmployee =
-    req.body.isEmployee === "true"
+    req.body.isEmployee === true
       ? true
-      : req.body.isEmployee === "false"
+      : req.body.isEmployee === false
       ? false
       : null;
 
