@@ -92,9 +92,7 @@ const getAllCertificates = async (req: Request, res: Response) => {
 };
 
 const getCertificateById = async (req: Request, res: Response) => {
-  // return res.send("Hello");
   const id = Number(req.params.certId);
-  // const userId = req.params.userId;
 
   const certificateRepository = dataSource.getRepository(Certificate);
 
