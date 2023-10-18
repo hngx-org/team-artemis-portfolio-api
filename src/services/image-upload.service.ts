@@ -24,9 +24,9 @@ export const cloudinaryService = async (
 ): Promise<{ successful: boolean; message: string; urls: any[] }> => {
   try {
     cloudinary.config({
-      cloud_name: "dopuv9ng2",
-      api_key: "455659881127534",
-      api_secret: "T4s_1Q4uw-kgOqJtUKXW5_1MJuw",
+      cloud_name: "ol4juwon",
+      api_key: "619781942963636",
+      api_secret: "8ZuIWrywiz5m6_6mLq_AYuHDeUo",
     });
 
     const urls = [];
@@ -44,7 +44,6 @@ export const cloudinaryService = async (
       const image = await cloudinary.v2.uploader.upload_large(final_file);
 
       urls.push(image.secure_url);
-      console.log(urls)
     }
 
     return { successful: true, message: "files uploaded successfully", urls };
