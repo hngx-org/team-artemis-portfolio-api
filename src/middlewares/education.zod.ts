@@ -1,45 +1,46 @@
-import { ZodError, z } from 'zod'
-import { NextFunction, Request, Response } from 'express'
-import { BadRequestError } from '../middlewares'
-import { parseAsync, ErrorMessageOptions } from 'zod-error'
-import { validate as isUUID } from 'uuid'
+import { ZodError, z } from "zod";
+import { NextFunction, Request, Response } from "express";
+import { BadRequestError } from "../middlewares";
+import { parseAsync, ErrorMessageOptions } from "zod-error";
+import { validate as isUUID } from "uuid";
 
 export const CreateEducationDetailDataSchema = z.object({
-  degreeId: z.number(),
+  degree_id: z.number().nullable(),
   fieldOfStudy: z.string(),
   school: z.string(),
   from: z.string(),
   description: z.string().optional(),
   to: z.string(),
-  userId: z.string().refine((value) => isUUID(value), {
-    message: 'userId has to be a valid UUID',
+  user_id: z.string().refine((value) => isUUID(value), {
+    message: "userId has to be a valid UUID",
   }),
-})
+});
 
 // Custom function to validate date strings in "yy-mm-dd" format
 function validateDateYYMMDD(dateString: string) {
-  const datePattern = /^\d{4}-\d{2}-\d{2}$/
-  return datePattern.test(dateString)
+  const yearPattern = /^\d{4}$/;
+  console.log("dateString", dateString);
+  return yearPattern.test(dateString);
 }
 
 const EducationDetailDataSchema = z.object({
   fieldOfStudy: z.string().optional(),
   school: z.string().optional(),
-  from: z.date().optional(),
-  to: z.date().optional(),
+  from: z.string().optional(),
+  to: z.string().optional(),
   description: z.string().optional(),
-  degreeId: z.number().optional(),
-  userId: z.number().optional(),
-  sectionId: z.number().optional(),
-})
+  degree_id: z.number().optional(),
+  user_id: z.number().optional(),
+  section_id: z.number().optional(),
+});
 
 const options: ErrorMessageOptions = {
   delimiter: {
-    error: ' 🔥 ',
+    error: " 🔥 ",
   },
   transform: ({ errorMessage, index }) =>
     `Error #${index + 1}: ${errorMessage}`,
-}
+};
 
 async function validateUpdateData(
   req: Request,
@@ -47,53 +48,55 @@ async function validateUpdateData(
   next: NextFunction
 ) {
   try {
-    const data = req.body
-    console.log('starting validate')
+    const data = req.body;
+    console.log("starting validate");
 
     if (!req.body) {
-      throw new BadRequestError('Missing request body')
+      throw new BadRequestError("Missing request body");
+    }
+
+    // check if the from date is less than the to date
+    if (data.from && data.to) {
+      const fromDate = parseInt(data.from);
+      const toDate = parseInt(data.to);
+      if (fromDate > toDate) {
+        throw new BadRequestError(
+          "The 'from' date cannot be greater than the 'to' date"
+        );
+      }
     }
 
     // Validate date strings in "yy-mm-dd" format
     if (data.from && !validateDateYYMMDD(data.from)) {
-      throw new BadRequestError("Invalid 'from' date format")
+      throw new BadRequestError("Invalid 'from' date format");
     }
 
     if (data.to && !validateDateYYMMDD(data.to)) {
-      throw new BadRequestError("Invalid 'to' date format")
+      throw new BadRequestError("Invalid 'to' date format");
     }
 
-    // Convert date strings to Date objects
-    if (data.from) {
-      data.from = new Date(data.from)
-    }
+    const result = await parseAsync(EducationDetailDataSchema, data, options);
 
-    if (data.to) {
-      data.to = new Date(data.to)
-    }
-    const result = await parseAsync(EducationDetailDataSchema, data, options)
-
-    const validatedData = result // Store the validated data in the request object if needed
-    console.log(validatedData)
-    next() // Continue to the next middleware or route handler
+    const validatedData = result; // Store the validated data in the request object if needed
+    console.log(validatedData);
+    next(); // Continue to the next middleware or route handler
   } catch (error) {
     const err = new BadRequestError(error.message);
     return res.status(err.statusCode).json({ message: err.message });
   }
 }
 
-async function validateCreateData(data: any, userId: string, res: Response) {
-
+async function validateCreateData(data: any, user_id: string, res: Response) {
   try {
     // Validate the data against the schema
     await CreateEducationDetailDataSchema.parseAsync({
       ...data,
-      userId,
-    })
+      user_id,
+    });
   } catch (error) {
-    return res.status(500).json({ error: 'Internal server error' })
+    const err = new BadRequestError(error.message);
+    return res.status(err.statusCode).json({ message: err.message });
   }
-  
 }
 
-export { validateUpdateData, validateCreateData, EducationDetailDataSchema }
+export { validateUpdateData, validateCreateData, EducationDetailDataSchema };
