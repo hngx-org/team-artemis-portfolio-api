@@ -35,6 +35,12 @@ export const createReference = async (req: Request, res: Response) => {
       return error(res, "Email should be a string", 422);
     }
 
+    const pattern = /^[a-zA-Z0-9]+$/;
+
+    if (!pattern.test(referer)) {
+      return error(res, "Referer should not contain sepecial characters", 422);
+    }
+
     const data = {
       userId: user_id,
       referer,
@@ -102,18 +108,24 @@ export const updateReference = async (req: Request, res: Response) => {
 
     let fields = Object.keys(req.body);
 
+    console.log(fields);
+
     let shouldContinue = true;
     let message: string;
 
     for (let i = 0; i < fields.length; i++) {
       const field = fields[i];
+      console.log(field);
       if (field == "sectionId") continue;
 
-      if (!isNaN(Number(field))) {
+      if (!isNaN(Number(req.body[field]))) {
         message = field;
         shouldContinue = false;
       }
     }
+
+    console.log(shouldContinue);
+    console.log(message);
 
     if (!shouldContinue) {
       return error(res, `${message} should be a string`, 422);
@@ -125,10 +137,12 @@ export const updateReference = async (req: Request, res: Response) => {
       .set(req.body)
       .where("id = :id", { id: id })
       .execute();
+
     const userRepository = connectionSource.getRepository(ReferenceDetail);
     const refByid = await userRepository.findOneBy({
       id: id,
     });
+
     success(res, refByid);
   } catch (err) {
     error(res, "invalid userid");
