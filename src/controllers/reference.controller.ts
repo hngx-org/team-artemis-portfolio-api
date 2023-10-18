@@ -108,8 +108,6 @@ export const updateReference = async (req: Request, res: Response) => {
 
     let fields = Object.keys(req.body);
 
-    console.log(fields);
-
     let shouldContinue = true;
     let message: string;
 
@@ -123,9 +121,6 @@ export const updateReference = async (req: Request, res: Response) => {
         shouldContinue = false;
       }
     }
-
-    console.log(shouldContinue);
-    console.log(message);
 
     if (!shouldContinue) {
       return error(res, `${message} should be a string`, 422);
