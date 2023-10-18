@@ -193,39 +193,10 @@ const updateCertificate = async (req: Request, res: Response) => {
   }
 };
 
-const getUserCertificates = async (req: Request, res: Response) => {
-  try {
-    // Get the user ID from the request parameters
-    const id = req.params.id;
-
-    // Check if the user with the provided ID exists
-    const user = await userRepository.findOne({ where: { id } });
-
-    if (!user) {
-      return error(res, "User not found. Please provide a valid User ID", 404);
-    }
-
-    // Retrieve all certificates for the user
-    const certificates = await certificateRepo.find({
-      where: { user: { id } },
-    });
-
-    if (!certificates) {
-      return error(res, "Error fetching user certificates", 500);
-    }
-
-    success(res, certificates, "User certificates fetched successfully");
-  } catch (error) {
-    console.error("Error fetching user certificates:", error);
-    error(res, (error as Error)?.message || "Internal server error", 500);
-  }
-};
-
 export {
   addCertificateController,
   deleteCertificate,
   getCertificateById,
   getAllCertificates,
   updateCertificate,
-  getUserCertificates,
 };

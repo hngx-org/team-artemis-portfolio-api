@@ -22,7 +22,7 @@ export const updateACertificate = async (
       }
 
       let certificateToUpdate = await certificationRepository.findOne({
-         where: {id, user}
+         where:{id, user: {id: user_id}}
       })
 
       if (!certificateToUpdate) {
