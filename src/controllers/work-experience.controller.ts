@@ -104,20 +104,17 @@ export const createWorkExperience: RequestHandler = async (
 
     try {
       workExperienceSchema.parse(req.body);
-    } catch (error: unknown) {
-      const { errors } = error as ZodError;
-      res.statusCode = 400;
-      return res.json({
-        message: errors.map((error) => {
-          return error.message;
-        })
+    } catch (err: unknown) {
+      const { errors } = err as ZodError;
+
+      const errorMessages = errors.map((error) => {
+        return error.message;
       })
+      return error(res, errorMessages, 400)
     }
-    if (endYear < startYear) {
-      res.statusCode = 400;
-      return res.json({
-        message: "EndYear must be greater than startYear"
-      })
+
+    if (Number(endYear) < Number(startYear)) {
+      return error(res, "EndYear must be greater than startYear", 400)
     }
 
     const workExperience = new WorkExperienceDetail();
@@ -133,14 +130,10 @@ export const createWorkExperience: RequestHandler = async (
     workExperience.section = sectionId;
 
     await workExperienceRepository.save(workExperience);
-    return res.json({
-      message: "Added Work Experience Successfully",
-      data: workExperience,
-    });
+    return success(res,  workExperience, "Added Work Experience Successfully");
+    
   } catch (err) {
-    console.log(err.errors)
-    res.statusCode = 500;
-    res.json({ error: err, message: (err as Error).message });
+    return error(res, (err as Error).message, 500)
   }
 };
 

@@ -10,7 +10,7 @@ export const success = (
 
 export const error = (
   res: Response,
-  message: string = "Error",
+  message: string|string[] = "Error",
   statusCode: number = 404
 ) => {
   return res
