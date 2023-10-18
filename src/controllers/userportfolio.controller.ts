@@ -1,6 +1,6 @@
-import { Request, Response, RequestHandler, NextFunction } from "express";
-import { connectionSource } from "../database/data-source";
-import { validate as isValidUUID } from "uuid";
+import { Request, Response, RequestHandler, NextFunction } from 'express';
+import { connectionSource } from '../database/data-source';
+import { validate as isValidUUID } from 'uuid';
 import {
   PortfolioDetail,
   User,
@@ -20,8 +20,9 @@ import {
   ReferenceDetail,
   SocialUser,
   LanguageDetail,
-} from "../database/entities";
-import { NotFoundError, BadRequestError } from "../middlewares/index";
+} from '../database/entities';
+import { NotFoundError, BadRequestError } from '../middlewares/index';
+import { getAllLanguages } from '../services/language.service';
 
 const portfolioDetailsRepository =
   connectionSource.getRepository(PortfolioDetail);
@@ -70,10 +71,9 @@ const getPortfolioDetails = async (
       where: { user: { id: user.id } },
     });
 
-
     const about = await aboutRepositiory.findOne({
       where: { user: { id: user.id } },
-    })
+    });
 
     const projects = await connectionSource.manager.find(Project, {
       where: { user: { id: user.id } },
@@ -84,7 +84,7 @@ const getPortfolioDetails = async (
 
     const tracks = await userTrackRepository.findOne({
       where: { user: { id: user.id } },
-      relations: ["track"],
+      relations: ['track'],
     });
 
     const workExperience = await workExperienceRepository.find({
@@ -103,14 +103,12 @@ const getPortfolioDetails = async (
       where: { user: { id: user.id } },
     });
 
-    // const langauge = await connectionSource.manager.find(LanguageDetail, {
-    //   where: { user: { id: user.id } },
-    // });
+    const languages = await getAllLanguages(user.id);
 
     const projectwithImages = await connectionSource.manager.find(Project, {
       where: { user: { id: user.id } },
-      relations: ["projectsImages"]
-    })
+      relations: ['projectsImages'],
+    });
     res.status(200).json({
       user,
       education,
@@ -124,8 +122,8 @@ const getPortfolioDetails = async (
       sections,
       track,
       reference,
-      projectwithImages
-      // langauge
+      projectwithImages,
+      languages
     });
   } catch (error) {
     return next(error);
@@ -154,14 +152,14 @@ const deletePortfolioDetails: RequestHandler = async (
 
     // return error if porfolio is not found
     if (!portfolioToRemove) {
-      throw new NotFoundError("Portfolio profile details not found");
+      throw new NotFoundError('Portfolio profile details not found');
     }
 
     const portfolio = await portfolioDetailsRepository.remove(
       portfolioToRemove
     );
     res.status(200).json({
-      message: "Portfolio profile details deleted successfully",
+      message: 'Portfolio profile details deleted successfully',
       portfolio,
     });
   } catch (error) {
