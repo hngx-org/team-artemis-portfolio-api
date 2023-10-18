@@ -21,6 +21,7 @@ import {
   SocialUser,
   LanguageDetail,
   Images,
+  ProjectsImage
 } from "../database/entities";
 import { NotFoundError, BadRequestError } from "../middlewares/index";
 import { getAllLanguages } from "../services/language.service";
@@ -40,6 +41,7 @@ const languageDetailRepository = connectionSource.getRepository(LanguageDetail);
 const aboutRepositiory = connectionSource.getRepository(AboutDetail);
 const awardRepository = connectionSource.getRepository(Award);
 const certificateRepository = connectionSource.getRepository(Certificate);
+const projectImageRepository = connectionSource.getRepository(ProjectsImage);
 
 export interface UpdatePortfolioDetailsDTO {
   name?: string;
@@ -135,17 +137,17 @@ const getPortfolioDetails = async (
       ]);
 
       const interestArray = interests[0].interest.split(","); //convert interest to Array of interests
-      
+
 
       const imagePromises = allProjects.map(async (project) => {
-        const imageUrlsPromises = project?.projectsImages?.map(
-          async (image) => {
-            const imageEntity = await imageRepository.findOne({
-              where: { id: image.id },
-            });
-            return imageEntity ? imageEntity.url : null;
-          }
-        );
+        const imageUrlsPromises = project?.projectsImages?.map(async (image) => {
+
+          const imageEntity = await projectImageRepository.findOne({
+            where: { id: image.id }, relations: ["image"]
+          });
+
+          return imageEntity ? imageEntity.image.url : null;
+        });
         const imageUrls = await Promise.all(imageUrlsPromises);
         return {
           ...project,
