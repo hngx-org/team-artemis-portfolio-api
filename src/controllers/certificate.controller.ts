@@ -13,8 +13,7 @@ const sectionRepository = dataSource.getRepository(Section);
 
 const addCertificateController = async (req: Request, res: Response) => {
   try {
-    const { title, year, organization, url, description, section_id } =
-      req.body;
+    const { title, year, organization, url, description, sectionId } = req.body;
     const userId = req.params.userId;
 
     // Check if the user with userId exists
@@ -24,7 +23,7 @@ const addCertificateController = async (req: Request, res: Response) => {
       return error(res, "User not found. Please provide a valid User ID", 404);
     }
 
-    const section = await sectionRepository.findOneBy({ id: section_id });
+    const section = await sectionRepository.findOneBy({ id: sectionId });
     if (!section) {
       return error(
         res,
