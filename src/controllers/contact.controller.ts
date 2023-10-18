@@ -99,7 +99,7 @@ export const createContacts = async (
       return res.status(400).json({ message: MESSAGES.INVALID_INPUT });
     }
   } catch (error) {
-    return res.status(500).json({ error });
+    return res.status(500).json({ message:"invalid user or social media id"});
   }
 };
 
