@@ -126,3 +126,9 @@ export const deleteReferenceDetailService = async (
     throw new Error(error.message);
   }
 };
+
+export const updateReferenced = async (id, data) => {
+  await referenceRepository.update({ id }, data);
+  let d = await referenceRepository.findOne({ where: { id } });
+  return d;
+};

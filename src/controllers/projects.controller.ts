@@ -345,3 +345,50 @@ export const updateProjectById: RequestHandler = async (
     return next(err);
   }
 };
+
+
+export const getAllProjectsForUser: RequestHandler = async (
+  req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { user_id } = req.params;
+    if (!user_id) {
+      throw new BadRequestError("Please provide user id");
+    }
+    const user = await userRepository.findOneBy({ id: user_id });
+    if (!user) {
+      throw new NotFoundError("User not found");
+    }
+
+    const allProjectsPromise = connectionSource.manager.find(Project, {
+      where: { user: { id: user.id } },
+      relations: ["projectsImages"]
+    });
+    try {
+      const [allProjects] = await Promise.all([allProjectsPromise]);
+
+      const imagePromises = allProjects.map(async (project) => {
+        const imageUrlsPromises = project?.projectsImages?.map(async (image) => {
+
+          const imageEntity = await projectImageRepository.findOne({
+            where: { id: image.id }, relations: ["image"]
+          });
+
+          return imageEntity ? imageEntity.image.url : null;
+        });
+        const imageUrls = await Promise.all(imageUrlsPromises);
+        return {
+          ...project,
+          projectsImages: imageUrls,
+          thumbnail: imageUrls[0],
+        };
+      });
+
+      const projects = await Promise.all(imagePromises);
+      success(res, projects, "Successfully Retrieved");
+    } catch (error) {
+      return next(error);
+    }
+  } catch (err) {
+    return next(err)
+  }
+}

@@ -32,7 +32,7 @@ export const createInterest: RequestHandler = async (req, res) => {
 
     // Check if the interest exists
     const interestExists = await interestRepository.findOne({
-      where: { user },
+      where: { user: { id: userId } },
     });
 
     // If the interest exists, delete the interest and create a new one
@@ -74,7 +74,6 @@ export const createInterest: RequestHandler = async (req, res) => {
     });
     // Save the interest to the database
     const savedInterest = await interestRepository.save(interestResponse);
-    console.log("Saved Interest", savedInterest);
 
     // Extract the userId, sectionId and sectionName from the savedInterest
     const user_id = savedInterest.user?.id;
@@ -140,7 +139,7 @@ export const updateInterest: RequestHandler = async (req, res) => {
       id: interestId,
     });
     // Convert the interests string to an array
-    const interestArray = data?.interest.split(",");
+    const interestArray = data?.interest.split(", ");
 
     res.status(200).json({
       successful: true,
@@ -164,7 +163,9 @@ export const deleteInterest: RequestHandler = async (req, res) => {
 
     const user = await userRepository.findOne({ where: { id: userId } });
 
-    const interest = await interestRepository.findOne({ where: { user } });
+    const interest = await interestRepository.findOne({
+      where: { user: { id: userId } },
+    });
 
     if (!interest) {
       return res.status(404).json({
@@ -203,9 +204,18 @@ export const getInterests: RequestHandler = async (req, res) => {
 
     // Retrieve interests from the database for the specific userId
     const interests = await interestRepository.findOne({
-      where: { user },
+      where: { user: { id: userId } },
     });
-    const interestArray = interests.interest.split(",");
+
+    if (!interests) {
+      return res.status(404).json({
+        successful: false,
+        message: "Interests not found.",
+      });
+    }
+
+    const interestArray = interests?.interest?.split(",");
+
     res.status(200).json({
       successful: true,
       data: interests,

@@ -63,9 +63,17 @@ const addCertificateController = async (req: Request, res: Response) => {
 
 const getAllCertificates = async (req: Request, res: Response) => {
   const certificateRepository = dataSource.getRepository(Certificate);
+  const userId = req.params.userId;
+
+  const user = await userRepository.findOneBy({ id: userId });
+
+  if (!user) {
+    return error(res, "User not found. Please provide a valid User ID", 404);
+  }
 
   try {
     const certificates = await certificateRepository.find({
+      where: { user: user },
       relations: ["section", "user"],
     });
 
@@ -75,7 +83,7 @@ const getAllCertificates = async (req: Request, res: Response) => {
 
     return success(res, certificates, "Certificates fetched successfully");
   } catch (error) {
-    res.status(500).json({ error: "Internal Server Error" });
+    return error(res, (error as Error)?.message ?? "Internal server error");
   }
 };
 

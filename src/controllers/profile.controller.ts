@@ -3,9 +3,10 @@ import express, {
   Request,
   RequestHandler,
   Response,
-} from "express";
-import { AnyZodObject, ZodError, z } from "zod";
-import { connectionSource } from "../database/data-source";
+} from 'express';
+import axios from 'axios';
+import { AnyZodObject, ZodError, z } from 'zod';
+import { connectionSource } from '../database/data-source';
 import {
   PortfolioDetail,
   Award,
@@ -24,20 +25,20 @@ import {
   SocialUser,
   Language,
   ReferenceDetail,
-} from "../database/entities";
+} from '../database/entities';
 import {
   cloudinaryService,
   uploadProfileCoverPhotoService,
   uploadProfileImageService,
-} from "../services";
-import { error, success } from "../utils";
-import { authMiddleWare, validateUser } from "../middlewares/auth";
+} from '../services';
+import { error, success } from '../utils';
+import { authMiddleWare, validateUser } from '../middlewares/auth';
 import {
   BadRequestError,
   InternalServerError,
   NotFoundError,
-} from "../middlewares";
-import { createPorfolioDataSchema } from "../middlewares/profile.zod";
+} from '../middlewares';
+import { createPorfolioDataSchema } from '../middlewares/profile.zod';
 
 // Get the repository for the PortfolioDetails entity
 const userRepository = connectionSource.getRepository(User);
@@ -65,14 +66,14 @@ export const uploadProfileImageController: RequestHandler = async (
   res: Response
 ) => {
   try {
-    if (!req.files) return error(res, "add event image", 400);
+    if (!req.files) return error(res, 'add event image', 400);
     const { service, userId } = req.body;
     const files = req.files as any;
     const imagesRes = await cloudinaryService(files, req.body.service);
 
     const user = await userRepository.findOne({ where: { id: userId } });
     if (!user) {
-      return error(res, "User Not found", 400);
+      return error(res, 'User Not found', 400);
     }
     const { urls } = await cloudinaryService(req.files, service);
     const data = await uploadProfileImageService(user.id, urls);
@@ -80,7 +81,7 @@ export const uploadProfileImageController: RequestHandler = async (
     console.log(urls);
     user.profilePic = imagesRes[0];
 
-    return success(res, data, "Profile picture uploaded successfully");
+    return success(res, data, 'Profile picture uploaded successfully');
   } catch (err) {
     error(res, (err as Error).message); // Use type assertion to cast 'err' to 'Error' type
   }
@@ -91,7 +92,7 @@ export const uploadProfileCoverController: RequestHandler = async (
   res: Response
 ) => {
   try {
-    if (!req.files) return error(res, "add event image", 400);
+    if (!req.files) return error(res, 'add event image', 400);
     const { service, userId } = req.body;
 
     const files = req.files as any;
@@ -100,7 +101,7 @@ export const uploadProfileCoverController: RequestHandler = async (
 
     const user = await userRepository.findOne({ where: { id: userId } });
     if (!user) {
-      return error(res, "User Not found", 400);
+      return error(res, 'User Not found', 400);
     }
 
     const { urls } = await cloudinaryService(req.files, service);
@@ -109,12 +110,12 @@ export const uploadProfileCoverController: RequestHandler = async (
     console.log(urls);
     user.profileCoverPhoto = imagesRes[0];
 
-    return success(res, data, "Cover photo uploaded successfully");
+    return success(res, data, 'Cover photo uploaded successfully');
   } catch (err) {
     if (err instanceof Error) {
       return error(res, err.message, 500);
     } else {
-      return error(res, "An unknown error occurred", 500);
+      return error(res, 'An unknown error occurred', 500);
     }
   }
 };
@@ -131,7 +132,7 @@ export const getUserById = async (req: Request, res: Response) => {
 
     const user = await userRepository.findOne({ where: { id: userId } });
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      return res.status(404).json({ message: 'User not found' });
     }
 
     const portfolio = await portfolioRepository.findOne({
@@ -139,14 +140,14 @@ export const getUserById = async (req: Request, res: Response) => {
     });
     const userTracks = await userTrackRepository.findOne({
       where: { user: { id: user.id } },
-      relations: ["track"],
+      relations: ['track'],
     });
 
     // const track = userTracks[0]?.track;
     res.status(200).json({ user, portfolio, userTracks: userTracks?.track });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ message: "Internal Server Error" });
+    return res.status(500).json({ message: 'Internal Server Error' });
   }
 };
 
@@ -173,20 +174,20 @@ export const updateProfileController = async (
 
     const { name, trackId, city, country } = req.body;
     if (!name && !trackId && !city && !country) {
-      throw new BadRequestError("No data to update");
+      throw new BadRequestError('No data to update');
     }
     const { userId } = req.params;
 
     const user = await userRepository.findOneBy({ id: userId });
 
     if (!user) {
-      throw new NotFoundError("User not found");
+      throw new NotFoundError('User not found');
     }
 
     if (name) {
       await userRepository.update(user.id, {
-        firstName: name?.split(" ")[0],
-        lastName: name?.split(" ")[1] || "",
+        firstName: name?.split(' ')[0],
+        lastName: name?.split(' ')[1] || '',
       });
     }
 
@@ -214,12 +215,12 @@ export const updateProfileController = async (
       // first  check if the track exists
       const track = await trackRepository.findOne({ where: { id: trackId } });
       if (!track) {
-        throw new NotFoundError("Track not found");
+        throw new NotFoundError('Track not found');
       }
 
       const userTrack = await userTrackRepository.findOne({
         where: { user: { id: user.id } },
-        relations: ["track"],
+        relations: ['track'],
       });
 
       console.log(userTrack);
@@ -250,12 +251,12 @@ export const updateProfileController = async (
 
     const userTrack = await userTrackRepository.findOne({
       where: { user: { id: user.id } },
-      relations: ["track"],
+      relations: ['track'],
     });
     return success(
       res,
       { portfolio: portfolio, track: userTrack?.track },
-      "Successfully Updated Portfolio profile"
+      'Successfully Updated Portfolio profile'
     );
   } catch (err) {
     console.error(err);
@@ -279,14 +280,14 @@ export const deletePortfolioDetails: RequestHandler = async (
 
     // return error if porfolio is not found
     if (!portfolioToRemove) {
-      return res.status(404).json({ error: "Portfolio Details not found!" });
+      return res.status(404).json({ error: 'Portfolio Details not found!' });
     }
 
     // delete the porfolio
 
     const portfolio = await portfolioRepository.remove(portfolioToRemove);
     res.status(200).json({
-      message: "Portfolio profile details deleted successfully",
+      message: 'Portfolio profile details deleted successfully',
       portfolio,
     });
   } catch (error) {
@@ -304,45 +305,53 @@ export const deleteAllSectionEntries: RequestHandler = async (
       about: aboutRepository,
       education: educationRepository,
       workExperience: workExperienceRepositry,
-      project: projectRepository,
+      projects: projectRepository,
       interests: interestRepository,
       sections: sectionRepository,
-      certificate: certificateRepository,
-      skill: skillsDetailRepository,
-      award: awardRepository,
-      contact: contactRepository,
+      certificates: certificateRepository,
+      skills: skillsDetailRepository,
       awards: awardRepository,
-      language: languageRepository,
+      contacts: contactRepository,
+      languages: languageRepository,
       reference: referenceRepository,
     };
 
     const { userId } = req.params;
     const { section } = req.body;
     if (!userId) {
-      return next(new BadRequestError("User id is missing"));
+      return next(new BadRequestError('User id is missing'));
     }
 
     const currentRepo = dynamicSection[section];
 
     if (currentRepo === undefined) {
-      return next(new BadRequestError("Invalid or missing section name"));
+      return next(new BadRequestError('Invalid or missing section name'));
     }
-    console.log(userId);
+
     const user = await userRepository.findOne({ where: { id: userId } });
     if (!user) {
-      return next(new BadRequestError("User not found"));
+      return next(new BadRequestError('User not found'));
     }
+
+    if (section == 'languages') {
+      const hostUrl = 'https://hng-u6fu.vercel.app';
+      await axios.delete(
+        `${hostUrl}/deleteLanguages/${userId}`
+      );
+      return success(res, 'Successfully deleted all entries');
+    }
+
     const alluserEntries = await currentRepo.find({
       where: { user: { id: user.id } },
     });
     if (alluserEntries.length === 0) {
-      return next(new BadRequestError("No entries to delete"));
+      return next(new BadRequestError('No entries to delete'));
     }
     const response = await currentRepo.remove(alluserEntries);
     if (response.affected === 0) {
-      return next(new BadRequestError("No entries to delete"));
+      return next(new BadRequestError('No entries to delete'));
     }
-    return success(res, "Successfully deleted all entries");
+    return success(res, 'Successfully deleted all entries');
   } catch (err) {
     return next(new InternalServerError(err.message));
   }
