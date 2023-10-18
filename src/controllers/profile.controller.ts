@@ -303,7 +303,7 @@ export const deleteAllSectionEntries: RequestHandler = async (
     const dynamicSection = {
       about: aboutRepository,
       educations: educationRepository,
-      workExperiences: workExperienceRepositry,
+      workExperience: workExperienceRepositry,
       projects: projectRepository,
       interests: interestRepository,
       sections: sectionRepository,
@@ -312,7 +312,7 @@ export const deleteAllSectionEntries: RequestHandler = async (
       awards: awardRepository,
       contacts: contactRepository,
       languages: languageRepository,
-      references: referenceRepository,
+      reference: referenceRepository,
     };
 
     const { userId } = req.params;
