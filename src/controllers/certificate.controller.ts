@@ -49,6 +49,8 @@ const addCertificateController = async (req: Request, res: Response) => {
       // Save the certificate to the database
       const savedCertificate = await certificateRepo.save(certificate);
 
+      Reflect.deleteProperty(savedCertificate, "user");
+
       if (!savedCertificate) {
         return error(res, "Error creating certificate", 400);
       }
