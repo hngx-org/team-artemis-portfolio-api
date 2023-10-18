@@ -1,6 +1,11 @@
 import express from "express";
-import { createReference, deleteReferenceDetail, getAllReference } from "../controllers/reference.controller"; 
-import { validateCreateReferenceData } from "../middlewares/reference.zod"; 
+import {
+  createReference,
+  deleteReferenceDetail,
+  getAllReference,
+  getAllUserReference,
+} from "../controllers/reference.controller";
+import { validateCreateReferenceData } from "../middlewares/reference.zod";
 
 const router = express.Router();
 
@@ -27,22 +32,25 @@ const router = express.Router();
  *         schema:
  *           type: object
  *           properties:
- *             name:
+ *             referer:
  *               type: string
  *             company:
  *               type: string
  *             position:
  *               type: string
- *             emailAddress:
+ *             email:
  *               type: string
  *             phoneNumber:
  *               type: string
+ *             sectionId:
+ *               type: number
  *           example:
- *             name: "Sapphire"
+ *             referer: "Sapphire"
  *             company: "Zuri"
  *             position: "Backend Developer"
- *             emailAddress: "sofiyyahabidoye@gmail.com"
+ *             email: "sofiyyahabidoye@gmail.com"
  *             phoneNumber: "08101695397"
+ *             sectionId: 25
  *     responses:
  *       201:
  *         description: Reference created successfully
@@ -91,9 +99,39 @@ router.post(
  *     tags:
  *       - References
  */
-router.get('/references', getAllReference)
+router.get("/references", getAllReference);
 
-
+/**
+ * @swagger
+ * /api/references/{userId}:
+ *   get:
+ *     summary: Get a user's reference.
+ *     description: Get all reference that belongs to a user
+ *     tags:
+ *       - References
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         description: The ID of the user for whom the reference is created.
+ *         required: false
+ *         schema:
+ *           type: string
+ *         example: "6ba7b810-9dad-11d1-80b4-00c04fd430c8"
+ *     responses:
+ *       201:
+ *         description: Reference created successfully
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: "Reference created successfully"
+ *       400:
+ *         description: Bad request
+ *         content:
+ *           application/json:
+ *             example:
+ *               error: "Invalid request"
+ */
+router.get("/references/:userId", getAllUserReference);
 
 /**
  * @swagger
