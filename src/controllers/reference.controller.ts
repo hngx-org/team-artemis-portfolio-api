@@ -19,6 +19,22 @@ export const createReference = async (req: Request, res: Response) => {
     const { referer, company, position, email, phoneNumber, sectionId } =
       req.body as IReference;
 
+    if (!isNaN(Number(referer))) {
+      return error(res, "Referer should be a string", 422);
+    }
+
+    if (!isNaN(Number(company))) {
+      return error(res, "Company should be a string", 422);
+    }
+
+    if (!isNaN(Number(position))) {
+      return error(res, "Position should be a string", 422);
+    }
+
+    if (!isNaN(Number(email))) {
+      return error(res, "Email should be a string", 422);
+    }
+
     const data = {
       userId: user_id,
       referer,
@@ -83,11 +99,31 @@ export const deleteReferenceDetail = async (
 export const updateReference = async (req: Request, res: Response) => {
   try {
     const { id }: any = req.params;
+
+    let fields = Object.keys(req.body);
+
+    let shouldContinue = true;
+    let message: string;
+
+    for (let i = 0; i < fields.length; i++) {
+      const field = fields[i];
+      if (field == "sectionId") continue;
+
+      if (!isNaN(Number(field))) {
+        message = field;
+        shouldContinue = false;
+      }
+    }
+
+    if (!shouldContinue) {
+      return error(res, `${message} should be a string`, 422);
+    }
+
     await connectionSource
       .createQueryBuilder()
       .update(ReferenceDetail)
       .set(req.body)
-      .where("id = :id", { id: id})
+      .where("id = :id", { id: id })
       .execute();
     const userRepository = connectionSource.getRepository(ReferenceDetail);
     const refByid = await userRepository.findOneBy({
