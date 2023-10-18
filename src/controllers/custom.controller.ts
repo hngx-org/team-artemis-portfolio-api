@@ -375,7 +375,14 @@ const createCustomField = async (
           return;
         }
 
-        return customFieldRepository.save(field);
+        let savedField = await customFieldRepository.save(field)
+        let savedFieldDB = await customFieldRepository.findOne({
+          where: {id: savedField.id}
+        })
+        customUserSection.customFields.push(savedFieldDB)
+        await customRepository.save(customUserSection)
+        
+        return savedFieldDB;
       })
     );
 
