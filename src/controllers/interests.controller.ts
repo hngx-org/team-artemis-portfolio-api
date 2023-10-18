@@ -205,7 +205,7 @@ export const getInterests: RequestHandler = async (req, res) => {
     const interests = await interestRepository.findOne({
       where: { user },
     });
-    const interestArray = interests.interest.split(",");
+    const interestArray = interests?.interest?.split(",");
     res.status(200).json({
       successful: true,
       data: interests,
