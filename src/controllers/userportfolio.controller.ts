@@ -1,6 +1,6 @@
-import { Request, Response, RequestHandler, NextFunction } from "express";
-import { connectionSource } from "../database/data-source";
-import { validate as isValidUUID } from "uuid";
+import { Request, Response, RequestHandler, NextFunction } from 'express';
+import { connectionSource } from '../database/data-source';
+import { validate as isValidUUID } from 'uuid';
 import {
   PortfolioDetail,
   User,
@@ -17,11 +17,13 @@ import {
   Award,
   Certificate,
   CustomUserSection,
+  ReferenceDetail,
+  SocialUser,
+  LanguageDetail,
+  Images
 } from "../database/entities";
 import { NotFoundError, BadRequestError } from "../middlewares/index";
-import { error, success } from "../utils/response.util";
-
-import { getRepository } from "typeorm";
+import { getAllLanguages } from '../services/language.service';
 
 const portfolioDetailsRepository =
   connectionSource.getRepository(PortfolioDetail);
@@ -29,12 +31,12 @@ const portfolioRepository = connectionSource.getRepository(PortfolioDetail);
 const userRepository = connectionSource.getRepository(User);
 const workExperienceRepository =
   connectionSource.getRepository(WorkExperienceDetail);
-const interestRepository = connectionSource.getRepository(InterestDetail);
-const skillRepository = connectionSource.getRepository(Skill);
+const imageRepository = connectionSource.getRepository(Images);
+const referenceRepository = connectionSource.getRepository(ReferenceDetail);
 const projectRepository = connectionSource.getRepository(Project);
 const sectionRepository = connectionSource.getRepository(Section);
 const userTrackRepository = connectionSource.getRepository(UserTrack);
-const trackRepository = connectionSource.getRepository(Tracks);
+const languageDetailRepository = connectionSource.getRepository(LanguageDetail);
 const aboutRepositiory = connectionSource.getRepository(AboutDetail);
 const awardRepository = connectionSource.getRepository(Award);
 const certificateRepository = connectionSource.getRepository(Certificate);
@@ -58,118 +60,128 @@ const getPortfolioDetails = async (
 
     const user = await userRepository.findOne({ where: { id: userId } });
 
-    const education = await connectionSource.manager.find(EducationDetail, {
+    const educationPromise = connectionSource.manager.find(EducationDetail, {
+      where: { user: { id: user.id } }, relations: ["degree"]
+    });
+
+    const skillsPromise = connectionSource.manager.find(SkillsDetail, {
       where: { user: { id: user.id } },
     });
 
-    const skills = await connectionSource.manager.find(SkillsDetail, {
+    const interestsPromise = connectionSource.manager.find(InterestDetail, {
       where: { user: { id: user.id } },
     });
 
-    const interests = await connectionSource.manager.find(InterestDetail, {
+    const aboutPromise = aboutRepositiory.findOne({
       where: { user: { id: user.id } },
     });
 
-    const about = await connectionSource.manager.find(AboutDetail, {
+    const allProjectsPromise = connectionSource.manager.find(Project, {
+      where: { user: { id: user.id } },
+      relations: ["projectsImages"]
+    });
+
+    const sectionsPromise = connectionSource.manager.find(CustomUserSection, {
       where: { user: { id: user.id } },
     });
 
-    const projects = await connectionSource.manager.find(Project, {
+    const tracksPromise = userTrackRepository.findOne({
       where: { user: { id: user.id } },
-    });
-    const sections = await connectionSource.manager.find(CustomUserSection, {
-      where: { user: { id: user.id } },
+      relations: ['track'],
     });
 
-    const tracks = await userTrackRepository.findOne({
-      where: { user: { id: user.id } },
-      relations: ["track"],
-    });
-
-    const workExperience = await workExperienceRepository.find({
+    const workExperiencePromise = workExperienceRepository.find({
       where: { user: { id: user.id } },
     });
 
-    const awards = await awardRepository.find({ where: { user: { id: user.id } } });
-    const certificates = await certificateRepository.find({ where: { user: { id: user.id } } });
-    const track = tracks?.track;
-
-
-    res.status(200).json({
-      user,
-      education,
-      skills,
-      interests,
-      about,
-      projects,
-      workExperience,
-      awards,
-      certificates,
-      sections,
-      track,
+    const awardsPromise = awardRepository.find({
+      where: { user: { id: user.id } },
     });
+
+    const certificatesPromise = certificateRepository.find({
+      where: { user: { id: user.id } },
+    });
+
+    const referencePromise = connectionSource.manager.find(ReferenceDetail, {
+      where: { user: { id: user.id } },
+    });
+
+    try {
+      const [
+        education,
+        skills,
+        interests,
+        about,
+        allProjects,
+        sections,
+        tracks,
+        workExperience,
+        awards,
+        certificates,
+        reference,
+      ] = await Promise.all([
+        educationPromise,
+        skillsPromise,
+        interestsPromise,
+        aboutPromise,
+        allProjectsPromise,
+        sectionsPromise,
+        tracksPromise,
+        workExperiencePromise,
+        awardsPromise,
+        certificatesPromise,
+        referencePromise,
+      ]);
+
+      const imagePromises = allProjects.map(async (project) => {
+        const imageUrlsPromises = project?.projectsImages?.map(async (image) => {
+          const imageEntity = await imageRepository.findOne({
+            where: { id: image.id },
+          });
+          return imageEntity ? imageEntity.url : null;
+        });
+        const imageUrls = await Promise.all(imageUrlsPromises);
+        return {
+          ...project,
+          projectsImages: imageUrls,
+          thumbnail: imageUrls[0],
+        };
+      });
+
+      const projects = await Promise.all(imagePromises);
+
+      const track = tracks?.track;
+
+      const languages = await getAllLanguages(user.id);
+
+
+      res.status(200).json({
+        user,
+        education,
+        skills,
+        interests,
+        about,
+        projects,
+        workExperience,
+        awards,
+        certificates,
+        sections,
+        track,
+        reference,
+        languages
+      });
+    } catch (error) {
+      return next(error);
+    }
   } catch (error) {
     return next(error);
   }
-};
+}
 
 const getAllPortfolioDetails = async (req: Request, res: Response) => {
   const PortfolioDetails = await portfolioRepository.find();
   return res.json({ PortfolioDetails });
 };
-
-// const updatePortfolioDetail = async (
-//   req: Request,
-//   res: Response,
-//   next: NextFunction
-// ) => {
-//   try {
-//     // Extract the portfolio detail ID from the request parameters.
-//     const { userId } = req.params;
-
-//     // Validate the portfolioDetailId, ensure it's a valid number or handle validation as needed.
-//     if (!userId || isNaN(Number(userId))) {
-//       throw new BadRequestError(`${userId} is not a valid ID`);
-//     }
-
-//     // Get the updated data for the portfolio detail from the request body.
-//     const { city, country } = req.body;
-
-//     // Find the portfolio detail by ID.
-//     const portfolioDetailRepository = getRepository(PortfolioDetail);
-//     const existingPortfolioDetail = await portfolioDetailRepository.findOne(
-//       Number(portfolioDetailId)
-//     );
-
-//     // Check if the portfolio detail with the provided ID exists.
-//     if (!existingPortfolioDetail) {
-//       throw new NotFoundError(
-//         `Portfolio detail with ID ${portfolioDetailId} not found`
-//       );
-//     }
-
-//     // Update the portfolio detail properties with the new data.
-//     existingPortfolioDetail.city = city;
-//     existingPortfolioDetail.country = country;
-
-//     // Save the updated portfolio detail to the database.
-//     await portfolioDetailRepository.save(existingPortfolioDetail);
-
-//     console.log("Successfully updated user profile portfolio details");
-//     return success(
-//       res,
-//       {
-//         portfolio: portfolio,
-//         // track: track,
-//         user: user,
-//       },
-//       "Successfully updated user profile portfolio details"
-//     );
-//   } catch (error) {
-//     console.log("Error updating profile detail:", error.message);
-//     next(error);
-//   }
-// };
 
 // delete Portfolio Profile details
 const deletePortfolioDetails: RequestHandler = async (
@@ -188,14 +200,14 @@ const deletePortfolioDetails: RequestHandler = async (
 
     // return error if porfolio is not found
     if (!portfolioToRemove) {
-      throw new NotFoundError("Portfolio profile details not found");
+      throw new NotFoundError('Portfolio profile details not found');
     }
 
     const portfolio = await portfolioDetailsRepository.remove(
       portfolioToRemove
     );
     res.status(200).json({
-      message: "Portfolio profile details deleted successfully",
+      message: 'Portfolio profile details deleted successfully',
       portfolio,
     });
   } catch (error) {
@@ -203,9 +215,4 @@ const deletePortfolioDetails: RequestHandler = async (
   }
 };
 
-export {
-  getPortfolioDetails,
-  // getAllPortfolioDetails,
-  //updatePortfolioDetail,
-  deletePortfolioDetails,
-};
+export { getAllPortfolioDetails, getPortfolioDetails, deletePortfolioDetails };

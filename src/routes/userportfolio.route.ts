@@ -1,7 +1,6 @@
 import {
-  // getAllPortfolioDetails,
+  getAllPortfolioDetails,
   getPortfolioDetails,
-  // updatePortfolioDetail,
   deletePortfolioDetails,
 } from "../controllers/userportfolio.controller";
 import { Router } from "express";
@@ -80,7 +79,7 @@ router.get("/getPortfolioDetails/:userId", getPortfolioDetails);
  *                 message:
  *                   type: string
  */
-// router.get("/portfolioDetails", getAllPortfolioDetails);
+router.get("/portfolioDetails", getAllPortfolioDetails);
 
 /**
  * @swagger

@@ -22,7 +22,7 @@ export class Award {
   year: string;
 
   @Column("character varying", { name: "presented_by", length: 255 })
-  presentedBy: string;
+  presented_by: string;
 
   @Column("text", { name: "url", nullable: true })
   url: string | null;
