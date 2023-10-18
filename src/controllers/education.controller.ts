@@ -50,7 +50,7 @@ const fetchUserEducationDetail: RequestHandler = async (req, res, next) => {
     }
 
     const educationDetails = await educationDetailRepository.find({
-      where: { user },
+      where: { user: { id: user_id } }, relations: ["degree"]
     });
 
     if (!educationDetails) {
