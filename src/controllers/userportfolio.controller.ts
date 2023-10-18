@@ -21,7 +21,7 @@ import {
   SocialUser,
   LanguageDetail,
   Images,
-  ProjectsImage
+  ProjectsImage,
 } from "../database/entities";
 import { NotFoundError, BadRequestError } from "../middlewares/index";
 import { getAllLanguages } from "../services/language.service";
@@ -138,16 +138,17 @@ const getPortfolioDetails = async (
 
       const interestArray = interests[0]?.interest?.split(","); //convert interest to Array of interests
 
-
       const imagePromises = allProjects.map(async (project) => {
-        const imageUrlsPromises = project?.projectsImages?.map(async (image) => {
+        const imageUrlsPromises = project?.projectsImages?.map(
+          async (image) => {
+            const imageEntity = await projectImageRepository.findOne({
+              where: { id: image.id },
+              relations: ["image"],
+            });
 
-          const imageEntity = await projectImageRepository.findOne({
-            where: { id: image.id }, relations: ["image"]
-          });
-
-          return imageEntity ? imageEntity.image.url : null;
-        });
+            return imageEntity ? imageEntity.image.url : null;
+          }
+        );
         const imageUrls = await Promise.all(imageUrlsPromises);
         return {
           ...project,
@@ -174,7 +175,7 @@ const getPortfolioDetails = async (
         awards,
         certificates,
         sections,
-        track,
+        tracks: track,
         reference,
         languages,
       });

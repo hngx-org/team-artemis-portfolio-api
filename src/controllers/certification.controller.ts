@@ -3,6 +3,10 @@ import { success, error } from "../utils/response.util";
 import { updateACertificate } from "../services/certificate.service";
 import { UpdateCertificateInterface } from "../interfaces/certification.interface";
 
+import { connectionSource } from "../database/data-source";
+import {Certificate} from "../database/entities/Certificate"
+const certificationRepository = connectionSource.getRepository(Certificate)
+
 const uuidPattern =
   /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
 
@@ -53,8 +57,10 @@ export const updateCertificate = async (req: Request, res: Response) => {
     }
 
     const data = await updateACertificate(id, user_id, section_id, payload);
+
+    const data = await certificationRepository.findOne()
     if (data.successful) {
-      success(res, data.data[0], "Certificate updated successfully");
+      success(res, data, "Certificate updated successfully");
     } else {
       error(res, data.message);
     }
