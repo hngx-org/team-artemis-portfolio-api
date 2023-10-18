@@ -73,7 +73,11 @@ const getAllCertificates = async (req: Request, res: Response) => {
 
   try {
     const certificates = await certificateRepository.find({
-      where: { user: user },
+      where: {
+        user: {
+          id: userId,
+        },
+      },
       relations: ["section", "user"],
     });
 
@@ -88,16 +92,22 @@ const getAllCertificates = async (req: Request, res: Response) => {
 };
 
 const getCertificateById = async (req: Request, res: Response) => {
-  const id = req.params.certId;
+  // return res.send("Hello");
+  const id = Number(req.params.certId);
+  // const userId = req.params.userId;
+
   const certificateRepository = dataSource.getRepository(Certificate);
 
   try {
-    const certificate = await certificateRepository
-      .createQueryBuilder("certificate")
-      .where("certificate.id = :id", { id })
-      .leftJoinAndSelect("certificate.section", "section")
-      .leftJoinAndSelect("certificate.user", "user")
-      .getOne();
+    const certificate = await certificateRepository.findOne({
+      where: {
+        id,
+      },
+      relations: {
+        section: true,
+        user: true,
+      },
+    });
 
     if (!certificate) {
       return error(res, "Certificate not found", 404);
@@ -110,6 +120,7 @@ const getCertificateById = async (req: Request, res: Response) => {
       .json({ error: (error as Error)?.message ?? "Internal server error" });
   }
 };
+
 
 const deleteCertificate = async (req: Request, res: Response) => {
   const id = req.params.certId;
