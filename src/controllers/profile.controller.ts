@@ -231,6 +231,11 @@ export const updateProfileController = async (req: Request, res: Response, Next:
       user: updatedUser,
     });
 
+    if (portfolio?.user) {
+      delete portfolio.user.password;
+      delete portfolio.user.email;
+    }
+
     const userTrack = await userTrackRepository.findOne({
       where: { user: { id: user.id } },
       relations: ["track"],
