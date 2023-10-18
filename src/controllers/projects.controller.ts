@@ -358,36 +358,36 @@ export const getAllProjectsForUser: RequestHandler = async (
     if (!user) {
       throw new NotFoundError("User not found");
     }
-    const projects = await projectRepository.find({
-      where: {
-        user: { id: user_id }
-      }, relations: ["projectsImages"]
+
+    const allProjectsPromise = connectionSource.manager.find(Project, {
+      where: { user: { id: user.id } },
+      relations: ["projectsImages"]
     });
+    try {
+      const [allProjects] = await Promise.all([allProjectsPromise]);
 
-    const projectsWithImageUrls = [];
+      const imagePromises = allProjects.map(async (project) => {
+        const imageUrlsPromises = project?.projectsImages?.map(async (image) => {
 
-    for (const project of projects) {
-      const imageUrlsPromises = project.projectsImages.map(
-        async (image) => {
-          const imageEntity = await imageRepository.findOne({
-            where: { id: image.id },
+          const imageEntity = await projectImageRepository.findOne({
+            where: { id: image.id }, relations: ["image"]
           });
-          return imageEntity ? imageEntity.url : null;
-        }
-      );
 
-      const imageUrls = await Promise.all(imageUrlsPromises);
-
-      projectsWithImageUrls.push({
-        ...project,
-        projectsImages: imageUrls,
-        thumbnail: imageUrls[0]
+          return imageEntity ? imageEntity.image.url : null;
+        });
+        const imageUrls = await Promise.all(imageUrlsPromises);
+        return {
+          ...project,
+          projectsImages: imageUrls,
+          thumbnail: imageUrls[0],
+        };
       });
+
+      const projects = await Promise.all(imagePromises);
+      success(res, projects, "Successfully Retrieved");
+    } catch (error) {
+      return next(error);
     }
-
-
-
-    success(res, projectsWithImageUrls, "Successfully Retrieved");
   } catch (err) {
     return next(err)
   }
