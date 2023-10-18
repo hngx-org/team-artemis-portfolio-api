@@ -30,7 +30,9 @@ const createDegreeController = async (
     const degree = degreeRepository.create({ type: type });
     const createdDegree = await degreeRepository.save(degree);
 
-    return res.status(201).json(createdDegree);
+    const createdDegreeString = createdDegree.id.toString();
+
+    return res.status(201).json(createdDegreeString);
   } catch (error) {
     if (error instanceof z.ZodError) {
       res.status(400).json({ errors: error.errors });
@@ -55,7 +57,9 @@ export const fetchDegree = async (
     const id = parseInt(req.params.id);
     const degree = await getDegree(id);
 
-    return res.status(200).json(degree);
+    const degreeString = degree.data.id.toString();
+
+    return res.status(200).json(degreeString);
   } catch (error) {
     next(error);
   }
