@@ -78,7 +78,7 @@ const getAllCertificates = async (req: Request, res: Response) => {
           id: userId,
         },
       },
-      relations: ["section", "user"],
+      relations: ["section"],
     });
 
     if (!certificates) {
@@ -103,7 +103,6 @@ const getCertificateById = async (req: Request, res: Response) => {
       },
       relations: {
         section: true,
-        user: true,
       },
     });
 
@@ -118,7 +117,6 @@ const getCertificateById = async (req: Request, res: Response) => {
       .json({ error: (error as Error)?.message ?? "Internal server error" });
   }
 };
-
 
 const deleteCertificate = async (req: Request, res: Response) => {
   const id = req.params.certId;
