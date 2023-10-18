@@ -1,6 +1,6 @@
-import { Request, Response, RequestHandler, NextFunction } from 'express';
-import { connectionSource } from '../database/data-source';
-import { validate as isValidUUID } from 'uuid';
+import { Request, Response, RequestHandler, NextFunction } from "express";
+import { connectionSource } from "../database/data-source";
+import { validate as isValidUUID } from "uuid";
 import {
   PortfolioDetail,
   User,
@@ -20,10 +20,11 @@ import {
   ReferenceDetail,
   SocialUser,
   LanguageDetail,
-  Images
+  Images,
+  ProjectsImage
 } from "../database/entities";
 import { NotFoundError, BadRequestError } from "../middlewares/index";
-import { getAllLanguages } from '../services/language.service';
+import { getAllLanguages } from "../services/language.service";
 
 const portfolioDetailsRepository =
   connectionSource.getRepository(PortfolioDetail);
@@ -40,6 +41,7 @@ const languageDetailRepository = connectionSource.getRepository(LanguageDetail);
 const aboutRepositiory = connectionSource.getRepository(AboutDetail);
 const awardRepository = connectionSource.getRepository(Award);
 const certificateRepository = connectionSource.getRepository(Certificate);
+const projectImageRepository = connectionSource.getRepository(ProjectsImage);
 
 export interface UpdatePortfolioDetailsDTO {
   name?: string;
@@ -61,7 +63,8 @@ const getPortfolioDetails = async (
     const user = await userRepository.findOne({ where: { id: userId } });
 
     const educationPromise = connectionSource.manager.find(EducationDetail, {
-      where: { user: { id: user.id } }, relations: ["degree"]
+      where: { user: { id: user.id } },
+      relations: ["degree"],
     });
 
     const skillsPromise = connectionSource.manager.find(SkillsDetail, {
@@ -78,7 +81,7 @@ const getPortfolioDetails = async (
 
     const allProjectsPromise = connectionSource.manager.find(Project, {
       where: { user: { id: user.id } },
-      relations: ["projectsImages"]
+      relations: ["projectsImages"],
     });
 
     const sectionsPromise = connectionSource.manager.find(CustomUserSection, {
@@ -87,7 +90,7 @@ const getPortfolioDetails = async (
 
     const tracksPromise = userTrackRepository.findOne({
       where: { user: { id: user.id } },
-      relations: ['track'],
+      relations: ["track"],
     });
 
     const workExperiencePromise = workExperienceRepository.find({
@@ -133,12 +136,17 @@ const getPortfolioDetails = async (
         referencePromise,
       ]);
 
+      const interestArray = interests[0]?.interest?.split(","); //convert interest to Array of interests
+
+
       const imagePromises = allProjects.map(async (project) => {
         const imageUrlsPromises = project?.projectsImages?.map(async (image) => {
-          const imageEntity = await imageRepository.findOne({
-            where: { id: image.id },
+
+          const imageEntity = await projectImageRepository.findOne({
+            where: { id: image.id }, relations: ["image"]
           });
-          return imageEntity ? imageEntity.url : null;
+
+          return imageEntity ? imageEntity.image.url : null;
         });
         const imageUrls = await Promise.all(imageUrlsPromises);
         return {
@@ -154,12 +162,12 @@ const getPortfolioDetails = async (
 
       const languages = await getAllLanguages(user.id);
 
-
       res.status(200).json({
         user,
         education,
         skills,
         interests,
+        interestArray,
         about,
         projects,
         workExperience,
@@ -168,7 +176,7 @@ const getPortfolioDetails = async (
         sections,
         track,
         reference,
-        languages
+        languages,
       });
     } catch (error) {
       return next(error);
@@ -176,7 +184,7 @@ const getPortfolioDetails = async (
   } catch (error) {
     return next(error);
   }
-}
+};
 
 const getAllPortfolioDetails = async (req: Request, res: Response) => {
   const PortfolioDetails = await portfolioRepository.find();
@@ -200,14 +208,14 @@ const deletePortfolioDetails: RequestHandler = async (
 
     // return error if porfolio is not found
     if (!portfolioToRemove) {
-      throw new NotFoundError('Portfolio profile details not found');
+      throw new NotFoundError("Portfolio profile details not found");
     }
 
     const portfolio = await portfolioDetailsRepository.remove(
       portfolioToRemove
     );
     res.status(200).json({
-      message: 'Portfolio profile details deleted successfully',
+      message: "Portfolio profile details deleted successfully",
       portfolio,
     });
   } catch (error) {
