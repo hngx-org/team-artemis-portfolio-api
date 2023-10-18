@@ -21,7 +21,7 @@ import {
   SocialUser,
   LanguageDetail,
   Images,
-  ProjectsImage
+  ProjectsImage,
 } from "../database/entities";
 import { NotFoundError, BadRequestError } from "../middlewares/index";
 import { getAllLanguages } from "../services/language.service";
@@ -88,7 +88,7 @@ const getPortfolioDetails = async (
       where: { user: { id: user.id } },
     });
 
-    const tracksPromise = userTrackRepository.findOne({
+    const tracks = await userTrackRepository.findOne({
       where: { user: { id: user.id } },
       relations: ["track"],
     });
@@ -117,7 +117,6 @@ const getPortfolioDetails = async (
         about,
         allProjects,
         sections,
-        tracks,
         workExperience,
         awards,
         certificates,
@@ -129,7 +128,6 @@ const getPortfolioDetails = async (
         aboutPromise,
         allProjectsPromise,
         sectionsPromise,
-        tracksPromise,
         workExperiencePromise,
         awardsPromise,
         certificatesPromise,
@@ -138,16 +136,17 @@ const getPortfolioDetails = async (
 
       const interestArray = interests[0]?.interest?.split(","); //convert interest to Array of interests
 
-
       const imagePromises = allProjects.map(async (project) => {
-        const imageUrlsPromises = project?.projectsImages?.map(async (image) => {
+        const imageUrlsPromises = project?.projectsImages?.map(
+          async (image) => {
+            const imageEntity = await projectImageRepository.findOne({
+              where: { id: image.id },
+              relations: ["image"],
+            });
 
-          const imageEntity = await projectImageRepository.findOne({
-            where: { id: image.id }, relations: ["image"]
-          });
-
-          return imageEntity ? imageEntity.image.url : null;
-        });
+            return imageEntity ? imageEntity.image.url : null;
+          }
+        );
         const imageUrls = await Promise.all(imageUrlsPromises);
         return {
           ...project,
