@@ -88,7 +88,7 @@ const getPortfolioDetails = async (
       where: { user: { id: user.id } },
     });
 
-    const tracks = await userTrackRepository.findOne({
+    const tracksPromise = userTrackRepository.findOne({
       where: { user: { id: user.id } },
       relations: ["track"],
     });
@@ -117,6 +117,7 @@ const getPortfolioDetails = async (
         about,
         allProjects,
         sections,
+        tracks,
         workExperience,
         awards,
         certificates,
@@ -128,6 +129,7 @@ const getPortfolioDetails = async (
         aboutPromise,
         allProjectsPromise,
         sectionsPromise,
+        tracksPromise,
         workExperiencePromise,
         awardsPromise,
         certificatesPromise,
@@ -173,7 +175,7 @@ const getPortfolioDetails = async (
         awards,
         certificates,
         sections,
-        track,
+        tracks: track,
         reference,
         languages,
       });
