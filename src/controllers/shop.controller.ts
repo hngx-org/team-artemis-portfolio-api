@@ -25,7 +25,7 @@ export const fetchShop = async (req: Request, res: Response) => {
     });
 
     if (!findProducts || findProducts.length === 0) {
-      res.status(404).json({ error: "No items in your shop." });
+      res.status(404).json({ error: "No items found in your shop." });
     } else {
       const productImageUrls = findProducts.map((product) =>
         product.productImages.map((image) => image.url)
