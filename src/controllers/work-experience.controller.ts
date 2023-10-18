@@ -1,6 +1,6 @@
 import { Request, RequestHandler, Response } from "express";
 import { connectionSource } from "../database/data-source";
-import { WorkExperienceDetail } from "../database/entities";
+import { WorkExperienceDetail } from "../database/entity/model";
 import { error, success } from "../utils";
 import { ZodError, boolean, number, object, string } from "zod";
 
@@ -26,106 +26,94 @@ export const createWorkExperience: RequestHandler = async (
 
   const userId = req.params.userId || req.body.userId;
 
-  console.log(req.body);
-  // change isEmployee to boolean
-  req.body.isEmployee =
-    req.body.isEmployee === true
-      ? true
-      : req.body.isEmployee === false
-      ? false
-      : null;
-
-  // check if sectionId is NAN
-  if (isNaN(sectionId)) {
-    res.statusCode = 400;
-    return res.json({ message: "sectionId must be a number" });
-  }
 
   const workExperienceSchema = object({
     company: string({
       required_error: "company is required in request body",
-      invalid_type_error: "company must be type string",
+      invalid_type_error: "company must be type string"
     })
-      .trim()
-      .min(1, "company must not be an empty string"),
+    .trim()
+    .min(1, "company must not be an empty string"),
 
     role: string({
       required_error: "role is required in request body",
-      invalid_type_error: "role must be type string",
+      invalid_type_error: "role must be type string"
     })
-      .trim()
-      .min(1, "role must not be an empty string"),
+    .trim()
+    .min(1, "role must not be an empty string"),
 
     startMonth: string({
       required_error: "startMonth is required in request body",
-      invalid_type_error: "startMonth must be type string",
+      invalid_type_error: "startMonth must be type string"
     })
-      .trim()
-      .min(1, "startMonth must not be an empty string"),
+    .trim()
+    .min(1, "startMonth must not be an empty string"),
 
     startYear: string({
       required_error: "startYear is required in request body",
-      invalid_type_error: "startYear must be type string",
+      invalid_type_error: "startYear must be type string"
     })
-      .trim()
-      .min(1, "startYear must not be an empty string")
-      .length(4, "startYear must be 4 digits"),
+    .trim()
+    .min(1, "startYear must not be an empty string")
+    .length(4, "startYear must be 4 digits"),
 
     endMonth: string({
       required_error: "endMonth is required in request body",
-      invalid_type_error: "endMonth must be type string",
+      invalid_type_error: "endMonth must be type string"
     })
-      .trim()
-      .min(1, "endMonth must not be an empty string"),
+    .trim()
+    .min(1, "endMonth must not be an empty string"),
 
     endYear: string({
       required_error: "endYear is required in request body",
-      invalid_type_error: "endYear must be type string",
+      invalid_type_error: "endYear must be type string"
     })
-      .trim()
-      .min(1, "endYear must not be an empty string")
-      .length(4, "endYear must be 4 digits"),
+    .trim()
+    .min(1, "endYear must not be an empty string")
+    .length(4, "endYear must be 4 digits"),
 
     description: string({
       required_error: "description is required in request body",
-      invalid_type_error: "description must be type string",
+      invalid_type_error: "description must be type string"
     })
-      .trim()
-      .min(1, "description must not be an empty string"),
+    .trim()
+    .min(1, "description must not be an empty string"),
 
     isEmployee: boolean({
       required_error: "isEmployee is required in request body",
-      invalid_type_error: "isEmployee must be type boolean",
+      invalid_type_error: "isEmployee must be type boolean"
     }),
 
-    //   userId: string({
-    //     required_error: "userId is required in request body",
-    //     invalid_type_error: "userId must be type string",
-    //   })
-    //     .trim()
-    //     .min(1, "userId must not be an empty string")
-    //     .uuid("userId must be in uuid format"),
-  });
+    userId: string({
+      required_error: "userId is required in request body",
+      invalid_type_error: "userId must be type string"
+    })
+    .trim()
+    .min(1, "userId must not be an empty string")
+    .uuid("userId must be in uuid format"),
 
+    sectionId: number({
+      required_error: "sectionId is required in request body",
+      invalid_type_error: "sectionId must be type number"
+    })
+  })
+  
+
+  
   try {
+    
     try {
       workExperienceSchema.parse(req.body);
-    } catch (error: unknown) {
+    } catch (error: unknown){
       const { errors } = error as ZodError;
       res.statusCode = 400;
       return res.json({
         message: errors.map((error) => {
-          return error.message;
-        }),
-      });
+          return error.message; 
+        })
+      })
     }
-    if (endYear < startYear) {
-      res.statusCode = 400;
-      return res.json({
-        message: "EndYear must be greater than startYear",
-      });
-    }
-
+    
     const workExperience = new WorkExperienceDetail();
     workExperience.company = company;
     workExperience.role = role;
@@ -135,8 +123,8 @@ export const createWorkExperience: RequestHandler = async (
     workExperience.endYear = endYear;
     workExperience.description = description;
     workExperience.isEmployee = isEmployee;
-    workExperience.user = userId;
-    workExperience.section = sectionId;
+    workExperience.userId = userId;
+    workExperience.sectionId = sectionId;
 
     await workExperienceRepository.save(workExperience);
     return res.json({
@@ -144,7 +132,7 @@ export const createWorkExperience: RequestHandler = async (
       data: workExperience,
     });
   } catch (err) {
-    console.log(err.errors);
+    console.log(err.errors)
     res.statusCode = 500;
     res.json({ error: err, message: (err as Error).message });
   }
@@ -241,12 +229,6 @@ export const updateWorkExperience: RequestHandler = async (
       res.statusCode = 404;
       return res.json({ message: "Work Experience not found" });
     }
-    if (endYear && startYear && endYear < startYear) {
-      res.statusCode = 400;
-      return res.json({
-        message: "EndYear must be greater than startYear",
-      });
-    }
 
     // Update the work experience details
     workExperienceToUpdate.company = company;
@@ -257,8 +239,8 @@ export const updateWorkExperience: RequestHandler = async (
     workExperienceToUpdate.endYear = endYear;
     workExperienceToUpdate.description = description;
     workExperienceToUpdate.isEmployee = isEmployee;
-    workExperienceToUpdate.user = userId;
-    workExperienceToUpdate.section = sectionId;
+    workExperienceToUpdate.userId = userId;
+    workExperienceToUpdate.sectionId = sectionId;
 
     // Save the updated work experience
     await workExperienceRepository.save(workExperienceToUpdate);

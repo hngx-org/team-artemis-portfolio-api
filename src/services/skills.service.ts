@@ -1,48 +1,28 @@
 import { Skill } from "../interfaces";
-import { SkillsDetail, Section, User } from "../database/entities";
+import { SkillsDetail } from "../database/entity/model";
 import { connectionSource } from "../database/data-source";
-
-const skillsDetailRepository = connectionSource.getRepository(SkillsDetail);
-const sectionRepository = connectionSource.getRepository(Section);
-const userRepository = connectionSource.getRepository(User);
-
 export const createSkillsService = async (
   skillData: Skill[]
 ): Promise<{ successful: boolean; message: string }> => {
-  try {
-    const newSkills = [];
-    for (const data of skillData) {
-      const { skills, sectionId, userId } = data;
+  const skillsDetailRepository = connectionSource.getRepository(SkillsDetail);
+  const skills = [];
 
-      const section = await sectionRepository.findOneBy({ id: sectionId });
-      const user = await userRepository.findOneBy({ id: userId });
-
-      if (!section || !user) {
-        return { successful: false, message: "section or user not found" };
-      }
-
-      const skillsDetailData = new SkillsDetail();
-      skillsDetailData.skills = skills;
-      skillsDetailData.section = section;
-      skillsDetailData.user = user;
-
-      newSkills.push(skillsDetailData);
-    }
-
-    await skillsDetailRepository.save(newSkills);
-
-    return { successful: true, message: "skills successfully saved" };
-  } catch (error) {
-    console.error("Error creating skills:", error);
-    return { successful: false, message: "Failed to create skills" };
+  for (const data of skillData) {
+    const newSkill = skillsDetailRepository.create(data);
+    skills.push(newSkill);
   }
+
+  const savedskill = await skillsDetailRepository.save(skills);
+
+  return { successful: true, message: "skills successfully saved" };
 };
 export const getSkillsService = async (userId: string
-) => {
-  const user = await userRepository.findOneBy({ id: userId });
-  const savedskilldetails = await skillsDetailRepository.find({where:{ user: {id: user.id} }});
+): Promise<Skill[]> => {
+  const skillsDetailRepository = connectionSource.getRepository(SkillsDetail);
 
-  return savedskilldetails;
+  const savedskilldetials = await skillsDetailRepository.find({where:{userId: userId}});
+
+  return savedskilldetials;
 };
 
 
@@ -51,6 +31,7 @@ export const updateSkillsService = async (
   updatedSkillData: Partial<Skill>
 ): Promise<{ successful: boolean; message: string }> => {
   try {
+    const skillsDetailRepository = connectionSource.getRepository(SkillsDetail);
     const skillToUpdate = await skillsDetailRepository.findOne({
       where: { id: skillId },
     });
@@ -61,14 +42,12 @@ export const updateSkillsService = async (
       skillToUpdate.skills = updatedSkillData.skills;
     }
     if (updatedSkillData.sectionId) {
-      skillToUpdate.section = await sectionRepository.findOneBy({ id: updatedSkillData.sectionId });
+      skillToUpdate.sectionId = updatedSkillData.sectionId;
     }
     if (updatedSkillData.userId) {
-      skillToUpdate.user = await userRepository.findOneBy({ id: updatedSkillData.userId });
+      skillToUpdate.userId = updatedSkillData.userId;
     }
-
     await skillsDetailRepository.save(skillToUpdate);
-
     return { successful: true, message: "skill updated successfully" };
   } catch (error) {
     console.error("Error updating skill:", error);
@@ -80,6 +59,7 @@ export const deleteSkillsService = async (
   skillId: number
 ): Promise<{ successful: boolean; message: string }> => {
   try {
+    const skillsDetailRepository = connectionSource.getRepository(SkillsDetail);
     const skillToDelete = await skillsDetailRepository.findOne({ where: { id: skillId } });
 
     if (!skillToDelete) {

@@ -45,6 +45,7 @@ export const cloudinaryService = async (
 
       urls.push(image.secure_url);
     }
+    console.log(urls);
 
     return { successful: true, message: "files uploaded successfully", urls };
   } catch (error) {

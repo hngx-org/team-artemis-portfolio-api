@@ -1,10 +1,10 @@
-export interface IReference {
+export interface Reference {
   id?: number;
-  referer: string;
+  name: string;
   company: string;
   position: string;
-  email: string;
+  emailAddress: string;
   phoneNumber: string;
-  userId?: string;
+  userId: string;
   sectionId: number;
 }

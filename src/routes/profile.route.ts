@@ -1,7 +1,7 @@
 import express from "express";
 import multer from "multer";
 import {
-  updateProfileController,
+  createProfileController,
   getAllUsers,
   getUserById,
   uploadImageController,
@@ -129,9 +129,10 @@ router.get("/users/:userId", getUserById);
  *                 error:
  *                   type: string
  */
-router.put(
-  "/users/:userId",
-  updateProfileController
+router.post(
+  "/profile/:userId",
+  validateCreatePortfolioDetails(createPorfolioDataSchema),
+  createProfileController
 );
 
 /**

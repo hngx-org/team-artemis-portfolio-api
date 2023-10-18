@@ -53,6 +53,21 @@ const router = express.Router();
  *                       type: boolean
  *                     message:
  *                       type: string
+ *       400:
+ *         description: Skill already exists.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 successful:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "A skill already exists"
+ *                 data:
+ *                   type: null
  *       500:
  *         description: Failed to create skills.
  *         content:
