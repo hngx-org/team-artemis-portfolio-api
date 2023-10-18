@@ -29,6 +29,8 @@ import {
   UserTrack,
   WorkExperienceDetail,
 } from "./index";
+import { LanguageDetail } from "./LanguageDetail";
+import { ReferenceDetail } from "./Reference";
 
 @Index("user_pkey", ["id"], { unique: true })
 @Entity("user", { schema: "public" })
@@ -157,6 +159,12 @@ export class User {
 
   @OneToMany(() => UserTrack, (userTrack) => userTrack.user)
   userTracks: UserTrack[];
+
+  @OneToMany(() => LanguageDetail, (languageDetail) => languageDetail.user)
+  languages: LanguageDetail[];
+
+  @OneToMany(() => ReferenceDetail, (referenceDetail) => referenceDetail.user)
+  references: ReferenceDetail[];
 
   @OneToMany(
     () => WorkExperienceDetail,

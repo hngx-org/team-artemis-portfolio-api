@@ -1,5 +1,5 @@
 import express from "express";
-import { getAllTracks } from "../controllers/tracks.controller";
+import { getAllTracks, getTrackById, createUserTrack } from "../controllers/tracks.controller";
 
 const router = express.Router();
 
@@ -21,6 +21,8 @@ const router = express.Router();
  *                 message:
  *                   type: string
  */
-router.get("/tracks", getAllTracks);
+router.get("/tracks", getAllTracks)
+    .get("/tracks/:id", getTrackById);
 
+router.post("/tracks", createUserTrack);
 module.exports = router;

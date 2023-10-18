@@ -23,16 +23,46 @@ export const createInterest: RequestHandler = async (req, res) => {
       where: { id: sectionId },
     });
 
+    if (!user || !section) {
+      return res.status(404).json({
+        successful: false,
+        message: "User or section does not exist.",
+      });
+    }
+
     // Check if the interest exists
     const interestExists = await interestRepository.findOne({
-      where: { user },
+      where: { user: { id: userId } },
     });
 
-    // If the interest exists, return an error
+    // If the interest exists, delete the interest and create a new one
     if (interestExists) {
-      return res.status(409).json({
-        successful: false,
-        message: "This user already has an interest section created.",
+      await interestRepository.remove(interestExists);
+
+      const newInterest = interestRepository.create({
+        interest: intrestsString,
+        user,
+        section,
+      });
+      const savedInterest = await interestRepository.save(newInterest);
+
+      // Extract the userId, sectionId and sectionName from the savedInterest
+      const user_id = savedInterest.user?.id;
+      const section_id = savedInterest.section?.id;
+      const section_name = savedInterest.section?.name;
+      const sectionDetails = { section_id, section_name };
+
+      // Create the data object to be returned
+      const data = {
+        interests: savedInterest.interest,
+        user_id,
+        sectionDetails,
+      };
+
+      return res.status(200).json({
+        successful: true,
+        message: "Interest updated successfully",
+        data,
       });
     }
 
@@ -43,7 +73,20 @@ export const createInterest: RequestHandler = async (req, res) => {
       section,
     });
     // Save the interest to the database
-    const data = await interestRepository.save(interestResponse);
+    const savedInterest = await interestRepository.save(interestResponse);
+
+    // Extract the userId, sectionId and sectionName from the savedInterest
+    const user_id = savedInterest.user?.id;
+    const section_id = savedInterest.section?.id;
+    const section_name = savedInterest.section?.name;
+    const sectionDetails = { section_id, section_name };
+
+    // Create the data object to be returned
+    const data = {
+      interests: savedInterest.interest,
+      user_id,
+      sectionDetails,
+    };
 
     res.status(201).json({
       successful: true,
@@ -96,7 +139,7 @@ export const updateInterest: RequestHandler = async (req, res) => {
       id: interestId,
     });
     // Convert the interests string to an array
-    const interestArray = data?.interest.split(",");
+    const interestArray = data?.interest.split(", ");
 
     res.status(200).json({
       successful: true,
@@ -120,7 +163,9 @@ export const deleteInterest: RequestHandler = async (req, res) => {
 
     const user = await userRepository.findOne({ where: { id: userId } });
 
-    const interest = await interestRepository.findOne({ where: { user } });
+    const interest = await interestRepository.findOne({
+      where: { user: { id: userId } },
+    });
 
     if (!interest) {
       return res.status(404).json({
@@ -159,9 +204,18 @@ export const getInterests: RequestHandler = async (req, res) => {
 
     // Retrieve interests from the database for the specific userId
     const interests = await interestRepository.findOne({
-      where: { user },
+      where: { user: { id: userId } },
     });
-    const interestArray = interests.interest.split(",");
+
+    if (!interests) {
+      return res.status(404).json({
+        successful: false,
+        message: "Interests not found.",
+      });
+    }
+
+    const interestArray = interests?.interest?.split(",");
+
     res.status(200).json({
       successful: true,
       data: interests,
