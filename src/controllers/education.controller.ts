@@ -1,8 +1,9 @@
-import { Request, RequestHandler, Response, NextFunction } from "express";
-import { connectionSource } from "../database/data-source";
-import { Degree, EducationDetail, Section, User } from "../database/entities";
-import { createEducationDetail } from "../services/education.service";
-import { EducationDetailData } from "../interfaces/education.interface";
+import { Request, RequestHandler, Response, NextFunction } from 'express'
+import { connectionSource } from '../database/data-source'
+import { Degree, EducationDetail, Section } from '../database/entity/model'
+import { createEducationDetail } from '../services/education.service'
+import { EducationDetailData } from '../interfaces/education.interface'
+import { User } from '../database/entity/user'
 
 import {
   CustomError,
@@ -13,68 +14,68 @@ import {
   InternalServerError,
   MethodNotAllowedError,
   errorHandler,
-} from "../middlewares";
+} from '../middlewares'
 import {
   CreateEducationDetailDataSchema,
   validateCreateData,
-} from "../middlewares/education.zod";
-import { z } from "zod";
-
-const educationDetailRepository =
-  connectionSource.getRepository(EducationDetail);
-const userRepository = connectionSource.getRepository(User);
+} from '../middlewares/education.zod'
+import { z } from 'zod'
 
 // Custom function to validate date strings in "yy-mm-dd" format
-function validateYear(dateString: string) {
-  const yearPattern = /^\d{4}$/;
-  console.log("dateString", dateString);
-  return yearPattern.test(dateString);
+function validateDateYYMMDD(dateString: string) {
+  const datePattern = /^\d{4}-\d{2}-\d{2}$/
+  return datePattern.test(dateString)
 }
 
 // Endpoint to fetch the education section
 const fetchUserEducationDetail: RequestHandler = async (req, res, next) => {
   // Add 'next' parameter
+  const educationRepository = connectionSource.getRepository(EducationDetail)
+  const userRepository = connectionSource.getRepository(User)
 
   try {
-    const user_id = req.params.id;
+    const id = req.params.id
 
-    if (!user_id) {
-      throw new BadRequestError("User ID is required");
+    if (!id) {
+      throw new BadRequestError('User ID is required')
     }
 
-    const user = await userRepository.findOne({ where: { id: user_id } });
+    const isUser = await userRepository.findOne({ where: { id } })
 
-    if (!user) {
-      const error = new NotFoundError("A user with this ID does not exist");
-      throw error;
+    if (!isUser) {
+      const error = new NotFoundError('A user with this ID does not exist')
+      throw error
     }
 
-    const educationDetails = await educationDetailRepository.find({
-      where: { user: { id: user_id } }, relations: ["degree"]
-    });
+    const educationDetails = await educationRepository.find({
+      where: { userId: id },
+      relations: ['degree', 'section', 'user'],
+    })
 
     if (!educationDetails) {
       const error = new InternalServerError(
-        "An error occurred while fetching the education details, please try again"
-      );
-      throw error;
+        'An error occurred while fetching the education details, please try again'
+      )
+      throw error
     }
 
     // Send a success response
-    res.status(200).json({ educationDetails });
+    res.status(200).json({ educationDetails })
   } catch (error) {
     // Handle errors
-    if (error.message.includes("invalid input syntax for type uuid")) {
-      error.message = "Invalid UUID format. Please provide a valid UUID.";
+    if (error.message.includes('invalid input syntax for type uuid')) {
+      error.message = 'Invalid UUID format. Please provide a valid UUID.'
     }
     res
       .status(error.statusCode || 500)
-      .json({ error: error.message || "An unknown error occurred" });
-    next(error);
+      .json({ error: error.message || 'An unknown error occurred' })
+    next(error)
   }
-};
+}
 
 // Get the repository for the EducationDetail entity
+const educationDetailRepository =
+  connectionSource.getRepository(EducationDetail)
 
 const createEducationDetailController = async (
   req: Request,
@@ -82,136 +83,115 @@ const createEducationDetailController = async (
   next: NextFunction
 ) => {
   try {
-    const user_id = req.params.id;
+    const userId = req.params.id
 
-    const {
-      degree_id,
-      fieldOfStudy,
-      school,
-      from,
-      description,
-      to,
-      section_id,
-    } = req.body as EducationDetailData;
-
-    console.log("req.body", req.body);
+    const { degreeId, fieldOfStudy, school, from, description, to, sectionId } =
+      req.body as EducationDetailData
 
     const data = {
-      degree_id,
+      degreeId,
       fieldOfStudy,
       school,
       from,
       description,
       to,
-      section_id,
-    };
+      sectionId,
+    }
 
     // Validate date strings in "yy-mm-dd" format
-    if (data.from && !validateYear(data.from)) {
-      return res.status(400).json({ errors: "Invalid 'from' date format" });
+    if (data.from && !validateDateYYMMDD(data.from)) {
+      return res.status(400).json({ errors: "Invalid 'from' date format" })
       // throw new BadRequestError("Invalid 'from' date format")
     }
 
-    if (data.to && !validateYear(data.to)) {
+    if (data.to && !validateDateYYMMDD(data.to)) {
       // throw new BadRequestError("Invalid 'to' date format")
-      return res.status(400).json({ errors: "Invalid 'to' date format" });
+      return res.status(400).json({ errors: "Invalid 'to' date format" })
     }
-    await validateCreateData(data, user_id, res);
+    await validateCreateData(data, userId, res)
 
-    // check if the from date is less than the to date
-    if (data.from && data.to) {
-      const fromDate = parseInt(data.from);
-      const toDate = parseInt(data.to);
-      if (fromDate > toDate) {
-        throw new BadRequestError(
-          "The 'from' date cannot be greater than the 'to' date"
-        );
-      }
-    }
-
-    console.log("validated");
     // Define an array of required fields
     const requiredFields = [
-      "degree_id",
-      "fieldOfStudy",
-      "school",
-      "from",
-      "description",
-      "to",
-      "section_id",
-    ];
+      'degreeId',
+      'fieldOfStudy',
+      'school',
+      'from',
+      'description',
+      'to',
+      'sectionId',
+    ]
 
     // Check for missing fields
-    const missingFields = requiredFields.filter((field) => !req.body[field]);
+    const missingFields = requiredFields.filter((field) => !req.body[field])
 
     if (missingFields.length > 0) {
       // Create a CustomError with a 400 status code
-      throw new CustomError(`Missing fields: ${missingFields.join(", ")}`);
+      throw new CustomError(`Missing fields: ${missingFields.join(', ')}`)
     }
 
     // Get the user by userId
-    const userRepository = connectionSource.getRepository(User);
-    const user = await userRepository.findOne({ where: { id: user_id } });
+    const userRepository = connectionSource.getRepository(User)
+    const user = await userRepository.findOne({ where: { id: userId } })
 
-    const sectionRepository = connectionSource.getRepository(Section);
-    const degreeRepository = connectionSource.getRepository(Degree);
+    const sectionRepository = connectionSource.getRepository(Section)
+    const degreeRepository = connectionSource.getRepository(Degree)
     const section = await sectionRepository.findOne({
-      where: { id: section_id },
-    });
-    const degree = await degreeRepository.findOne({ where: { id: degree_id } });
+      where: { id: sectionId },
+    })
+    const degree = await degreeRepository.findOne({ where: { id: degreeId } })
 
-    console.log("gone past");
     if (!user) {
       // Create a CustomError with a 404 status code
-      throw new NotFoundError(
-        "Error creating education detail: User not found"
-      );
+      const err = new NotFoundError(
+        'Error creating education detail: User not found'
+      )
+      return res.status(err.statusCode).json({ error: err.message })
     }
     if (!section) {
       // Create a CustomError with a 404 status code
-      throw new NotFoundError(
-        "Error creating education detail: Section not found"
-      );
+      const err = new NotFoundError(
+        'Error creating education detail: Section not found'
+      )
+      return res.status(err.statusCode).json({ error: err.message })
     }
     if (!degree) {
       // Create a CustomError with a 404 status code
-      throw new NotFoundError(
-        "Error creating education detail: Degree not found"
-      );
+      const err = new NotFoundError(
+        'Error creating education detail: Degree not found'
+      )
+      return res.status(err.statusCode).json({ error: err.message })
     }
-
-    console.log("creating");
-    console.log(degree);
-    console.log(section);
-    console.log(user);
-    console.log(degree_id);
-    console.log(section_id);
-    console.log(user_id);
 
     // Call the service function to create an education detail
     const educationDetail = await createEducationDetail({
-      degree_id,
+      degreeId,
       fieldOfStudy,
       school,
       from,
       description,
       to,
-      user_id,
-      section_id,
-    });
+      userId,
+      sectionId,
+    })
 
     const response = {
-      message: "Successfully created education detail",
-      status: "success",
+      message: 'Successfully created education detail',
+      status: 'success',
       statusCode: 201,
       educationDetail,
-    };
+    }
 
-    return res.status(201).json(response);
+    return res.status(201).json(response)
   } catch (error) {
-    return next(error);
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({ errors: error.errors })
+    } else {
+      console.error('An error occurred:', error)
+      return res.status(500).json({ error: 'Internal server error' })
+    }
+    next(error)
   }
-};
+}
 
 // get education detail by id
 const getEducationDetailById = async (
@@ -220,29 +200,29 @@ const getEducationDetailById = async (
   next: NextFunction
 ) => {
   try {
-    const id = parseInt(req.params.id);
+    const id = parseInt(req.params.id)
 
     if (isNaN(id) || id < 1) {
-      throw new BadRequestError("Invalid ID Format");
+      throw new BadRequestError('Invalid ID Format')
     }
 
     // Attempt to fetch education details
     const educationDetail = await educationDetailRepository.findOne({
       where: { id },
-    });
+    })
 
     // If the education detail is not found, you can throw a NotFoundError
     if (!educationDetail) {
-      throw new NotFoundError("Education detail not found");
+      throw new NotFoundError('Education detail not found')
     }
 
     // Send a success response
-    res.status(200).json({ educationDetail });
+    res.status(200).json({ educationDetail })
   } catch (error) {
-    console.error("Error fetching education detail:", error.message);
-    next(error);
+    console.error('Error fetching education detail:', error.message)
+    next(error)
   }
-};
+}
 
 const updateEducationDetail = async (
   req: Request,
@@ -250,47 +230,53 @@ const updateEducationDetail = async (
   next: NextFunction
 ) => {
   try {
-    const id = parseInt(req.params.id);
+    const id = parseInt(req.params.id)
 
     if (isNaN(id) || id < 1) {
-      throw new BadRequestError("Invalid ID Format");
+      throw new BadRequestError('Invalid ID Format')
+    }
+
+    // convert the date objects to date strings
+    if (req.body.from && req.body.to) {
+      req.body.from = new Date(req.body.from)
+      req.body.to = new Date(req.body.to)
     }
 
     if (!req.body) {
-      throw new BadRequestError("No data provided");
+      throw new BadRequestError('No data provided')
     }
 
     const educationDetail = await educationDetailRepository.findOne({
       where: { id },
-    });
+    })
 
     if (!educationDetail) {
-      throw new NotFoundError("Education detail not found");
+      throw new NotFoundError('Education detail not found')
     }
 
-    const updateData = req.body;
+    const updateData = req.body
 
     // Dynamic updates based on the updateData object
     for (const key in updateData) {
       if (updateData.hasOwnProperty(key)) {
-        educationDetail[key] = updateData[key];
+        educationDetail[key] = updateData[key]
       }
     }
 
     // Save the updated education detail
-    await educationDetailRepository.save(educationDetail);
+    await educationDetailRepository.save(educationDetail)
 
-    console.log("Education detail updated successfully");
+    console.log('Education detail updated successfully')
 
     res.status(200).json({
-      message: "Education detail updated successfully",
+      message: 'Education detail updated successfully',
       educationDetail,
-    });
+    })
   } catch (error) {
-    console.error("Error updating education detail:", error.message);
-    next(error);
+    console.error('Error updating education detail:', error.message)
+    next(error)
   }
-};
+}
 
 // Delete Education Controller
 const deleteEducationDetail = async (
@@ -299,34 +285,34 @@ const deleteEducationDetail = async (
   next: NextFunction
 ) => {
   try {
-    const id = parseInt(req.params.id);
+    const id = parseInt(req.params.id)
 
     if (isNaN(id) || id < 1) {
-      throw new BadRequestError("Invalid ID Format");
+      throw new BadRequestError('Invalid ID Format')
     }
 
     // Find the existing education detail by ID
     const educationDetail = await educationDetailRepository.findOne({
       where: { id },
-    });
+    })
 
     if (!educationDetail) {
-      throw new NotFoundError("Education detail not found");
+      throw new NotFoundError('Education detail not found')
     }
 
-    await educationDetailRepository.remove(educationDetail);
+    await educationDetailRepository.remove(educationDetail)
 
     res.status(204).json({
-      message: "Education detail deleted successfully",
+      message: 'Education detail deleted successfully',
       educationDetail,
-    });
-    console.log("Education detail deleted successfully");
+    })
+    console.log('Education detail deleted successfully')
   } catch (error) {
-    console.error("Error deleting education detail:", error);
+    console.error('Error deleting education detail:', error)
     // errorHandler(error, req, res, next);
-    next(error);
+    next(error)
   }
-};
+}
 
 export {
   createEducationDetailController,
@@ -334,4 +320,4 @@ export {
   getEducationDetailById,
   deleteEducationDetail,
   fetchUserEducationDetail,
-};
+}

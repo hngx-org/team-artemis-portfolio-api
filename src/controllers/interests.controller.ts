@@ -1,6 +1,6 @@
 import { RequestHandler } from "express";
 import { connectionSource } from "../database/data-source";
-import { InterestDetail, User, Section } from "../database/entities";
+import { InterestDetail } from "../database/entity/model";
 import {
   InterestsInterface,
   updateInterestsInterface,
@@ -8,8 +8,6 @@ import {
 
 // Get the repository for the InterestDetail entity
 const interestRepository = connectionSource.getRepository(InterestDetail);
-const userRepository = connectionSource.getRepository(User);
-const sectionRepository = connectionSource.getRepository(Section);
 
 export const createInterest: RequestHandler = async (req, res) => {
   try {
@@ -18,76 +16,27 @@ export const createInterest: RequestHandler = async (req, res) => {
     // Convert the interests array to a string
     const intrestsString = interests.toString();
 
-    const user = await userRepository.findOne({ where: { id: userId } });
-    const section = await sectionRepository.findOne({
-      where: { id: sectionId },
-    });
-
-    if (!user || !section) {
-      return res.status(404).json({
-        successful: false,
-        message: "User or section does not exist.",
-      });
-    }
-
     // Check if the interest exists
     const interestExists = await interestRepository.findOne({
-      where: { user },
+      where: { userId },
     });
 
-    // If the interest exists, delete the interest and create a new one
+    // If the interest exists, return an error
     if (interestExists) {
-      await interestRepository.remove(interestExists);
-
-      const newInterest = interestRepository.create({
-        interest: intrestsString,
-        user,
-        section,
-      });
-      const savedInterest = await interestRepository.save(newInterest);
-
-      // Extract the userId, sectionId and sectionName from the savedInterest
-      const user_id = savedInterest.user?.id;
-      const section_id = savedInterest.section?.id;
-      const section_name = savedInterest.section?.name;
-      const sectionDetails = { section_id, section_name };
-
-      // Create the data object to be returned
-      const data = {
-        interests: savedInterest.interest,
-        user_id,
-        sectionDetails,
-      };
-
-      return res.status(200).json({
-        successful: true,
-        message: "Interest updated successfully",
-        data,
+      return res.status(409).json({
+        successful: false,
+        message: "This user already has an interest section created.",
       });
     }
 
     // Create the interest
     const interestResponse = interestRepository.create({
       interest: intrestsString,
-      user,
-      section,
+      userId,
+      sectionId,
     });
     // Save the interest to the database
-    const savedInterest = await interestRepository.save(interestResponse);
-    console.log("Saved Interest", savedInterest);
-
-    // Extract the userId, sectionId and sectionName from the savedInterest
-    const user_id = savedInterest.user?.id;
-    const section_id = savedInterest.section?.id;
-    const section_name = savedInterest.section?.name;
-    const sectionDetails = { section_id, section_name };
-
-    // Create the data object to be returned
-    const data = {
-      interests: savedInterest.interest,
-      user_id,
-      sectionDetails,
-    };
+    const data = await interestRepository.save(interestResponse);
 
     res.status(201).json({
       successful: true,
@@ -113,11 +62,9 @@ export const updateInterest: RequestHandler = async (req, res) => {
     // Convert the interests array to a string
     const interestsString = interests.toString();
 
-    const user = await userRepository.findOne({ where: { id: userId } });
-
     // Check if the interest exists
     const interestExists = await interestRepository.findOne({
-      where: { user },
+      where: { userId },
     });
 
     // If the interest does not exist, return an error
@@ -161,10 +108,7 @@ export const updateInterest: RequestHandler = async (req, res) => {
 export const deleteInterest: RequestHandler = async (req, res) => {
   try {
     const { userId } = req.params;
-
-    const user = await userRepository.findOne({ where: { id: userId } });
-
-    const interest = await interestRepository.findOne({ where: { user } });
+    const interest = await interestRepository.findOne({ where: { userId } });
 
     if (!interest) {
       return res.status(404).json({
@@ -194,8 +138,6 @@ export const getInterests: RequestHandler = async (req, res) => {
   try {
     const { userId } = req.params;
 
-    const user = await userRepository.findOne({ where: { id: userId } });
-
     const userIdRegex = /^[A-Fa-f0-9\-]+$/;
     if (!userIdRegex.test(userId)) {
       return res.status(400).json({ message: "Invalid userId format" });
@@ -203,7 +145,7 @@ export const getInterests: RequestHandler = async (req, res) => {
 
     // Retrieve interests from the database for the specific userId
     const interests = await interestRepository.findOne({
-      where: { user },
+      where: { userId: String(userId) },
     });
     const interestArray = interests.interest.split(",");
     res.status(200).json({

@@ -1,13 +1,11 @@
 import {
   getAllPortfolioDetails,
   getPortfolioDetails,
+  updatePortfolioDetails,
   deletePortfolioDetails,
 } from "../controllers/userportfolio.controller";
 import { Router } from "express";
-import {
-  updatePortfolioDataSchema,
-  validateUpdatePortfolioDetails,
-} from "../middlewares/profile.zod";
+import { updatePortfolioDataSchema, validateUpdatePortfolioDetails } from "../middlewares/profile.zod";
 
 const router = Router();
 
@@ -80,6 +78,7 @@ router.get("/getPortfolioDetails/:userId", getPortfolioDetails);
  *                   type: string
  */
 router.get("/portfolioDetails", getAllPortfolioDetails);
+
 
 /**
  * @swagger
@@ -172,7 +171,7 @@ router.get("/portfolioDetails", getAllPortfolioDetails);
  *                   type: null
  */
 
-// router.put("/update-profile-details/:userId", validateUpdatePortfolioDetails(updatePortfolioDataSchema), updatePortfolioDetail);
+router.put("/update-profile-details/:userId", validateUpdatePortfolioDetails(updatePortfolioDataSchema), updatePortfolioDetails);
 
 /**
  * @swagger

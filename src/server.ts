@@ -1,6 +1,6 @@
 import { connectionSource } from "./database/data-source";
 import express from "express";
-import * as entities from "./database/entities";
+import * as entities from "./database/entity/model";
 import { readdirSync } from "fs";
 import { sayHelloController } from "./controllers/greeting.controller";
 import cors from "cors";

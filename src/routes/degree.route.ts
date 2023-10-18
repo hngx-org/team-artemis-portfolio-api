@@ -5,7 +5,7 @@ import {
   fetchAllDegree,
   updateExisitingDegree,
   deleteDegree,
-} from "../controllers/degree.controller";
+} from '../controllers/degree.controller'
 
 const router = express.Router();
 
@@ -249,6 +249,6 @@ router.put("/degree/:id", updateExisitingDegree);
  *                 error:
  *                   type: string
  */
-router.delete("/degree/:degreeId", deleteDegree);
+router.delete('/degree/:degreeId', deleteDegree)
 
 module.exports = router;

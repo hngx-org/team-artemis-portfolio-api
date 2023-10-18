@@ -96,9 +96,7 @@ router.get("/education/:id", fetchUserEducationDetail);
  *         schema:
  *           type: object
  *           properties:
- *             section_id:
- *               type: number
- *             degree_id:
+ *             degreeId:
  *               type: number
  *             fieldOfStudy:
  *               type: string
@@ -111,8 +109,8 @@ router.get("/education/:id", fetchUserEducationDetail);
  *             to:
  *               type: string
  *         example:
- *           section_id: 1
- *           degree_id: 1
+ *           sectionId: 1
+ *           degreeId: 1
  *           fieldOfStudy: "Engineering"
  *           school: "Unilag"
  *           description: "Description"
@@ -149,14 +147,17 @@ router.get("/education/:id", fetchUserEducationDetail);
  *                 data:
  *                   type: null
  */
-router.post("/education/:id", createEducationDetailController);
+router.post(
+  '/education/:id',
+  createEducationDetailController
+)
 
 /**
  * @swagger
  * /api/education/{id}:
  *   get:
- *     summary: Get education detail(s) for a user who's id is in the params and returns an array of objects containing a user education details.
- *     description: Get education detail(s) for a user who's id is in the params and returns an array of objects containing a user education details.
+ *     summary: Get a single education detail by ID
+ *     description: Get an education detail by its ID.
  *     tags: [Education]
  *     parameters:
  *       - in: path

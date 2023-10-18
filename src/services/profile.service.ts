@@ -1,5 +1,5 @@
 import { connectionSource } from "../database/data-source";
-import { User } from "../database/entities";
+import { User } from "../database/entity/user";
 
 export const uploadProfileImageService = async (
   userId: string,

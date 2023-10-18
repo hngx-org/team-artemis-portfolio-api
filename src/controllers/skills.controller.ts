@@ -27,7 +27,6 @@ export const createSkills: RequestHandler = async (
     const newSkills = [];
 
     skills.forEach((skill) => {
-      skill = skill.trim();
       if (!existingSkills.includes(skill)) {
         newSkills.push(skill);
       }

@@ -282,6 +282,6 @@ router.get('/socials/', getSocials)
  *     tags:
  *       - Contacts
  */
-router.patch("/contacts/:id", updateContactController);
+router.patch("/contact/:Id", updateContactController);
 
 module.exports = router;

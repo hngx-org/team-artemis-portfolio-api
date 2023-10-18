@@ -1,66 +1,52 @@
 import { Request, Response, NextFunction } from "express";
 import { connectionSource } from "../database/data-source";
-import { CustomError, NotFoundError, BadRequestError } from "../middlewares";
-import { ReferenceDetail, Section, User } from "../database/entities";
-import { IReference } from "../interfaces";
-import { success, error } from "../utils";
+import { References } from "../database/entity/model";
 import {
-  createReferenceService,
-  deleteReferenceDetailService,
-  getAllUserReferenceService,
-} from "../services/reference.service";
+  CustomError,
+  NotFoundError,
+  BadRequestError,
+} from "../middlewares";
 
-
+const referenceRepository = connectionSource.getRepository(References);
 export const createReference = async (req: Request, res: Response) => {
   try {
-    const user_id = req.params.userId;
+      const validatedData = req.body; // Assuming that the validation middleware stored the validated data
+    const userIdFromURL = req.params.userId; // Extract user ID from the URL
 
-    const { referer, company, position, email, phoneNumber, sectionId } =
-      req.body as IReference;
+    // If the user ID is not provided in the URL, check if it's in the request body
+    let userId = userIdFromURL || validatedData.userId;
+    // Create a new References object with the validated data
+    const reference = new References();
+    reference.name = validatedData.name;
+    reference.company = validatedData.company;
+    reference.position = validatedData.position;
+    reference.emailAddress = validatedData.emailAddress;
+    reference.phoneNumber = validatedData.phoneNumber;
+    reference.userId = userId;
 
-    const data = {
-      userId: user_id,
-      referer,
-      company,
-      position,
-      email,
-      phoneNumber,
-      sectionId,
-    };
+    // Save the reference to the database
+    await referenceRepository.save(reference);
 
-    let d = await createReferenceService(user_id, sectionId, data);
-
-    success(res, d.data, d.message);
-  } catch (err) {
-    error(res, (err as Error).message); // Use type assertion to cast 'err' to 'Error' type
+    res.status(201).json({ message: "Reference created successfully" });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
   }
 };
 
-export const getAllReference = async (req: Request, res: Response) => {
+export const getAllReference = async (
+  req: Request,
+  res: Response,
+) => {
   try {
-    // const references = await referenceRepository.find();
-    // res.json({ references });
+    const references = await referenceRepository.find();
+    res.json({ references });
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: "Internal server error" });
   }
 };
 
-export const getAllUserReference = async (req: Request, res: Response) => {
-  try {
-    const userId = req.params.userId;
-    const d = await getAllUserReferenceService(userId);
 
-    if (!d.successful) {
-      return error(res, d.message);
-    }
-
-    return success(res, d.data, d.message);
-  } catch (err) {
-    console.log(err);
-    error(res, (err as Error).message); // Use type assertion to cast 'err' to 'Error' type
-  }
-};
 
 export const deleteReferenceDetail = async (
   req: Request,
@@ -70,11 +56,26 @@ export const deleteReferenceDetail = async (
   try {
     const id = parseInt(req.params.id);
 
-    const d = await deleteReferenceDetailService(id);
+    if (isNaN(id) || id < 1) {
+      throw new BadRequestError("Invalid ID Format");
+    }
 
-    success(res, {}, d.message);
-  } catch (err) {
+    // Find the existing reference detail by ID
+    const referenceDetail = await referenceRepository.findOne({
+      where: { id },
+    });
+
+    if (!referenceDetail) {
+      throw new NotFoundError("Reference detail not found");
+    }
+
+    await referenceRepository.remove(referenceDetail);
+
+     res.status(200).json({
+      message: "Reference detail deleted successfully"  });
+  } catch (error) {
     console.error("Error deleting reference detail:", error);
-    error(res, (err as Error).message); // Use type assertion to cast 'err' to 'Error' type
+    next(error);
   }
 };
+

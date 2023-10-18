@@ -24,7 +24,6 @@ import {
   createProject,
   updateProjectById,
   deleteProjectController,
-  getAllProjectsForUser,
 } from "../controllers/projects.controller";
 
 /**
@@ -255,39 +254,6 @@ router.delete("/projects/:id", deleteProjectController);
  *       - Project
  */
 
-router.put("/projects/:project_id", uploadHandler, updateProjectById);
-
-
-/**
- * @swagger
- * /api/projects/{id}:
- *   get:
- *     summary: Get project by ID
- *     description: Retrieve a project by its ID.
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         description: The ID of the project to retrieve.
- *         schema:
- *           type: string
- *     responses:
- *       '200':
- *         description: Successfully retrieved the project
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *       '404':
- *         description: Project not found
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *     tags:
- *       - Project
- */
-
-router.get("/users/:user_id/projects", getAllProjectsForUser);
+router.put("/update-project/:project_id", uploadHandler, updateProjectById);
 
 module.exports = router;

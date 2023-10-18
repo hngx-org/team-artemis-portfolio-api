@@ -1,11 +1,11 @@
 export interface NotificationSettings {
   id?: number;
-  emailSummary?: boolean;
+  emailSummary?: boolean ;
   specialOffers?: boolean;
   communityUpdate?: boolean;
-  followUpdate?: boolean;
+  followUpdate?: boolean ;
   newMessages?: boolean;
-  user: UserSettings;
+  userId?: string;
 }
 
 export interface UserSettings {
@@ -29,5 +29,5 @@ export interface NotificationSetting {
   id: number;
   newMessages: boolean;
   portfolioUpdates: boolean;
-  userId: string;
+  userId: string; 
 }

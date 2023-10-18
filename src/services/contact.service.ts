@@ -1,6 +1,7 @@
 import { resolve } from "path";
 import { connectionSource } from "../database/data-source";
-import { SocialUser, SocialMedia, User } from "../database/entities";
+import { SocialUser, SocialMedia } from "../database/entity/model";
+import { User } from "../database/entity/user";
 import { UpdateResult } from "typeorm"; // Import TypeORM's Result types
 
 export const findUser = async (userId: string) => {
@@ -22,8 +23,7 @@ const checkResourceAndPermission = async (socialId: number, userId: string) => {
     throw new Error("Resource not found");
   }
 
-
-  if (findSocial.user !== await findUser(userId)) {
+  if (findSocial.userId !== userId) {
     throw new Error(
       "Unauthorized access: You do not have permission to access this social contact."
     );
@@ -48,9 +48,7 @@ export const updateContact = async (
       .createQueryBuilder()
       .update(SocialUser)
       .set({
-        socialMedia: {
-          id: socialMediaId,
-        },
+        socialMediaId,
         url: url,
       })
       .where("id = :socialId", { socialId })
@@ -84,24 +82,24 @@ export const createContact = async (
   // create the social contact
   try {
     const contactsRepo = connectionSource.getRepository(SocialUser);
-    const contact = contactsRepo.save({
+    const contact = contactsRepo.create({
       url,
-      user: { id: userId },
+      userId: userId,
       socialMediaId: socialMediaId
-
+      
     });
-    const promise = new Promise(async (resolve, reject) => {
-      try {
-        const data = await contactsRepo.findOneBy({ id: +contact })
+    const promise = new Promise(async (resolve, reject)=>{
+      try{
+        const data = await contactsRepo.save(contact)
         console.log(data)
         resolve(data)
-      } catch (err) {
+      }catch(err){
         reject('failed to save')
       }
     })
 
-    return promise;
-
+      return promise;
+    
   } catch (error) {
     throw new Error("Error creating contact: " + error);
   }
@@ -132,7 +130,7 @@ export class SocialUserService {
     });
 
     if (usersCount === 0) {
-      //await socialMediaRepository.remove({ where : { socialMedia } });
+      await socialMediaRepository.remove(socialMedia);
     }
   }
 }
