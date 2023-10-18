@@ -1,6 +1,6 @@
-import { Request, Response, RequestHandler, NextFunction } from "express";
-import { connectionSource } from "../database/data-source";
-import { validate as isValidUUID } from "uuid";
+import { Request, Response, RequestHandler, NextFunction } from 'express';
+import { connectionSource } from '../database/data-source';
+import { validate as isValidUUID } from 'uuid';
 import {
   PortfolioDetail,
   User,
@@ -23,6 +23,7 @@ import {
   Images
 } from "../database/entities";
 import { NotFoundError, BadRequestError } from "../middlewares/index";
+import { getAllLanguages } from '../services/language.service';
 
 const portfolioDetailsRepository =
   connectionSource.getRepository(PortfolioDetail);
@@ -86,7 +87,7 @@ const getPortfolioDetails = async (
 
     const tracksPromise = userTrackRepository.findOne({
       where: { user: { id: user.id } },
-      relations: ["track"],
+      relations: ['track'],
     });
 
     const workExperiencePromise = workExperienceRepository.find({
@@ -151,9 +152,7 @@ const getPortfolioDetails = async (
 
       const track = tracks?.track;
 
-      // const langauge = await connectionSource.manager.find(LanguageDetail, {
-      //   where: { user: { id: user.id } },
-      // });
+      const languages = await getAllLanguages(user.id);
 
 
       res.status(200).json({
@@ -169,7 +168,7 @@ const getPortfolioDetails = async (
         sections,
         track,
         reference,
-        // langauge
+        languages
       });
     } catch (error) {
       return next(error);
@@ -201,14 +200,14 @@ const deletePortfolioDetails: RequestHandler = async (
 
     // return error if porfolio is not found
     if (!portfolioToRemove) {
-      throw new NotFoundError("Portfolio profile details not found");
+      throw new NotFoundError('Portfolio profile details not found');
     }
 
     const portfolio = await portfolioDetailsRepository.remove(
       portfolioToRemove
     );
     res.status(200).json({
-      message: "Portfolio profile details deleted successfully",
+      message: 'Portfolio profile details deleted successfully',
       portfolio,
     });
   } catch (error) {
