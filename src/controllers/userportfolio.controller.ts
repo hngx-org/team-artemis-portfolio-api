@@ -20,6 +20,7 @@ import {
   ReferenceDetail,
   SocialUser,
   LanguageDetail,
+  Images
 } from "../database/entities";
 import { NotFoundError, BadRequestError } from "../middlewares/index";
 
@@ -29,7 +30,7 @@ const portfolioRepository = connectionSource.getRepository(PortfolioDetail);
 const userRepository = connectionSource.getRepository(User);
 const workExperienceRepository =
   connectionSource.getRepository(WorkExperienceDetail);
-const interestRepository = connectionSource.getRepository(InterestDetail);
+const imageRepository = connectionSource.getRepository(Images);
 const referenceRepository = connectionSource.getRepository(ReferenceDetail);
 const projectRepository = connectionSource.getRepository(Project);
 const sectionRepository = connectionSource.getRepository(Section);
@@ -58,79 +59,125 @@ const getPortfolioDetails = async (
 
     const user = await userRepository.findOne({ where: { id: userId } });
 
-    const education = await connectionSource.manager.find(EducationDetail, {
+    const educationPromise = connectionSource.manager.find(EducationDetail, {
+      where: { user: { id: user.id } }, relations: ["degree"]
+    });
+
+    const skillsPromise = connectionSource.manager.find(SkillsDetail, {
       where: { user: { id: user.id } },
     });
 
-    const skills = await connectionSource.manager.find(SkillsDetail, {
+    const interestsPromise = connectionSource.manager.find(InterestDetail, {
       where: { user: { id: user.id } },
     });
 
-    const interests = await connectionSource.manager.find(InterestDetail, {
+    const aboutPromise = aboutRepositiory.findOne({
       where: { user: { id: user.id } },
     });
 
-
-    const about = await aboutRepositiory.findOne({
+    const allProjectsPromise = connectionSource.manager.find(Project, {
       where: { user: { id: user.id } },
-    })
-
-    const projects = await connectionSource.manager.find(Project, {
-      where: { user: { id: user.id } },
+      relations: ["projectsImages"]
     });
-    const sections = await connectionSource.manager.find(CustomUserSection, {
+
+    const sectionsPromise = connectionSource.manager.find(CustomUserSection, {
       where: { user: { id: user.id } },
     });
 
-    const tracks = await userTrackRepository.findOne({
+    const tracksPromise = userTrackRepository.findOne({
       where: { user: { id: user.id } },
       relations: ["track"],
     });
 
-    const workExperience = await workExperienceRepository.find({
+    const workExperiencePromise = workExperienceRepository.find({
       where: { user: { id: user.id } },
     });
 
-    const awards = await awardRepository.find({
-      where: { user: { id: user.id } },
-    });
-    const certificates = await certificateRepository.find({
-      where: { user: { id: user.id } },
-    });
-    const track = tracks?.track;
-
-    const reference = await connectionSource.manager.find(ReferenceDetail, {
+    const awardsPromise = awardRepository.find({
       where: { user: { id: user.id } },
     });
 
-    // const langauge = await connectionSource.manager.find(LanguageDetail, {
-    //   where: { user: { id: user.id } },
-    // });
-
-    const projectwithImages = await connectionSource.manager.find(Project, {
+    const certificatesPromise = certificateRepository.find({
       where: { user: { id: user.id } },
-      relations: ["projectsImages"]
-    })
-    res.status(200).json({
-      user,
-      education,
-      skills,
-      interests,
-      about,
-      projects,
-      workExperience,
-      awards,
-      certificates,
-      sections,
-      track,
-      reference,
-      projectwithImages
-      // langauge
     });
+
+    const referencePromise = connectionSource.manager.find(ReferenceDetail, {
+      where: { user: { id: user.id } },
+    });
+
+    try {
+      const [
+        education,
+        skills,
+        interests,
+        about,
+        allProjects,
+        sections,
+        tracks,
+        workExperience,
+        awards,
+        certificates,
+        reference,
+      ] = await Promise.all([
+        educationPromise,
+        skillsPromise,
+        interestsPromise,
+        aboutPromise,
+        allProjectsPromise,
+        sectionsPromise,
+        tracksPromise,
+        workExperiencePromise,
+        awardsPromise,
+        certificatesPromise,
+        referencePromise,
+      ]);
+
+      const imagePromises = allProjects.map(async (project) => {
+        const imageUrlsPromises = project?.projectsImages?.map(async (image) => {
+          const imageEntity = await imageRepository.findOne({
+            where: { id: image.id },
+          });
+          return imageEntity ? imageEntity.url : null;
+        });
+        const imageUrls = await Promise.all(imageUrlsPromises);
+        return {
+          ...project,
+          projectsImages: imageUrls,
+          thumbnail: imageUrls[0],
+        };
+      });
+
+      const projects = await Promise.all(imagePromises);
+
+      const track = tracks?.track;
+
+      // const langauge = await connectionSource.manager.find(LanguageDetail, {
+      //   where: { user: { id: user.id } },
+      // });
+
+
+      res.status(200).json({
+        user,
+        education,
+        skills,
+        interests,
+        about,
+        projects,
+        workExperience,
+        awards,
+        certificates,
+        sections,
+        track,
+        reference,
+        // langauge
+      });
+    } catch (error) {
+      return next(error);
+    }
   } catch (error) {
     return next(error);
   }
-};
+}
 
 const getAllPortfolioDetails = async (req: Request, res: Response) => {
   const PortfolioDetails = await portfolioRepository.find();
