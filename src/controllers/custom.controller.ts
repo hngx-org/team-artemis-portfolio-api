@@ -362,6 +362,7 @@ const createCustomField = async (
         });
         const customUserSection = await customRepository.findOne({
           where: { id: field.customUserSectionId },
+          relations: ["customFields", "section", "user"]
         });
 
         if (!section) {
@@ -379,6 +380,7 @@ const createCustomField = async (
         let savedFieldDB = await customFieldRepository.findOne({
           where: {id: savedField.id}
         })
+        
         customUserSection.customFields.push(savedFieldDB)
         await customRepository.save(customUserSection)
         
