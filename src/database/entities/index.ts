@@ -23,3 +23,5 @@ export * from "./WorkExperienceDetail";
 export * from "./Language";
 export * from "./LanguageDetail";
 export * from "./Reference";
+export * from "./Product";
+export * from "./ProductImage";

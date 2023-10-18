@@ -31,6 +31,7 @@ import {
 } from "./index";
 import { LanguageDetail } from "./LanguageDetail";
 import { ReferenceDetail } from "./Reference";
+import { Product } from "./Product";
 
 @Index("user_pkey", ["id"], { unique: true })
 @Entity("user", { schema: "public" })
@@ -171,4 +172,7 @@ export class User {
     (workExperienceDetail) => workExperienceDetail.user
   )
   workExperienceDetails: WorkExperienceDetail[];
+
+  @OneToMany(() => Product, (product) => product.user)
+  products: Product[];
 }
