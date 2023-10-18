@@ -303,7 +303,7 @@ export const deleteAllSectionEntries: RequestHandler = async (
   try {
     const dynamicSection = {
       about: aboutRepository,
-      educations: educationRepository,
+      education: educationRepository,
       workExperience: workExperienceRepositry,
       projects: projectRepository,
       interests: interestRepository,
@@ -338,7 +338,7 @@ export const deleteAllSectionEntries: RequestHandler = async (
       await axios.delete(
         `${hostUrl}/deleteLanguages/${userId}`
       );
-	  return success(res, 'Successfully deleted all entries');
+      return success(res, 'Successfully deleted all entries');
     }
 
     const alluserEntries = await currentRepo.find({
