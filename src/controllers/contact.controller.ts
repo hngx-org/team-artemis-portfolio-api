@@ -77,13 +77,20 @@ export const createContacts = async (
   });
   const { url, user_id, social_media_id }: Icontacts = req.body;
   const formattedId = Number(social_media_id);
+  console.log(typeof formattedId === 'number')
   const isValid = schema.safeParse({
     url,
     user_id,
     social_media_id: formattedId,
   });
-
+  console.log(isValid)
+  
   try {
+    const user = await userRepository.find({where:{id:user_id}});
+    console.log(user.length)
+    if(user.length < 1){
+      return res.json({message:"user does not exist"})
+    }
     if (isValid.success) {
       // check if request body details is a valid data
       await createContact(social_media_id, url, user_id);
@@ -109,11 +116,13 @@ export const getContacts = async (req: Request, res: Response) => {
     const user = await userRepository.findOne({
       where: { id: user_id },
     });
+    console.log(user)
     if (!user) {
       return res.status(404).json({ message: MESSAGES.NOT_FOUND });
     }
+    console.log(user_id)
     const contacts = await contactsRepo.find({
-      where: { user },
+      where: { user_id },
     });
     return res.status(200).json(contacts);
   } catch (error) {
