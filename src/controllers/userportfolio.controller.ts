@@ -136,7 +136,7 @@ const getPortfolioDetails = async (
         referencePromise,
       ]);
 
-      const interestArray = interests[0].interest.split(","); //convert interest to Array of interests
+      const interestArray = interests[0]?.interest?.split(","); //convert interest to Array of interests
 
 
       const imagePromises = allProjects.map(async (project) => {
