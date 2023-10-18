@@ -25,7 +25,7 @@ const router = express.Router();
  *             userId:
  *               type: string
  *               format: uuid
- *               example: "f8e1d17d-0d9e-4d21-89c5-7a564f8a1e90"
+ *               example: "0c8c29f7-5baf-4d81-97ba-eaa992a8801b"
  *             languages:
  *               type: array
  *               items:
@@ -114,7 +114,7 @@ router.post(
  *         schema:
  *           type: string
  *           format: uuid
- *           example: f8e1d17d-0d9e-4d21-89c5-7a564f8a1e90
+ *           example: 0c8c29f7-5baf-4d81-97ba-eaa992a8801b
  *     responses:
  *       200:
  *         description: Successful response
@@ -178,5 +178,85 @@ router.post(
  *                   type: object
  */
 router.get('/language/:userId', languageController.getUserLanguages);
+
+/**
+ * @swagger
+ * /api/language/{userId}:
+ *   delete:
+ *     summary: delete all languages owned by the user
+ *     description: delete all the languages the requesting user owns
+ *     tags: [Language]
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         description: Id of requesting user
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *           example: 0c8c29f7-5baf-4d81-97ba-eaa992a8801b
+ *     responses:
+ *       200:
+ *         description: Successful response
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: integer
+ *                   example: 200
+ *                 message:
+ *                   type: string
+ *                   example: success
+ *                 data:
+ *                   type: string
+ *       404:
+ *         description: Not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: integer
+ *                   example: 404
+ *                 message:
+ *                   type: string
+ *                   example: Not found
+ *                 data:
+ *                   type: object
+ *       400:
+ *         description: Bad request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: integer
+ *                   example: 400
+ *                 message:
+ *                   type: string
+ *                   example: Bad Request
+ *                 data:
+ *                   type: object
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: integer
+ *                   example: 500
+ *                 message:
+ *                   type: string
+ *                   example: Internal server error
+ *                 data:
+ *                   type: object
+ */
+router.delete('/language/:userId', languageController.deleteAllUserLanguages);
 
 module.exports = router;

@@ -97,7 +97,7 @@ const router = express.Router();
  *       - Work Experience
  */
 
-router.post("/api/create-work-experience/:userId", createWorkExperience);
+router.post("/create-work-experience/:userId", createWorkExperience);
 
 /**
  * @swagger
@@ -128,7 +128,7 @@ router.post("/api/create-work-experience/:userId", createWorkExperience);
  *     tags:
  *       - Work Experience
  */
-router.delete("/api/work-experience/:id", deleteWorkExperience);
+router.delete("/work-experience/:id", deleteWorkExperience);
 
 /**
  * @swagger
@@ -154,7 +154,7 @@ router.delete("/api/work-experience/:id", deleteWorkExperience);
  *     tags:
  *       - Work Experience
  */
-router.get("/api/work-experience", workExperienceController);
+router.get("/work-experience", workExperienceController);
 
 /**
  * @swagger
@@ -244,6 +244,6 @@ router.get("/api/work-experience", workExperienceController);
  *     tags:
  *       - Work Experience
  */
-router.put("/api/update-work-experience/:workId", updateWorkExperience);
+router.put("/update-work-experience/:workId", updateWorkExperience);
 
 module.exports = router;

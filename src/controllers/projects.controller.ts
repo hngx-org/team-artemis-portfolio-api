@@ -1,21 +1,29 @@
-import { Project, Images, ProjectsImage } from "../database/entity/model";
+import {
+  Project,
+  Images,
+  ProjectsImage,
+  User,
+  Section,
+} from "../database/entities";
 import { connectionSource } from "../database/data-source";
-import express, { NextFunction, Request, RequestHandler, Response } from "express";
+import express, {
+  NextFunction,
+  Request,
+  RequestHandler,
+  Response,
+} from "express";
 import { error, success } from "../utils";
 import { cloudinaryService } from "../services/image-upload.service";
 import { updateProjectService } from "../services/project.service";
 import { projectSchema } from "../middlewares/projects.zod";
 
-
-import {
-  CustomError,
-  NotFoundError,
-  BadRequestError
-} from '../middlewares'
+import { CustomError, NotFoundError, BadRequestError } from "../middlewares";
 
 const projectRepository = connectionSource.getRepository(Project);
 const imageRepository = connectionSource.getRepository(Images);
 const projectImageRepository = connectionSource.getRepository(ProjectsImage);
+const userRepository = connectionSource.getRepository(User);
+const sectionRepositoty = connectionSource.getRepository(Section);
 
 interface ProjectModel {
   title: string;
@@ -46,8 +54,29 @@ export const getProjectById: RequestHandler = async (
 ) => {
   try {
     const { id } = req.params;
-    const data = await projectRepository.findOneBy({ id: +id });
-    success(res, data);
+    const project = await projectRepository.findOne({
+      where: {
+        id: +id,
+      },
+      relations: ["projectsImages"],
+    });
+    const allThumbnails = await projectImageRepository.find({
+      where: { project },
+    });
+
+    const thumbnail = await imageRepository.findOne({
+      where: { id: allThumbnails[0].id },
+    });
+
+    project.thumbnail = thumbnail.url as any;
+    const imageUrlsPromises = project.projectsImages.map(async (image) => {
+      const imageEntity = await imageRepository.findOne({
+        where: { id: image.id },
+      });
+      return imageEntity ? imageEntity.url : null;
+    });
+    project.projectsImages = (await Promise.all(imageUrlsPromises)) as any;
+    success(res, project, "Successfully Retrieved");
   } catch (err) {
     error(res, (err as Error).message);
   }
@@ -63,63 +92,81 @@ export const createProject: RequestHandler = async (
     try {
       jsonData = JSON.parse(req.body.jsondata);
     } catch (error) {
-      return res.status(400).json({ error: "Please check the input data", message: "Invalid JSON" });
+      return res
+        .status(400)
+        .json({
+          error: "Please check the input data",
+          message: "Invalid JSON",
+        });
     }
 
     const normalizedData: ProjectModel = {} as ProjectModel;
     for (const key in jsonData) {
       if (Object.hasOwnProperty.call(jsonData, key)) {
         const normalizedKey = key.toLowerCase();
-        if (key === 'userid') {
+        if (normalizedKey === "userid") {
           normalizedData["userId"] = jsonData[key];
-          continue;
-        }
-        if (key === 'sectionid') {
+        } else if (normalizedKey === "sectionid") {
           normalizedData["sectionId"] = +jsonData[key];
-          continue;
+        } else {
+          normalizedData[normalizedKey] = jsonData[key];
         }
-        normalizedData[normalizedKey] = jsonData[key];
       }
     }
 
     try {
       projectSchema.parse(normalizedData);
-
     } catch (error) {
-      const errors = []
-      if (error.name == 'ZodError') {
+      const errors = [];
+      if (error.name == "ZodError") {
         const msg = error.issues.map((issue: any) => {
-          errors.push(`${issue.path[0]}: ${issue.message}`)
-        })
+          errors.push(`${issue.path[0]}: ${issue.message}`);
+        });
       }
 
-      const response = errors.join(', ');
+      const response = errors.join(", ");
       throw new BadRequestError(response);
     }
-    const { title, year, url, tags, description, userId, sectionId } = normalizedData;
+    const { title, year, url, tags, description, userId, sectionId } =
+      normalizedData;
 
+    if (!userId || !sectionId) {
+      throw new BadRequestError("Please provide user and section");
+    }
+    const user = await userRepository.findOneBy({ id: userId });
 
+    if (!user) {
+      throw new NotFoundError("User not found");
+    }
 
-    const project = new Project() as unknown as ProjectModel;
+    const section = await sectionRepositoty.findOneBy({ id: sectionId });
+    {
+      if (!section) {
+        throw new NotFoundError("Section not found");
+      }
+    }
+
+    const project = new Project();
     project.title = title;
     project.year = year;
     project.url = url;
     project.tags = tags;
     project.description = description;
-    project.userId = userId;
-    project.sectionId = sectionId;
+    project.user = user;
+    project.section = section;
     project.thumbnail = 0;
 
-    const data = await projectRepository.save(project);
-    const projectId = data.id;
-
+    const newProject = await projectRepository.save(project);
+    if (!newProject.id) {
+      throw new CustomError("Project not created", 400);
+    }
     const files = req.files as any;
     if (!files.length) {
-      throw new BadRequestError('Add thumbnail image');
+      throw new BadRequestError("Add thumbnail image");
     }
-    console.log(files.length)
+
     if (files.length > 10) {
-      throw new BadRequestError('You can only upload a maximum of 10 images');
+      throw new BadRequestError("You can only upload a maximum of 10 images");
     }
 
     const imagesRes = await cloudinaryService(files, req.body.service);
@@ -131,40 +178,68 @@ export const createProject: RequestHandler = async (
       try {
         const imageResponse = await imageRepository.save(image);
 
-        const projectImage = new ProjectsImage() as ProjectsImage;
-        projectImage.projectId = projectId;
-        projectImage.imageId = imageResponse.id;
+        const projectImage = new ProjectsImage();
 
-        await projectImageRepository.save(projectImage);
-      } catch (error) {
-        throw new CustomError('Error saving image', 400);
+        const savedImage = await imageRepository.findOne({
+          where: { id: imageResponse.id },
+        });
+
+        projectImage.project = newProject;
+        projectImage.image = savedImage;
+
+        const out = await projectImageRepository.save(projectImage);
+      } catch (err) {
+        throw new CustomError(err.message, 400);
       }
     }
 
-    const allThumbnails = await projectImageRepository.findBy({
-      projectId: projectId,
+    const allThumbnails = await projectImageRepository.find({
+      where: { project: { id: project.id } },
     });
-
+    const updatedProject = await projectRepository.find({
+      where: { id: newProject.id },
+    });
     if (allThumbnails.length === 0) {
-      return success(res, data, "Created without thumbnail");
+      return success(res, updatedProject, "Created without thumbnail");
     }
 
-    const thumbnail = await imageRepository.findOneBy({
-      id: allThumbnails[0].imageId,
+    const thumbnail = await imageRepository.findOne({
+      where: { id: allThumbnails[0].id },
     });
 
+    let data;
     if (thumbnail) {
       const thumbnailId = thumbnail.id;
-      const data = await projectRepository.update(
-        { id: projectId },
+      data = await projectRepository.update(
+        { id: newProject.id },
         { thumbnail: thumbnailId }
       );
-      const updatedProject = await projectRepository.findOneBy({
-        id: +projectId,
+
+      const updatedProject = await projectRepository.findOne({
+        where: {
+          id: +newProject.id,
+        },
+        relations: ["projectsImages"],
       });
+      updatedProject.thumbnail = thumbnail.url as any;
+      const imageUrlsPromises = updatedProject.projectsImages.map(
+        async (image) => {
+          const imageEntity = await imageRepository.findOne({
+            where: { id: image.id },
+          });
+          return imageEntity ? imageEntity.url : null;
+        }
+      );
+      updatedProject.projectsImages = (await Promise.all(
+        imageUrlsPromises
+      )) as any;
       success(res, updatedProject, "Successfully created");
     } else {
-      success(res, data, "Created without thumbnail");
+      success(
+        res,
+        { thumbnail: thumbnail.url, ...data },
+        "Created without thumbnail"
+      );
     }
   } catch (err) {
     return next(err);
@@ -180,16 +255,14 @@ export const updateProjectController: RequestHandler = async (
   const data = req.body;
   const images = req.files as Express.Multer.File[];
 
-
   if (images.length > 10) {
     return error(res, "You can only upload a maximum of 10 images at a time");
   }
   if (!data) {
-    throw new BadRequestError('Please provide data to update!!');
+    throw new BadRequestError("Please provide data to update!!");
   }
 
   try {
-    console.log(id);
     const updatedProject = await updateProjectService(
       parseInt(id),
       data,
@@ -201,35 +274,37 @@ export const updateProjectController: RequestHandler = async (
       `Project with id: ${id} updated successfully`
     );
   } catch (error) {
-    console.log(error);
     return error(res, "Project update failed");
   }
 };
-export const deleteProjectController: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
+export const deleteProjectController: RequestHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const id = parseInt(req.params.id);
-    const projectDetail = await projectRepository.findOne({ where: { id: id } });
+    const projectDetail = await projectRepository.findOne({
+      where: { id: id },
+    });
 
     if (!projectDetail) {
       const errorResponse = {
-        message: 'Project not Found!',
+        message: "Project not Found!",
       };
       res.status(404).json(errorResponse);
     } else {
       const deletedProject = await projectRepository.delete({ id });
 
       res.status(200).json({
-        message: 'Project deleted successfully',
+        message: "Project deleted successfully",
         deletedProject: projectDetail,
       });
-      console.log('Project deleted successfully');
     }
   } catch (error) {
-    console.error('Error deleting project detail', error);
     next(error);
   }
 };
-
 
 // update project section
 export const updateProjectById: RequestHandler = async (
@@ -243,21 +318,19 @@ export const updateProjectById: RequestHandler = async (
 
   try {
     projectSchema.parse(data);
-
   } catch (error) {
-    const errors = []
-    if (error.name == 'ZodError') {
+    const errors = [];
+    if (error.name == "ZodError") {
       const msg = error.issues.map((issue: any) => {
-        errors.push(`${issue.path[0]}: ${issue.message}`)
-      })
+        errors.push(`${issue.path[0]}: ${issue.message}`);
+      });
     }
 
-    const response = errors.join(', ');
-    return next(new BadRequestError(response));
+    const response = errors.join(", ");
+    throw new BadRequestError(response);
   }
 
   try {
-
     const updatedProject = await updateProjectService(
       parseInt(id),
       data,
@@ -272,3 +345,50 @@ export const updateProjectById: RequestHandler = async (
     return next(err);
   }
 };
+
+
+export const getAllProjectsForUser: RequestHandler = async (
+  req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { user_id } = req.params;
+    if (!user_id) {
+      throw new BadRequestError("Please provide user id");
+    }
+    const user = await userRepository.findOneBy({ id: user_id });
+    if (!user) {
+      throw new NotFoundError("User not found");
+    }
+
+    const allProjectsPromise = connectionSource.manager.find(Project, {
+      where: { user: { id: user.id } },
+      relations: ["projectsImages"]
+    });
+    try {
+      const [allProjects] = await Promise.all([allProjectsPromise]);
+
+      const imagePromises = allProjects.map(async (project) => {
+        const imageUrlsPromises = project?.projectsImages?.map(async (image) => {
+
+          const imageEntity = await projectImageRepository.findOne({
+            where: { id: image.id }, relations: ["image"]
+          });
+
+          return imageEntity ? imageEntity.image.url : null;
+        });
+        const imageUrls = await Promise.all(imageUrlsPromises);
+        return {
+          ...project,
+          projectsImages: imageUrls,
+          thumbnail: imageUrls[0],
+        };
+      });
+
+      const projects = await Promise.all(imagePromises);
+      success(res, projects, "Successfully Retrieved");
+    } catch (error) {
+      return next(error);
+    }
+  } catch (err) {
+    return next(err)
+  }
+}

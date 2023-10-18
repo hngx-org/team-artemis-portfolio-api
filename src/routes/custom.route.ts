@@ -14,7 +14,18 @@ import {
   // updateCustomSection,
   customFieldSchema,
   fieldsSchema,
+  getSection,
+  getSingleSection,
+  getSectionSchema,
+  UpdateSection,
+  deleteSection,
+  updateSectionSchema,
+  updateCustomSection,
+  updateCustomSectionSchema,
+  findAllCustomField,
+  deleteCustomFields,
 } from "../controllers/custom.controller";
+import { validateQuery } from "../middlewares/custom.zod";
 
 const router = express.Router();
 
@@ -22,63 +33,55 @@ const router = express.Router();
  * @swagger
  * /api/section:
  *   post:
- *     summary: Add section
- *     description: Add a new section
+ *     summary: Create a new section.
+ *     description: Create education details for a user.
+ *     tags: [Section]
  *     parameters:
- *       - in: header
- *         name: Authorization
- *         type: string
- *         description: Optional authorization header
  *       - in: body
- *         name: sectionDetails
- *         description: The data for the section to be created.
+ *         name: Section details
+ *         description: The data for the Section details to be created.
  *         required: true
  *         schema:
  *           type: object
  *           properties:
- *             sectionId:
+ *             position:
  *               type: number
- *             degreeId:
- *               type: number
- *             fieldOfStudy:
- *               type: string
- *             school:
+ *             name:
  *               type: string
  *             description:
  *               type: string
- *             from:
+ *             meta:
  *               type: string
- *             to:
- *               type: string
- *         example:
- *           sectionId: 1
- *           degreeId: 1
- *           fieldOfStudy: "Engineering"
- *           school: "Unilag"
- *           description: "Description"
- *           from: "2017"
- *           to: "2020"
+ *
  *     responses:
- *       200:
- *         description: Success
+ *       201:
+ *         description: Section details created
  *         content:
  *           application/json:
  *             schema:
  *               type: object
  *               properties:
+ *                 successful:
+ *                   type: boolean
  *                 message:
  *                   type: string
- *       400:
- *         description: Bad request. Please fill all fields
+ *                 data:
+ *                   type: object
+ *       500:
+ *         description: Failed to create section details.
  *         content:
  *           application/json:
  *             schema:
  *               type: object
  *               properties:
- *                 error:
+ *                 successful:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
  *                   type: string
- *     tags:
- *       - custom
+ *                   example: "invalid input syntax for type integer: \"\""
+ *                 data:
+ *                   type: null
  */
 router.post("/section", validateSchema(sectionSchema), createSection);
 
@@ -86,38 +89,51 @@ router.post("/section", validateSchema(sectionSchema), createSection);
  * @swagger
  * /api/custom:
  *   post:
- *     summary: Add custom user section
- *     description: Add a new custom user section
+ *     summary: Create a new custom section
+ *     description: Create a new custom section
+ *     tags: [Custom]
  *     parameters:
- *       - name: userId
- *         in: body
+ *       - in: body
+ *         name: Section details
+ *         description: The data for the Section details to be created.
  *         required: true
  *         schema:
  *           type: object
  *           properties:
- *             userId:
- *               type: string
- *               description: required must be a uuid
  *             sectionId:
  *               type: number
- *               description: required must be an integer
+ *             userId:
+ *               type: string
+ *
  *     responses:
- *       200:
- *         description: Success
- *         schema:
- *           type: object
- *           properties:
- *             message:
- *               type: string
- *       400:
- *         description: Bad request. Please fill all fields
- *         schema:
- *           type: object
- *           properties:
- *             error:
- *               type: string
- *     tags:
- *       - custom
+ *       201:
+ *         description: custom Section details created
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 successful:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   type: object
+ *       500:
+ *         description: Failed to create custom section details.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 successful:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "invalid input syntax for type integer: \"\""
+ *                 data:
+ *                   type: null
  */
 router.post("/custom", validateSchema(customUserSectionSchema), create);
 
@@ -138,10 +154,102 @@ router.post("/custom", validateSchema(customUserSectionSchema), create);
  *                 message:
  *                   type: string
  *     tags:
- *       - custom
+ *       - Custom
  */
 router.get("/custom", findAll);
+/**
+ * @swagger
+ * /api/section:
+ *   get:
+ *     summary: Get section details.
+ *     description: all sections.
+ *     tags: [Section]
+ *     parameters:
+ *       - in: query
+ *         name: name
+ *         type: string
+ *         description: Optional name parameter
+ *     responses:
+ *       200:
+ *         section: success
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 successful:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     successful:
+ *                       type: boolean
+ *                     message:
+ *                       type: string
+ *       500:
+ *         description: Failed to fetch section detail(s).
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 successful:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "invalid input syntax for type integer: \"\""
+ *                 data:
+ *                   type: null
+ */
+router.get("/section", validateQuery(getSectionSchema), getSection);
 
+/**
+ * @swagger
+ * /api/custom-fields:
+ *   get:
+ *     summary: Get section details.
+ *     description: all sections.
+ *     tags: [Custom Fields]
+ *     responses:
+ *       200:
+ *         section: success
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 successful:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     successful:
+ *                       type: boolean
+ *                     message:
+ *                       type: string
+ *       500:
+ *         description: Failed to fetch section detail(s).
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 successful:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "invalid input syntax for type integer: \"\""
+ *                 data:
+ *                   type: null
+ */
+
+router.get("/custom-fields", findAllCustomField);
 /**
  * @swagger
  * /api/custom/{id}:
@@ -165,21 +273,69 @@ router.get("/custom", findAll);
  *                 message:
  *                   type: string
  *     tags:
- *       - custom
+ *       - Custom
  */
 router.get("/custom/:id", findOne);
 
 /**
  * @swagger
+ * /api/section/{id}:
+ *   get:
+ *     summary: Get section by id.
+ *     description: Get section by id.
+ *     tags: [Section]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         type: number
+ *         description: required id param
+ *     responses:
+ *       200:
+ *         section: section not found.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 successful:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     successful:
+ *                       type: boolean
+ *                     message:
+ *                       type: string
+ *       500:
+ *         description: Failed to fetch section.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 successful:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "invalid input syntax for type integer: \"\""
+ *                 data:
+ *                   type: null
+ */
+router.get("/section/:id", getSingleSection);
+/**
+ * @swagger
  * /api/custom/field:
  *   post:
- *     summary: Add custom field section
- *     description: Add custom fields in a section using an array
+ *     summary: Create a new custom field
+ *     description: Create a new custom field
+ *     tags: [Custom Fields]
  *     parameters:
  *       - in: body
  *         name: fields
- *         description: An array of custom field objects.
- *         required: true
+ *         type: string
  *         schema:
  *           type: array
  *           items:
@@ -187,37 +343,45 @@ router.get("/custom/:id", findOne);
  *             properties:
  *               fieldType:
  *                 type: string
- *                 description: Must be a string
  *               customSectionId:
  *                 type: number
- *                 description: Must be a number
  *               customUserSectionId:
  *                 type: number
- *                 description: Must be a number
  *               fieldName:
  *                 type: string
- *                 description: Must be a string
  *               value:
  *                 type: string
- *                 nullable: true
- *                 description: Must be a string (nullable)
+ *
  *     responses:
- *       200:
- *         description: Success
- *         schema:
- *           type: object
- *           properties:
- *             message:
- *               type: string
- *       400:
- *         description: Bad request. Please fill all fields
- *         schema:
- *           type: object
- *           properties:
- *             error:
- *               type: string
- *     tags:
- *       - custom
+ *       201:
+ *         description: custom fields details created
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 successful:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   type: object
+ *       500:
+ *         description: Failed to create custom fields details.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 successful:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "invalid input syntax for type integer: \"\""
+ *                 data:
+ *                   type: null
+ *
  */
 
 router.post("/custom/field", validateSchema(fieldsSchema), createCustomField);
@@ -246,7 +410,7 @@ router.post("/custom/field", validateSchema(fieldsSchema), createCustomField);
  *                 message:
  *                   type: string
  *     tags:
- *       - custom
+ *       - Custom Fields
  */
 router.get("/custom/field/:id", findOneCustomField);
 
@@ -327,9 +491,107 @@ router.get("/custom/field/:id", findOneCustomField);
  *                   type: string
  *                   example: "Error deleting Custom Section"
  *     tags:
- *       - custom
+ *       - Custom
  */
 router.delete("/custom-section/:id", deleteCustomSection);
+
+/**
+ * @swagger
+ * /api/section/{id}:
+ *   delete:
+ *     summary: Delete section by id.
+ *     description: Delete section by id.
+ *     tags: [Section]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         type: number
+ *         description: required id param
+ *     responses:
+ *       200:
+ *         section: section not found.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 successful:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     successful:
+ *                       type: boolean
+ *                     message:
+ *                       type: string
+ *       500:
+ *         description: Failed to fetch section.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 successful:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "invalid input syntax for type integer: \"\""
+ *                 data:
+ *                   type: null
+ */
+router.delete("/section/:id", deleteSection);
+
+/**
+ * @swagger
+ * /api/custom/field/{id}:
+ *   delete:
+ *     summary: Delete custom field by id.
+ *     description: Delete custom field by id.
+ *     tags: [Custom Fields]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         type: number
+ *         description: required id param
+ *     responses:
+ *       200:
+ *         section: section not found.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 successful:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     successful:
+ *                       type: boolean
+ *                     message:
+ *                       type: string
+ *       500:
+ *         description: Failed to fetch section.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 successful:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "invalid input syntax for type integer: \"\""
+ *                 data:
+ *                   type: null
+ */
+router.delete("/custom/field/:id", deleteCustomFields);
 
 /**
  * @swagger
@@ -413,8 +675,136 @@ router.delete("/custom-section/:id", deleteCustomSection);
  *                   type: string
  *                   example: "Error updating Custom Field"
  *     tags:
- *       - custom
+ *       - Custom Fields
  */
 router.put("/custom/field/:id", updateCustomField);
+
+/**
+ * @swagger
+ * /api/section/{id}:
+ *   put:
+ *     summary: Update section by id.
+ *     description: Update section by id.
+ *     tags: [Section]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         type: number
+ *         description: required id param
+ *       - in: body
+ *         name: section
+ *         description: education details
+ *         required: true
+ *         schema:
+ *           type: object
+ *           properties:
+ *            name:
+ *             type: string
+ *            position:
+ *             type: number
+ *            meta:
+ *             type: string
+ *            description:
+ *             type: string
+ *     responses:
+ *       200:
+ *         section: section not found.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 successful:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     successful:
+ *                       type: boolean
+ *                     message:
+ *                       type: string
+ *       500:
+ *         description: Failed to fetch section.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 successful:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "invalid input syntax for type integer: \"\""
+ *                 data:
+ *                   type: null
+ */
+router.put("/section/:id", validateSchema(updateSectionSchema), UpdateSection);
+
+/**
+ * @swagger
+ * /api/custom/{id}:
+ *   put:
+ *     summary: Update Custom section by id.
+ *     description: Update Custom section by id with userId or sectionid
+ *     tags: [Custom]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         type: number
+ *         description: required id param
+ *       - in: body
+ *         name: section
+ *         description: education details
+ *         required: true
+ *         schema:
+ *           type: object
+ *           properties:
+ *            userId:
+ *             type: string
+ *            sectionId:
+ *             type: number
+ *     responses:
+ *       200:
+ *         section: section not found.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 successful:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     successful:
+ *                       type: boolean
+ *                     message:
+ *                       type: string
+ *       500:
+ *         description: Failed to fetch section.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 successful:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "invalid input syntax for type integer: \"\""
+ *                 data:
+ *                   type: null
+ */
+router.put(
+  "/custom/:id",
+  validateSchema(updateCustomSectionSchema),
+  updateCustomSection
+);
 
 module.exports = router;

@@ -76,10 +76,10 @@ router.post("/create-skills", createSkills);
 
 /**
  * @swagger
- * /api/skills-details:
+ * /api/skills-details/{userId}:
  *   get:
  *     summary: Get skills details
- *     description: Get details of all skills.
+ *     description: Get details of all skills for logged in user.
  *     responses:
  *       200:
  *         description: Skills details retrieved successfully.
@@ -104,7 +104,7 @@ router.post("/create-skills", createSkills);
  *     tags:
  *       - Skills
  */
-router.get("/skills-details", getSkillsDetails);
+router.get("/skills-details/:userId", getSkillsDetails);
 
 /**
  * @swagger

@@ -1,11 +1,12 @@
 import express, { NextFunction, Request, Response } from "express";
 import multer from "multer";
 import {
-  createProfileController,
+  updateProfileController,
   getAllUsers,
   getUserById,
   uploadProfileCoverController,
   uploadProfileImageController,
+  deleteAllSectionEntries
 } from "../controllers";
 import { ForbiddenError } from "../middlewares";
 import {
@@ -124,10 +125,9 @@ router.get("/users/:userId", getUserById);
  *                 error:
  *                   type: string
  */
-router.post(
-  "/profile/:userId",
-  validateCreatePortfolioDetails(createPorfolioDataSchema),
-  createProfileController
+router.put(
+  "/users/:userId",
+  updateProfileController
 );
 
 /**
@@ -215,5 +215,10 @@ router.post("/profile/cover/upload", uploadHandler, uploadProfileCoverController
  *     in: header
  */
 router.post("/profile/image/upload", uploadHandler, uploadProfileImageController);
+
+
+
+
+router.delete("/profile/details/:userId", deleteAllSectionEntries);
 
 module.exports = router;
