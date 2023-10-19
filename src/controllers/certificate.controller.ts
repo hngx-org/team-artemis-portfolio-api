@@ -1,8 +1,6 @@
 import { Request, Response } from "express";
 import { connectionSource as dataSource } from "../database/data-source";
 import { success, error } from "../utils";
-import { updateACertificate } from "../services/certificate.service";
-import { UpdateCertificateInterface } from "../interfaces/certification.interface";
 import { Certificate, Section } from "../database/entities";
 import { User } from "../database/entities";
 import { validateCertificateData } from "../middlewares/certificate.zod";
@@ -41,8 +39,8 @@ const addCertificateController = async (req: Request, res: Response) => {
       certificate.organization = organization;
       certificate.url = url;
       certificate.description = description;
-      certificate.user = user;
       certificate.section = section;
+      certificate.user = user;
 
       // Save the certificate to the database
       const savedCertificate = await certificateRepo.save(certificate);
@@ -148,63 +146,66 @@ const deleteCertificate = async (req: Request, res: Response) => {
   }
 };
 
-const uuidPattern =
-  /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
-
-const isValidCertificate = (
-  payload: any
-): payload is UpdateCertificateInterface => {
-  return (
-    typeof payload.title === "string" &&
-    typeof payload.year === "string" &&
-    typeof payload.organization === "string" &&
-    typeof payload.url === "string" &&
-    typeof payload.description === "string"
-  );
-};
-
-const updateCertificate = async (req: Request, res: Response) => {
+const updateCertificate = async (req, res) => {
   try {
-    const id = parseInt(req.params.id);
+    const id = parseInt(req.params.certId);
     const user_id = req.params.userId;
-    const section_id = parseInt(req.params.section_id);
+    const sectionId = parseInt(req.body.sectionId);
     const payload = req.body;
 
-    if (
-      !id ||
-      typeof id !== "number" ||
-      !user_id ||
-      !uuidPattern.test(user_id)
-    ) {
-      return res.status(400).json({
-        success: false,
-        message:
-          "Please provide an integer id and a valid UUID user id as parameters",
-      });
+    // Validate the certificate data
+    const certificateDataIsValid = await validateCertificateData(req, res);
+
+    if (!certificateDataIsValid) {
+      return;
     }
 
-    if (!isValidCertificate(payload)) {
-      return res.status(400).json({
-        success: false,
-        message: "Payload should be in the format below",
-        format: {
-          title: "string",
-          year: "string",
-          organization: "string",
-          url: "string",
-          description: "string",
-        },
-      });
+    const user = await userRepository.findOneBy({ id: user_id });
+    if (!user) {
+      return error(res, "User not found", 404);
     }
 
-    const data = await updateACertificate(id, user_id, section_id, payload);
-    if (data.successful) {
-      success(res, data.data[0], "Certificate updated successfully");
-    } else {
-      error(res, data.message);
+    const certificate = await certificateRepo.findOne({
+      where: {
+        id: id,
+        user: user,
+      },
+    });
+
+    if (!certificate) {
+      return error(res, "Certificate not found", 404);
     }
-  } catch (error: any) {
-    return error(res, error.message);
+
+    const section = await sectionRepository.findOneBy({ id: sectionId });
+
+    if (!section) {
+      return error(
+        res,
+        "Section not found. Please provide a valid section ID",
+        404
+      );
+    }
+
+    // Update certificate properties
+    certificate.title = payload.title;
+    certificate.year = payload.year;
+    certificate.organization = payload.organization;
+    certificate.url = payload.url;
+    certificate.description = payload.description;
+    certificate.section = section;
+
+    const updatedCertificate = await certificateRepo.save(certificate);
+
+    if (!updatedCertificate) {
+      return error(res, "Error updating certificate", 400);
+    }
+
+    // Remove the user property from the updated certificate
+    Reflect.deleteProperty(updatedCertificate, "user");
+
+    return success(res, updatedCertificate, "Certificate updated successfully");
+  } catch (error) {
+    return error(res, error.message || "Internal server error");
   }
 };
 

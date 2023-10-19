@@ -1,6 +1,5 @@
 import { ZodError, z } from "zod";
 import { Request, Response } from "express";
-import { validate as isUUID } from "uuid";
 
 const certificateDataSchema = z.object({
   title: z.string().min(1, { message: "Title is required" }).trim(),

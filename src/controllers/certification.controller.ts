@@ -58,7 +58,7 @@ export const updateCertificate = async (req: Request, res: Response) => {
 
     const data = await updateACertificate(id, user_id, section_id, payload);
 
-    const data = await certificationRepository.findOne()
+    // const data = await certificationRepository.findOne()
     if (data.successful) {
       success(res, data, "Certificate updated successfully");
     } else {
