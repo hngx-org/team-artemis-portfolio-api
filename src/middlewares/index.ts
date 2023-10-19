@@ -35,6 +35,11 @@ class ForbiddenError extends CustomError {
     super(message, 403);
   }
 }
+class UnprocessableEntityError extends CustomError {
+  constructor(message: string) {
+    super(message, 422);
+  }
+}
 
 class InternalServerError extends CustomError {
   constructor(message: string) {
@@ -92,7 +97,6 @@ const errorHandler = (
     return res.status(err.statusCode).json({ message: err.message });
   }
   res.status(err.statusCode || 500).json({ message: err.message });
-
 };
 
 export {
@@ -104,4 +108,5 @@ export {
   ForbiddenError,
   InternalServerError,
   MethodNotAllowedError,
+  UnprocessableEntityError,
 };
