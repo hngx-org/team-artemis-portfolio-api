@@ -13,8 +13,7 @@ const sectionRepository = dataSource.getRepository(Section);
 
 const addCertificateController = async (req: Request, res: Response) => {
   try {
-    const { title, year, organization, url, description, section_id } =
-      req.body;
+    const { title, year, organization, url, description, sectionId } = req.body;
     const userId = req.params.userId;
 
     // Check if the user with userId exists
@@ -24,7 +23,7 @@ const addCertificateController = async (req: Request, res: Response) => {
       return error(res, "User not found. Please provide a valid User ID", 404);
     }
 
-    const section = await sectionRepository.findOneBy({ id: section_id });
+    const section = await sectionRepository.findOneBy({ id: sectionId });
     if (!section) {
       return error(
         res,
@@ -49,6 +48,8 @@ const addCertificateController = async (req: Request, res: Response) => {
       // Save the certificate to the database
       const savedCertificate = await certificateRepo.save(certificate);
 
+      Reflect.deleteProperty(savedCertificate, "user");
+
       if (!savedCertificate) {
         return error(res, "Error creating certificate", 400);
       }
@@ -63,10 +64,22 @@ const addCertificateController = async (req: Request, res: Response) => {
 
 const getAllCertificates = async (req: Request, res: Response) => {
   const certificateRepository = dataSource.getRepository(Certificate);
+  const userId = req.params.userId;
+
+  const user = await userRepository.findOneBy({ id: userId });
+
+  if (!user) {
+    return error(res, "User not found. Please provide a valid User ID", 404);
+  }
 
   try {
     const certificates = await certificateRepository.find({
-      relations: ["section", "user"],
+      where: {
+        user: {
+          id: userId,
+        },
+      },
+      relations: ["section"],
     });
 
     if (!certificates) {
@@ -75,21 +88,24 @@ const getAllCertificates = async (req: Request, res: Response) => {
 
     return success(res, certificates, "Certificates fetched successfully");
   } catch (error) {
-    res.status(500).json({ error: "Internal Server Error" });
+    return error(res, (error as Error)?.message ?? "Internal server error");
   }
 };
 
 const getCertificateById = async (req: Request, res: Response) => {
-  const id = req.params.certId;
+  const id = Number(req.params.certId);
+
   const certificateRepository = dataSource.getRepository(Certificate);
 
   try {
-    const certificate = await certificateRepository
-      .createQueryBuilder("certificate")
-      .where("certificate.id = :id", { id })
-      .leftJoinAndSelect("certificate.section", "section")
-      .leftJoinAndSelect("certificate.user", "user")
-      .getOne();
+    const certificate = await certificateRepository.findOne({
+      where: {
+        id,
+      },
+      relations: {
+        section: true,
+      },
+    });
 
     if (!certificate) {
       return error(res, "Certificate not found", 404);
@@ -193,39 +209,10 @@ const updateCertificate = async (req: Request, res: Response) => {
   }
 };
 
-const getUserCertificates = async (req: Request, res: Response) => {
-  try {
-    // Get the user ID from the request parameters
-    const id = req.params.id;
-
-    // Check if the user with the provided ID exists
-    const user = await userRepository.findOne({ where: { id } });
-
-    if (!user) {
-      return error(res, "User not found. Please provide a valid User ID", 404);
-    }
-
-    // Retrieve all certificates for the user
-    const certificates = await certificateRepo.find({
-      where: { user: { id } },
-    });
-
-    if (!certificates) {
-      return error(res, "Error fetching user certificates", 500);
-    }
-
-    success(res, certificates, "User certificates fetched successfully");
-  } catch (error) {
-    console.error("Error fetching user certificates:", error);
-    error(res, (error as Error)?.message || "Internal server error", 500);
-  }
-};
-
 export {
   addCertificateController,
   deleteCertificate,
   getCertificateById,
   getAllCertificates,
   updateCertificate,
-  getUserCertificates,
 };

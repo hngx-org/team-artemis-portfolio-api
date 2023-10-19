@@ -1,10 +1,9 @@
 import express from "express";
-import {
-  addCertificateController,
-  deleteCertificate,
-  getAllCertificates,
-  getCertificateById,
-  getUserCertificates,
+import { 
+   addCertificateController, 
+   deleteCertificate, 
+   getAllCertificates,
+   getCertificateById, 
 } from "../controllers/certificate.controller";
 
 const router = express.Router();
@@ -98,11 +97,18 @@ router.post("/add-certificate/:userId", addCertificateController);
 
 /**
  * @swagger
- * /api/certificates:
+ * /api/certificates/{userId}:
  *   get:
- *     summary: Get all certificates.
- *     description: Retrieve a list of all available certificates.
+ *     summary: Get all certificates for a specific user.
+ *     description: Retrieve a list of all available certificates for a specific user.
  *     tags: [Certificates]
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The unique identifier of the user for whom certificates are being retrieved.
  *     responses:
  *       200:
  *         description: Certificates retrieved successfully.
@@ -132,7 +138,7 @@ router.post("/add-certificate/:userId", addCertificateController);
  *                     type: string
  *                     description: Additional description of the certificate.
  *       404:
- *         description: No certificates found. There are no certificates available.
+ *         description: No certificates found. There are no certificates available for the specified user.
  *         content:
  *           application/json:
  *             schema:
@@ -140,7 +146,7 @@ router.post("/add-certificate/:userId", addCertificateController);
  *               properties:
  *                 error:
  *                   type: string
- *                   description: Error message indicating that no certificates were found.
+ *                   description: Error message indicating that no certificates were found for the specified user.
  *       500:
  *         description: Internal Server Error. An error occurred while processing the request.
  *         content:
@@ -151,8 +157,8 @@ router.post("/add-certificate/:userId", addCertificateController);
  *                 error:
  *                   type: string
  */
+router.get("/certificates/:userId", getAllCertificates);
 
-router.get("/certificates", getAllCertificates);
 
 /**
  * @swagger
@@ -203,6 +209,7 @@ router.get("/certificates", getAllCertificates);
  *                   type: string
  */
 router.delete("/certificates/:certId", deleteCertificate);
+
 
 /**
  * @swagger
@@ -264,8 +271,6 @@ router.delete("/certificates/:certId", deleteCertificate);
  *                 error:
  *                   type: string
  */
-// router.get("/certificates/:certId", getCertificateById);
-
-router.get("/certificates/:userId", getUserCertificates);
+router.get("/certificates/:certId", getCertificateById);
 
 module.exports = router;

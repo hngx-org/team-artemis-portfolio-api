@@ -266,7 +266,11 @@ export const updateNotificationSettings = async (
       connectionSource.getRepository(NotificationSetting);
 
     const notification = await notificationModel.find({
-      where: { user: user },
+      where: {
+        user: {
+          id: userId,
+        },
+      },
       order: { id: "DESC" },
       take: 1,
     });
@@ -323,7 +327,11 @@ export const getUserNotificationSettings = async (
       connectionSource.getRepository(NotificationSetting);
 
     const notifications = await notificationModel.find({
-      where: { user: user },
+      where: {
+        user: {
+          id: userId,
+        },
+      },
       order: { id: "DESC" },
       take: 1,
     });
