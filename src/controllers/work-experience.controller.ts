@@ -172,12 +172,10 @@ export const createWorkExperience: RequestHandler = async (
     const convertedStartMonth = convertMonthToLongForm(startMonth);
     const convertedEndMonth = convertMonthToLongForm(endMonth);
 
-    console.log("past here too");
     if (endYear < startYear) {
       throw new BadRequestError("EndYear must be greater than startYear");
     }
 
-    console.log("past here too too");
     const workExperience = new WorkExperienceDetail();
     workExperience.company = company;
     workExperience.role = role;
@@ -190,7 +188,6 @@ export const createWorkExperience: RequestHandler = async (
     workExperience.user = userId;
     workExperience.section = sectionId;
 
-    console.log("past here too too toooo");
 
     await workExperienceRepository.save(workExperience);
     return success(res,  workExperience, "Added Work Experience Successfully");
