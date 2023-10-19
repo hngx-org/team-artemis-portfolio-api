@@ -14,7 +14,10 @@ import {
   errorHandler,
 } from "../middlewares";
 
-import { validateWorkExperience } from "../middlewares/work-experience.zod";
+import {
+  validateWorkExperience,
+  convertMonthToLongForm,
+} from "../middlewares/work-experience.zod";
 
 // Get the repository for the WorkExperienceDetail entity
 const workExperienceRepository =
@@ -79,6 +82,10 @@ export const createWorkExperience: RequestHandler = async (
     // Validate the request body against the schema
     await validateWorkExperience(req, res, next);
 
+    // convert month to long form
+    const convertedStartMonth = convertMonthToLongForm(startMonth);
+    const convertedEndMonth = convertMonthToLongForm(endMonth);
+
     console.log("past here too");
     if (endYear < startYear) {
       throw new BadRequestError("EndYear must be greater than startYear");
@@ -88,9 +95,9 @@ export const createWorkExperience: RequestHandler = async (
     const workExperience = new WorkExperienceDetail();
     workExperience.company = company;
     workExperience.role = role;
-    workExperience.startMonth = startMonth;
+    workExperience.startMonth = convertedStartMonth;
     workExperience.startYear = startYear;
-    workExperience.endMonth = endMonth;
+    workExperience.endMonth = convertedEndMonth;
     workExperience.endYear = endYear;
     workExperience.description = description;
     workExperience.isEmployee = isEmployee;
