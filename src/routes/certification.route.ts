@@ -1,5 +1,5 @@
-import express from 'express';
-import { updateCertificate } from '../controllers/certification.controller';
+import express from "express";
+import { updateCertificate } from "../controllers/certification.controller";
 
 const router = express.Router();
 
@@ -9,18 +9,16 @@ const router = express.Router();
  *   put:
  *     summary: Update a user's certificate by ID
  *     description: Update a user's certificate by providing its ID.
- *     tags: [Certification]
+ *     tags: [Certificates]
  *     parameters:
  *       - in: path
  *         name: id
  *         description: The id of the certificate to be updated
  *         required: true
- *         type: integer
  *       - in: path
  *         name: userId
- *         description: A valid user id (uuid) 
+ *         description: A valid user id (uuid)
  *         required: true
- *         type: uuid
  *       - in: body
  *         name: payload
  *         description: New certificate details.
@@ -34,7 +32,7 @@ const router = express.Router();
  *               type: string
  *             organization:
  *               type: string
- *             url: 
+ *             url:
  *               type: string
  *             description:
  *               type: string
@@ -72,13 +70,13 @@ const router = express.Router();
  *                           type: number
  *                         organization:
  *                           type: string
- *                         url: 
+ *                         url:
  *                           type: string
  *                         description:
  *                           type: string
  *                         created_at:
  *                           type: string
- *                         userId: 
+ *                         userId:
  *                           type: string
  *                         sectionId:
  *                           type: string
@@ -127,6 +125,6 @@ const router = express.Router();
  *                   type: null
  */
 
-router.put('/update-certification/:userId/:id', updateCertificate)
+router.put("/update-certification/:userId/:id", updateCertificate);
 
 module.exports = router;
