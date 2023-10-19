@@ -3,6 +3,13 @@ import { NextFunction, Request, Response } from "express";
 import { BadRequestError } from "../middlewares";
 import { parseAsync, ErrorMessageOptions } from "zod-error";
 import { validate as isUUID } from "uuid";
+import { error } from "console";
+
+function checkNotEmptyString(value, fieldName) {
+  if (!value || value.trim().length === 0) {
+    throw new BadRequestError(`The '${fieldName}' cannot be an empty string`);
+  }
+}
 
 export const CreateEducationDetailDataSchema = z.object({
   degree_id: z.number().nullable(),
@@ -36,7 +43,7 @@ const EducationDetailDataSchema = z.object({
 
 const options: ErrorMessageOptions = {
   delimiter: {
-    error: " 🔥 ",
+    error: " # ",
   },
   transform: ({ errorMessage, index }) =>
     `Error #${index + 1}: ${errorMessage}`,
@@ -66,6 +73,12 @@ async function validateUpdateData(
       }
     }
 
+    // Usage:
+
+    checkNotEmptyString(data.school, "school");
+    checkNotEmptyString(data.description, "description");
+    checkNotEmptyString(data.fieldOfStudy, "fieldOfStudy");
+
     // Validate date strings in "yy-mm-dd" format
     if (data.from && !validateDateYYMMDD(data.from)) {
       throw new BadRequestError("Invalid 'from' date format");
@@ -81,12 +94,17 @@ async function validateUpdateData(
     console.log(validatedData);
     next(); // Continue to the next middleware or route handler
   } catch (error) {
-    const err = new BadRequestError(error.message);
-    return res.status(err.statusCode).json({ message: err.message });
+    next(new BadRequestError(error.message));
+    return;
   }
 }
 
-async function validateCreateData(data: any, user_id: string, res: Response) {
+async function validateCreateData(
+  data: any,
+  user_id: string,
+  res: Response,
+  next: NextFunction
+) {
   try {
     // Validate the data against the schema
     await CreateEducationDetailDataSchema.parseAsync({
@@ -94,8 +112,8 @@ async function validateCreateData(data: any, user_id: string, res: Response) {
       user_id,
     });
   } catch (error) {
-    const err = new BadRequestError(error.message);
-    return res.status(err.statusCode).json({ message: err.message });
+    next(new BadRequestError(error.message));
+    return;
   }
 }
 
