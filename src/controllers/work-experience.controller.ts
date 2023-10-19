@@ -1,16 +1,31 @@
-import { Request, RequestHandler, Response } from "express";
+import { Request, RequestHandler, Response, NextFunction } from "express";
 import { connectionSource } from "../database/data-source";
-import { WorkExperienceDetail } from "../database/entities";
+import { WorkExperienceDetail, Section, User } from "../database/entities";
 import { error, success } from "../utils";
-import { ZodError, boolean, number, object, string } from "zod";
+
+import {
+  CustomError,
+  NotFoundError,
+  BadRequestError,
+  UnauthorizedError,
+  ForbiddenError,
+  InternalServerError,
+  MethodNotAllowedError,
+  errorHandler,
+} from "../middlewares";
+
+import { validateWorkExperience } from "../middlewares/work-experience.zod";
 
 // Get the repository for the WorkExperienceDetail entity
 const workExperienceRepository =
   connectionSource.getRepository(WorkExperienceDetail);
+const userRepository = connectionSource.getRepository(User);
+const sectionRepository = connectionSource.getRepository(Section);
 
 export const createWorkExperience: RequestHandler = async (
   req: Request,
-  res: Response
+  res: Response,
+  next: NextFunction
 ) => {
   const {
     company,
@@ -27,105 +42,49 @@ export const createWorkExperience: RequestHandler = async (
   const userId = req.params.userId || req.body.userId;
 
   console.log(req.body);
-  // change isEmployee to boolean
-  req.body.isEmployee =
-    req.body.isEmployee === true
-      ? true
-      : req.body.isEmployee === false
-      ? false
-      : null;
 
-  // check if sectionId is NAN
-  if (isNaN(sectionId)) {
-    res.statusCode = 400;
-    return res.json({ message: "sectionId must be a number" });
-  }
-
-  const workExperienceSchema = object({
-    company: string({
-      required_error: "company is required in request body",
-      invalid_type_error: "company must be type string",
-    })
-      .trim()
-      .min(1, "company must not be an empty string"),
-
-    role: string({
-      required_error: "role is required in request body",
-      invalid_type_error: "role must be type string",
-    })
-      .trim()
-      .min(1, "role must not be an empty string"),
-
-    startMonth: string({
-      required_error: "startMonth is required in request body",
-      invalid_type_error: "startMonth must be type string",
-    })
-      .trim()
-      .min(1, "startMonth must not be an empty string"),
-
-    startYear: string({
-      required_error: "startYear is required in request body",
-      invalid_type_error: "startYear must be type string",
-    })
-      .trim()
-      .min(1, "startYear must not be an empty string")
-      .length(4, "startYear must be 4 digits"),
-
-    endMonth: string({
-      required_error: "endMonth is required in request body",
-      invalid_type_error: "endMonth must be type string",
-    })
-      .trim()
-      .min(1, "endMonth must not be an empty string"),
-
-    endYear: string({
-      required_error: "endYear is required in request body",
-      invalid_type_error: "endYear must be type string",
-    })
-      .trim()
-      .min(1, "endYear must not be an empty string")
-      .length(4, "endYear must be 4 digits"),
-
-    description: string({
-      required_error: "description is required in request body",
-      invalid_type_error: "description must be type string",
-    })
-      .trim()
-      .min(1, "description must not be an empty string"),
-
-    isEmployee: boolean({
-      required_error: "isEmployee is required in request body",
-      invalid_type_error: "isEmployee must be type boolean",
-    }),
-
-    //   userId: string({
-    //     required_error: "userId is required in request body",
-    //     invalid_type_error: "userId must be type string",
-    //   })
-    //     .trim()
-    //     .min(1, "userId must not be an empty string")
-    //     .uuid("userId must be in uuid format"),
-  });
+  console.log("past here");
 
   try {
-    try {
-      workExperienceSchema.parse(req.body);
-    } catch (error: unknown) {
-      const { errors } = error as ZodError;
-      res.statusCode = 400;
-      return res.json({
-        message: errors.map((error) => {
-          return error.message;
-        }),
-      });
-    }
-    if (endYear < startYear) {
-      res.statusCode = 400;
-      return res.json({
-        message: "EndYear must be greater than startYear",
-      });
+    // change isEmployee to boolean
+    req.body.isEmployee =
+      req.body.isEmployee === true
+        ? true
+        : req.body.isEmployee === false
+        ? false
+        : null;
+
+    // check if sectionId is NAN
+    if (isNaN(sectionId)) {
+      throw new BadRequestError("sectionId must be a number");
     }
 
+    // check if section exists
+    const section = await sectionRepository.findOneBy({
+      id: sectionId,
+    });
+
+    if (!section) {
+      throw new NotFoundError("Section not found");
+    }
+
+    // check if the user exists
+    const user = await userRepository.findOneBy({
+      id: userId,
+    });
+
+    if (!user) {
+      throw new NotFoundError("User not found");
+    }
+    // Validate the request body against the schema
+    await validateWorkExperience(req, res, next);
+
+    console.log("past here too");
+    if (endYear < startYear) {
+      throw new BadRequestError("EndYear must be greater than startYear");
+    }
+
+    console.log("past here too too");
     const workExperience = new WorkExperienceDetail();
     workExperience.company = company;
     workExperience.role = role;
@@ -138,15 +97,16 @@ export const createWorkExperience: RequestHandler = async (
     workExperience.user = userId;
     workExperience.section = sectionId;
 
+    console.log("past here too too toooo");
+
     await workExperienceRepository.save(workExperience);
     return res.json({
       message: "Added Work Experience Successfully",
       data: workExperience,
     });
   } catch (err) {
-    console.log(err.errors);
-    res.statusCode = 500;
-    res.json({ error: err, message: (err as Error).message });
+    console.log(err);
+    return next(err);
   }
 };
 
