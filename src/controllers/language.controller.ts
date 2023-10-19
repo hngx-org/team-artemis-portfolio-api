@@ -29,7 +29,7 @@ const addLanguage: RequestHandler = async (req: Request, res: Response) => {
     }
 
     if (misMatchFound)
-      return responseHandler.badRequest(res, {error: "Language must be in the recommended list"});
+      return responseHandler.badRequest(res, "Chosen language must be in the recommended list");
 
     const user = await userRepository.findOneBy({ id: userId });
 
