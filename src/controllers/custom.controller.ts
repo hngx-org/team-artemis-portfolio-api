@@ -27,7 +27,6 @@ import {
 const customRepository = connectionSource.getRepository(CustomUserSection);
 const customFieldRepository = connectionSource.getRepository(CustomField);
 const sectionRepository = connectionSource.getRepository(Section);
-const userRepositoy = connectionSource.getRepository(User);
 
 const MAX_ID_LENGTH = 10;
 
@@ -224,26 +223,16 @@ const create = async (
   res: Response
 ) => {
   try {
-    // const { user_id, section_id } = req.body as any;
     const section = await sectionRepository.findOne({
       where: { id: req.body.sectionId },
     });
     if (!section) return error(res, "SectionId does not exist", 400);
-    const user = await userRepositoy.findOne({
-      where: { id: req.body.userId },
-    });
-    if (!user) return error(res, "Invalid User", 400);
-    const alreadyCreated = await customRepository.findOne({
-      where: { user },
-    });
-    if (alreadyCreated)
-      return error(
-        res,
-        "A custom section for this user has already been created",
-        400
-      );
+    // const user = await userRepositoy.findOne({
+    //   where: { id: req.body.userId },
+    // });
+    // if (!user) return error(res, "Invalid User", 400);
     const newRecord = new CustomUserSection();
-    newRecord.user = user;
+    newRecord.user = (req as any).user;
     newRecord.section = section;
 
     await customRepository.save(newRecord);
@@ -295,23 +284,6 @@ export const updateCustomSection = async (
     });
     if (!section) return error(res, "Custom section not found", 404);
     const newRecord = new CustomUserSection();
-    if (req.body.userId) {
-      const user = await userRepositoy.findOne({
-        where: { id: req.body.userId },
-      });
-      if (!user) return error(res, "Invalid User", 400);
-      const alreadyCreated = await customRepository.findOne({
-        where: { user },
-      });
-      if (alreadyCreated)
-        return error(
-          res,
-          "A custom section for this user has already been created",
-          400
-        );
-      newRecord.user = user;
-    }
-
     if (req.body.sectionId) {
       const section = await sectionRepository.findOne({
         where: { id: req.body.sectionId },
@@ -353,33 +325,20 @@ const createCustomField = async (
   req: Request<{}, {}, IField, {}>,
   res: Response
 ) => {
-  const errors = [];
   try {
+    const customSection = await customRepository.findOne({
+      where: { id: req.body.customUserSectionId },
+    });
+    if (!customSection) return error(res, "Custom section not found", 404);
+
     const newRecords = await Promise.all(
       req.body.fields.map(async (field) => {
-        const section = await sectionRepository.findOne({
-          where: { id: field.customSectionId },
+        return customFieldRepository.save({
+          ...field,
+          customSection,
         });
-        const customUserSection = await customRepository.findOne({
-          where: { id: field.customUserSectionId },
-        });
-
-        if (!section) {
-          errors.push(`Invalid customSectionId for field: ${field.fieldName}`);
-          return;
-        }
-        if (!customUserSection) {
-          errors.push(
-            `Invalid customUserSectionId for field: ${field.fieldName}`
-          );
-          return;
-        }
-
-        return customFieldRepository.save(field);
       })
     );
-
-    if (errors.length > 0) return error(res, errors.join("\n"), 400);
     return success(res, newRecords, "Success");
   } catch (err) {
     console.error(err);
@@ -387,9 +346,18 @@ const createCustomField = async (
   }
 };
 
-export const findAllCustomField = async (req: Request, res: Response) => {
+export const findAllCustomField = async (
+  req: Request<{}, {}, {}, { customSection?: number }>,
+  res: Response
+) => {
   try {
-    const records = await customFieldRepository.find();
+    const filter: any = {};
+    if (req.query.customSection)
+      filter.customSection = { id: req.query.customSection };
+    const records = await customFieldRepository.find({
+      where: filter,
+      relations: ["customSection"],
+    });
     return success(res, records, "Success");
   } catch (err) {
     console.log(err);
@@ -459,23 +427,27 @@ export const deleteCustomFields = async (
   }
 };
 const customUserSectionSchema = z.object({
-  userId: z.string().uuid(),
   sectionId: z.number(),
 });
 
 const customFieldSchema = z.object({
   fieldType: z
     .string()
-    .min(3, { message: "fieldType must have at least three characters " }),
+    .min(3, { message: "fieldType must have at least three characters " })
+    .refine((value) => /^[A-Za-z]+$/.test(value), {
+      message: "Field must contain only letters (A-Z, a-z)",
+    }),
   fieldName: z
     .string()
-    .min(3, { message: "fieldName must have at least three characters " }),
-  customSectionId: z.number(),
-  customUserSectionId: z.number(),
+    .min(3, { message: "fieldName must have at least three characters " })
+    .refine((value) => /^[A-Za-z]+$/.test(value), {
+      message: "Field must contain only letters (A-Z, a-z)",
+    }),
   value: z.string().nullable(),
 });
 
 const fieldsSchema = z.object({
+  customUserSectionId: z.number(),
   fields: z
     .array(customFieldSchema)
     .min(1, { message: "At least one custom field is required" }),
@@ -484,9 +456,24 @@ const fieldsSchema = z.object({
 const sectionSchema = z.object({
   name: z
     .string()
-    .min(3, { message: "name must have at least three characters " }),
-  description: z.string().optional(),
-  meta: z.string().optional(),
+    .min(3, { message: "name must have at least three characters " })
+    .refine((value) => /^[A-Za-z]+$/.test(value), {
+      message: "Field must contain only letters (A-Z, a-z)",
+    }),
+  description: z
+    .string()
+    .min(3, { message: "description must have at least three characters " })
+    .optional()
+    .refine((value) => /^[A-Za-z]+$/.test(value), {
+      message: "Field must contain only letters (A-Z, a-z)",
+    }),
+  meta: z
+    .string()
+    .min(3, { message: "meta must have at least three characters " })
+    .optional()
+    .refine((value) => /^[A-Za-z]+$/.test(value), {
+      message: "Field must contain only letters (A-Z, a-z)",
+    }),
 });
 
 const updateSectionSchema: any = z
@@ -497,15 +484,13 @@ const updateSectionSchema: any = z
       .optional(),
     description: z.string().optional(),
     meta: z.string().optional(),
-    position: z.number().positive().optional(),
   })
   .refine(
     (data) => {
       return (
         data.name !== undefined ||
         data.description !== undefined ||
-        data.meta !== undefined ||
-        data.position !== undefined
+        data.meta !== undefined 
       );
     },
     {
@@ -514,23 +499,26 @@ const updateSectionSchema: any = z
     }
   );
 
-const updateCustomSectionSchema: any = z
-  .object({
-    userId: z.string().uuid().optional(),
-    sectionId: z.number().optional(),
-  })
-  .refine(
-    (data) => {
-      return data.userId !== undefined || data.sectionId !== undefined;
-    },
-    {
-      message: "At least one of the fields (userId, sectionId) is required",
-    }
-  );
+const updateCustomSectionSchema: any = z.object({
+  sectionId: z.number().positive(),
+});
 
 const getSectionSchema = z.object({
   name: z.string().optional(),
 });
+
+export const getcustomfieldsSchema: any = z
+  .object({
+    customSection: z.string().optional(),
+  })
+  // .refine(
+  //   (data) => {
+  //     return Number(data) > 0;
+  //   },
+  //   {
+  //     message: "Number must be greater than 0",
+  //   }
+  // );
 
 const validateSchema =
   (schema: AnyZodObject) => async (req: Request, res: Response, next: any) => {

@@ -24,8 +24,10 @@ import {
   updateCustomSectionSchema,
   findAllCustomField,
   deleteCustomFields,
+  getcustomfieldsSchema,
 } from "../controllers/custom.controller";
 import { validateQuery } from "../middlewares/custom.zod";
+import { validate } from "../middlewares/auth";
 
 const router = express.Router();
 
@@ -135,7 +137,7 @@ router.post("/section", validateSchema(sectionSchema), createSection);
  *                 data:
  *                   type: null
  */
-router.post("/custom", validateSchema(customUserSectionSchema), create);
+router.post("/custom", [validate, validateSchema(customUserSectionSchema)], create);
 
 /**
  * @swagger
@@ -249,7 +251,7 @@ router.get("/section", validateQuery(getSectionSchema), getSection);
  *                   type: null
  */
 
-router.get("/custom-fields", findAllCustomField);
+router.get("/custom-fields", validateQuery(getcustomfieldsSchema), findAllCustomField);
 /**
  * @swagger
  * /api/custom/{id}:
