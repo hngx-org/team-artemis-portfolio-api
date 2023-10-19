@@ -26,29 +26,33 @@ const options: ErrorMessageOptions = {
 
 const validMonths = [
   "January",
-  "Jan",
   "February",
-  "Feb",
   "March",
-  "Mar",
   "April",
-  "Apr",
   "May",
   "June",
-  "Jun",
   "July",
-  "Jul",
   "August",
-  "Aug",
   "September",
-  "Sep",
   "October",
-  "Oct",
   "November",
-  "Nov",
   "December",
-  "Dec",
 ];
+
+const shortToLongMonths = {
+  Jan: "January",
+  Feb: "February",
+  Mar: "March",
+  Apr: "April",
+  May: "May",
+  Jun: "June",
+  Jul: "July",
+  Aug: "August",
+  Sep: "September",
+  Oct: "October",
+  Nov: "November",
+  Dec: "December",
+};
 
 const workExperienceSchema = object({
   company: z.string(),
@@ -60,6 +64,37 @@ const workExperienceSchema = object({
   description: z.string(),
   isEmployee: z.boolean(),
 });
+
+// convertMonthToLongForm function
+function convertMonthToLongForm(month: string) {
+  const shortToLongMonths = {
+    Jan: "January",
+    Feb: "February",
+    Mar: "March",
+    Apr: "April",
+    May: "May",
+    Jun: "June",
+    Jul: "July",
+    Aug: "August",
+    Sep: "September",
+    Oct: "October",
+    Nov: "November",
+    Dec: "December",
+  };
+
+  // Convert to title case (capitalizing the first letter of each word)
+  const formattedMonth = month
+    .toLowerCase()
+    .replace(/\b\w/g, (char) => char.toUpperCase());
+
+  // Check if the input matches a short form month, and convert if necessary
+  if (shortToLongMonths[formattedMonth]) {
+    return shortToLongMonths[formattedMonth];
+  }
+
+  // If it's not a short form, return the original input
+  return formattedMonth;
+}
 
 async function validateWorkExperience(
   req: Request,
@@ -87,15 +122,28 @@ async function validateWorkExperience(
     }
 
     if (data.startMonth) {
+      // Convert to title case (capitalizing the first letter of each word)
       data.startMonth = data.startMonth
         .toLowerCase()
         .replace(/\b\w/g, (char) => char.toUpperCase());
+
+      // Check if the input matches a short form month, and convert if necessary
+      if (shortToLongMonths[data.startMonth]) {
+        data.startMonth = shortToLongMonths[data.startMonth];
+        console.log("here 1");
+      }
     }
 
     if (data.endMonth) {
+      // Convert to title case
       data.endMonth = data.endMonth
         .toLowerCase()
         .replace(/\b\w/g, (char) => char.toUpperCase());
+
+      // Check if the input matches a short form month, and convert if necessary
+      if (shortToLongMonths[data.endMonth]) {
+        data.endMonth = shortToLongMonths[data.endMonth];
+      }
     }
 
     // Check if startMonth and endMonth are valid (full names or abbreviations)
@@ -141,4 +189,4 @@ async function validateWorkExperience(
   }
 }
 
-export { validateWorkExperience, workExperienceSchema };
+export { validateWorkExperience, workExperienceSchema, convertMonthToLongForm };
