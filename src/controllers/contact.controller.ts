@@ -84,10 +84,13 @@ export const createContacts = async (
     social_media_id: formattedId,
   });
   const socialsRepo = dataSource.getRepository(SocialMedia);
+
   
   try {
     let social = await socialsRepo.find({where:{Id:social_media_id}});
-    console.log(url)
+    if(social.length<1){
+      return res.status(400).json({message:"Social media Id does not exist"})
+    }
     let validname = (url.toLocaleLowerCase()).includes((social[0].name ).toLocaleLowerCase())
     let validend = url.includes(".com") ||url.includes(".net")||url.includes(".ng")||url.includes(".uk")||url.includes(".app")
     let validprotocol = url.startsWith("https://")|| url.startsWith("http://") ||(url.toLocaleLowerCase()).startsWith("www.")
@@ -103,11 +106,12 @@ export const createContacts = async (
       if(user.length < 1){
         return res.json({message:"user does not exist"})
       }
+      
       // check if request body details is a valid data
       await createContact(social_media_id, url, user_id);
       return res.status(201).json({ message: MESSAGES.CREATED });
     } else {
-      return res.status(400).json({ message: "invalid User id" });
+      return res.status(400).json({ message: " User id is not valid" });
     }
   } catch (error) {
     return res.status(500).json({ message:" error creating contacts"});
@@ -131,11 +135,11 @@ export const getContacts = async (req: Request, res: Response) => {
     if (!user) {
       return res.status(404).json({ message: "No such user" });
     }
-    console.log(user_id)
+    console.log(user.email)
     const contacts = await contactsRepo.find({
       where: { user_id },
     });
-    return res.status(200).json(contacts);
+    return res.status(200).json({message:"success",statusCode:200,payload:[{"email":user.email}, ...contacts]});
   } catch (error) {
     console.error("Error getting contacts:", error);
     return res.status(500).json({ message: "could not fetch contacts" });
