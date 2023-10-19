@@ -16,7 +16,6 @@ const addCertificateController = async (req: Request, res: Response) => {
     const { title, year, organization, url, description, sectionId } = req.body;
     const userId = req.params.userId;
 
-    // Check if the user with userId exists
     const user = await userRepository.findOneBy({ id: userId });
 
     if (!user) {
@@ -48,6 +47,7 @@ const addCertificateController = async (req: Request, res: Response) => {
       // Save the certificate to the database
       const savedCertificate = await certificateRepo.save(certificate);
 
+      // Remove the user property from the saved certificate
       Reflect.deleteProperty(savedCertificate, "user");
 
       if (!savedCertificate) {
