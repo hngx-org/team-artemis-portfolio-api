@@ -2,7 +2,9 @@ import { Request, RequestHandler, Response } from 'express';
 import { connectionSource } from '../database/data-source';
 import { User } from '../database/entities';
 import { validate as isValidUUID } from 'uuid';
-import responseHandler from '../services/language.service';
+import responseHandler, {
+  programmingLanguages,
+} from '../services/language.service';
 import axios from 'axios';
 
 // const languageRepository = connectionSource.getRepository(Language);
@@ -14,6 +16,20 @@ const addLanguage: RequestHandler = async (req: Request, res: Response) => {
     let { userId, languages } = req.body;
 
     languages = languages.map((language: string) => language.toLowerCase());
+    let checkLanguageArray = programmingLanguages.map((language) =>
+      language.toLowerCase()
+    );
+    let misMatchFound = false;
+
+    for (const language of languages) {
+      if (!checkLanguageArray.includes(language)) {
+        misMatchFound = true;
+        break;
+      }
+    }
+
+    if (misMatchFound)
+      return responseHandler.badRequest(res, {error: "Language must be in the recommended list"});
 
     const user = await userRepository.findOneBy({ id: userId });
 
@@ -48,8 +64,6 @@ const getUserLanguages: RequestHandler = async (
 
     const userLanguages = await axios.get(`${hostUrl}/getLanguages/${userId}`);
 
-    console.log(userLanguages);
-
     return responseHandler.success(res, userLanguages.data.data);
   } catch (error) {
     return responseHandler.serverError(res, error.message);
@@ -81,8 +95,18 @@ const deleteAllUserLanguages: RequestHandler = async (
     return responseHandler.serverError(res, error.message);
   }
 };
+
+const getAllLanguages: RequestHandler = (req: Request, res: Response) => {
+  try {
+    return responseHandler.success(res, programmingLanguages);
+  } catch (error) {
+    return responseHandler.serverError(res, error.message);
+  }
+};
+
 export default {
   addLanguage,
   getUserLanguages,
   deleteAllUserLanguages,
+  getAllLanguages,
 };
