@@ -20,8 +20,7 @@ const options: ErrorMessageOptions = {
   delimiter: {
     error: " # ",
   },
-  transform: ({ errorMessage, index }) =>
-    `Error #${index + 1}: ${errorMessage}`,
+  transform: ({ errorMessage, index }) => `${errorMessage}`,
 };
 
 const validMonths = [
@@ -59,29 +58,14 @@ const workExperienceSchema = object({
   role: z.string(),
   startMonth: z.string(),
   startYear: z.string(),
-  endMonth: z.string(),
-  endYear: z.string(),
+  endMonth: z.string().optional(),
+  endYear: z.string().optional(),
   description: z.string(),
   isEmployee: z.boolean(),
 });
 
 // convertMonthToLongForm function
 function convertMonthToLongForm(month: string) {
-  const shortToLongMonths = {
-    Jan: "January",
-    Feb: "February",
-    Mar: "March",
-    Apr: "April",
-    May: "May",
-    Jun: "June",
-    Jul: "July",
-    Aug: "August",
-    Sep: "September",
-    Oct: "October",
-    Nov: "November",
-    Dec: "December",
-  };
-
   // Convert to title case (capitalizing the first letter of each word)
   const formattedMonth = month
     .toLowerCase()
@@ -96,95 +80,69 @@ function convertMonthToLongForm(month: string) {
   return formattedMonth;
 }
 
+// Helper function to convert a month to title case and validate it
+function processAndValidateMonth(data, key, errors) {
+  if (data[key]) {
+    // Convert to title case
+    data[key] = data[key]
+      .toLowerCase()
+      .replace(/\b\w/g, (char) => char.toUpperCase());
+
+    // Check if the input matches a short form month, and convert if necessary
+    if (shortToLongMonths[data[key]]) {
+      data[key] = shortToLongMonths[data[key]];
+    }
+
+    if (!validMonths.includes(data[key])) {
+      errors.push(`Invalid '${key}' value`);
+    }
+  }
+}
+
+// Helper function to validate date format
+function validateDate(data, key, errors) {
+  if (data[key] && !validateDateYYMMDD(data[key])) {
+    errors.push(`Invalid '${key}' date format`);
+  }
+}
+
 async function validateWorkExperience(
   req: Request,
   res: Response,
   next: NextFunction
 ) {
+  const errors = [];
   try {
-    console.log(req.body);
-    console.log("here");
     if (!req.body) {
-      throw new BadRequestError("Missing request body");
+      errors.push("Missing request body");
     }
 
     const data = req.body;
 
-    // check if the from date is less than the to date
-    if (data.startYear && data.endYear) {
-      const fromDate = parseInt(data.startYear);
-      const toDate = parseInt(data.endYear);
-      if (fromDate > toDate) {
-        throw new BadRequestError(
-          "The 'from' date cannot be greater than the 'to' date"
-        );
-      }
+    processAndValidateMonth(data, "startMonth", errors);
+    validateDate(data, "startYear", errors);
+
+    // Check if endMonth and endYear are not empty
+    if (data.endMonth !== "" && data.endYear !== "") {
+      processAndValidateMonth(data, "endMonth", errors);
+      validateDate(data, "endYear", errors);
     }
-
-    if (data.startMonth) {
-      // Convert to title case (capitalizing the first letter of each word)
-      data.startMonth = data.startMonth
-        .toLowerCase()
-        .replace(/\b\w/g, (char) => char.toUpperCase());
-
-      // Check if the input matches a short form month, and convert if necessary
-      if (shortToLongMonths[data.startMonth]) {
-        data.startMonth = shortToLongMonths[data.startMonth];
-        console.log("here 1");
-      }
-    }
-
-    if (data.endMonth) {
-      // Convert to title case
-      data.endMonth = data.endMonth
-        .toLowerCase()
-        .replace(/\b\w/g, (char) => char.toUpperCase());
-
-      // Check if the input matches a short form month, and convert if necessary
-      if (shortToLongMonths[data.endMonth]) {
-        data.endMonth = shortToLongMonths[data.endMonth];
-      }
-    }
-
-    // Check if startMonth and endMonth are valid (full names or abbreviations)
-    if (data.startMonth && !validMonths.includes(data.startMonth)) {
-      throw new BadRequestError("Invalid 'startMonth' value");
-    }
-
-    if (data.endMonth && !validMonths.includes(data.endMonth)) {
-      throw new BadRequestError("Invalid 'endMonth' value");
-    }
-
-    // Validate date strings in "yy-mm-dd" format
-    if (data.startYear && !validateDateYYMMDD(data.startYear)) {
-      throw new BadRequestError("Invalid 'start Year' date format");
-    }
-
-    if (data.endYear && !validateDateYYMMDD(data.endYear)) {
-      throw new BadRequestError("Invalid 'to' date format");
-    }
-
-    console.log(data);
-    console.log("here 000000");
 
     // check if fields are empty
     checkNotEmptyString(data.company, "company");
-    console.log("here 111111");
     checkNotEmptyString(data.role, "role");
-    console.log("here 222222");
-    checkNotEmptyString(data.startYear, "startYear");
-    console.log("here 444444");
-    checkNotEmptyString(data.endYear, "endYear");
-    console.log("here 666666");
     checkNotEmptyString(data.description, "description");
-    console.log("here 777777");
 
     const result = await parseAsync(workExperienceSchema, req.body, options);
 
     const validatedData = result; // Store the validated data in the request object if needed
-    console.log(validatedData);
   } catch (error) {
-    next(new BadRequestError(error.message));
+    errors.push(error.message);
+  }
+
+  if (errors.length > 0) {
+    // If there are errors in the array, pass them to the error handler
+    next(new BadRequestError(errors.join(", ")));
     return;
   }
 }
