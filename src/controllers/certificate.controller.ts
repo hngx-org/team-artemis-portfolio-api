@@ -142,6 +142,17 @@ const deleteCertificate = async (req: Request, res: Response
   const certificateRepository = dataSource.getRepository(Certificate);
 
   try {
+    // Check if the user with userId exists
+    const user = await userRepository
+    .createQueryBuilder()
+    .where("id = :id", { id: userId })
+    .getOne();
+
+    if (!user) {
+      return error(res, "User not found. Please provide a valid User ID", 404);
+    }
+
+
     const certificate = await certificateRepository
       .createQueryBuilder()
       .where("id = :id", { id: certId })
