@@ -18,6 +18,7 @@ import {
   errorHandler,
   UnprocessableEntityError,
 } from "../middlewares";
+
 import {
   CreateEducationDetailDataSchema,
   validateCreateData,
@@ -132,21 +133,21 @@ const createEducationDetailController = async (
       throw new UnprocessableEntityError("description should be a string");
     }
 
-    const pattern = /^[a-zA-Z0-9]+$/;
+    const pattern = /^[a-zA-Z0-9 ,.]+$/;
 
     if (!pattern.test(fieldOfStudy)) {
       throw new UnprocessableEntityError(
-        "Referer should not contain sepecial characters"
+        "field Of Study should not contain sepecial characters"
       );
     }
     if (!pattern.test(school)) {
       throw new UnprocessableEntityError(
-        "Referer should not contain sepecial characters"
+        "school should not contain sepecial characters"
       );
     }
     if (!pattern.test(description)) {
       throw new UnprocessableEntityError(
-        "Referer should not contain sepecial characters"
+        "description should not contain sepecial characters"
       );
     }
 
@@ -161,7 +162,6 @@ const createEducationDetailController = async (
       }
     }
 
-    console.log("validated");
     // Define an array of required fields
     const requiredFields = [
       "degree_id",
