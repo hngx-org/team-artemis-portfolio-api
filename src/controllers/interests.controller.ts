@@ -214,7 +214,7 @@ export const getInterests: RequestHandler = async (req, res) => {
       });
     }
 
-    const interestArray = interests??.interest??.split(",");
+    const interestArray = interests?.interest?.split(",");
 
     res.status(200).json({
       successful: true,
