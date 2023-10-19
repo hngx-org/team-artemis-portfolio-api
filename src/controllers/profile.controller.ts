@@ -130,9 +130,29 @@ export const getUserById = async (req: Request, res: Response) => {
     const { userId: id } = req.params;
     const userId = id.trim();
 
-    const user = await userRepository.findOne({ where: { id: userId } });
+    const user = await userRepository.findOne({ 
+      where: { id: userId },
+      select: [
+        'id',
+        'firstName',
+        'lastName',
+        'profilePic',
+        'profileCoverPhoto',
+        'email',
+        'phoneNumber',
+        'references',
+        'awards',
+        'certificates',
+        'socialUsers',
+        'sectionOrder',
+        'aboutDetails',
+        'location',
+        'username',
+        'workExperienceDetails'
+      ] 
+    });
     if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+      return error(res, "User not found", 400)
     }
 
     const portfolio = await portfolioRepository.findOne({
@@ -144,10 +164,9 @@ export const getUserById = async (req: Request, res: Response) => {
     });
 
     // const track = userTracks[0]?.track;
-    res.status(200).json({ user, portfolio, userTracks: userTracks?.track });
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: 'Internal Server Error' });
+    return success(res, { user, portfolio, userTracks: userTracks?.track }, "Fetched User Successfully")
+  } catch (err) {
+    return error(res, 'Internal Server Error', 500)
   }
 };
 
