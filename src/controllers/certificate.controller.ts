@@ -154,7 +154,11 @@ const updateCertificate = async (req, res) => {
     const payload = req.body;
 
     // Validate the certificate data
-    const certificateDataIsValid = await validateCertificateData(req, res);
+    const certificateDataIsValid = await validateCertificateData(
+      req,
+      res,
+      true
+    );
 
     if (!certificateDataIsValid) {
       return;
