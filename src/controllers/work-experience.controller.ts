@@ -1,16 +1,35 @@
-import { Request, RequestHandler, Response } from "express";
+import { Request, RequestHandler, Response, NextFunction } from "express";
 import { connectionSource } from "../database/data-source";
-import { WorkExperienceDetail } from "../database/entities";
+import { WorkExperienceDetail, Section, User } from "../database/entities";
 import { error, success } from "../utils";
-import { ZodError, boolean, number, object, string } from "zod";
+import { object, string, number, boolean, ZodError } from "zod";
+
+import {
+  CustomError,
+  NotFoundError,
+  BadRequestError,
+  UnauthorizedError,
+  ForbiddenError,
+  InternalServerError,
+  MethodNotAllowedError,
+  errorHandler,
+} from "../middlewares";
+
+import {
+  validateWorkExperience,
+  convertMonthToLongForm,
+} from "../middlewares/work-experience.zod";
 
 // Get the repository for the WorkExperienceDetail entity
 const workExperienceRepository =
   connectionSource.getRepository(WorkExperienceDetail);
+const userRepository = connectionSource.getRepository(User);
+const sectionRepository = connectionSource.getRepository(Section);
 
 export const createWorkExperience: RequestHandler = async (
   req: Request,
-  res: Response
+  res: Response,
+  next: NextFunction
 ) => {
   const {
     company,
@@ -101,33 +120,77 @@ export const createWorkExperience: RequestHandler = async (
 
 
   try {
+    workExperienceSchema.parse(req.body);
+  } catch (err: unknown) {
+    const { errors } = err as ZodError;
 
-    try {
-      workExperienceSchema.parse(req.body);
-    } catch (err: unknown) {
-      const { errors } = err as ZodError;
+    const errorMessages = errors.map((error) => {
+      return error.message;
+    })
+    return error(res, errorMessages, 400)
+  }
 
-      const errorMessages = errors.map((error) => {
-        return error.message;
-      })
-      return error(res, errorMessages, 400)
+  if (Number(endYear) < Number(startYear)) {
+    return error(res, "EndYear must be greater than startYear", 400)
+  }
+
+  try {
+    // change isEmployee to boolean
+    req.body.isEmployee =
+      req.body.isEmployee === true
+        ? true
+        : req.body.isEmployee === false
+        ? false
+        : null;
+
+    // check if sectionId is NAN
+    if (isNaN(sectionId)) {
+      throw new BadRequestError("sectionId must be a number");
     }
 
-    if (Number(endYear) < Number(startYear)) {
-      return error(res, "EndYear must be greater than startYear", 400)
+    // check if section exists
+    const section = await sectionRepository.findOneBy({
+      id: sectionId,
+    });
+
+    if (!section) {
+      throw new NotFoundError("Section not found");
     }
 
+    // check if the user exists
+    const user = await userRepository.findOneBy({
+      id: userId,
+    });
+
+    if (!user) {
+      throw new NotFoundError("User not found");
+    }
+    // Validate the request body against the schema
+    await validateWorkExperience(req, res, next);
+
+    // convert month to long form
+    const convertedStartMonth = convertMonthToLongForm(startMonth);
+    const convertedEndMonth = convertMonthToLongForm(endMonth);
+
+    console.log("past here too");
+    if (endYear < startYear) {
+      throw new BadRequestError("EndYear must be greater than startYear");
+    }
+
+    console.log("past here too too");
     const workExperience = new WorkExperienceDetail();
     workExperience.company = company;
     workExperience.role = role;
-    workExperience.startMonth = startMonth;
+    workExperience.startMonth = convertedStartMonth;
     workExperience.startYear = startYear;
-    workExperience.endMonth = endMonth;
+    workExperience.endMonth = convertedEndMonth;
     workExperience.endYear = endYear;
     workExperience.description = description;
     workExperience.isEmployee = isEmployee;
     workExperience.user = userId;
     workExperience.section = sectionId;
+
+    console.log("past here too too toooo");
 
     await workExperienceRepository.save(workExperience);
     return success(res,  workExperience, "Added Work Experience Successfully");

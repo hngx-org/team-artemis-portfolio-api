@@ -1,7 +1,10 @@
 import { Request, RequestHandler, Response, NextFunction } from "express";
 import { connectionSource } from "../database/data-source";
 import { Degree, EducationDetail, Section, User } from "../database/entities";
-import { createEducationDetail } from "../services/education.service";
+import {
+  createEducationDetail,
+  updateEducationDetailID,
+} from "../services/education.service";
 import { EducationDetailData } from "../interfaces/education.interface";
 
 import {
@@ -18,7 +21,6 @@ import {
   CreateEducationDetailDataSchema,
   validateCreateData,
 } from "../middlewares/education.zod";
-import { z } from "zod";
 
 const educationDetailRepository =
   connectionSource.getRepository(EducationDetail);
@@ -50,7 +52,8 @@ const fetchUserEducationDetail: RequestHandler = async (req, res, next) => {
     }
 
     const educationDetails = await educationDetailRepository.find({
-      where: { user: { id: user_id } }, relations: ["degree"]
+      where: { user: { id: user_id } },
+      relations: ["degree"],
     });
 
     if (!educationDetails) {
@@ -108,15 +111,15 @@ const createEducationDetailController = async (
 
     // Validate date strings in "yy-mm-dd" format
     if (data.from && !validateYear(data.from)) {
-      return res.status(400).json({ errors: "Invalid 'from' date format" });
-      // throw new BadRequestError("Invalid 'from' date format")
+      // return res.status(400).json({ errors: "Invalid 'from' date format" });
+      throw new BadRequestError("Invalid 'from' date format");
     }
 
     if (data.to && !validateYear(data.to)) {
       // throw new BadRequestError("Invalid 'to' date format")
       return res.status(400).json({ errors: "Invalid 'to' date format" });
     }
-    await validateCreateData(data, user_id, res);
+    await validateCreateData(data, user_id, res, next);
 
     // check if the from date is less than the to date
     if (data.from && data.to) {
@@ -145,8 +148,7 @@ const createEducationDetailController = async (
     const missingFields = requiredFields.filter((field) => !req.body[field]);
 
     if (missingFields.length > 0) {
-      // Create a CustomError with a 400 status code
-      throw new CustomError(`Missing fields: ${missingFields.join(", ")}`);
+      throw new BadRequestError(`Missing fields: ${missingFields.join(", ")}`);
     }
 
     // Get the user by userId
@@ -162,19 +164,16 @@ const createEducationDetailController = async (
 
     console.log("gone past");
     if (!user) {
-      // Create a CustomError with a 404 status code
       throw new NotFoundError(
         "Error creating education detail: User not found"
       );
     }
     if (!section) {
-      // Create a CustomError with a 404 status code
       throw new NotFoundError(
         "Error creating education detail: Section not found"
       );
     }
     if (!degree) {
-      // Create a CustomError with a 404 status code
       throw new NotFoundError(
         "Error creating education detail: Degree not found"
       );
@@ -278,13 +277,16 @@ const updateEducationDetail = async (
     }
 
     // Save the updated education detail
-    await educationDetailRepository.save(educationDetail);
-
-    console.log("Education detail updated successfully");
+    const result = await updateEducationDetailID(
+      educationDetail.id,
+      updateData,
+      next
+    );
 
     res.status(200).json({
       message: "Education detail updated successfully",
-      educationDetail,
+      educationDetail: result,
+      success: true,
     });
   } catch (error) {
     console.error("Error updating education detail:", error.message);
