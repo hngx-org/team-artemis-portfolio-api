@@ -56,11 +56,11 @@ const getAllCertificates = async (req: Request, res: Response) => {
   try {
     const certificates = await certificateRepository.find();
 
-    if (certificates.length > 0) {
-      res.json(certificates);
-    } else {
-      res.status(404).json({ error: "No certificates found" });
+    if (!certificates) {
+      return error(res, "Error fetching certificates", 400);
     }
+
+    return success(res, certificates, "Certificates fetched successfully");
   } catch (error) {
     res.status(500).json({ error: "Internal Server Error" });
   }

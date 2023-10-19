@@ -53,6 +53,21 @@ const router = express.Router();
  *                       type: boolean
  *                     message:
  *                       type: string
+ *       400:
+ *         description: Skill already exists.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 successful:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "A skill already exists"
+ *                 data:
+ *                   type: null
  *       500:
  *         description: Failed to create skills.
  *         content:
@@ -76,10 +91,10 @@ router.post("/create-skills", createSkills);
 
 /**
  * @swagger
- * /api/skills-details:
+ * /api/skills-details/{userId}:
  *   get:
  *     summary: Get skills details
- *     description: Get details of all skills.
+ *     description: Get details of all skills for logged in user.
  *     responses:
  *       200:
  *         description: Skills details retrieved successfully.
@@ -104,7 +119,7 @@ router.post("/create-skills", createSkills);
  *     tags:
  *       - Skills
  */
-router.get("/skills-details", getSkillsDetails);
+router.get("/skills-details/:userId", getSkillsDetails);
 
 /**
  * @swagger

@@ -7,6 +7,7 @@ import {
   uploadImageController,
   uploadProfileCoverController,
   uploadProfileImageController,
+  deleteAllSectionEntries
 } from "../controllers";
 import {
   createPorfolioDataSchema,
@@ -219,5 +220,10 @@ router.post("/profile/cover/upload", uploadHandler, uploadProfileCoverController
  *     in: header
  */
 router.post("/profile/image/upload", uploadHandler, uploadProfileImageController);
+
+
+
+
+router.delete("/profile/details/:userId", deleteAllSectionEntries);
 
 module.exports = router;
