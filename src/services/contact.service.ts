@@ -49,7 +49,7 @@ export const updateContact = async (
       .update(SocialUser)
       .set({
         socialMedia: {
-          id: socialMediaId,
+          Id: socialMediaId,
         },
         url: url,
       })
@@ -87,15 +87,16 @@ export const createContact = async (
     const contact = contactsRepo.save({
       url,
       user: { id: userId },
-      socialMediaId: socialMediaId
+      socialMedia: {Id: socialMediaId}
 
     });
     const promise = new Promise(async (resolve, reject) => {
       try {
-        const data = await contactsRepo.findOneBy({ id: +contact })
+        const data = await contactsRepo.findOneBy({ Id: (await contact).Id })
         console.log(data)
         resolve(data)
       } catch (err) {
+        console.log(err)
         reject('failed to save')
       }
     })
