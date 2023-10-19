@@ -4,6 +4,7 @@ import {
    deleteCertificate, 
    getAllCertificates,
    getCertificateById, 
+   updateCertificate
 } from "../controllers/certificate.controller";
 
 const router = express.Router();
@@ -162,18 +163,25 @@ router.get("/certificates/:userId", getAllCertificates);
 
 /**
  * @swagger
- * /api/certificates/{certId}:
+ * /api/certificates/{userId}/{certId}:
  *   delete:
  *     summary: Delete a certificate by ID.
  *     description: Delete a certificate by its unique certificate ID.
  *     tags: [Certificates]
  *     parameters:
  *       - in: path
- *         name: certId
+ *         name: userId
  *         required: true
  *         schema:
  *           type: string
- *         description: The ID of the certificate to be deleted.
+ *           format: uuid
+ *         description: The UUID of the user associated with the certificate to be deleted.
+ *       - in: path
+ *         name: certId
+ *         required: true
+ *         schema:
+ *           type: number
+ *         description: The id of the certificate to be deleted.
  *     responses:
  *       200:
  *         description: Certificate deleted successfully.
@@ -208,7 +216,8 @@ router.get("/certificates/:userId", getAllCertificates);
  *                 error:
  *                   type: string
  */
-router.delete("/certificates/:certId", deleteCertificate);
+
+router.delete("/certificates/:userId/:certId", deleteCertificate);
 
 
 /**

@@ -119,16 +119,43 @@ const getCertificateById = async (req: Request, res: Response) => {
   }
 };
 
-const deleteCertificate = async (req: Request, res: Response) => {
-  const id = req.params.certId;
+const isUUID = (value: string) => {
+  // Regular expression to match UUID format (8-4-4-12)
+  const uuidPattern = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
+  return uuidPattern.test(value);
+};
+
+const deleteCertificate = async (req: Request, res: Response
+  ) => {
+  const { certId, userId } = req.params;
+
+  // Validate userId is a UUID
+  if (!isUUID(userId)) {
+    return error(res, "Provide a valid userId in UUID format", 400);
+  }
+
+  // Validate certId is an integer
+  if (!Number.isInteger(Number(certId))) {
+    return error(res, "Provide a valid certId. It must be an integer", 400);
+  }
+
   const certificateRepository = dataSource.getRepository(Certificate);
 
-  console.log("Request received to delete certificate with certId:", id);
-
   try {
+    // Check if the user with userId exists
+    const user = await userRepository
+    .createQueryBuilder()
+    .where("id = :id", { id: userId })
+    .getOne();
+
+    if (!user) {
+      return error(res, "User not found. Please provide a valid User ID", 404);
+    }
+
+
     const certificate = await certificateRepository
       .createQueryBuilder()
-      .where("id = :id", { id })
+      .where("id = :id", { id: certId })
       .getOne();
 
     if (certificate) {
@@ -137,17 +164,21 @@ const deleteCertificate = async (req: Request, res: Response) => {
       // Fetch the updated list of certificates
       const updatedCertificates = await certificateRepository.find();
 
-      res.json({
+      return success(res, {
         message: "Certificate deleted successfully",
         certificates: updatedCertificates,
       });
     } else {
-      res.status(404).json({ error: "Certificate not found" });
+      return error(res, "Certificate not found", 404);
     }
   } catch (error) {
-    res.status(500).json({ error: "Internal Server Error" });
+    console.error("Error deleting certificate:", error);
+    // errorHandler(error, req, res, next);
+  (error);
   }
 };
+
+
 
 const uuidPattern =
   /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
