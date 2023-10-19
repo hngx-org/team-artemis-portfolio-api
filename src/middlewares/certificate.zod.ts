@@ -1,11 +1,11 @@
 import { ZodError, z } from "zod";
 import { Request, Response } from "express";
+import { validate as isUUID } from "uuid";
 
 const certificateDataSchema = z.object({
   title: z.string().min(1, { message: "Title is required" }).trim(),
   year: z
     .string()
-    .min(4, { message: "Year should be a 4-digit number" })
     .refine((value) => /^\d{4}$/.test(value), {
       message: "Year should be a valid 4-digit number",
     })
@@ -52,11 +52,9 @@ async function validateCertificateData(req: Request, res: Response) {
     });
 
     res.status(400).json({
-      timestamp: new Date().toISOString(),
-      error: "Bad Request Error",
-      message: errorMessages,
-      path: req.url,
       success: false,
+      message: errorMessages,
+      data: null,
     });
 
     isValidData = false;

@@ -57,7 +57,6 @@ const addCertificateController = async (req: Request, res: Response) => {
       return success(res, savedCertificate, "Certificate created successfully");
     }
   } catch (err) {
-    console.error("Error creating certificate:", err);
     return error(res, (err as Error)?.message);
   }
 };
@@ -95,6 +94,10 @@ const getAllCertificates = async (req: Request, res: Response) => {
 const getCertificateById = async (req: Request, res: Response) => {
   const id = Number(req.params.certId);
 
+  if (!id) {
+    return error(res, "Please provide a valid certificate ID", 400);
+  }
+
   const certificateRepository = dataSource.getRepository(Certificate);
 
   try {
@@ -112,18 +115,14 @@ const getCertificateById = async (req: Request, res: Response) => {
     }
 
     return success(res, certificate, "Certificate fetched successfully");
-  } catch (error) {
-    return res
-      .status(500)
-      .json({ error: (error as Error)?.message ?? "Internal server error" });
+  } catch (err) {
+    return error(res, (err as Error)?.message ?? "Internal server error");
   }
 };
 
 const deleteCertificate = async (req: Request, res: Response) => {
   const id = req.params.certId;
   const certificateRepository = dataSource.getRepository(Certificate);
-
-  console.log("Request received to delete certificate with certId:", id);
 
   try {
     const certificate = await certificateRepository
