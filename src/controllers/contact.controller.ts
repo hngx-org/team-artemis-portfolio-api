@@ -91,8 +91,9 @@ export const createContacts = async (
     let validname = (url.toLocaleLowerCase()).includes((social[0].name ).toLocaleLowerCase())
     let validend = url.includes(".com") ||url.includes(".net")||url.includes(".ng")||url.includes(".uk")||url.includes(".app")
     let validprotocol = url.startsWith("https://")|| url.startsWith("http://") ||(url.toLocaleLowerCase()).startsWith("www.")
-console.log
-    if(validname === false || validend ===false || validprotocol ===false){// checks if social url is valid
+    let invalidChar = url.includes("*") ||url.includes("+")
+    
+    if(validname === false || validend ===false || validprotocol ===false || invalidChar){// checks if social url is valid
       return res.status(400).json({message:'invalid url please correct to match social media type'})
     }
        
