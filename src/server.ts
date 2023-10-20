@@ -15,8 +15,7 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerOptions));
 
 connectionSource
   .initialize()
-  .then(async (conn) => {
-    await conn.runMigrations()
+  .then(async () => {
     console.log("Database Connected");
   })
   .catch((error) => console.log(error));
