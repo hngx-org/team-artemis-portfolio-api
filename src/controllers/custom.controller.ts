@@ -234,7 +234,7 @@ const create = async (
     const newRecord = new CustomUserSection();
     newRecord.user = (req as any).user;
     newRecord.section = section;
-
+    newRecord.title = req.body.title;
     const record = await customRepository.save(newRecord);
     return success(res, record, "Success");
   } catch (err) {
@@ -444,6 +444,12 @@ export const deleteCustomFields = async (
 };
 const customUserSectionSchema = z.object({
   sectionId: z.number(),
+  title: z
+    .string()
+    .min(3, { message: "title must have at least three characters " })
+    .refine((value) => /^[A-Za-z]+$/.test(value), {
+      message: "title must contain only letters (A-Z, a-z)",
+    }),
 });
 
 const customFieldSchema = z.object({

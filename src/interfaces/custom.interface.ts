@@ -1,5 +1,5 @@
 export interface ICustomSection {
-  userId: string;
+  title: string;
   sectionId: number;
 }
 
