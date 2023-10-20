@@ -1,18 +1,9 @@
 import { Request, RequestHandler, Response, NextFunction } from "express";
 import { connectionSource } from "../database/data-source";
 import { WorkExperienceDetail, Section, User } from "../database/entities";
-import { error, success } from "../utils";
+import { success } from "../utils";
 
-import {
-  CustomError,
-  NotFoundError,
-  BadRequestError,
-  UnauthorizedError,
-  ForbiddenError,
-  InternalServerError,
-  MethodNotAllowedError,
-  errorHandler,
-} from "../middlewares";
+import { NotFoundError, BadRequestError } from "../middlewares";
 
 import {
   validateWorkExperience,
@@ -44,18 +35,14 @@ export const createWorkExperience: RequestHandler = async (
 
   const userId = req.params.userId || req.body.userId;
 
-  console.log(req.body);
-
-  console.log("past here");
-
   try {
     // change isEmployee to boolean
-    req.body.isEmployee =
-      req.body.isEmployee === true
-        ? true
-        : req.body.isEmployee === false
-        ? false
-        : null;
+    const newIsEmployee =
+      isEmployee === true ? true : isEmployee === false ? false : null;
+
+    // Set newEndMonth and newEndYear based on newIsEmployee
+    const newEndMonth = newIsEmployee === true ? "" : endMonth;
+    const newEndYear = newIsEmployee === true ? "" : endYear;
 
     // check if sectionId is NAN
     if (isNaN(sectionId)) {
@@ -79,40 +66,33 @@ export const createWorkExperience: RequestHandler = async (
     if (!user) {
       throw new NotFoundError("User not found");
     }
+
     // Validate the request body against the schema
     await validateWorkExperience(req, res, next);
-
     // convert month to long form
     const convertedStartMonth = convertMonthToLongForm(startMonth);
-    const convertedEndMonth = convertMonthToLongForm(endMonth);
+    const convertedEndMonth = convertMonthToLongForm(newEndMonth);
 
-    console.log("past here too");
-    if (endYear < startYear) {
-      throw new BadRequestError("EndYear must be greater than startYear");
-    }
-
-    console.log("past here too too");
     const workExperience = new WorkExperienceDetail();
     workExperience.company = company;
     workExperience.role = role;
     workExperience.startMonth = convertedStartMonth;
+    workExperience.startMonth = convertedStartMonth;
     workExperience.startYear = startYear;
     workExperience.endMonth = convertedEndMonth;
-    workExperience.endYear = endYear;
+    workExperience.endYear = newEndYear;
     workExperience.description = description;
-    workExperience.isEmployee = isEmployee;
+    workExperience.isEmployee = newIsEmployee;
     workExperience.user = userId;
     workExperience.section = sectionId;
-
-    console.log("past here too too toooo");
 
     await workExperienceRepository.save(workExperience);
     return res.json({
       message: "Added Work Experience Successfully",
       data: workExperience,
+      success: true,
     });
   } catch (err) {
-    console.log(err);
     return next(err);
   }
 };
@@ -129,7 +109,7 @@ export const deleteWorkExperience: RequestHandler = async (req, res, next) => {
 
     // If the work experience detail doesn't exist, return a 404 Not Found
     if (!workExperienceToRemove) {
-      return error(res, "Work Experience not found", 404);
+      throw new NotFoundError("Work Experience not found");
     }
 
     // Delete the work experience detail
@@ -137,8 +117,7 @@ export const deleteWorkExperience: RequestHandler = async (req, res, next) => {
 
     success(res, data, "Work Experience Deleted");
   } catch (err) {
-    console.log(err);
-    error(res, (err as Error).message);
+    return next(err);
   }
 };
 
@@ -151,22 +130,29 @@ export const workExperienceController: RequestHandler = async (
     const workExperienceRepository =
       connectionSource.getRepository(WorkExperienceDetail);
     const workExperiences = await workExperienceRepository.find();
+    if (!workExperiences) {
+      throw new NotFoundError(
+        "No Work Experience was not found in the database"
+      );
+    }
     res.json({ workExperiences });
   } catch (error) {
-    console.log(error);
-    res.status(500).json({ error: "Internal server error" });
+    return next(error);
   }
 };
 
 export const updateWorkExperience: RequestHandler = async (
   req: Request,
-  res: Response
+  res: Response,
+  next: NextFunction
 ) => {
   const workId = parseInt(req.params.workId);
 
   if (!workId) {
-    res.statusCode = 400;
-    return res.json({ message: "workExpId must be provided as a parameter" });
+    return next(
+      new BadRequestError("workExpId must be provided as a parameter")
+    );
+    throw new BadRequestError("workId is missing from request params");
   }
 
   const {
@@ -183,20 +169,15 @@ export const updateWorkExperience: RequestHandler = async (
   } = req.body;
 
   if (!userId) {
-    res.statusCode = 400;
-    return res.json({ message: "userId is missing from request body" });
+    throw new BadRequestError("userId is missing from request body");
   }
 
   if (sectionId === undefined) {
-    res.statusCode = 400;
-    return res.json({ message: "sectionId is missing from request body" });
+    throw new BadRequestError("sectionId is missing from request body");
   }
 
   if (!company || !role) {
-    res.statusCode = 400;
-    return res.json({
-      message: "company or role is missing from request body",
-    });
+    throw new BadRequestError("company or role is missing from request body");
   }
 
   try {
@@ -205,17 +186,14 @@ export const updateWorkExperience: RequestHandler = async (
     });
 
     if (!workExperienceToUpdate) {
-      res.statusCode = 404;
-      return res.json({ message: "Work Experience not found" });
+      throw new NotFoundError("Work Experience not found");
     }
-    if (endYear && startYear && endYear < startYear) {
-      res.statusCode = 400;
-      return res.json({
-        message: "EndYear must be greater than startYear",
-      });
-    }
+    // if (endYear && startYear && endYear < startYear) {
+    //   throw new BadRequestError("EndYear must be greater than startYear");
+    // }
 
-    // Update the work experience details
+    validateWorkExperience(req, res, next);
+
     workExperienceToUpdate.company = company;
     workExperienceToUpdate.role = role;
     workExperienceToUpdate.startMonth = startMonth;
@@ -227,15 +205,14 @@ export const updateWorkExperience: RequestHandler = async (
     workExperienceToUpdate.user = userId;
     workExperienceToUpdate.section = sectionId;
 
-    // Save the updated work experience
     await workExperienceRepository.save(workExperienceToUpdate);
 
     return res.json({
       message: "Updated Work Experience Successfully",
       data: workExperienceToUpdate,
+      success: true,
     });
   } catch (err) {
-    res.statusCode = 500;
-    res.json({ error: err, message: (err as Error).message });
+    return next(err);
   }
 };
