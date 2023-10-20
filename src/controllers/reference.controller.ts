@@ -10,6 +10,8 @@ import {
   getAllUserReferenceService,
   updateReferenced,
 } from "../services/reference.service";
+import { updatereferenceschema } from "../middlewares/reference.zod";
+import { z } from "zod";
 const referenceRepository = connectionSource.getRepository(ReferenceDetail);
 
 export const createReference = async (req: Request, res: Response) => {
