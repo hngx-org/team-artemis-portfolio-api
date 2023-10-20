@@ -10,7 +10,7 @@ import {
 
 router.post("/about/:userId", createAbout);
 router.put("/about/:id", updateAbout);
-router.get("/about/:id", getAboutByID);
+router.get("/about/:userId", getAboutByID);
 router.delete("/about/:id", deleteAbout);
 
 module.exports = router;
