@@ -106,7 +106,7 @@ async function validateWorkExperience(
   const errors = [];
   try {
     if (!req.body) {
-      errors.push("Missing request body");
+      errors.push("Cannot Submit empty form");
     }
     const data = req.body;
     if (data) {
@@ -168,7 +168,7 @@ async function validateWorkExperience(
         getMonthNumber(data.endMonth) < getMonthNumber(data.startMonth)
       ) {
         errors.push(
-          "End month must be greater than or equal to start month when end year is the same as start year"
+          "End month must match or exceed start month in the same year."
         );
       }
     }
@@ -181,7 +181,7 @@ async function validateWorkExperience(
         getMonthNumber(data.endMonth) < getMonthNumber(data.startMonth)
       ) {
         errors.push(
-          "End month must be greater than or equal to start month when end year is the same as start year"
+          "End month must be at or after start month for the same year."
         );
       }
     }
@@ -195,7 +195,8 @@ async function validateWorkExperience(
         const errorGroups = {};
 
         for (const issue of zodError.issues) {
-          const errorMessage = `${issue.message} in ${issue.path.join(", ")}`;
+          const Message = issue.message.replace(/,\s?/g, " ");
+          const errorMessage = `${Message} in ${issue.path.join(", ")}`;
           if (!errorGroups[errorMessage]) {
             errorGroups[errorMessage] = [];
           }
@@ -214,7 +215,6 @@ async function validateWorkExperience(
       } else {
         errors.push(`Zod Error: ${zodError.message}`);
       }
-
     }
   } catch (error) {
     errors.push(error.message);
