@@ -124,7 +124,7 @@ async function validateWorkExperience(
           }
 
           if (text[0] && text[0].match(/\d/)) {
-            errors.push(`Invalid input for ${field}`);
+            errors.push(`Only Letters, - , & allowed for ${field} `);
           }
         }
       });
