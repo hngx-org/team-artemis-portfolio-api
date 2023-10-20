@@ -20,15 +20,12 @@ export const createSocials = async (req: Request, res: Response) => {
       .string()
       .min(1)
       .max(50)
-      .refine((name) => !name.includes('*'), {
-        message: 'Asterisk (*) is not allowed in the name field',
-      })
-      .refine((name) => !/\d/.test(name), {
-        message: 'Numbers are not allowed in the name field',
-      })
-      .refine((name) => !name.includes('?'), {
-        message: 'question mark (?) is not allowed in the name field',
-      }),
+        .refine((name) => {
+      const forbiddenChars = ['*', '?', '+', '-', '_', '<', '>' , '!', ',' , '.' , '[' , ']' , ';' , '=','|'];
+      return !forbiddenChars.some(char => name.includes(char));
+    }, {
+      message: 'Forbidden characters are not allowed in the name field',
+    }),
   });
 
   try {
@@ -60,7 +57,6 @@ export const createSocials = async (req: Request, res: Response) => {
     }
   }
 };
-
 // get all social media types
 export const getSocials = async (req: Request, res: Response) => {
   try {
@@ -285,32 +281,52 @@ export const deleteContact = async (req: Request, res: Response) => {
 };
 
 //update Contact controller
+//update Contact controller
 export const updateContactController = async (req: Request, res: Response) => {
   const updateContactSchema = z.object({
     url: z.string().nonempty(),
-    socialMediaId: z.number().int(),
+    socialMediaId: z.number(),
     userId: z.string().nonempty(),
   });
- 
+   let { url, socialMediaId, userId } = req.body;
+
+    url = url.trim().toLocaleLowerCase(); 
+    userId = userId.trim().toLocaleLowerCase(); 
+    const formattedId = Number(socialMediaId);
+  const isValid = updateContactSchema.safeParse({
+    url,
+    userId,
+    social_media_id: formattedId,
+  });
   const Id = parseInt(req.params.id);
-  const { url, socialMediaId, userId } = req.body;
+ 
   console.log(Id)
   if (isNaN(Id) || Id <= 0 || !Number.isInteger(Id)) {
     return res.status(404).json("contact_Id invalid");
   }
-   try {
-   // updateContactSchema.parse({ url, socialMediaId, userId });
-  
-    const updatedContact = await updateContact(Id, { url, socialMediaId }, userId);
-   res.json({
-    url: updatedContact.url,
-    socialMediaId: updatedContact.socialMedia,  
-});
+  try {
+    
+    if (isValid.success) {
+      const updatedContact = await updateContact(Id, { url, socialMediaId }, userId);
+      res.status(200).json({
+        statusCode: 200,
+        success: true,
+        url: updatedContact.url,
+        socialMediaId: updatedContact.socialMedia,
+      });
+    } else {
+       return res.status(400).json({
+        statusCode: 400,
+        error: "Bad Request Error",
+        success: false,
+        message: MESSAGES.INVALID_INPUT,
+      });
+    }
   } catch (error) {
     if (error instanceof z.ZodError) {
       const errorMessage = error.errors.map((err) => err.message).join(', ');
       return res.status(400).json({ error: errorMessage });
     }
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(500).json({  statusCode: 500, error: error.message });
   }
 };
