@@ -12,7 +12,7 @@ const router = express.Router();
 
 /**
  * @swagger
-nce  * /api/v1/references/{userId}:
+ * /api/v1/references/{userId}:
  *   post:
  *     summary: Create a new reference.
  *     description: Create a new reference detail for a user.
@@ -46,12 +46,11 @@ nce  * /api/v1/references/{userId}:
  *             sectionId:
  *               type: number
  *           example:
- *             referer: "Sapphire"
- *             company: "Zuri"
+ *             referer: "Dami"
+ *             company: "RooTek"
  *             position: "Backend Developer"
- *             email: "sofiyyahabidoye@gmail.com"
- *             phoneNumber: "08101695397"
- *             sectionId: 25
+ *             email: "ogundele.damilare4@gmail.com"
+ *             phoneNumber: "+2348070859502"
  *     responses:
  *       201:
  *         description: Reference created successfully

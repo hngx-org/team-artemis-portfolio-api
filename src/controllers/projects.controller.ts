@@ -17,7 +17,7 @@ import { cloudinaryService } from "../services/image-upload.service";
 import { updateProjectService } from "../services/project.service";
 import { projectSchema } from "../middlewares/projects.zod";
 
-import { CustomError, NotFoundError, BadRequestError } from "../middlewares";
+import { CustomError, NotFoundError, BadRequestError, InternalServerError } from "../middlewares";
 
 const projectRepository = connectionSource.getRepository(Project);
 const imageRepository = connectionSource.getRepository(Images);
@@ -253,7 +253,7 @@ export const updateProjectController: RequestHandler = async (
   const images = req.files as Express.Multer.File[];
 
   if (images.length > 10) {
-    return error(res, "You can only upload a maximum of 10 images at a time");
+    throw new BadRequestError("You can only upload a maximum of 10 images at a time");
   }
   if (!data) {
     throw new BadRequestError("Please provide data to update!!");
@@ -271,7 +271,7 @@ export const updateProjectController: RequestHandler = async (
       `Project with id: ${id} updated successfully`
     );
   } catch (error) {
-    return error(res, "Project update failed");
+    throw new InternalServerError("Project update failed");
   }
 };
 export const deleteProjectController: RequestHandler = async (

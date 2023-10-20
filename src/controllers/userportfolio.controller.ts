@@ -56,13 +56,15 @@ const getPortfolioDetails = async (
   next: NextFunction
 ) => {
   try {
-    const { userId } = req.params;
-    if (!userId || !isValidUUID(`${userId}`)) {
-      throw new BadRequestError(`${userId} is not a valid UUID`);
-    }
+    // const { userId } = req.params;
+    const { slug } = req.params;
+    // if (!userId || !isValidUUID(`${userId}`)) {
+    //   throw new BadRequestError(`${userId} is not a valid UUID`);
+    // }
 
     const user = await userRepository.findOne({
-      where: { id: userId },
+      // where: { id: userId },
+      where: { slug },
       select: [
         "id",
         "firstName",
