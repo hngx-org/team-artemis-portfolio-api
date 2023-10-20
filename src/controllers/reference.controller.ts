@@ -102,44 +102,71 @@ export const deleteReferenceDetail = async (
   }
 };
 
+// export const updateReference = async (req: Request, res: Response) => {
+//   try {
+//     const { id }: any = req.params;
+
+//     let fields = Object.keys(req.body);
+
+//     let shouldContinue = true;
+//     let message: string;
+
+//     for (let i = 0; i < fields.length; i++) {
+//       const field = fields[i];
+//       console.log(field);
+//       if (field == "sectionId") continue;
+
+//       if (!isNaN(Number(req.body[field]))) {
+//         message = field;
+//         shouldContinue = false;
+//       }
+//     }
+
+//     if (!shouldContinue) {
+//       return error(res, `${message} should be a string`, 422);
+//     }
+
+//     await connectionSource
+//       .createQueryBuilder()
+//       .update(ReferenceDetail)
+//       .set(req.body)
+//       .where("id = :id", { id: id })
+//       .execute();
+
+//     const userRepository = connectionSource.getRepository(ReferenceDetail);
+//     const refByid = await userRepository.findOneBy({
+//       id: id,
+//     });
+
+//     success(res, refByid);
+//   } catch (err) {
+//     error(res, "invalid reference id");
+//   }
+// };
+
 export const updateReference = async (req: Request, res: Response) => {
   try {
+    updatereferenceschema.parse(req.body);
+    if (JSON.stringify(req.body) === "{}") {
+      return error(res, "cannot send an empty Request Body");
+    }
     const { id }: any = req.params;
-
-    let fields = Object.keys(req.body);
-
-    let shouldContinue = true;
-    let message: string;
-
-    for (let i = 0; i < fields.length; i++) {
-      const field = fields[i];
-      console.log(field);
-      if (field == "sectionId") continue;
-
-      if (!isNaN(Number(req.body[field]))) {
-        message = field;
-        shouldContinue = false;
-      }
-    }
-
-    if (!shouldContinue) {
-      return error(res, `${message} should be a string`, 422);
-    }
-
     await connectionSource
       .createQueryBuilder()
       .update(ReferenceDetail)
       .set(req.body)
       .where("id = :id", { id: id })
       .execute();
-
     const userRepository = connectionSource.getRepository(ReferenceDetail);
     const refByid = await userRepository.findOneBy({
       id: id,
     });
-
     success(res, refByid);
   } catch (err) {
-    error(res, "invalid reference id");
+    if (err instanceof z.ZodError) {
+      error(res, err.flatten().fieldErrors);
+    } else {
+      error(res, "invalid Reference ID");
+    }
   }
 };
