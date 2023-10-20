@@ -1,9 +1,10 @@
 import express from "express";
-import { 
-   addCertificateController, 
-   deleteCertificate, 
-   getAllCertificates,
-   getCertificateById, 
+import {
+  addCertificateController,
+  deleteCertificate,
+  getAllCertificates,
+  getCertificateById,
+  updateCertificate,
 } from "../controllers/certificate.controller";
 
 const router = express.Router();
@@ -97,11 +98,18 @@ router.post("/add-certificate/:userId", addCertificateController);
 
 /**
  * @swagger
- * /api/certificates:
+ * /api/certificates/{userId}:
  *   get:
- *     summary: Get all certificates.
- *     description: Retrieve a list of all available certificates.
+ *     summary: Get all certificates for a specific user.
+ *     description: Retrieve a list of all available certificates for a specific user.
  *     tags: [Certificates]
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The unique identifier of the user for whom certificates are being retrieved.
  *     responses:
  *       200:
  *         description: Certificates retrieved successfully.
@@ -131,7 +139,7 @@ router.post("/add-certificate/:userId", addCertificateController);
  *                     type: string
  *                     description: Additional description of the certificate.
  *       404:
- *         description: No certificates found. There are no certificates available.
+ *         description: No certificates found. There are no certificates available for the specified user.
  *         content:
  *           application/json:
  *             schema:
@@ -139,7 +147,7 @@ router.post("/add-certificate/:userId", addCertificateController);
  *               properties:
  *                 error:
  *                   type: string
- *                   description: Error message indicating that no certificates were found.
+ *                   description: Error message indicating that no certificates were found for the specified user.
  *       500:
  *         description: Internal Server Error. An error occurred while processing the request.
  *         content:
@@ -150,9 +158,7 @@ router.post("/add-certificate/:userId", addCertificateController);
  *                 error:
  *                   type: string
  */
-
-router.get("/certificates", getAllCertificates);
-
+router.get("/certificates/:userId", getAllCertificates);
 
 /**
  * @swagger
@@ -203,7 +209,6 @@ router.get("/certificates", getAllCertificates);
  *                   type: string
  */
 router.delete("/certificates/:certId", deleteCertificate);
-
 
 /**
  * @swagger
@@ -265,6 +270,96 @@ router.delete("/certificates/:certId", deleteCertificate);
  *                 error:
  *                   type: string
  */
-router.get("/certificates/:certId", getCertificateById);
+router.get("/certificate/:userId/:certId", getCertificateById);
+
+/**
+ * @swagger
+ * /api/certificate/{userId}/{certId}:
+ *   patch:
+ *     summary: Update certificate details for a user with a specified certificate ID.
+ *     description: Update certificate details for a user.
+ *     tags:
+ *       - Certificates
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The ID of the user associated with the certificate.
+ *       - in: path
+ *         name: certId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: The ID of the certificate to be updated.
+ *       - in: body
+ *         name: certificateDetails
+ *         description: The data for the certificate details to be updated.
+ *         required: true
+ *         schema:
+ *           type: object
+ *           properties:
+ *             title:
+ *               type: string
+ *             year:
+ *               type: string
+ *             organization:
+ *               type: string
+ *             url:
+ *               type: string
+ *             description:
+ *               type: string
+ *             sectionId:
+ *               type: number
+ *         example:
+ *           title: "Updated Certificate Title"
+ *           year: "2024"
+ *           organization: "Updated Certificate Organization"
+ *           url: "https://example-updated.com"
+ *           description: "Updated Certificate Description"
+ *           sectionId: 3
+ *     responses:
+ *       200:
+ *         description: Certificate details successfully updated. Returns the updated certificate.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 successful:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   type: object
+ *       400:
+ *         description: Error updating certificate details.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 successful:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   type: null
+ *       404:
+ *         description: Certificate or User not found. Please provide valid IDs.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 successful:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   type: null
+ */
+router.patch("/certificate/:userId/:certId", updateCertificate);
 
 module.exports = router;

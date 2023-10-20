@@ -1,11 +1,11 @@
-import { Award } from "../database/entity/model";
 import { NextFunction, Request, Response } from "express";
 import { createAwardService } from "../services/award.service";
 import { AwardData } from "../interfaces/";
-import { User } from "../database/entity/user";
 import { connectionSource } from "../database/data-source";
 import { NotFoundError } from "../middlewares";
 import { QueryFailedError } from "typeorm";
+import { Award } from "../database/entities/Award";
+import { User } from "../database/entities/User";
 
 // Controller function to create an award
 const createAwardController = async (

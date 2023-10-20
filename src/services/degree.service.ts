@@ -1,5 +1,5 @@
 import { connectionSource } from "../database/data-source";
-import { Degree } from "../database/entity/model";
+import { Degree } from "../database/entities";
 import { UpdateDegreeResponse } from "../interfaces/degree.interface";
 import { NotFoundError } from "../middlewares/index";
 

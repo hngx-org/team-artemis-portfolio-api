@@ -2,24 +2,46 @@ import { Request, Response, RequestHandler, NextFunction } from "express";
 import { connectionSource } from "../database/data-source";
 import { validate as isValidUUID } from "uuid";
 import {
-  PortfolioDetails,
+  PortfolioDetail,
+  User,
+  WorkExperienceDetail,
   AboutDetail,
   EducationDetail,
   InterestDetail,
+  Skill,
   Project,
   Section,
   SkillsDetail,
-  WorkExperienceDetail,
-  UserTrack,
   Tracks,
-} from "../database/entity/model";
+  UserTrack,
+  Award,
+  Certificate,
+  CustomUserSection,
+  ReferenceDetail,
+  SocialUser,
+  LanguageDetail,
+  Images,
+  ProjectsImage,
+} from "../database/entities";
 import { NotFoundError, BadRequestError } from "../middlewares/index";
-import { User } from "../database/entity/user";
-import { success } from "../utils";
+import { getAllLanguages } from "../services/language.service";
 
 const portfolioDetailsRepository =
-  connectionSource.getRepository(PortfolioDetails);
-const portfolioRepository = connectionSource.getRepository(PortfolioDetails);
+  connectionSource.getRepository(PortfolioDetail);
+const portfolioRepository = connectionSource.getRepository(PortfolioDetail);
+const userRepository = connectionSource.getRepository(User);
+const workExperienceRepository =
+  connectionSource.getRepository(WorkExperienceDetail);
+const imageRepository = connectionSource.getRepository(Images);
+const referenceRepository = connectionSource.getRepository(ReferenceDetail);
+const projectRepository = connectionSource.getRepository(Project);
+const sectionRepository = connectionSource.getRepository(Section);
+const userTrackRepository = connectionSource.getRepository(UserTrack);
+const languageDetailRepository = connectionSource.getRepository(LanguageDetail);
+const aboutRepositiory = connectionSource.getRepository(AboutDetail);
+const awardRepository = connectionSource.getRepository(Award);
+const certificateRepository = connectionSource.getRepository(Certificate);
+const projectImageRepository = connectionSource.getRepository(ProjectsImage);
 
 export interface UpdatePortfolioDetailsDTO {
   name?: string;
@@ -38,142 +60,136 @@ const getPortfolioDetails = async (
       throw new BadRequestError(`${userId} is not a valid UUID`);
     }
 
-    const workExperience = await connectionSource.manager.find(
-      WorkExperienceDetail,
-      { where: { userId } }
-    );
+    const user = await userRepository.findOne({ where: { id: userId } });
 
-    const education = await connectionSource.manager.find(EducationDetail, {
-      where: { userId },
+    const educationPromise = connectionSource.manager.find(EducationDetail, {
+      where: { user: { id: user.id } },
+      relations: ["degree"],
     });
 
-    const skills = await connectionSource.manager.find(SkillsDetail, {
-      where: { userId },
+    const skillsPromise = connectionSource.manager.find(SkillsDetail, {
+      where: { user: { id: user.id } },
     });
 
-    const interests = await connectionSource.manager.find(InterestDetail, {
-      where: { userId },
+    const interestsPromise = connectionSource.manager.find(InterestDetail, {
+      where: { user: { id: user.id } },
     });
 
-    const about = await connectionSource.manager.find(AboutDetail, {
-      where: { userId },
+    const aboutPromise = aboutRepositiory.findOne({
+      where: { user: { id: user.id } },
     });
 
-    const projects = await connectionSource.manager.find(Project, {
-      where: { userId },
+    const allProjectsPromise = connectionSource.manager.find(Project, {
+      where: { user: { id: user.id } },
+      relations: ["projectsImages"],
     });
 
-    const sections = await connectionSource.manager.find(Section);
-    res.status(200).json({
-      workExperience,
-      education,
-      skills,
-      interests,
-      about,
-      projects,
-      sections,
+    const sectionsPromise = connectionSource.manager.find(CustomUserSection, {
+      where: { user: { id: user.id } },
     });
+
+    const tracksPromise = userTrackRepository.findOne({
+      where: { user: { id: user.id } },
+      relations: ["track"],
+    });
+
+    const workExperiencePromise = workExperienceRepository.find({
+      where: { user: { id: user.id } },
+    });
+
+    const awardsPromise = awardRepository.find({
+      where: { user: { id: user.id } },
+    });
+
+    const certificatesPromise = certificateRepository.find({
+      where: { user: { id: user.id } },
+    });
+
+    const referencePromise = connectionSource.manager.find(ReferenceDetail, {
+      where: { user: { id: user.id } },
+    });
+
+    try {
+      const [
+        education,
+        skills,
+        interests,
+        about,
+        allProjects,
+        sections,
+        tracks,
+        workExperience,
+        awards,
+        certificates,
+        reference,
+      ] = await Promise.all([
+        educationPromise,
+        skillsPromise,
+        interestsPromise,
+        aboutPromise,
+        allProjectsPromise,
+        sectionsPromise,
+        tracksPromise,
+        workExperiencePromise,
+        awardsPromise,
+        certificatesPromise,
+        referencePromise,
+      ]);
+
+      const interestArray = interests[0]?.interest?.split(","); //convert interest to Array of interests
+
+      const imagePromises = allProjects.map(async (project) => {
+        const imageUrlsPromises = project?.projectsImages?.map(
+          async (image) => {
+            const imageEntity = await projectImageRepository.findOne({
+              where: { id: image.id },
+              relations: ["image"],
+            });
+
+            return imageEntity ? imageEntity.image.url : null;
+          }
+        );
+        const imageUrls = await Promise.all(imageUrlsPromises);
+        return {
+          ...project,
+          projectsImages: imageUrls,
+          thumbnail: imageUrls[0],
+        };
+      });
+
+      const projects = await Promise.all(imagePromises);
+
+      const track = tracks?.track;
+
+      const languages = await getAllLanguages(user.id); // Please do not delete
+
+      res.status(200).json({
+        user,
+        education,
+        skills,
+        interests,
+        interestArray,
+        about,
+        projects,
+        workExperience,
+        awards,
+        certificates,
+        sections,
+        tracks: track,
+        reference,
+        languages,
+      });
+    } catch (error) {
+      return next(error);
+    }
   } catch (error) {
     return next(error);
   }
 };
-//.
+
 const getAllPortfolioDetails = async (req: Request, res: Response) => {
   const PortfolioDetails = await portfolioRepository.find();
   return res.json({ PortfolioDetails });
-};
-
-const updatePortfolioDetails: RequestHandler = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const userId = req.params.userId;
-    const { name, trackId, city, country } = req.body;
-
-    if (!req.body) {
-      throw new BadRequestError("No data provided");
-    }
-
-    const userRepository = connectionSource.getRepository(User);
-    const portfolioDetailsRepository =
-      connectionSource.getRepository(PortfolioDetails);
-    const userTrackRepository = connectionSource.getRepository(UserTrack);
-    const trackRepository = connectionSource.getRepository(Tracks);
-
-    let user = await userRepository.findOne({ where: { id: userId } });
-
-    if (!user) {
-      throw new NotFoundError("User Not Found");
-    }
-
-    if (name) {
-      const splitName = name.split(" ");
-      await userRepository.update(user.id, {
-        firstName: splitName[0],
-        lastName: splitName[1],
-      });
-
-      // Fetch the updated user immediately
-      user = await userRepository.findOne({ where: { id: userId } });
-    }
-
-    let track: Tracks;
-
-    if (trackId) {
-      track = await trackRepository.findOne({ where: { id: trackId } });
-
-      if (!track) {
-        throw new NotFoundError("Track Not Found");
-      }
-
-      const userTrack = await userTrackRepository.findOne({
-        where: { trackId: trackId, userId },
-      });
-
-      if (!userTrack) {
-        const newUserTrack = userTrackRepository.create({
-          trackId: trackId,
-          userId,
-        });
-
-        await userTrackRepository.save(newUserTrack);
-      }
-    }
-
-    let portfolio = await portfolioDetailsRepository.findOne({
-      where: { userId: userId },
-    });
-
-    if (!portfolio) {
-      throw new NotFoundError("Portfolio Not Found");
-    }
-
-    if (city) {
-      portfolio.city = city;
-    }
-
-    if (country) {
-      portfolio.country = country;
-    }
-
-    portfolio = await portfolioDetailsRepository.save(portfolio);
-
-    console.log("Successfully updated user profile portfolio details");
-    return success(
-      res,
-      {
-        portfolio: portfolio,
-        track: track,
-        user: user,
-      },
-      "Successfully updated user profile portfolio details"
-    );
-  } catch (error) {
-    console.log("Error updating profile detail:", error.message);
-    next(error);
-  }
 };
 
 // delete Portfolio Profile details
@@ -208,9 +224,4 @@ const deletePortfolioDetails: RequestHandler = async (
   }
 };
 
-export {
-  getPortfolioDetails,
-  getAllPortfolioDetails,
-  updatePortfolioDetails,
-  deletePortfolioDetails,
-};
+export { getAllPortfolioDetails, getPortfolioDetails, deletePortfolioDetails };

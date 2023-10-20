@@ -1,4 +1,5 @@
 import { Response } from 'express';
+import axios from 'axios';
 
 export const success = (res: Response, data: string | Object) => {
   return res.status(200).json({
@@ -43,10 +44,50 @@ export const notFound = (res: Response, data: string | Object) => {
   });
 };
 
+export const getAllLanguages = async (userId) => {
+  const hostUrl = 'https://hng-u6fu.vercel.app';
+  const languages = await axios.get(`${hostUrl}/getLanguages/${userId}`);
+  if (!languages.data.data) return []
+  return languages.data.data
+};
+
+export const programmingLanguages = [
+	'JavaScript',
+	'TypeScript',
+	'Python',
+	'Java',
+	'C',
+	'C++',
+	'C#',
+	'Go',
+	'Rust',
+	'Swift',
+	'Kotlin',
+	'Ruby',
+	'PHP',
+	'Scala',
+	'Elixir',
+	'Clojure',
+	'Haskell',
+	'Lua',
+	'Dart',
+	'R',
+	'Julia',
+	'Groovy',
+	'Objective-C',
+	'CoffeeScript',
+	'F#',
+	'Perl',
+	'MATLAB',
+	'VB.NET',
+	'Shell Scripting',
+  ];
+
 export default {
   success,
   badRequest,
   serverError,
   created,
   notFound,
+  getAllLanguages,
 };

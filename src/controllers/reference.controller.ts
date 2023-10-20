@@ -1,52 +1,67 @@
 import { Request, Response, NextFunction } from "express";
 import { connectionSource } from "../database/data-source";
-import { References } from "../database/entity/model";
+import { CustomError, NotFoundError, BadRequestError } from "../middlewares";
+import { ReferenceDetail, Section, User } from "../database/entities";
+import { IReference } from "../interfaces";
+import { success, error } from "../utils";
 import {
-  CustomError,
-  NotFoundError,
-  BadRequestError,
-} from "../middlewares";
+  createReferenceService,
+  deleteReferenceDetailService,
+  getAllUserReferenceService,
+  updateReferenced,
+} from "../services/reference.service";
+const referenceRepository = connectionSource.getRepository(ReferenceDetail);
 
-const referenceRepository = connectionSource.getRepository(References);
 export const createReference = async (req: Request, res: Response) => {
   try {
-      const validatedData = req.body; // Assuming that the validation middleware stored the validated data
-    const userIdFromURL = req.params.userId; // Extract user ID from the URL
+    const user_id = req.params.userId;
 
-    // If the user ID is not provided in the URL, check if it's in the request body
-    let userId = userIdFromURL || validatedData.userId;
-    // Create a new References object with the validated data
-    const reference = new References();
-    reference.name = validatedData.name;
-    reference.company = validatedData.company;
-    reference.position = validatedData.position;
-    reference.emailAddress = validatedData.emailAddress;
-    reference.phoneNumber = validatedData.phoneNumber;
-    reference.userId = userId;
+    const { referer, company, position, email, phoneNumber, sectionId } =
+      req.body as IReference;
 
-    // Save the reference to the database
-    await referenceRepository.save(reference);
+    const data = {
+      userId: user_id,
+      referer,
+      company,
+      position,
+      email,
+      phoneNumber,
+      sectionId,
+    };
 
-    res.status(201).json({ message: "Reference created successfully" });
-  } catch (error) {
-    res.status(400).json({ error: error.message });
+    let d = await createReferenceService(user_id, sectionId, data);
+
+    success(res, d.data, d.message);
+  } catch (err) {
+    error(res, (err as Error).message); // Use type assertion to cast 'err' to 'Error' type
   }
 };
 
-export const getAllReference = async (
-  req: Request,
-  res: Response,
-) => {
+export const getAllReference = async (req: Request, res: Response) => {
   try {
-    const references = await referenceRepository.find();
-    res.json({ references });
+    // const references = await referenceRepository.find();
+    // res.json({ references });
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: "Internal server error" });
   }
 };
 
+export const getAllUserReference = async (req: Request, res: Response) => {
+  try {
+    const userId = req.params.userId;
+    const d = await getAllUserReferenceService(userId);
 
+    if (!d.successful) {
+      return error(res, d.message);
+    }
+
+    return success(res, d.data, d.message);
+  } catch (err) {
+    console.log(err);
+    error(res, (err as Error).message); // Use type assertion to cast 'err' to 'Error' type
+  }
+};
 
 export const deleteReferenceDetail = async (
   req: Request,
@@ -56,26 +71,30 @@ export const deleteReferenceDetail = async (
   try {
     const id = parseInt(req.params.id);
 
-    if (isNaN(id) || id < 1) {
-      throw new BadRequestError("Invalid ID Format");
-    }
+    const d = await deleteReferenceDetailService(id);
 
-    // Find the existing reference detail by ID
-    const referenceDetail = await referenceRepository.findOne({
-      where: { id },
-    });
-
-    if (!referenceDetail) {
-      throw new NotFoundError("Reference detail not found");
-    }
-
-    await referenceRepository.remove(referenceDetail);
-
-     res.status(200).json({
-      message: "Reference detail deleted successfully"  });
-  } catch (error) {
+    success(res, {}, d.message);
+  } catch (err) {
     console.error("Error deleting reference detail:", error);
-    next(error);
+    error(res, (err as Error).message); // Use type assertion to cast 'err' to 'Error' type
   }
 };
 
+export const updateReference = async (req: Request, res: Response) => {
+  try {
+    const { id }: any = req.params;
+    await connectionSource
+      .createQueryBuilder()
+      .update(ReferenceDetail)
+      .set(req.body)
+      .where("id = :id", { id: id})
+      .execute();
+    const userRepository = connectionSource.getRepository(ReferenceDetail);
+    const refByid = await userRepository.findOneBy({
+      id: id,
+    });
+    success(res, refByid);
+  } catch (err) {
+    error(res, "invalid userid");
+  }
+};

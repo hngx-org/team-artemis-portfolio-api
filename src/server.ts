@@ -1,6 +1,6 @@
 import { connectionSource } from "./database/data-source";
 import express from "express";
-import * as entities from "./database/entity/model";
+import * as entities from "./database/entities";
 import { readdirSync } from "fs";
 import { sayHelloController } from "./controllers/greeting.controller";
 import cors from "cors";
@@ -15,7 +15,8 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerOptions));
 
 connectionSource
   .initialize()
-  .then(async () => {
+  .then(async (conn) => {
+    await conn.runMigrations()
     console.log("Database Connected");
   })
   .catch((error) => console.log(error));

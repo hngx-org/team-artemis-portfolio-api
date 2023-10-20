@@ -1,33 +1,48 @@
 import { Request, RequestHandler, Response } from 'express';
 import { connectionSource } from '../database/data-source';
-import { Language } from '../database/entity/model';
-import { User } from '../database/entity/user';
+import { User } from '../database/entities';
 import { validate as isValidUUID } from 'uuid';
-import responseHandler from '../services/language.service';
+import responseHandler, {
+  programmingLanguages,
+} from '../services/language.service';
+import axios from 'axios';
 
-const languageRepository = connectionSource.getRepository(Language);
+// const languageRepository = connectionSource.getRepository(Language);
 const userRepository = connectionSource.getRepository(User);
+const hostUrl = 'https://hng-u6fu.vercel.app';
 
 const addLanguage: RequestHandler = async (req: Request, res: Response) => {
   try {
-    const { userId, languages } = req.body;
+    let { userId, languages } = req.body;
+
+    languages = languages.map((language: string) => language.toLowerCase());
+    let checkLanguageArray = programmingLanguages.map((language) =>
+      language.toLowerCase()
+    );
+    let misMatchFound = false;
+
+    for (const language of languages) {
+      if (!checkLanguageArray.includes(language)) {
+        misMatchFound = true;
+        break;
+      }
+    }
+
+    if (misMatchFound)
+      return responseHandler.badRequest(res, "Chosen language must be in the recommended list");
 
     const user = await userRepository.findOneBy({ id: userId });
 
     if (!user) return responseHandler.notFound(res, 'User not found');
 
-    await languageRepository.delete({ userId });
-
-    languages.map(async (language: string) => {
-      const userLanguage = new Language();
-      userLanguage.userId = userId;
-      userLanguage.language = language;
-      await languageRepository.save(userLanguage);
+    const result = await axios.post(`${hostUrl}/createLanguage`, {
+      userId,
+      languages,
     });
 
-    responseHandler.success(res, languages);
+    responseHandler.success(res, result.data.data);
   } catch (error) {
-    return responseHandler.serverError(res, error.message);
+    return responseHandler.serverError(res, error);
   }
 };
 
@@ -38,16 +53,52 @@ const getUserLanguages: RequestHandler = async (
   try {
     const userId = req.params.userId;
 
-	if (!isValidUUID(userId)) return responseHandler.badRequest(res, "userId must be a valid UUID string")
+    if (!isValidUUID(userId))
+      return responseHandler.badRequest(
+        res,
+        'userId must be a valid UUID string'
+      );
 
     const user = await userRepository.findOneBy({ id: userId });
     if (!user) return responseHandler.notFound(res, 'User not found');
 
-    const userLanguages = await languageRepository.find({
-      where: { userId: userId },
-    });
+    const userLanguages = await axios.get(`${hostUrl}/getLanguages/${userId}`);
 
-    return responseHandler.success(res, userLanguages);
+    return responseHandler.success(res, userLanguages.data.data);
+  } catch (error) {
+    return responseHandler.serverError(res, error.message);
+  }
+};
+
+const deleteAllUserLanguages: RequestHandler = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const userId = req.params.userId;
+
+    if (!isValidUUID(userId))
+      return responseHandler.badRequest(
+        res,
+        'userId must be a valid UUID string'
+      );
+
+    const user = await userRepository.findOneBy({ id: userId });
+    if (!user) return responseHandler.notFound(res, 'User not found');
+
+    const userLanguages = await axios.delete(
+      `${hostUrl}/deleteLanguages/${userId}`
+    );
+
+    return responseHandler.success(res, userLanguages.data.data);
+  } catch (error) {
+    return responseHandler.serverError(res, error.message);
+  }
+};
+
+const getAllLanguages: RequestHandler = (req: Request, res: Response) => {
+  try {
+    return responseHandler.success(res, programmingLanguages);
   } catch (error) {
     return responseHandler.serverError(res, error.message);
   }
@@ -56,4 +107,6 @@ const getUserLanguages: RequestHandler = async (
 export default {
   addLanguage,
   getUserLanguages,
+  deleteAllUserLanguages,
+  getAllLanguages,
 };
