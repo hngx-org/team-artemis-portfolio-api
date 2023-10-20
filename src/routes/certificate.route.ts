@@ -11,7 +11,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /api/add-certificate/{userId}:
+ * /api/v1/certificates/{userId}:
  *   post:
  *     summary: Create certificate details for a user with a specified ID.
  *     description: Create certificate details for a user.
@@ -94,11 +94,11 @@ const router = express.Router();
  *                 data:
  *                   type: null
  */
-router.post("/add-certificate/:userId", addCertificateController);
+router.post("/certificates/:userId", addCertificateController);
 
 /**
  * @swagger
- * /api/certificates/{userId}:
+ * /api/v1/certificates/{userId}:
  *   get:
  *     summary: Get all certificates for a specific user.
  *     description: Retrieve a list of all available certificates for a specific user.
@@ -162,7 +162,7 @@ router.get("/certificates/:userId", getAllCertificates);
 
 /**
  * @swagger
- * /api/certificates/{certId}:
+ * /api/v1/certificates/{userId}/{certId}:
  *   delete:
  *     summary: Delete a certificate by ID.
  *     description: Delete a certificate by its unique certificate ID.
@@ -208,11 +208,11 @@ router.get("/certificates/:userId", getAllCertificates);
  *                 error:
  *                   type: string
  */
-router.delete("/certificates/:certId", deleteCertificate);
+router.delete("/certificates/:userId/:certId", deleteCertificate);
 
 /**
  * @swagger
- * /api/certificates/{certId}:
+ * /api/v1/certificates/{certId}:
  *   get:
  *     summary: Get a certificate by ID.
  *     description: Retrieve a certificate by its unique certificate ID.
@@ -270,11 +270,11 @@ router.delete("/certificates/:certId", deleteCertificate);
  *                 error:
  *                   type: string
  */
-router.get("/certificate/:userId/:certId", getCertificateById);
+router.get("/certificates/:userId/:certId", getCertificateById);
 
 /**
  * @swagger
- * /api/certificate/{userId}/{certId}:
+ * /api/v1/certificates/{userId}/{certId}:
  *   put:
  *     summary: Update certificate details for a user with a specified certificate ID.
  *     description: Update certificate details for a user.
@@ -360,6 +360,6 @@ router.get("/certificate/:userId/:certId", getCertificateById);
  *                 data:
  *                   type: null
  */
-router.put("/certificate/:userId/:certId", updateCertificate);
+router.put("/certificates/:userId/:certId", updateCertificate);
 
 module.exports = router;
