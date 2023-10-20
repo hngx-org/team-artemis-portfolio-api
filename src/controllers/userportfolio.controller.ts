@@ -42,6 +42,7 @@ const aboutRepositiory = connectionSource.getRepository(AboutDetail);
 const awardRepository = connectionSource.getRepository(Award);
 const certificateRepository = connectionSource.getRepository(Certificate);
 const projectImageRepository = connectionSource.getRepository(ProjectsImage);
+const contactsRepository = connectionSource.getRepository(SocialUser);
 
 export interface UpdatePortfolioDetailsDTO {
   name?: string;
@@ -60,7 +61,22 @@ const getPortfolioDetails = async (
       throw new BadRequestError(`${userId} is not a valid UUID`);
     }
 
-    const user = await userRepository.findOne({ where: { id: userId } });
+    const user = await userRepository.findOne({
+      where: { id: userId },
+      select: [
+        "id",
+        "firstName",
+        "lastName",
+        "email",
+        "profilePic",
+        "profileCoverPhoto",
+        "phoneNumber",
+        "location",
+        "username",
+        "country",
+        "slug",
+      ],
+    });
 
     const educationPromise = connectionSource.manager.find(EducationDetail, {
       where: { user: { id: user.id } },
@@ -109,6 +125,10 @@ const getPortfolioDetails = async (
       where: { user: { id: user.id } },
     });
 
+    const contactsPromise = contactsRepository.find({
+      where: { user: { id: user.id } },
+    });
+
     try {
       const [
         education,
@@ -122,6 +142,7 @@ const getPortfolioDetails = async (
         awards,
         certificates,
         reference,
+        contacts,
       ] = await Promise.all([
         educationPromise,
         skillsPromise,
@@ -134,6 +155,7 @@ const getPortfolioDetails = async (
         awardsPromise,
         certificatesPromise,
         referencePromise,
+        contactsPromise,
       ]);
 
       const interestArray = interests[0]?.interest?.split(","); //convert interest to Array of interests
@@ -178,6 +200,7 @@ const getPortfolioDetails = async (
         tracks: track,
         reference,
         languages,
+        contacts,
       });
     } catch (error) {
       return next(error);
