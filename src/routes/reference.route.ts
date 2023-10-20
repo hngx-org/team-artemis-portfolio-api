@@ -12,7 +12,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /api/v1/references/{userId}:
+nce  * /api/v1/references/{userId}:
  *   post:
  *     summary: Create a new reference.
  *     description: Create a new reference detail for a user.
