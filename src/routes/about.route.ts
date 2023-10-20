@@ -1,10 +1,16 @@
 import express from "express";
 const router = express.Router();
 
-import { createOrUpdateAbout, getAboutByUserID } from "../controllers/about.controller";
+import {
+  createAbout,
+  updateAbout,
+  getAboutByID,
+  deleteAbout,
+} from "../controllers/about.controller";
 
-
-router.put("/about/:userId", createOrUpdateAbout);
-router.get("/about/:user_id", getAboutByUserID);
+router.post("/about/:userId", createAbout);
+router.put("/about/:id", updateAbout);
+router.get("/about/:id", getAboutByID);
+router.delete("/about/:id", deleteAbout);
 
 module.exports = router;
