@@ -27,6 +27,7 @@ import {
 const customRepository = connectionSource.getRepository(CustomUserSection);
 const customFieldRepository = connectionSource.getRepository(CustomField);
 const sectionRepository = connectionSource.getRepository(Section);
+const userRepository = connectionSource.getRepository( User)
 
 const MAX_ID_LENGTH = 10;
 
@@ -227,11 +228,16 @@ const create = async (
       where: { id: req.body.sectionId },
     });
     if (!section) return error(res, "SectionId does not exist", 400);
+    const user = await userRepository.findOne({
+      where: { id: req.body.userId },
+    });
+     if (!user) return error(res, "User not found", 400);
     const newRecord = new CustomUserSection();
-    newRecord.user = (req as any).user;
+    newRecord.user = user;
     newRecord.section = section;
     newRecord.titile = req.body.title;
     const record = await customRepository.save(newRecord);
+    delete record.user.password;
     return success(res, record, "Success");
   } catch (err) {
     console.log(err);
@@ -243,9 +249,14 @@ export const getAllCustomSections = async (
   req: Request,
   res: Response
 ) => {
+   const { id } = req.params;
   try {
+     const user = await userRepository.findOne({
+      where: { id },
+    });
+     if (!user) return error(res, "User not found", 400);
     const records = await customRepository.find({
-      where: { user: { id: (req as any).user?.id } },
+      where: { user: { id } },
       relations: ["customFields"],
     });
     return success(res, records, "Success");
@@ -446,6 +457,11 @@ const customUserSectionSchema = z.object({
     .refine((value) => /^[A-Za-z]+$/.test(value), {
       message: "title must contain only letters (A-Z, a-z)",
     }),
+  userId: z.string().uuid().min(3)
+});
+
+const customGetUserSectionSchema = z.object({
+  userId: z.string().uuid().min(3)
 });
 
 const customFieldSchema = z.object({
@@ -639,4 +655,5 @@ export {
   deleteSection,
   updateSectionSchema,
   updateCustomSectionSchema,
+  customGetUserSectionSchema 
 };

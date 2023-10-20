@@ -10,7 +10,6 @@ import {
   createSection,
   validateSchema,
   sectionSchema,
-  customUserSectionSchema,
   // updateCustomSection,
   customFieldSchema,
   fieldsSchema,
@@ -26,6 +25,8 @@ import {
   deleteCustomFields,
   getcustomfieldsSchema,
   getAllCustomSections,
+  customUserSectionSchema,
+  customGetUserSectionSchema 
 } from "../controllers/custom.controller";
 import { validateQuery } from "../middlewares/custom.zod";
 import { validate } from "../middlewares/auth";
@@ -96,10 +97,6 @@ router.post("/section", validateSchema(sectionSchema), createSection);
  *     description: Create a new custom section
  *     tags: [Custom]
  *     parameters:
- *       - in: header
- *         name: Authorization
- *         type: string
- *         description: required token
  *       - in: body
  *         name: Section details
  *         description: The data for the Section details to be created.
@@ -110,6 +107,8 @@ router.post("/section", validateSchema(sectionSchema), createSection);
  *             sectionId:
  *               type: number
  *             title:
+ *               type: string
+ *             userId:
  *               type: string
  *
  *     responses:
@@ -142,7 +141,7 @@ router.post("/section", validateSchema(sectionSchema), createSection);
  *                 data:
  *                   type: null
  */
-router.post("/custom", [validate, validateSchema(customUserSectionSchema)], create);
+router.post("/custom",  validateSchema(customUserSectionSchema), create);
 
 /**
  * @swagger
@@ -167,16 +166,18 @@ router.get("/custom", findAll);
 
 /**
  * @swagger
- * /api/v1/custom/user:
+ * /api/v1/custom/user/{id}:
  *   get:
  *     summary: Get All custom sections for a user.
  *     description: Gets all custom section for a user along with their fields
  *     tags: [Custom]
  *     parameters:
- *       - in: header
- *         name: Authorization
- *         type: string
- *         description: required token
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: The ID of the user
+ *         schema:
+ *           type: string
  *     responses:
  *       200:
  *         description: Custom section detail retrieved successfully.
@@ -206,7 +207,10 @@ router.get("/custom", findAll);
  *                 message:
  *                   type: string
  */
-router.get("/custom/user", validate, getAllCustomSections);
+router.get(
+  "/custom/user/:id",
+  getAllCustomSections
+);
 /**
  * @swagger
  * /api/v1/section:

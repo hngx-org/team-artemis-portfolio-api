@@ -1,6 +1,7 @@
 export interface ICustomSection {
   title: string;
   sectionId: number;
+  userId: string;
 }
 
 export interface ICustomField {
