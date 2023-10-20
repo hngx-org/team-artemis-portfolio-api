@@ -35,7 +35,7 @@ export const createReference = async (req: Request, res: Response) => {
       return error(res, "Email should be a string", 422);
     }
 
-    const pattern = /^[a-zA-Z0-9]+$/;
+    const pattern = /^[a-zA-Z0-9 ,.]+$/;
 
     if (!pattern.test(referer)) {
       return error(res, "Referer should not contain sepecial characters", 422);
