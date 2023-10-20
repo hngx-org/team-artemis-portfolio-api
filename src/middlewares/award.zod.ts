@@ -26,19 +26,7 @@ const CreateAwardDataSchema = z.object({
     .string()
     .min(3, { message: 'field cannot be empty' })
     .regex(charRegex, { message: 'Message cannot contain special characters' }),
-  url: z
-    .string()
-    .min(3, { message: 'field cannot be empty' })
-    .optional()
-    .refine(
-      (value) => {
-        if (value) {
-          return urlRegex.test(value)
-        }
-        return true
-      },
-      { message: 'Invalid URL format' }
-    ),
+  url: z.string(),
   userId: z
     .string()
     .min(3)
@@ -53,23 +41,23 @@ export const UpdateAwardDataSchema = z.object({
   presented_by: z.string(),
   url: z.string().optional(),
   userId: z.string().refine((value) => isUUID(value), {
-    message: "userId has to be a valid UUID",
+    message: 'userId has to be a valid UUID',
   }),
-});
+})
 
 // Custom function to validate date strings in "yyyy" format
 function validateDateYYYY(dateString: string) {
-  const datePattern = /^\d{4}$/;
-  return datePattern.test(dateString);
+  const datePattern = /^\d{4}$/
+  return datePattern.test(dateString)
 }
 
 const options: ErrorMessageOptions = {
   delimiter: {
-    error: " 🔥 ",
+    error: ' 🔥 ',
   },
   transform: ({ errorMessage, index }) =>
     `Error #${index + 1}: ${errorMessage}`,
-};
+}
 
 async function validateCreateAwardData(
   req: Request,
@@ -77,30 +65,30 @@ async function validateCreateAwardData(
   next: NextFunction
 ) {
   try {
-    const data = req.body;
+    const data = req.body
 
     // Validate date strings in "yy-mm-dd" format
     if (data.year && !validateDateYYYY(data.year)) {
       const err = new BadRequestError(
         "Invalid 'year' date format, it must be 'yyyy' "
-      );
-      return res.status(err.statusCode).json({ error: err.message });
+      )
+      return res.status(err.statusCode).json({ error: err.message })
     }
 
     // Retrieve the "userId" from request parameters
-    const userId = req.params.userId;
+    const userId = req.params.userId
 
     // Validate the rest of the data against the schema
     const result = await parseAsync(CreateAwardDataSchema, {
       ...data,
       userId,
       options,
-    });
+    })
 
     // Store the validated data in the request object if needed
-    const validatedData = result;
-    console.log(validatedData);
-    next(); // Continue to the next middleware or route handler
+    const validatedData = result
+    console.log(validatedData)
+    next() // Continue to the next middleware or route handler
   } catch (error) {
     const err = new BadRequestError(error.message)
     const errorMessage = error.message.split(':').pop().trim()
@@ -116,26 +104,26 @@ async function validateUpdateAwardData(
   next: NextFunction
 ) {
   try {
-    const data = req.body;
+    const data = req.body
 
     // Validate date strings in "yyyy" format
     if (data.year && !validateDateYYYY(data.year)) {
       const err = new BadRequestError(
         "Invalid 'year' date format, it must be 'yyyy'"
-      );
-      return res.status(err.statusCode).json({ error: err.message });
+      )
+      return res.status(err.statusCode).json({ error: err.message })
     }
 
     // Validate the data against the schema
-    const result = await parseAsync(UpdateAwardDataSchema, data, options);
+    const result = await parseAsync(UpdateAwardDataSchema, data, options)
 
-    const validatedData = result;
-    console.log(validatedData);
-    next();
+    const validatedData = result
+    console.log(validatedData)
+    next()
   } catch (error) {
-    const err = new BadRequestError(error.message);
-    console.error(err.message);
-    res.status(err.statusCode).json({ error: err.message });
+    const err = new BadRequestError(error.message)
+    console.error(err.message)
+    res.status(err.statusCode).json({ error: err.message })
   }
 }
-export { validateCreateAwardData, validateUpdateAwardData };
+export { validateCreateAwardData, validateUpdateAwardData }
