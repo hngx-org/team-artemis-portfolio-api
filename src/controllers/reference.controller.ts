@@ -10,10 +10,15 @@ import {
   getAllUserReferenceService,
   updateReferenced,
 } from "../services/reference.service";
+import { CreateReferenceDetailSchema, updatereferenceschema } from "../middlewares/reference.zod";
+import { z } from "zod";
+
 const referenceRepository = connectionSource.getRepository(ReferenceDetail);
+
 
 export const createReference = async (req: Request, res: Response) => {
   try {
+    CreateReferenceDetailSchema.parse(req.body);
     const user_id = req.params.userId;
 
     const { referer, company, position, email, phoneNumber, sectionId } =
@@ -35,7 +40,7 @@ export const createReference = async (req: Request, res: Response) => {
       return error(res, "Email should be a string", 422);
     }
 
-    const pattern = /^[a-zA-Z0-9]+$/;
+    const pattern = /^[a-zA-Z0-9 ,.]+$/;
 
     if (!pattern.test(referer)) {
       return error(res, "Referer should not contain sepecial characters", 422);
@@ -55,7 +60,12 @@ export const createReference = async (req: Request, res: Response) => {
 
     success(res, d.data, d.message);
   } catch (err) {
-    error(res, (err as Error).message); // Use type assertion to cast 'err' to 'Error' type
+    if (err instanceof z.ZodError){
+      error(res, err.flatten());
+    }else {
+      error(res, (err as Error).message);
+    }
+    // error(res, (err as Error).message); // Use type assertion to cast 'err' to 'Error' type
   }
 };
 
@@ -102,44 +112,71 @@ export const deleteReferenceDetail = async (
   }
 };
 
+// export const updateReference = async (req: Request, res: Response) => {
+//   try {
+//     const { id }: any = req.params;
+
+//     let fields = Object.keys(req.body);
+
+//     let shouldContinue = true;
+//     let message: string;
+
+//     for (let i = 0; i < fields.length; i++) {
+//       const field = fields[i];
+//       console.log(field);
+//       if (field == "sectionId") continue;
+
+//       if (!isNaN(Number(req.body[field]))) {
+//         message = field;
+//         shouldContinue = false;
+//       }
+//     }
+
+//     if (!shouldContinue) {
+//       return error(res, `${message} should be a string`, 422);
+//     }
+
+//     await connectionSource
+//       .createQueryBuilder()
+//       .update(ReferenceDetail)
+//       .set(req.body)
+//       .where("id = :id", { id: id })
+//       .execute();
+
+//     const userRepository = connectionSource.getRepository(ReferenceDetail);
+//     const refByid = await userRepository.findOneBy({
+//       id: id,
+//     });
+
+//     success(res, refByid);
+//   } catch (err) {
+//     error(res, "invalid reference id");
+//   }
+// };
+
 export const updateReference = async (req: Request, res: Response) => {
   try {
+    updatereferenceschema.parse(req.body);
+    if (JSON.stringify(req.body) === "{}") {
+      return error(res, "cannot send an empty Request Body");
+    }
     const { id }: any = req.params;
-
-    let fields = Object.keys(req.body);
-
-    let shouldContinue = true;
-    let message: string;
-
-    for (let i = 0; i < fields.length; i++) {
-      const field = fields[i];
-      console.log(field);
-      if (field == "sectionId") continue;
-
-      if (!isNaN(Number(req.body[field]))) {
-        message = field;
-        shouldContinue = false;
-      }
-    }
-
-    if (!shouldContinue) {
-      return error(res, `${message} should be a string`, 422);
-    }
-
     await connectionSource
       .createQueryBuilder()
       .update(ReferenceDetail)
       .set(req.body)
       .where("id = :id", { id: id })
       .execute();
-
     const userRepository = connectionSource.getRepository(ReferenceDetail);
     const refByid = await userRepository.findOneBy({
       id: id,
     });
-
     success(res, refByid);
   } catch (err) {
-    error(res, "invalid userid");
+    if (err instanceof z.ZodError) {
+      error(res, err.flatten().fieldErrors);
+    } else {
+      error(res, "invalid Reference ID");
+    }
   }
 };

@@ -16,7 +16,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /api/education/{id}:
+ * /api/v1/education/{id}:
  *   get:
  *     summary: Get education detail(s) for a user who's id is in the params and returns an array of objects containing a user education details.
  *     description: Get education detail(s) for a user who's id is in the params and returns an array of objects containing a user education details.
@@ -73,7 +73,7 @@ router.get("/education/:id", fetchUserEducationDetail);
 
 /**
  * @swagger
- * /api/education/{id}:
+ * /api/v1/education/{id}:
  *   post:
  *     summary: Create education details for a user with a specified ID.
  *     description: Create education details for a user.
@@ -153,7 +153,7 @@ router.post("/education/:id", createEducationDetailController);
 
 /**
  * @swagger
- * /api/education/{id}:
+ * /api/v1/education/{id}:
  *   get:
  *     summary: Get education detail(s) for a user who's id is in the params and returns an array of objects containing a user education details.
  *     description: Get education detail(s) for a user who's id is in the params and returns an array of objects containing a user education details.
@@ -198,7 +198,7 @@ router.get("/education/:id", getEducationDetailById);
 
 /**
  * @swagger
- * /api/updateEducationDetail/{id}:
+ * /api/v1/updateEducationDetail/{id}:
  *   patch:
  *     summary: Update education details for a user by its ID.
  *     description: Update education details for a user by its ID.
@@ -268,7 +268,7 @@ router.patch(
 
 /**
  * @swagger
- * /api/educationDetail/{id}:
+ * /api/v1/educationDetail/{id}:
  *  get:
  *   summary: Get education detail by its ID
  *   description: Retrieve an education detail by its ID.
@@ -339,7 +339,7 @@ router.get("/educationDetail/:id", getEducationDetailById);
 
 /**
  * @swagger
- * /api/education/{id}:
+ * /api/v1/education/{id}:
  *   delete:
  *     summary: Delete education detail by ID
  *     description: Delete an education detail by its ID.

@@ -1,4 +1,6 @@
 import { Request, RequestHandler, Response, NextFunction } from "express";
+import { v4 as uuidv4, validate as isUUID } from "uuid";
+
 import { connectionSource } from "../database/data-source";
 import { Degree, EducationDetail, Section, User } from "../database/entities";
 import {
@@ -46,7 +48,13 @@ const fetchUserEducationDetail: RequestHandler = async (req, res, next) => {
       throw new BadRequestError("User ID is required");
     }
 
-    const user = await userRepository.findOne({ where: { id: user_id } });
+    let user: User;
+
+    if (isUUID(user_id)) {
+      user = await userRepository.findOne({ where: { id: user_id } });
+    } else {
+      user = await userRepository.findOne({ where: { slug: user_id } });
+    }
 
     if (!user) {
       const error = new NotFoundError("A user with this ID does not exist");
@@ -54,7 +62,7 @@ const fetchUserEducationDetail: RequestHandler = async (req, res, next) => {
     }
 
     const educationDetails = await educationDetailRepository.find({
-      where: { user: { id: user_id } },
+      where: { user: { id: user.id } },
       relations: ["degree"],
     });
 
@@ -183,7 +191,13 @@ const createEducationDetailController = async (
     // Get the user by userId
     const userRepository = connectionSource.getRepository(User);
 
-    const user = await userRepository.findOne({ where: { id: user_id } });
+    let user: User;
+
+    if (isUUID(user_id)) {
+      user = await userRepository.findOne({ where: { id: user_id } });
+    } else {
+      user = await userRepository.findOne({ where: { slug: user_id } });
+    }
 
     const sectionRepository = connectionSource.getRepository(Section);
     const degreeRepository = connectionSource.getRepository(Degree);
