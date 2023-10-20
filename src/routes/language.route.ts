@@ -1,9 +1,9 @@
-import express from 'express';
-import languageController from '../controllers/language.controller';
+import express from "express";
+import languageController from "../controllers/language.controller";
 import {
   postLanguageSchema,
   validateSchema,
-} from '../middlewares/language.zod';
+} from "../middlewares/language.zod";
 
 const router = express.Router();
 
@@ -42,7 +42,7 @@ const router = express.Router();
  *         description: Internal server error
  */
 router.post(
-  '/language',
+  "/languages",
   validateSchema(postLanguageSchema),
   languageController.addLanguage
 );
@@ -73,7 +73,7 @@ router.post(
  *       500:
  *         description: Internal server error
  */
-router.get('/language/:userId', languageController.getUserLanguages);
+router.get("/languages/:userId", languageController.getUserLanguages);
 
 /**
  * @swagger
@@ -101,7 +101,7 @@ router.get('/language/:userId', languageController.getUserLanguages);
  *       500:
  *         description: Internal server error
  */
-router.delete('/language/:userId', languageController.deleteAllUserLanguages);
+router.delete("/languages/:userId", languageController.deleteAllUserLanguages);
 
 /**
  * @swagger
@@ -120,6 +120,6 @@ router.delete('/language/:userId', languageController.deleteAllUserLanguages);
  *       500:
  *         description: Internal server error
  */
-router.get('/language', languageController.getAllLanguages)
+router.get("/language", languageController.getAllLanguages);
 
 module.exports = router;

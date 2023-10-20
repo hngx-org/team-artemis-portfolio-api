@@ -15,7 +15,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /api/award/{userId}:
+ * /api/v1/awards/{userId}:
  *   post:
  *     summary: Create a new award for a user.
  *     description: Create a new award for a user by providing the user's ID.
@@ -85,11 +85,11 @@ const router = express.Router();
  *     tags:
  *       - Award
  */
-router.post("/award/:userId", validateCreateAwardData, createAwardController);
+router.post("/awards/:userId", validateCreateAwardData, createAwardController);
 
 /**
  * @swagger
- * /api/award/{awardId}:
+ * /api/v1/awards/{awardId}:
  *   put:
  *     summary: Update an award by ID.
  *     description: Update an award's information by providing its ID.
@@ -177,11 +177,11 @@ router.post("/award/:userId", validateCreateAwardData, createAwardController);
  *     tags:
  *       - Award
  */
-router.put("/award/:awardId", updateAwardController);
+router.put("/awards/:awardId", updateAwardController);
 
 /**
  * @swagger
- * /api/award/{id}:
+ * /api/v1/awards/{id}:
  *   get:
  *     summary: Fetch user award by ID.
  *     description: Fetch the award of a user.
@@ -245,12 +245,11 @@ router.put("/award/:awardId", updateAwardController);
  *                   type: string
  *                   example: "Award not found."           
  */
-
-router.get("/award/:id", getAwardController);
+router.get("/awards/:id", getAwardController);
 
 /**
  * @swagger
- * /api/awards:
+ * /api/v1/awards
  *   get:
  *     summary: Fetch all user award.
  *     description: Fetch the award of all user.
@@ -298,7 +297,7 @@ router.get("/awards", getAllAwardsController);
 
 /**
  * @swagger
- * /api/award/{id}:
+ * /api/v1/awards/{id}:
  *   delete:
  *     summary: Delete an award by ID.
  *     description: Delete an award by its unique ID.
@@ -341,7 +340,6 @@ router.get("/awards", getAllAwardsController);
  *     tags:
  *       - Award
  */
-
-router.delete("/award/:id", deleteAwardController);
+router.delete("/awards/:id", deleteAwardController);
 
 module.exports = router;
