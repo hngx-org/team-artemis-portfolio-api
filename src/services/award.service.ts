@@ -26,7 +26,22 @@ export const createAwardService = async (award: AwardData) => {
       description,
       url,
     });
-    const createdAward = await awardRepository.save(newAward);
+    const data = await awardRepository.save(newAward);
+
+    const {id, firstName, lastName} = data.user
+    
+    const createdAward = {
+      title: data.title,
+      year: data.year,
+      presented_by: data.presented_by,
+      url: data.url,
+      description: data.description,
+      user: {
+        id,
+        firstName,
+        lastName,
+      },
+    }
 
     return createdAward;
   } catch (error) {

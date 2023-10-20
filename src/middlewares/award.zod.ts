@@ -1,18 +1,51 @@
-import { ZodError, z } from "zod";
-import { NextFunction, Request, Response } from "express";
-import { BadRequestError } from "../middlewares";
-import { parseAsync, ErrorMessageOptions } from "zod-error";
-import { validate as isUUID } from "uuid";
+import { ZodError, z } from 'zod'
+import { NextFunction, Request, Response } from 'express'
+import { BadRequestError } from '../middlewares'
+import { parseAsync, ErrorMessageOptions } from 'zod-error'
+import { validate as isUUID } from 'uuid'
 
-export const CreateAwardDataSchema = z.object({
-  title: z.string(),
-  year: z.string(),
-  presented_by: z.string(),
-  url: z.string().optional(),
-  userId: z.string().refine((value) => isUUID(value), {
-    message: "userId has to be a valid UUID",
-  }),
-});
+const urlRegex = new RegExp(
+  '^((ft|htt)ps?:\\/\\/)?' +
+    '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|' + // domain name
+    '((\\d{1,3}\\.){3}\\d{1,3}))' +
+    '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*' +
+    '(\\?[;&a-z\\d%_.~+=-]*)?' +
+    '(\\#[-a-z\\d_]*)?$',
+  'i'
+)
+
+const charRegex = /^[a-zA-Z0-9\s]+$/
+
+const CreateAwardDataSchema = z.object({
+  title: z
+    .string()
+    .min(3)
+    .regex(charRegex, { message: 'Title cannot contain special characters' }),
+  year: z.string().min(3, { message: 'field cannot be empty' }),
+  presented_by: z
+    .string()
+    .min(3, { message: 'field cannot be empty' })
+    .regex(charRegex, { message: 'Message cannot contain special characters' }),
+  url: z
+    .string()
+    .min(3, { message: 'field cannot be empty' })
+    .optional()
+    .refine(
+      (value) => {
+        if (value) {
+          return urlRegex.test(value)
+        }
+        return true
+      },
+      { message: 'Invalid URL format' }
+    ),
+  userId: z
+    .string()
+    .min(3)
+    .refine((value) => isUUID(value), {
+      message: 'userId has to be a valid UUID',
+    }),
+})
 
 export const UpdateAwardDataSchema = z.object({
   title: z.string(),
@@ -69,9 +102,11 @@ async function validateCreateAwardData(
     console.log(validatedData);
     next(); // Continue to the next middleware or route handler
   } catch (error) {
-    const err = new BadRequestError(error.message);
-    console.log(err.message);
-    res.status(err.statusCode).json({ error: err.message });
+    const err = new BadRequestError(error.message)
+    const errorMessage = error.message.split(':').pop().trim()
+    console.log(errorMessage)
+
+    next(new BadRequestError(errorMessage))
   }
 }
 
