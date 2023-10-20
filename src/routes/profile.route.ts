@@ -222,6 +222,47 @@ router.post("/profile/image/upload", uploadHandler, uploadProfileImageController
 
 
 
+/**
+ * @swagger
+ * /api/update/details/{userId}:
+ *   delete:
+ *     summary: Delete a user section
+ *     description: Delete all entries of a particular section for a user.
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         description: The ID of the user whose section is to be deleted.
+ *         type: uuid
+ *         example: "d290f1ee-6c54-4b01-90e6-d701748f0851"
+ *       - in: body
+ *         name: body
+ *         required: true
+ *         description: Body of request takes a section name
+ *         schema:
+ *           type: object
+ *           properties:
+ *             section:
+ *               type: string
+ *               example: "about"
+ *     responses:
+ *       200:
+ *         description: Successful response
+ *         schema:
+ *           type: object
+ *           properties:
+ *             message:
+ *               type: string
+ *       400:
+ *         description: Bad request
+ *         schema:
+ *           type: object
+ *           properties:
+ *             error:
+ *               type: string
+ *     tags:
+ *       - Settings
+ */
 
 router.delete("/profile/details/:userId", deleteAllSectionEntries);
 

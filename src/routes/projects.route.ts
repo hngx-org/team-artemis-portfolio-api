@@ -260,7 +260,7 @@ router.put("/projects/:project_id", uploadHandler, updateProjectById);
 
 /**
  * @swagger
- * /api/projects/{id}:
+ * /api/users/{id}/projects:
  *   get:
  *     summary: Get project by ID
  *     description: Retrieve a project by its ID.

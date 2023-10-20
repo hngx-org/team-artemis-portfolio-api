@@ -39,6 +39,7 @@ import {
   NotFoundError,
 } from "../middlewares";
 import { createPorfolioDataSchema } from "../middlewares/profile.zod";
+import { nextTick } from 'process';
 
 // Get the repository for the PortfolioDetails entity
 const userRepository = connectionSource.getRepository(User);
@@ -57,8 +58,8 @@ const portfolioDetailsRepository =
 const trackRepository = connectionSource.getRepository(Tracks);
 const certificateRepository = connectionSource.getRepository(Certificate);
 const awardRepository = connectionSource.getRepository(Award);
-const contactRepository = connectionSource.getRepository(SocialUser);
 const languageRepository = connectionSource.getRepository(Language);
+const contactsRepository = connectionSource.getRepository(SocialUser);
 const referenceRepository = connectionSource.getRepository(ReferenceDetail);
 // Export the uploadProfileImageController function
 export const uploadProfileImageController: RequestHandler = async (
@@ -98,13 +99,14 @@ export const uploadProfileImageController: RequestHandler = async (
 
     return success(res, data, "Profile picture uploaded successfully");
   } catch (err) {
-    error(res, (err as Error).message); // Use type assertion to cast 'err' to 'Error' type
+    error(res, (err as Error).message);
   }
 };
 
 export const uploadProfileCoverController: RequestHandler = async (
   req: Request,
-  res: Response
+  res: Response,
+  next: NextFunction
 ) => {
   try {
     if (!req.files) return error(res, "add event image", 400);
@@ -127,11 +129,7 @@ export const uploadProfileCoverController: RequestHandler = async (
 
     return success(res, data, "Cover photo uploaded successfully");
   } catch (err) {
-    if (err instanceof Error) {
-      return error(res, err.message, 500);
-    } else {
-      return error(res, "An unknown error occurred", 500);
-    }
+    return next(err)
   }
 };
 
@@ -159,17 +157,21 @@ export const getUserById = async (req: Request, res: Response) => {
     });
 
     // const track = userTracks[0]?.track;
-    res.status(200).json({ user, portfolio, userTracks: userTracks?.track });
+    return success(
+      res,
+      { user, portfolio, userTracks: userTracks?.track },
+      "Fetched User Successfully"
+    );
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ message: "Internal Server Error" });
+    return error(res, "Internal Server Error", 500);
   }
 };
 
 export const updateProfileController = async (
   req: Request,
   res: Response,
-  Next: NextFunction
+  next: NextFunction
 ) => {
   try {
     try {
@@ -274,15 +276,15 @@ export const updateProfileController = async (
       "Successfully Updated Portfolio profile"
     );
   } catch (err) {
-    console.error(err);
-    return error(res, err.message, 500);
+    return next(err);
   }
 };
 
 // delete Portfolio Profile details
 export const deletePortfolioDetails: RequestHandler = async (
   req: Request,
-  res: Response
+  res: Response,
+  next: NextFunction
 ) => {
   try {
     // convert the id to number
@@ -295,7 +297,7 @@ export const deletePortfolioDetails: RequestHandler = async (
 
     // return error if porfolio is not found
     if (!portfolioToRemove) {
-      return res.status(404).json({ error: "Portfolio Details not found!" });
+      throw new NotFoundError("Portfolio Details not found!");
     }
 
     // delete the porfolio
@@ -306,7 +308,7 @@ export const deletePortfolioDetails: RequestHandler = async (
       portfolio,
     });
   } catch (error) {
-    res.status(500).json(error as Error);
+    return next(error)
   }
 };
 
@@ -326,9 +328,9 @@ export const deleteAllSectionEntries: RequestHandler = async (
       certificates: certificateRepository,
       skills: skillsDetailRepository,
       awards: awardRepository,
-      contacts: contactRepository,
       languages: languageRepository,
       reference: referenceRepository,
+      contacts: contactsRepository
     };
 
     const { userId } = req.params;

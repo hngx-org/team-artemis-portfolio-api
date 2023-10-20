@@ -1,3 +1,4 @@
+import { v4 as uuidv4, validate as isUUID } from "uuid";
 import { connectionSource } from "../database/data-source";
 import { Degree, EducationDetail, Section } from "../database/entities";
 import { EducationDetailData } from "../interfaces";
@@ -27,7 +28,15 @@ const createEducationDetail = async (data: EducationDetailData) => {
     const userRepository = connectionSource.getRepository(User);
     const sectionRepository = connectionSource.getRepository(Section);
     const degreeRepository = connectionSource.getRepository(Degree);
-    const user = await userRepository.findOne({ where: { id: user_id } });
+    // const user = await userRepository.findOne({ where: { id: user_id } });
+    let user: User;
+
+    if (isUUID(user_id)) {
+      user = await userRepository.findOne({ where: { id: user_id } });
+    } else {
+      user = await userRepository.findOne({ where: { slug: user_id } });
+    }
+
     const section = await sectionRepository.findOne({
       where: { id: section_id },
     });

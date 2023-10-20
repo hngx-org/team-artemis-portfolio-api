@@ -59,7 +59,8 @@ const router = Router();
  *                   type: string
  *                   description: null
  */
-router.get("/portfolio/:userId", getPortfolioDetails);
+router.get("/portfolio/:slug", getPortfolioDetails);
+// router.get("/portfolio/:userId", getPortfolioDetails);
 
 /**
  * @swagger
