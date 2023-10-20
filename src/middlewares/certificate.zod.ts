@@ -122,14 +122,14 @@ async function validateCertificateData(
       };
     });
 
-    badRequest(req, res, errorMessages);
+    errorResponse(req, res, errorMessages);
     isValidData = false;
   }
 
   return isValidData;
 }
 
-const badRequest = (req: Request, res: Response, message: any) => {
+const errorResponse = (req: Request, res: Response, message: any, statusCode?: number) => {
   res.status(400).json({
     timestamp: new Date().toISOString(),
     status: 400,
@@ -140,4 +140,4 @@ const badRequest = (req: Request, res: Response, message: any) => {
   });
 };
 
-export { validateCertificateData, badRequest };
+export { validateCertificateData, errorResponse };
