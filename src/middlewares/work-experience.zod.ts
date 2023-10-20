@@ -1,20 +1,12 @@
-import { object, string, z } from "zod";
+import { object, string, z, ZodError } from "zod";
 import { NextFunction, Request, Response } from "express";
 import { BadRequestError } from "../middlewares";
-import { parseAsync, ErrorMessageOptions } from "zod-error";
 
 // Custom function to validate date strings in "yy-mm-dd" format
 function validateDateYYMMDD(dateString: string) {
   const yearPattern = /^\d{4}$/;
   return yearPattern.test(dateString);
 }
-
-const options: ErrorMessageOptions = {
-  delimiter: {
-    error: " # ",
-  },
-  transform: ({ errorMessage, index }) => `${errorMessage}`,
-};
 
 const validMonths = [
   "January",
@@ -195,10 +187,34 @@ async function validateWorkExperience(
     }
 
     try {
-      const result = await parseAsync(workExperienceSchema, data, options);
+      const result = workExperienceSchema.parse(data);
       const validatedData = result; // Store the validated data in the request object if needed
     } catch (zodError) {
-      errors.push(zodError.message);
+      // Handle Zod errors
+      if (zodError instanceof z.ZodError) {
+        const errorGroups = {};
+
+        for (const issue of zodError.issues) {
+          const errorMessage = `${issue.message} in ${issue.path.join(", ")}`;
+          if (!errorGroups[errorMessage]) {
+            errorGroups[errorMessage] = [];
+          }
+          errorGroups[errorMessage].push(issue.path);
+        }
+
+        for (const errorMessage in errorGroups) {
+          if (errorGroups.hasOwnProperty(errorMessage)) {
+            const errorPaths = errorGroups[errorMessage];
+            console.log(errorMessage);
+            console.log(errorPaths);
+
+            errors.push(errorMessage);
+          }
+        }
+      } else {
+        errors.push(`Zod Error: ${zodError.message}`);
+      }
+
     }
   } catch (error) {
     errors.push(error.message);
@@ -206,6 +222,7 @@ async function validateWorkExperience(
 
   if (errors.length > 0) {
     // If there are errors in the array, pass them to the error handler
+    console.log(errors);
     throw new BadRequestError(errors.join(", "));
   }
 }
