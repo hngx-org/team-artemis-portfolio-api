@@ -1,4 +1,4 @@
-import { object, string, ZodIssue, ZodError } from "zod";
+import { object, string, ZodIssue, ZodError,z} from "zod";
 import { NextFunction, Request, Response } from "express";
 import { BadRequestError } from "../middlewares";
 import { parseAsync, ErrorMessageOptions } from "zod-error";
@@ -30,6 +30,30 @@ export const CreateReferenceDetailSchema = object({
     .min(1, { message: "User ID must not be an empty string" })
     .optional()
     .nullish(),
+});
+const name = new RegExp("[^$@0-9]+");
+export const updatereferenceschema = z.object({
+  referer: string()
+    .min(1, { message: "Name must not be an empty string" })
+    .regex(name, "name cannot contain number or special character")
+    .optional(),
+
+  company: string()
+    .min(1, { message: "Company must not be an empty string" })
+    .regex(name,"cannot contain special characters")
+    .optional(),
+
+  position: string()
+    .min(1, { message: "position cannot be an empty string" })
+    .regex(name,"cannot contain special characters")
+    .optional(),
+
+  email: string().email().optional(),
+
+  phone_number: string()
+    .max(15, "Invalid Phone Number!")
+    .min(6, "invalid Phone !")
+    .optional(),
 });
 
 // Custom function to validate email addresses
