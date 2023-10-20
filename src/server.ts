@@ -28,7 +28,7 @@ app.use(cors());
 
 //serve all routes dynamically using readdirsync
 readdirSync("./src/routes").map((path) =>
-  app.use("/api", require(`./routes/${path}`))
+  app.use("/api/v1", require(`./routes/${path}`))
 );
 app.get("/", sayHelloController);
 app.use(errorHandler);
