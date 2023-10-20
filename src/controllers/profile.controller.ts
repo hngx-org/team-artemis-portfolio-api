@@ -333,6 +333,7 @@ export const deleteAllSectionEntries: RequestHandler = async (
       return next(new BadRequestError('User not found'));
     }
 
+	/* Please do not delete */
     if (section == 'languages') {
       const hostUrl = 'https://hng-u6fu.vercel.app';
       await axios.delete(

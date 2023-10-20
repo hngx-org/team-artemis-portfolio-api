@@ -72,7 +72,7 @@ const router = express.Router();
  *       - Skills
  */
 
-router.post("/create-skills", createSkills);
+router.post("/skills", createSkills);
 
 /**
  * @swagger
@@ -104,7 +104,7 @@ router.post("/create-skills", createSkills);
  *     tags:
  *       - Skills
  */
-router.get("/skills-details/:userId", getSkillsDetails);
+router.get("/skills/:userId", getSkillsDetails);
 
 /**
  * @swagger
@@ -176,7 +176,7 @@ router.get("/skills-details/:userId", getSkillsDetails);
  *     tags:
  *       - Skills
  */
-router.put("/update-skills/:id", updateSkills);
+router.put("/skills/:id", updateSkills);
 
 /**
  * @swagger

@@ -98,6 +98,9 @@ export class User {
   @Column("character varying", { name: "country", nullable: true, length: 255 })
   country: string | null;
 
+  @Column("character varying", { name: "slug", length: 255, nullable: true })
+  slug: string;
+
   @Column("text", { name: "profile_pic", nullable: true })
   profilePic: string | null;
 

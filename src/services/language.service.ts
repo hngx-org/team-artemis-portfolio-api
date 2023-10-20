@@ -51,6 +51,38 @@ export const getAllLanguages = async (userId) => {
   return languages.data.data
 };
 
+export const programmingLanguages = [
+	'JavaScript',
+	'TypeScript',
+	'Python',
+	'Java',
+	'C',
+	'C++',
+	'C#',
+	'Go',
+	'Rust',
+	'Swift',
+	'Kotlin',
+	'Ruby',
+	'PHP',
+	'Scala',
+	'Elixir',
+	'Clojure',
+	'Haskell',
+	'Lua',
+	'Dart',
+	'R',
+	'Julia',
+	'Groovy',
+	'Objective-C',
+	'CoffeeScript',
+	'F#',
+	'Perl',
+	'MATLAB',
+	'VB.NET',
+	'Shell Scripting',
+  ];
+
 export default {
   success,
   badRequest,
