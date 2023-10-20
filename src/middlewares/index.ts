@@ -26,6 +26,10 @@ const ForbiddenError = createCustomError("Forbidden Error", 403);
 const InternalServerError = createCustomError("Internal ServerError", 500);
 const MethodNotAllowedError = createCustomError("MethodNotAllowed Error", 405);
 const ConflictError = createCustomError("Conflict Error", 409);
+const UnprocessableEntityError = createCustomError(
+  "Unprocessable Entity Error",
+  422
+);
 
 const errorHandler = (
   err: CustomError,
@@ -59,6 +63,7 @@ export {
   ForbiddenError,
   InternalServerError,
   MethodNotAllowedError,
+  UnprocessableEntityError,
   ConflictError,
   errorHandler,
 };

@@ -16,7 +16,9 @@ import {
   InternalServerError,
   MethodNotAllowedError,
   errorHandler,
+  UnprocessableEntityError,
 } from "../middlewares";
+
 import {
   CreateEducationDetailDataSchema,
   validateCreateData,
@@ -97,8 +99,6 @@ const createEducationDetailController = async (
       section_id,
     } = req.body as EducationDetailData;
 
-    console.log("req.body", req.body);
-
     const data = {
       degree_id,
       fieldOfStudy,
@@ -116,10 +116,40 @@ const createEducationDetailController = async (
     }
 
     if (data.to && !validateYear(data.to)) {
-      // throw new BadRequestError("Invalid 'to' date format")
-      return res.status(400).json({ errors: "Invalid 'to' date format" });
+      throw new BadRequestError("Invalid 'to' date format");
+      // return res.status(400).json({ errors: "Invalid 'to' date format" });
     }
     await validateCreateData(data, user_id, res, next);
+
+    if (!isNaN(Number(fieldOfStudy))) {
+      throw new UnprocessableEntityError("field Of Study should be a string");
+    }
+
+    if (!isNaN(Number(school))) {
+      throw new UnprocessableEntityError("school should be a string");
+    }
+
+    if (!isNaN(Number(description))) {
+      throw new UnprocessableEntityError("description should be a string");
+    }
+
+    const pattern = /^[a-zA-Z0-9 ,.]+$/;
+
+    if (!pattern.test(fieldOfStudy)) {
+      throw new UnprocessableEntityError(
+        "field Of Study should not contain sepecial characters"
+      );
+    }
+    if (!pattern.test(school)) {
+      throw new UnprocessableEntityError(
+        "school should not contain sepecial characters"
+      );
+    }
+    if (!pattern.test(description)) {
+      throw new UnprocessableEntityError(
+        "description should not contain sepecial characters"
+      );
+    }
 
     // check if the from date is less than the to date
     if (data.from && data.to) {
@@ -132,7 +162,6 @@ const createEducationDetailController = async (
       }
     }
 
-    console.log("validated");
     // Define an array of required fields
     const requiredFields = [
       "degree_id",
@@ -153,16 +182,17 @@ const createEducationDetailController = async (
 
     // Get the user by userId
     const userRepository = connectionSource.getRepository(User);
+
     const user = await userRepository.findOne({ where: { id: user_id } });
 
     const sectionRepository = connectionSource.getRepository(Section);
     const degreeRepository = connectionSource.getRepository(Degree);
+
     const section = await sectionRepository.findOne({
       where: { id: section_id },
     });
     const degree = await degreeRepository.findOne({ where: { id: degree_id } });
 
-    console.log("gone past");
     if (!user) {
       throw new NotFoundError(
         "Error creating education detail: User not found"
@@ -178,14 +208,6 @@ const createEducationDetailController = async (
         "Error creating education detail: Degree not found"
       );
     }
-
-    console.log("creating");
-    console.log(degree);
-    console.log(section);
-    console.log(user);
-    console.log(degree_id);
-    console.log(section_id);
-    console.log(user_id);
 
     // Call the service function to create an education detail
     const educationDetail = await createEducationDetail({
