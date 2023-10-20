@@ -33,40 +33,31 @@ const checkResourceAndPermission = async (socialId: number, userId: string) => {
 };
 
 export const updateContact = async (
-  socialMediaId: number,
-  url: string,
-  socialId: number,
-  userId: string
+  id: number,
+  updatedData: { url?: string; socialMediaId?: number },
+  userId: string 
 ) => {
-  const socialRepository = connectionSource.getRepository(SocialUser);
+  const contactsRepo = connectionSource.getRepository(SocialUser);
 
-  const errorResponse = await checkResourceAndPermission(socialId, userId);
+  // Check if the contact with the given ID exists and belongs to the user
+  const existingContact = await contactsRepo.findOne({
+    where: {Id:id, user_id: userId},
+  });
 
-  // Update the social contact
+  if (!existingContact) {
+    throw new Error('Contact not found or does not belong to the user.');
+  }
   try {
-    const updateResult: UpdateResult = await socialRepository
-      .createQueryBuilder()
-      .update(SocialUser)
-      .set({
-        socialMedia: {
-          Id: socialMediaId,
-        },
-        url: url,
-      })
-      .where("id = :socialId", { socialId })
-      .execute();
-
-    if (updateResult.affected >= 1) {
-      // Retrieve the updated social contact
-      const updatedResult = await socialRepository.findOne({
-        where: { id: socialId },
-      });
-      return updatedResult;
-    } else {
-      return null;
+    if (updatedData.url) {
+      existingContact.url = updatedData.url;
     }
+    if (updatedData.socialMediaId) {
+      existingContact.socialMedia = updatedData.socialMediaId;
+    }
+    const updatedContact = await contactsRepo.save(existingContact);
+    return updatedContact;
   } catch (error) {
-    throw new Error("Error updating contact: " + error);
+    throw new Error('Error updating contact: ' + error.message);
   }
 };
 

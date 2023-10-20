@@ -29,6 +29,9 @@ export class Section {
   @Column("text", { name: "description", nullable: true })
   description: string | null;
 
+  @Column("character varying", { name: "title", nullable: true })
+  title: string | null;
+
   @Column("text", { name: "meta", nullable: true })
   meta: string | null;
 
