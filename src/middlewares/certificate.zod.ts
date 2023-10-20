@@ -8,8 +8,8 @@ const createCertificateDataSchema = z.object({
       required_error: "Title is required",
       invalid_type_error: "Title cannot be an empty string",
     })
-    .refine((value) => /^[a-zA-Z ]+$/.test(value), {
-      message: "Title can only contain alphabets and spaces",
+    .refine((value) => /^[a-zA-Z]+$/.test(value), {
+      message: "Title can only contain alphabets",
     }),
   year: z
     .string({
@@ -25,7 +25,7 @@ const createCertificateDataSchema = z.object({
       required_error: "Organization is required",
       invalid_type_error: "Organization cannot be an empty string",
     })
-    .refine((value) => /^[A-Za-z0-9]*$/.test(value), {
+    .refine((value) => /^[A-Za-z]*$/.test(value), {
       message: "Organization can only contain alphabets and spaces",
     }),
   url: z
@@ -35,9 +35,13 @@ const createCertificateDataSchema = z.object({
     })
     .url({ message: "Invalid URL format" })
     .trim(),
-  description: z.string({
-    invalid_type_error: "Description cannot be an empty string",
-  }),
+  description: z
+    .string({
+      invalid_type_error: "Description cannot be an empty string",
+    })
+    .min(30, {
+      message: "Description must be at least 30 characters long",
+    }),
   sectionId: z
     .number({
       required_error: "Section ID is required",
@@ -55,13 +59,13 @@ const updateCertificateDataSchema = z.object({
     })
     .trim()
     .refine((value) => /^[a-zA-Z ]+$/.test(value), {
-      message: "Title can only contain alphabets and spaces",
+      message: "Title can only contain alphabets",
     })
     .optional(),
   year: z
     .string({
       required_error: "Year is required",
-      invalid_type_error: "Year can only be passed as string",
+      invalid_type_error: "Year can only be passed as a string",
     })
     .refine((value) => /^\d{4}$/.test(value), {
       message: "Year should be a valid 4-digit number",
@@ -72,8 +76,8 @@ const updateCertificateDataSchema = z.object({
       required_error: "Organization is required",
       invalid_type_error: "Organization must be a string",
     })
-    .refine((value) => /^[A-Za-z0-9]*$/.test(value), {
-      message: "Organization can only contain alphabets and numbers",
+    .refine((value) => /^[A-Za-z]*$/.test(value), {
+      message: "Organization can only contain alphabets",
     })
     .optional(),
   url: z
@@ -87,6 +91,9 @@ const updateCertificateDataSchema = z.object({
   description: z
     .string({
       invalid_type_error: "Description must be a string",
+    })
+    .min(30, {
+      message: "Description must be at least 30 characters long",
     })
     .optional(),
   sectionId: z
@@ -129,7 +136,12 @@ async function validateCertificateData(
   return isValidData;
 }
 
-const errorResponse = (req: Request, res: Response, message: any, statusCode?: number) => {
+const errorResponse = (
+  req: Request,
+  res: Response,
+  message: any,
+  statusCode?: number
+) => {
   res.status(400).json({
     timestamp: new Date().toISOString(),
     status: 400,
