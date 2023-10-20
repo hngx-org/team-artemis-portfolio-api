@@ -2,39 +2,35 @@ import { z } from "zod";
 import { NextFunction, Request, Response } from "express";
 import { BadRequestError } from "../middlewares";
 import { parseAsync, ErrorMessageOptions } from "zod-error";
-import { validate as isUUID } from "uuid";
 
-function isValidString(value) {
-  // Regular expression to allow  alphanumeric characters spaces, comma, fullstotp and question mark
-  const regex = /^[A-Za-z0-9,.\s!?']+$/;
-  return regex.test(value);
-}
+// function isValidString(value) {
+//   // Regular expression to allow  alphanumeric characters spaces, comma, fullstotp and question mark
+//   const regex = /^[A-Za-z0-9,.\s!?']+$/;
+//   return regex.test(value);
+// }
 
-function checkValidString(value, fieldName) {
-  if (!isValidString(value)) {
-    throw new BadRequestError(`The '${fieldName}' contains invalid characters`);
-  }
-}
+// function checkValidString(value, fieldName) {
+//   if (!isValidString(value)) {
+//     throw new BadRequestError(`The '${fieldName}' contains invalid characters`);
+//   }
+// }
 
 function checkNotEmptyString(value, fieldName) {
   if (!value /*|| value.trim().length === 0*/) {
     throw new BadRequestError(`The '${fieldName}' cannot be an empty string`);
   }
-  checkValidString(value, fieldName);
+  // checkValidString(value, fieldName);
 }
 
 export const CreateAboutDataSchema = z.object({
-  bio: z.string().min(3).max(255).nullable(),
+  bio: z.string().min(3).max(1000).nullable(),
   section_id: z.number().optional(),
   //user_id: z.string().refine((value) => isUUID(value), {
   //  message: "userId has to be a valid UUID",
   // }),
 });
 
-async function ValidateCreateAbout(
-  data: any
-  // user_id: string,
-) {
+async function ValidateCreateAbout(data: any) {
   try {
     checkNotEmptyString(data.bio, "bio");
     const result = await parseAsync(
@@ -60,7 +56,7 @@ const options: ErrorMessageOptions = {
 };
 
 export const UpdateAboutDataSchema = z.object({
-  bio: z.string().min(3).max(255),
+  bio: z.string().min(3).max(1000),
   section_id: z.number().optional(),
   user_id: z.string().optional(),
 });
@@ -76,7 +72,6 @@ async function ValidateUpdateAbout(data: any) {
     return validatedData;
   } catch (error) {
     throw new BadRequestError(error.message);
-    //return;
   }
 }
 
