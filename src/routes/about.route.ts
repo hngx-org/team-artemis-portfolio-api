@@ -158,14 +158,14 @@ router.put("/about/:id", updateAbout);
 
 /**
  * @swagger
- * /api/v1/about/{id}:
+ * /api/v1/about/{userId}:
  *   get:
- *     summary: Get existing about details by id.
- *     description: Get an existing about detail for a user by providing the about ID.
+ *     summary: Get existing about details by user id.
+ *     description: Get an existing about detail for a user by providing the about user ID.
  *     parameters:
  *       - in: path
  *         name: id
- *         description: The ID of the about details to retrieve
+ *         description: The ID of the user
  *         required: true
  *         type: integer
  *
@@ -206,7 +206,7 @@ router.put("/about/:id", updateAbout);
  *     tags:
  *       - About
  */
-router.get("/about/:id", getAboutByID);
+router.get("/about/:userId", getAboutByID);
 
 /**
  * @swagger
