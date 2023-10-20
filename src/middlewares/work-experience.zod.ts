@@ -137,6 +137,10 @@ async function validateWorkExperience(
       processAndValidateMonth(data, "endMonth", errors);
       validateDate(data, "endYear", errors);
     }
+
+    if (!data.isEmployee && (!data.endMonth || !data.endYear)) {
+      errors.push("End Dates Cannot be empty");
+    }
     // Function to get the numeric representation of a month
     const getMonthNumber = (month: string): number => {
       const monthIndex = validMonths.indexOf(month);
