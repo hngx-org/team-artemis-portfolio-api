@@ -111,6 +111,22 @@ export const getAboutByIdService = async (id: number) => {
   }
 };
 
+export const getAboutByUserIdService = async (id: string) => {
+  try {
+    const user = await userRepository.findOne({ where: { id } });
+
+    if (!user) {
+      throw new NotFoundError(`Cannot find user with id ${id}`);
+    }
+
+    const about = await aboutRepository.findOne({ where: { user } });
+    return about
+
+  } catch (error){
+    throw error
+  }
+}
+
 export const deleteAboutService = async (id: number) => {
   try {
     const about = await aboutRepository.findOne({ where: { id: id } });
