@@ -149,9 +149,6 @@ export const updateWorkExperience: RequestHandler = async (
   const workId = parseInt(req.params.workId);
 
   if (!workId) {
-    return next(
-      new BadRequestError("workExpId must be provided as a parameter")
-    );
     throw new BadRequestError("workId is missing from request params");
   }
 
