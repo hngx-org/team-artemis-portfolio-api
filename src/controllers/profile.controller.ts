@@ -57,8 +57,8 @@ const portfolioDetailsRepository =
 const trackRepository = connectionSource.getRepository(Tracks);
 const certificateRepository = connectionSource.getRepository(Certificate);
 const awardRepository = connectionSource.getRepository(Award);
-const contactRepository = connectionSource.getRepository(SocialUser);
 const languageRepository = connectionSource.getRepository(Language);
+const contactsRepository = connectionSource.getRepository(SocialUser);
 const referenceRepository = connectionSource.getRepository(ReferenceDetail);
 // Export the uploadProfileImageController function
 export const uploadProfileImageController: RequestHandler = async (
@@ -98,7 +98,7 @@ export const uploadProfileImageController: RequestHandler = async (
 
     return success(res, data, "Profile picture uploaded successfully");
   } catch (err) {
-    error(res, (err as Error).message); // Use type assertion to cast 'err' to 'Error' type
+    error(res, (err as Error).message);
   }
 };
 
@@ -159,10 +159,14 @@ export const getUserById = async (req: Request, res: Response) => {
     });
 
     // const track = userTracks[0]?.track;
-    res.status(200).json({ user, portfolio, userTracks: userTracks?.track });
+    return success(
+      res,
+      { user, portfolio, userTracks: userTracks?.track },
+      "Fetched User Successfully"
+    );
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ message: "Internal Server Error" });
+    return error(res, "Internal Server Error", 500);
   }
 };
 
@@ -326,9 +330,9 @@ export const deleteAllSectionEntries: RequestHandler = async (
       certificates: certificateRepository,
       skills: skillsDetailRepository,
       awards: awardRepository,
-      contacts: contactRepository,
       languages: languageRepository,
       reference: referenceRepository,
+      contacts: contactsRepository
     };
 
     const { userId } = req.params;
