@@ -163,7 +163,7 @@ export const updateReference = async (req: Request, res: Response) => {
     const { id }: any = req.params;
     
     await connectionSource
-      .createQueryBuilder()git
+      .createQueryBuilder()
       .update(ReferenceDetail)
       .set(req.body)
       .where("id = :id", { id: id })
