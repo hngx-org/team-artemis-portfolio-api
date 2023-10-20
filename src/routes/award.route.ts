@@ -85,7 +85,7 @@ const router = express.Router();
  *     tags:
  *       - Award
  */
-router.post("/award/:userId", validateCreateAwardData, createAwardController);
+router.post("/awards/:userId", validateCreateAwardData, createAwardController);
 
 /**
  * @swagger
@@ -177,7 +177,7 @@ router.post("/award/:userId", validateCreateAwardData, createAwardController);
  *     tags:
  *       - Award
  */
-router.put("/award/:awardId", updateAwardController);
+router.put("/awards/:awardId", updateAwardController);
 
 /**
  * @swagger
@@ -228,7 +228,7 @@ router.put("/award/:awardId", updateAwardController);
  *                 'Input Error':
  *                   type: string
  */
-router.get("/award/:id", getAwardController);
+router.get("/awards/:id", getAwardController);
 
 /**
  * @swagger
@@ -309,6 +309,6 @@ router.get("/awards", getAllAwardsController);
  *     tags:
  *       - Award
  */
-router.delete("/award/:id", deleteAwardController);
+router.delete("/awards/:id", deleteAwardController);
 
 module.exports = router;
