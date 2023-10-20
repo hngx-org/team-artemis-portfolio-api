@@ -64,7 +64,8 @@ const referenceRepository = connectionSource.getRepository(ReferenceDetail);
 // Export the uploadProfileImageController function
 export const uploadProfileImageController: RequestHandler = async (
   req: Request,
-  res: Response
+  res: Response,
+  next: NextFunction
 ) => {
   try {
     if (!req.files) return error(res, "add event image", 400);
@@ -89,7 +90,7 @@ export const uploadProfileImageController: RequestHandler = async (
       ],
     });
     if (!user) {
-      return error(res, "User Not found", 400);
+      throw new NotFoundError("User not found");
     }
     const { urls } = await cloudinaryService(req.files, service);
     const data = await uploadProfileImageService(user.id, urls);
@@ -99,7 +100,7 @@ export const uploadProfileImageController: RequestHandler = async (
 
     return success(res, data, "Profile picture uploaded successfully");
   } catch (err) {
-    error(res, (err as Error).message);
+    return next(err)
   }
 };
 
@@ -138,7 +139,7 @@ export const getAllUsers = async (req: Request, res: Response) => {
   res.status(200).json({ users });
 };
 
-export const getUserById = async (req: Request, res: Response) => {
+export const getUserById = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { userId: id } = req.params;
     const userId = id.trim();
@@ -161,7 +162,9 @@ export const getUserById = async (req: Request, res: Response) => {
         'aboutDetails',
         'location',
         'username',
-        'workExperienceDetails'
+        'workExperienceDetails',
+        "country",
+        "slug",
       ] 
     });
     if (!user) {
@@ -176,10 +179,24 @@ export const getUserById = async (req: Request, res: Response) => {
       relations: ["track"],
     });
 
-    // const track = userTracks[0]?.track;
+    const allBadges = await connectionSource.manager.query(
+      `SELECT badge_id FROM "user_badge" WHERE "user_id" = '${user.id}' ORDER BY created_at DESC`
+    );
+    let badges = [];
+    if (allBadges.length > 0) {
+      const badgeIds = allBadges?.map(badge => badge.badge_id) || [];
+
+      badges = await connectionSource.manager.query(
+        `SELECT id, name, badge_image  FROM "skill_badge" WHERE "id" IN (${badgeIds.join(',')})`
+      );
+
+    }
+
+
+
     return success(
       res,
-      { user, portfolio, userTracks: userTracks?.track },
+      { user, portfolio, userTracks: userTracks?.track, badges },
       "Fetched User Successfully"
     );
   } catch (error) {
