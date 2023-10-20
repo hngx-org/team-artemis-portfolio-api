@@ -103,13 +103,20 @@ router.get("/degree/:id", fetchDegree);
  *     responses:
  *       200:
  *         description: Successful response
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
+ *         schema:
+ *            type: object
+ *            properties:
+ *                message:
  *                   type: string
+ *                payload:
+ *                   type: array
+ *                   items:
+ *                      type: object
+ *                      properties:
+ *                          id:
+ *                             type: string
+ *                          type:
+ *                             type: string
  * '404':
  *         description: Not Found
  *         content:
