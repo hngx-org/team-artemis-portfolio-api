@@ -53,7 +53,7 @@ export const createAboutService = async (
     return mappedData;
   } catch (error) {
     console.log("final", error);
-    throw new Error(error.message);
+    throw error;
   }
 };
 
@@ -94,7 +94,7 @@ export const updateAboutService = async (
     return aboutDetail;
   } catch (error) {
     console.log("final", error);
-    throw new Error(error.message);
+    throw error;
   }
 };
 
@@ -107,7 +107,7 @@ export const getAboutByIdService = async (id: number) => {
     }
     return about;
   } catch (error) {
-    throw new Error(error.message);
+    throw error;
   }
 };
 
@@ -120,6 +120,6 @@ export const deleteAboutService = async (id: number) => {
     }
     await aboutRepository.remove(about);
   } catch (error) {
-    throw new Error(error.message);
+    throw error;
   }
 };
