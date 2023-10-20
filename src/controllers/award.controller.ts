@@ -89,28 +89,6 @@ const getAwardController = async (req: Request, res: Response) => {
 };
 
 
-// // Get award by Id
-// const getAwardController = async (req: Request, res: Response) => {
-//   const userRepository = connectionSource.getRepository(User);
-
-//   try {
-//     const id = parseInt(req.params.user_id); // Assuming award ID is passed as a route parameter
-//     const user = await userRepository.findOne({ where: { id } });
-
-//     if (!award) {
-//       return res.status(404).json({ message: "Award not found" });
-//     }
-
-//     res.status(200).json({
-//       message: "Award retrieved successfully",
-//       award:award
-//     });
-//   } catch (error) {
-//     console.error("Error getting award", error);
-//     res.status(500).json({ message: "Internal server error" });
-//   }
-// };
-
 
 // get all awards
 const getAllAwardsController = async (req: Request, res: Response) => {
