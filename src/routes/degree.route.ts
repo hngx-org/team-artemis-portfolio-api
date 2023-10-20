@@ -11,7 +11,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /api/degree:
+ * /api/v1/degree:
  *   post:
  *     summary: Update education details for a user by its ID.
  *     description: Update education details for a user by its ID.
@@ -50,7 +50,7 @@ router.post("/degree", createDegreeController);
 
 /**
  * @swagger
- * /api/degree/{id}:
+ * /api/v1/degree/{id}:
  *   get:
  *     summary: Get a degree by id
  *     description: Get a single degree by providing its ID.
@@ -95,7 +95,7 @@ router.get("/degree/:id", fetchDegree);
 
 /**
  * @swagger
- * /api/degree:
+ * /api/v1/degree:
  *   get:
  *     summary: Get all Degrees
  *     description: Retrieve a list of all degrees.
@@ -127,7 +127,7 @@ router.get("/degree", fetchAllDegree);
 
 /**
  * @swagger
- * /api/degree/{Id}:
+ * /api/v1/degree/{Id}:
  *   put:
  *     summary: Update a degree by ID.
  *     description: Update a degree's information by providing its ID.
@@ -208,7 +208,7 @@ router.put("/degree/:id", updateExisitingDegree);
 
 /**
  * @swagger
- * /api/degree/{id}:
+ * /api/v1/degree/{id}:
  *   delete:
  *     summary: Delete a degree by id
  *     description: Delete a single degree by providing its ID.

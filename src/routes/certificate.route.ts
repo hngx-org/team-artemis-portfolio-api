@@ -11,7 +11,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /api/add-certificate/{userId}:
+ * /api/v1/add-certificate/{userId}:
  *   post:
  *     summary: Create certificate details for a user with a specified ID.
  *     description: Create certificate details for a user.
@@ -98,7 +98,7 @@ router.post("/add-certificate/:userId", addCertificateController);
 
 /**
  * @swagger
- * /api/certificates/{userId}:
+ * /api/v1/certificates/{userId}:
  *   get:
  *     summary: Get all certificates for a specific user.
  *     description: Retrieve a list of all available certificates for a specific user.
@@ -162,7 +162,7 @@ router.get("/certificates/:userId", getAllCertificates);
 
 /**
  * @swagger
- * /api/certificates/{certId}:
+ * /api/v1/certificates/{certId}:
  *   delete:
  *     summary: Delete a certificate by ID.
  *     description: Delete a certificate by its unique certificate ID.
@@ -212,7 +212,7 @@ router.delete("/certificates/:certId", deleteCertificate);
 
 /**
  * @swagger
- * /api/certificates/{certId}:
+ * /api/v1/certificates/{certId}:
  *   get:
  *     summary: Get a certificate by ID.
  *     description: Retrieve a certificate by its unique certificate ID.
@@ -274,7 +274,7 @@ router.get("/certificate/:userId/:certId", getCertificateById);
 
 /**
  * @swagger
- * /api/certificate/{userId}/{certId}:
+ * /api/v1/certificate/{userId}/{certId}:
  *   put:
  *     summary: Update certificate details for a user with a specified certificate ID.
  *     description: Update certificate details for a user.

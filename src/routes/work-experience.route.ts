@@ -10,7 +10,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /api/create-work-experience/{userId}:
+ * /api/v1/create-work-experience/{userId}:
  *   post:
  *     summary: Create a new work experience.
  *     parameters:
@@ -101,7 +101,7 @@ router.post("/create-work-experience/:userId", createWorkExperience);
 
 /**
  * @swagger
- * /api/work-experience/{id}:
+ * /api/v1/work-experience/{id}:
  *   delete:
  *     summary: Delete a work experience section.
  *     parameters:
@@ -132,7 +132,7 @@ router.delete("/work-experience/:id", deleteWorkExperience);
 
 /**
  * @swagger
- * /api/work-experience:
+ * /api/v1/work-experience:
  *   get:
  *     summary: Get all work experience sections.
  *     description: Get all work experience sections from Database.
@@ -158,7 +158,7 @@ router.get("/work-experience", workExperienceController);
 
 /**
  * @swagger
- * /api/update-work-experience/{workId}:
+ * /api/v1/update-work-experience/{workId}:
  *   put:
  *     summary: Update a work experience by ID.
  *     description: Update a work experience's information by providing its ID.

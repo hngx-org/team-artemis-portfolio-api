@@ -21,7 +21,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /api/interests:
+ * /api/v1/interests:
  *   post:
  *     summary: Create user interests.
  *     description: Create section for user interests.
@@ -93,7 +93,7 @@ router.post(
 
 /**
  * @swagger
- * /api/interests/{userId}:
+ * /api/v1/interests/{userId}:
  *   get:
  *     summary: Fetch user interests.
  *     description: Fetch the interests of a user.
@@ -169,7 +169,7 @@ router.get("/interests/:userId", validateUserId(userIdSchema), getInterests);
 
 /**
  * @swagger
- * /api/interests/{userId}:
+ * /api/v1/interests/{userId}:
  *   put:
  *     summary: Update user interests.
  *     description: Update the interests of a user.
@@ -249,7 +249,7 @@ router.put(
 
 /**
  * @swagger
- * /api/interests/{userId}:
+ * /api/v1/interests/{userId}:
  *   delete:
  *     summary: Delete user interests.
  *     description: Delete the interests of a user.

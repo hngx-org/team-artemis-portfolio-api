@@ -9,7 +9,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /api/language:
+ * /api/v1/language:
  *   post:
  *     summary: Create a new language for user
  *     description: Adds a language as one of the user languages
@@ -49,7 +49,7 @@ router.post(
 
 /**
  * @swagger
- * /api/language/{userId}:
+ * /api/v1/language/{userId}:
  *   get:
  *     summary: Get all languages owned by the user
  *     description: Get all the languages the requesting user owns
@@ -77,7 +77,7 @@ router.get("/languages/:userId", languageController.getUserLanguages);
 
 /**
  * @swagger
- * /api/language/{userId}:
+ * /api/v1/language/{userId}:
  *   delete:
  *     summary: delete all languages owned by the user
  *     description: delete all the languages the requesting user owns
@@ -105,7 +105,7 @@ router.delete("/languages/:userId", languageController.deleteAllUserLanguages);
 
 /**
  * @swagger
- * /api/language:
+ * /api/v1/language:
  *   get:
  *     summary: Get all languages that can be chosen
  *     description: Get all the languages that will be shown on the frontend dropdown

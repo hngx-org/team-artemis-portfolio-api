@@ -12,7 +12,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /api/references/{userId}:
+ * /api/v1/references/{userId}:
  *   post:
  *     summary: Create a new reference.
  *     description: Create a new reference detail for a user.
@@ -74,7 +74,7 @@ router.post(
 
 /**
  * @swagger
- * /api/references:
+ * /api/v1/references:
  *   get:
  *     summary: Get all references.
  *     description: Get all reference sections from Database.
@@ -104,7 +104,7 @@ router.get("/references", getAllReference);
 
 /**
  * @swagger
- * /api/references/{userId}:
+ * /api/v1/references/{userId}:
  *   get:
  *     summary: Get a user's reference.
  *     description: Get all reference that belongs to a user
@@ -136,7 +136,7 @@ router.get("/references/:userId", getAllUserReference);
 
 /**
  * @swagger
- * /api/references/{id}:
+ * /api/v1/references/{id}:
  *   delete:
  *     summary: Delete a reference by ID.
  *     description: Deletes a reference detail from the database by its ID.
@@ -175,7 +175,7 @@ router.delete("/references/:id", deleteReferenceDetail);
 
 /**
  * @swagger
- * /api/references/{userId}:
+ * /api/v1/references/{userId}:
  *   put:
  *     summary: update a new reference.
  *     description: update  reference detail for a user.
