@@ -5,7 +5,8 @@ import {
   getAllAwardsController,
   deleteAwardController,
   updateAwardController,
-} from "../controllers/award.controller";
+  getAwardByUserId,
+} from '../controllers/award.controller'
 import {
   validateCreateAwardData,
   validateUpdateAwardData,
@@ -229,6 +230,57 @@ router.put("/awards/:awardId", updateAwardController);
  *                   type: string
  */
 router.get("/awards/:id", getAwardController);
+
+/**
+ * @swagger
+ * /api/v1/awards/{userId}:
+ *   get:
+ *     summary: Get award detail(s) for a user who's id is the params and returns an array of objects containing a user award details.
+ *     description: Get award detail(s) for a user who's id is in the params and returns an array of objects containing a user award details.
+ *     tags: [Award]
+ *     parameters:
+ *       - in: header
+ *         name: Authorization
+ *         type: string
+ *         description: Optional authorization header
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The ID of the user for whom to create education details.
+ *     responses:
+ *       200:
+ *         description: Award retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 award:
+ *                   type: object
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *       '404':
+ *         description: Not Found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 'Input Error':
+ *                   type: string
+ */
+router.get('/awards/user/:userId', getAwardByUserId)
 
 /**
  * @swagger
