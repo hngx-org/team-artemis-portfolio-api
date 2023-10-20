@@ -38,19 +38,21 @@ interface ProjectModel {
 
 export const getAllProjects: RequestHandler = async (
   req: Request,
-  res: Response
+  res: Response,
+  next: NextFunction
 ) => {
   try {
     const data = await projectRepository.find();
     success(res, data);
   } catch (err) {
-    error(res, (err as Error).message);
+    return next(err);
   }
 };
 
 export const getProjectById: RequestHandler = async (
   req: Request,
-  res: Response
+  res: Response,
+  next: NextFunction
 ) => {
   try {
     const { id } = req.params;
@@ -78,7 +80,7 @@ export const getProjectById: RequestHandler = async (
     project.projectsImages = (await Promise.all(imageUrlsPromises)) as any;
     success(res, project, "Successfully Retrieved");
   } catch (err) {
-    error(res, (err as Error).message);
+    return next(err);
   }
 };
 
@@ -92,12 +94,7 @@ export const createProject: RequestHandler = async (
     try {
       jsonData = JSON.parse(req.body.jsondata);
     } catch (error) {
-      return res
-        .status(400)
-        .json({
-          error: "Please check the input data",
-          message: "Invalid JSON",
-        });
+      throw new BadRequestError("Please provide valid json data");
     }
 
     const normalizedData: ProjectModel = {} as ProjectModel;
@@ -158,7 +155,7 @@ export const createProject: RequestHandler = async (
 
     const newProject = await projectRepository.save(project);
     if (!newProject.id) {
-      throw new CustomError("Project not created", 400);
+      throw new CustomError("Project not created", "400");
     }
     const files = req.files as any;
     if (!files.length) {
@@ -189,7 +186,7 @@ export const createProject: RequestHandler = async (
 
         const out = await projectImageRepository.save(projectImage);
       } catch (err) {
-        throw new CustomError(err.message, 400);
+        throw new CustomError(err.message, "400");
       }
     }
 
@@ -292,7 +289,7 @@ export const deleteProjectController: RequestHandler = async (
       const errorResponse = {
         message: "Project not Found!",
       };
-      res.status(404).json(errorResponse);
+      throw new BadRequestError(errorResponse.message);
     } else {
       const deletedProject = await projectRepository.delete({ id });
 
@@ -313,7 +310,8 @@ export const updateProjectById: RequestHandler = async (
   next: NextFunction
 ) => {
   const id = req.params.project_id;
-  const data = req.body;
+  const data = JSON.parse(req.body.jsondata);
+
   const images = req.files as Express.Multer.File[];
 
   try {

@@ -77,6 +77,7 @@ export const createWorkExperience: RequestHandler = async (
     workExperience.company = company;
     workExperience.role = role;
     workExperience.startMonth = convertedStartMonth;
+    workExperience.startMonth = convertedStartMonth;
     workExperience.startYear = startYear;
     workExperience.endMonth = convertedEndMonth;
     workExperience.endYear = newEndYear;
@@ -148,6 +149,9 @@ export const updateWorkExperience: RequestHandler = async (
   const workId = parseInt(req.params.workId);
 
   if (!workId) {
+    return next(
+      new BadRequestError("workExpId must be provided as a parameter")
+    );
     throw new BadRequestError("workId is missing from request params");
   }
 
@@ -190,7 +194,6 @@ export const updateWorkExperience: RequestHandler = async (
 
     validateWorkExperience(req, res, next);
 
-    // Update the work experience details
     workExperienceToUpdate.company = company;
     workExperienceToUpdate.role = role;
     workExperienceToUpdate.startMonth = startMonth;
@@ -202,7 +205,6 @@ export const updateWorkExperience: RequestHandler = async (
     workExperienceToUpdate.user = userId;
     workExperienceToUpdate.section = sectionId;
 
-    // Save the updated work experience
     await workExperienceRepository.save(workExperienceToUpdate);
 
     return res.json({
