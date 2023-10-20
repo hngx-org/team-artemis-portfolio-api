@@ -15,21 +15,49 @@ const userRepository = dataSource.getRepository(User);
 const socialUserService = new SocialUserService();
 
 export const createSocials = async (req: Request, res: Response) => {
+  const createSocialsSchema = z.object({
+    name: z
+      .string()
+      .min(1)
+      .max(50)
+      .refine((name) => !name.includes('*'), {
+        message: 'Asterisk (*) is not allowed in the name field',
+      })
+      .refine((name) => !/\d/.test(name), {
+        message: 'Numbers are not allowed in the name field',
+      })
+      .refine((name) => !name.includes('?'), {
+        message: 'question mark (?) is not allowed in the name field',
+      }),
+  });
+
   try {
-    const { name } = req.body;
-    if (!name) {
-      return res.status(400).json({ message: "Invalid input data" });
-    }
+    const validatedData = createSocialsSchema.parse(req.body);
+    const { name } = validatedData;
+
     const contactsRepo = dataSource.getRepository(SocialMedia);
-    const contact = new SocialMedia();
-    contact.name = name;
+    const contact = contactsRepo.create({
+      name,
+    });
     await contactsRepo.save(contact);
-    return res
-      .status(201)
-      .json({ message: "Social Media type created successfully" });
+
+    const response = {
+      message: 'Social Media type created successfully',
+      status: 'success',
+      statusCode: 201,
+    };
+    return res.status(201).json(response);
   } catch (error) {
-    console.error("Error creating contact:", error);
-    return res.status(400).json({ message: "Invalid input data" });
+    if (error instanceof z.ZodError) {
+      const fieldErrors = error.errors.map((err) => ({
+        message: err.message,
+      }));
+
+      return res.status(400).json({ error:fieldErrors });
+    } else {
+      console.error('Error creating contact:', error);
+      return res.status(500).json({ message: 'Internal server error' });
+    }
   }
 };
 
@@ -147,10 +175,16 @@ export const deleteContact = async (req: Request, res: Response) => {
   try {
     let { id } = req.params;
     const contact_id = parseInt(id);
+    if (isNaN(contact_id) || contact_id <= 0) {
+      return res.status(400).json({ message: 'Invalid contact ID' });
+    }
     console.log(contact_id);
     // const userIdRegex = /^[A-Fa-f0-9\-]+$/
-    const contacts = await contactsRepo.delete(contact_id);
-    return res.status(200).json(contacts);
+    const result = await contactsRepo.delete(contact_id);
+   if (result.affected === 0) {
+  return res.status(404).json({ message: 'Contact not found' });
+}
+ return res.status(204).json({ message: `Contact with ID ${contact_id} deleted successfully` });
   } catch (error) {
     console.error("Error getting contacts:", error);
     return res.status(404).json({ message: MESSAGES.NOT_FOUND });
@@ -158,32 +192,32 @@ export const deleteContact = async (req: Request, res: Response) => {
 };
 
 //update Contact controller
-export const updateContactController: RequestHandler = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const { socialMediaId, url, userId }: ContactBody = req.body;
-    const socialId: number = Number(req.params.Id);
-
-    const user = await findUser(userId);
-
-    if (!user) {
-      return res.status(404).json("user not found");
-    }
-
-    const contact = await updateContact(socialMediaId, url, socialId, userId);
-
-    if (!contact) {
-      return res.status(404).json("can not update contact");
-    }
-
-    return res.status(200).json({
-      message: "new contact updated",
-    });
+export const updateContactController = async (req: Request, res: Response) => {
+  const updateContactSchema = z.object({
+    url: z.string().nonempty(),
+    socialMediaId: z.number().int(),
+    userId: z.string().nonempty(),
+  });
+ 
+  const Id = parseInt(req.params.id);
+  const { url, socialMediaId, userId } = req.body;
+  console.log(Id)
+  if (isNaN(Id) || Id <= 0 || !Number.isInteger(Id)) {
+    return res.status(404).json("contact_Id invalid");
+  }
+   try {
+   // updateContactSchema.parse({ url, socialMediaId, userId });
+  
+    const updatedContact = await updateContact(Id, { url, socialMediaId }, userId);
+   res.json({
+    url: updatedContact.url,
+    socialMediaId: updatedContact.socialMedia,  
+});
   } catch (error) {
-    console.log(error);
-    return res.status(500).json({ message: "Failed to update contact" });
+    if (error instanceof z.ZodError) {
+      const errorMessage = error.errors.map((err) => err.message).join(', ');
+      return res.status(400).json({ error: errorMessage });
+    }
+    res.status(500).json({ error: 'Internal server error' });
   }
 };
