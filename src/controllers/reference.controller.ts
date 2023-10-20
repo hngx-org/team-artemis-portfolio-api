@@ -153,8 +153,9 @@ export const updateReference = async (req: Request, res: Response) => {
       return error(res, "cannot send an empty Request Body");
     }
     const { id }: any = req.params;
+    
     await connectionSource
-      .createQueryBuilder()
+      .createQueryBuilder()git
       .update(ReferenceDetail)
       .set(req.body)
       .where("id = :id", { id: id })
