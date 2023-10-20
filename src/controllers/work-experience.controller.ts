@@ -1,18 +1,9 @@
 import { Request, RequestHandler, Response, NextFunction } from "express";
 import { connectionSource } from "../database/data-source";
 import { WorkExperienceDetail, Section, User } from "../database/entities";
-import { error, success } from "../utils";
+import { success } from "../utils";
 
-import {
-  CustomError,
-  NotFoundError,
-  BadRequestError,
-  UnauthorizedError,
-  ForbiddenError,
-  InternalServerError,
-  MethodNotAllowedError,
-  errorHandler,
-} from "../middlewares";
+import { NotFoundError, BadRequestError } from "../middlewares";
 
 import {
   validateWorkExperience,
@@ -43,10 +34,6 @@ export const createWorkExperience: RequestHandler = async (
   } = req.body;
 
   const userId = req.params.userId || req.body.userId;
-
-  console.log(req.body);
-
-  console.log("past here");
 
   try {
     // change isEmployee to boolean
@@ -79,16 +66,12 @@ export const createWorkExperience: RequestHandler = async (
     if (!user) {
       throw new NotFoundError("User not found");
     }
+
     // Validate the request body against the schema
     await validateWorkExperience(req, res, next);
-
     // convert month to long form
     const convertedStartMonth = convertMonthToLongForm(startMonth);
     const convertedEndMonth = convertMonthToLongForm(newEndMonth);
-
-    if (endYear < startYear) {
-      throw new BadRequestError("EndYear must be greater than startYear");
-    }
 
     const workExperience = new WorkExperienceDetail();
     workExperience.company = company;
@@ -109,7 +92,6 @@ export const createWorkExperience: RequestHandler = async (
       success: true,
     });
   } catch (err) {
-    console.log(err);
     return next(err);
   }
 };
@@ -147,9 +129,13 @@ export const workExperienceController: RequestHandler = async (
     const workExperienceRepository =
       connectionSource.getRepository(WorkExperienceDetail);
     const workExperiences = await workExperienceRepository.find();
+    if (!workExperiences) {
+      throw new NotFoundError(
+        "No Work Experience was not found in the database"
+      );
+    }
     res.json({ workExperiences });
   } catch (error) {
-    console.log(error);
     return next(error);
   }
 };
@@ -198,9 +184,11 @@ export const updateWorkExperience: RequestHandler = async (
     if (!workExperienceToUpdate) {
       throw new NotFoundError("Work Experience not found");
     }
-    if (endYear && startYear && endYear < startYear) {
-      throw new BadRequestError("EndYear must be greater than startYear");
-    }
+    // if (endYear && startYear && endYear < startYear) {
+    //   throw new BadRequestError("EndYear must be greater than startYear");
+    // }
+
+    validateWorkExperience(req, res, next);
 
     // Update the work experience details
     workExperienceToUpdate.company = company;
@@ -223,7 +211,6 @@ export const updateWorkExperience: RequestHandler = async (
       success: true,
     });
   } catch (err) {
-    console.log(err);
     return next(err);
   }
 };
