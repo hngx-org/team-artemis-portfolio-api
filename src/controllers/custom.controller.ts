@@ -227,14 +227,10 @@ const create = async (
       where: { id: req.body.sectionId },
     });
     if (!section) return error(res, "SectionId does not exist", 400);
-    // const user = await userRepositoy.findOne({
-    //   where: { id: req.body.userId },
-    // });
-    // if (!user) return error(res, "Invalid User", 400);
     const newRecord = new CustomUserSection();
     newRecord.user = (req as any).user;
     newRecord.section = section;
-    newRecord.title = req.body.title;
+    newRecord.titile = req.body.title;
     const record = await customRepository.save(newRecord);
     return success(res, record, "Success");
   } catch (err) {
@@ -262,7 +258,7 @@ export const getAllCustomSections = async (
 const findAll = async (req: Request, res: Response) => {
   try {
     const records = await customRepository.find({
-      relations: ["customFields", "section", "user"],
+      relations: ["customFields", "section"],
     });
     return success(res, records, "Success");
   } catch (err) {
@@ -279,7 +275,7 @@ const findOne = async (req: Request, res: Response) => {
     }
     const record = await customRepository.findOne({
       where: { id: Number(id) },
-      relations: ["customFields", "section", "user"],
+      relations: ["customFields", "section"],
     });
     return record
       ? success(res, record, "Success")
