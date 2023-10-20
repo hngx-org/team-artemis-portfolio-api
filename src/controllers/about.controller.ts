@@ -4,6 +4,7 @@ import {
   createAboutService,
   deleteAboutService,
   getAboutByIdService,
+  getAboutByUserIdService,
   updateAboutService,
 } from "../services/about.service";
 import { NotFoundError, BadRequestError } from "../middlewares";
@@ -11,6 +12,8 @@ import {
   ValidateCreateAbout,
   ValidateUpdateAbout,
 } from "../middlewares/about.zod";
+import { success, error } from "../utils";
+import { z } from "zod";
 
 // endpoint to create about details
 
@@ -85,6 +88,23 @@ export const getAboutByID = async (
   next: NextFunction
 ) => {
   try {
+    const { userId } = req.params;
+
+
+    const userIdSchema = z.string()
+    .trim()
+    .uuid("userId must be in uuid format");
+
+    try {
+      userIdSchema.parse(userId)
+    } catch (err) {
+      const { errors } = err;
+      return error(res, errors[0].message, 400)
+    }
+    
+    const about = await getAboutByUserIdService(userId);
+
+    /*
     const id = parseInt(req.params.id);
     const about = await getAboutByIdService(id);
 
@@ -94,6 +114,10 @@ export const getAboutByID = async (
       statusCode: 200,
       about,
     });
+    */
+
+    return success(res, about, "About details successfully retrieved.")
+
   } catch (err) {
     return next(err);
   }
