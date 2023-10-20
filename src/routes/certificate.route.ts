@@ -169,6 +169,12 @@ router.get("/certificates/:userId", getAllCertificates);
  *     tags: [Certificates]
  *     parameters:
  *       - in: path
+ *         name: userId  
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The ID of the user who owns the certificate.
+ *       - in: path
  *         name: certId
  *         required: true
  *         schema:
