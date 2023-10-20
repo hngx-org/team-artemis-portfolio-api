@@ -275,7 +275,7 @@ router.get("/certificate/:userId/:certId", getCertificateById);
 /**
  * @swagger
  * /api/certificate/{userId}/{certId}:
- *   patch:
+ *   put:
  *     summary: Update certificate details for a user with a specified certificate ID.
  *     description: Update certificate details for a user.
  *     tags:
@@ -360,6 +360,6 @@ router.get("/certificate/:userId/:certId", getCertificateById);
  *                 data:
  *                   type: null
  */
-router.patch("/certificate/:userId/:certId", updateCertificate);
+router.put("/certificate/:userId/:certId", updateCertificate);
 
 module.exports = router;

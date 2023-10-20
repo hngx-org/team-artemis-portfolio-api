@@ -21,7 +21,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /api/interests:
+ * /api/v1/interests:
  *   post:
  *     summary: Create user interests.
  *     description: Create section for user interests.
@@ -55,8 +55,10 @@ const router = express.Router();
  *             schema:
  *               type: object
  *               properties:
- *                 successful:
+ *                 success:
  *                   type: boolean
+ *                 statusCode:
+ *                   type: number
  *                 message:
  *                   type: string
  *                 data:
@@ -68,9 +70,12 @@ const router = express.Router();
  *             schema:
  *               type: object
  *               properties:
- *                 successful:
+ *                 success:
  *                   type: boolean
  *                   example: false
+ *                 statusCode:
+ *                   type: number
+ *                   example: 500
  *                 message:
  *                   type: string
  *                   example: "invalid input syntax for type integer: \"\""
@@ -88,7 +93,7 @@ router.post(
 
 /**
  * @swagger
- * /api/interests/{userId}:
+ * /api/v1/interests/{userId}:
  *   get:
  *     summary: Fetch user interests.
  *     description: Fetch the interests of a user.
@@ -111,12 +116,14 @@ router.post(
  *             schema:
  *               type: object
  *               properties:
- *                 successful:
+ *                 success:
  *                   type: boolean
- *                   example: true
+ *                 statusCode:
+ *                   type: number
+ *                 message:
+ *                   type: string
  *                 data:
  *                   type: object
- *                   example: ["Backend", "Frontend"]
  *       500:
  *         description: Internal server error while retrieving interests.
  *         content:
@@ -124,9 +131,12 @@ router.post(
  *             schema:
  *               type: object
  *               properties:
- *                 successful:
+ *                 success:
  *                   type: boolean
  *                   example: false
+ *                 statusCode:
+ *                   type: number
+ *                   example: 500
  *                 message:
  *                   type: string
  *                   example: "Internal server error occurred."
@@ -140,6 +150,12 @@ router.post(
  *             schema:
  *               type: object
  *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 statusCode:
+ *                   type: number
+ *                   example: 400
  *                 message:
  *                   type: string
  *                   example: "Invalid userId format. Please provide a valid user ID."
@@ -147,13 +163,13 @@ router.post(
  *                   type: string
  */
 
-router.get("/interests/:userId", getInterests);
+router.get("/interests/:userId", validateUserId(userIdSchema), getInterests);
 
 // Update interests
 
 /**
  * @swagger
- * /api/interests/{userId}:
+ * /api/v1/interests/{userId}:
  *   put:
  *     summary: Update user interests.
  *     description: Update the interests of a user.
@@ -189,8 +205,10 @@ router.get("/interests/:userId", getInterests);
  *             schema:
  *               type: object
  *               properties:
- *                 successful:
+ *                 success:
  *                   type: boolean
+ *                 statusCode:
+ *                   type: number
  *                 message:
  *                   type: string
  *                 data:
@@ -207,9 +225,12 @@ router.get("/interests/:userId", getInterests);
  *             schema:
  *               type: object
  *               properties:
- *                 successful:
+ *                 success:
  *                   type: boolean
  *                   example: false
+ *                 statusCode:
+ *                   type: number
+ *                   example: 500
  *                 message:
  *                   type: string
  *                   example: "Could not update interests."
@@ -228,7 +249,7 @@ router.put(
 
 /**
  * @swagger
- * /api/interests/{userId}:
+ * /api/v1/interests/{userId}:
  *   delete:
  *     summary: Delete user interests.
  *     description: Delete the interests of a user.
@@ -250,8 +271,10 @@ router.put(
  *             schema:
  *               type: object
  *               properties:
- *                 successful:
+ *                 success:
  *                   type: boolean
+ *                 statusCode:
+ *                   type: number
  *                 message:
  *                   type: string
  *                 deletedInterest:
@@ -263,9 +286,12 @@ router.put(
  *             schema:
  *               type: object
  *               properties:
- *                 successful:
+ *                 success:
  *                   type: boolean
  *                   example: false
+ *                 statusCode:
+ *                   type: number
+ *                   example: 500
  *                 message:
  *                   type: string
  *                   example: "Could not delete interest."

@@ -1,10 +1,9 @@
-import express, { Request, RequestHandler, Response } from "express";
+import express, { Request, RequestHandler, Response, NextFunction } from "express";
 import { z } from "zod";
 import { validate as isUUID } from "uuid";
 import {
   createSkillsService,
   updateSkillsService,
-  deleteSkillsService,
   getSkillsService,
 } from "../services/skills.service";
 import { error, success } from "../utils";
@@ -18,6 +17,8 @@ import {
   MethodNotAllowedError,
   errorHandler,
 } from "../middlewares";
+import { connectionSource } from "../database/data-source";
+import { SkillsDetail } from "../database/entities";
 
 // Schema to validate req body
 const skillsSchema = z.object({
@@ -113,41 +114,51 @@ export const updateSkills: RequestHandler = async (
 
 export const deleteSkills: RequestHandler = async (
   req: Request,
-  res: Response
+  res: Response,
+  next: NextFunction
 ) => {
   try {
     const id = parseInt((req as any).params.id);
 
-    const data = await deleteSkillsService(id);
-    if (data.successful) {
-      success(res, data);
-    } else {
-      error(res, data.message);
+    if (isNaN(id) || id < 1) {
+      throw new BadRequestError("Invalid skill ID");
     }
+    const skillsDetailRepository = connectionSource.getRepository(SkillsDetail);
+
+    const skillToDelete = await skillsDetailRepository.findOne({
+      where: { id },
+    });
+    if (!skillToDelete) {
+      throw new NotFoundError("Skill not found");
+    }
+    await skillsDetailRepository.remove(skillToDelete);
+    return res.status(200).json({ message: "Skill deleted successfully" });
   } catch (err) {
-    error(res, (err as Error).message);
+    console.error("Failed to delete skill:", err);
+    next(err);
   }
 };
 
 // Controller function to fetch skills for a logged-in user
 export const getSkillsDetails: RequestHandler = async (
   req: Request,
-  res: Response
+  res: Response,
+  next: NextFunction
 ) => {
   try {
     const { userId } = req.params;
     // Fetch skills for the logged-in user based on their user ID
     const result = await getSkillsService(userId);
 
-    const data = result.map((record) => ({
+    const skills = result.map((record) => ({
       skillId: record["id"],
       skill: record["skills"],
     }));
 
     // Send a response with the fetched skills
-    success(res, data, "Skills");
+    return res.status(200).json({message: "skills successfully fetched", skills});
   } catch (err) {
     console.error("Error fetching skills:", error);
-    error(res, err instanceof Error ? err.message : "An error occurred");
+    next(err)
   }
 };
