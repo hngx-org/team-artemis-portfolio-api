@@ -235,8 +235,24 @@ const create = async (
     newRecord.user = (req as any).user;
     newRecord.section = section;
 
-    await customRepository.save(newRecord);
-    return success(res, newRecord, "Success");
+    const record = await customRepository.save(newRecord);
+    return success(res, record, "Success");
+  } catch (err) {
+    console.log(err);
+    return error(res, "An error occurred", 500);
+  }
+};
+
+export const getAllCustomSections = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const records = await customRepository.find({
+      where: { user: { id: (req as any).user?.id } },
+      relations: ["customFields"],
+    });
+    return success(res, records, "Success");
   } catch (err) {
     console.log(err);
     return error(res, "An error occurred", 500);
@@ -490,7 +506,7 @@ const updateSectionSchema: any = z
       return (
         data.name !== undefined ||
         data.description !== undefined ||
-        data.meta !== undefined 
+        data.meta !== undefined
       );
     },
     {
@@ -507,18 +523,17 @@ const getSectionSchema = z.object({
   name: z.string().optional(),
 });
 
-export const getcustomfieldsSchema: any = z
-  .object({
-    customSection: z.string().optional(),
-  })
-  // .refine(
-  //   (data) => {
-  //     return Number(data) > 0;
-  //   },
-  //   {
-  //     message: "Number must be greater than 0",
-  //   }
-  // );
+export const getcustomfieldsSchema: any = z.object({
+  customSection: z.string().optional(),
+});
+// .refine(
+//   (data) => {
+//     return Number(data) > 0;
+//   },
+//   {
+//     message: "Number must be greater than 0",
+//   }
+// );
 
 const validateSchema =
   (schema: AnyZodObject) => async (req: Request, res: Response, next: any) => {

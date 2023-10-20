@@ -25,6 +25,7 @@ import {
   findAllCustomField,
   deleteCustomFields,
   getcustomfieldsSchema,
+  getAllCustomSections,
 } from "../controllers/custom.controller";
 import { validateQuery } from "../middlewares/custom.zod";
 import { validate } from "../middlewares/auth";
@@ -159,6 +160,7 @@ router.post("/custom", [validate, validateSchema(customUserSectionSchema)], crea
  *       - Custom
  */
 router.get("/custom", findAll);
+router.get("/custom/user", validate, getAllCustomSections);
 /**
  * @swagger
  * /api/section:
