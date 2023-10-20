@@ -10,10 +10,13 @@ import {
   getAllUserReferenceService,
   updateReferenced,
 } from "../services/reference.service";
+import { CreateReferenceDetailSchema } from "../middlewares/reference.zod";
 const referenceRepository = connectionSource.getRepository(ReferenceDetail);
+
 
 export const createReference = async (req: Request, res: Response) => {
   try {
+    CreateReferenceDetailSchema.parse(req.body);
     const user_id = req.params.userId;
 
     const { referer, company, position, email, phoneNumber, sectionId } =
@@ -33,7 +36,12 @@ export const createReference = async (req: Request, res: Response) => {
 
     success(res, d.data, d.message);
   } catch (err) {
-    error(res, (err as Error).message); // Use type assertion to cast 'err' to 'Error' type
+    if (err instanceof z.ZodError){
+      error(res, err.flatten());
+    }else {
+      error(res, (err as Error).message);
+    }
+    // error(res, (err as Error).message); // Use type assertion to cast 'err' to 'Error' type
   }
 };
 

@@ -2,21 +2,20 @@ import { object, string, ZodIssue, ZodError } from "zod";
 import { NextFunction, Request, Response } from "express";
 import { BadRequestError } from "../middlewares";
 import { parseAsync, ErrorMessageOptions } from "zod-error";
+const regx = new RegExp("[^$@0-9]+");
 
 export const CreateReferenceDetailSchema = object({
   referer: string()
     .min(1, { message: "Name must not be an empty string" })
-    .refine((name) => !!name, {
-      message: "Name is required in the request body",
-    }),
+    .regex(regx, "Name cannot be a number or special character"),
 
   company: string()
     .min(1, { message: "Company must not be an empty string" })
-    .refine((company) => !!company, {
-      message: "Company is required in the request body",
-    }),
+    .regex(regx, "Company cannot be a number or special character"),
 
-  position: string().optional(),
+  position: string()
+     .regex(regx, "Position cannot be a number or special character")
+     .optional(),
 
   email: string()
     .min(1, { message: "Email address must not be an empty string" })
@@ -24,7 +23,10 @@ export const CreateReferenceDetailSchema = object({
       message: "Email address is required in the request body",
     }),
 
-  phoneNumber: string().optional(),
+  phoneNumber: string()
+    .min(6, "Invalid Phone Number")
+    .max(15, "Invalid Phone Number")
+    .optional(),
 
   userId: string()
     .min(1, { message: "User ID must not be an empty string" })
