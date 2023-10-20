@@ -10,7 +10,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /api/create-skills:
+ * /api/v1/skills:
  *   post:
  *     summary: Create new skills
  *     description: Create one or more skills for a user.
@@ -76,10 +76,16 @@ router.post("/skills", createSkills);
 
 /**
  * @swagger
- * /api/skills-details/{userId}:
+ * /api/v1/skills/{userId}:
  *   get:
  *     summary: Get skills details
  *     description: Get details of all skills for logged in user.
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         description: The ID of the user whose skills details are to be retrieved.
+ *         required: true
+ *         type: string
  *     responses:
  *       200:
  *         description: Skills details retrieved successfully.
@@ -108,7 +114,7 @@ router.get("/skills/:userId", getSkillsDetails);
 
 /**
  * @swagger
- * /api/update-skills/{id}:
+ * /api/v1/skills/{id}:
  *   put:
  *     summary: Update a skill by ID.
  *     description: Update a skill's information by providing its ID.
@@ -180,7 +186,7 @@ router.put("/skills/:id", updateSkills);
 
 /**
  * @swagger
- * /api/delete-skills/{id}:
+ * /api/v1/skills/{id}:
  *   delete:
  *     summary: Delete a skill by ID
  *     description: Delete a skill by providing its ID.
@@ -189,7 +195,9 @@ router.put("/skills/:id", updateSkills);
  *         name: id
  *         description: The ID of the skill to delete.
  *         required: true
- *         type: integer
+ *         schema:
+ *           type: integer
+ *           example: 1
  *     responses:
  *       200:
  *         description: Skill deleted successfully.
@@ -198,9 +206,6 @@ router.put("/skills/:id", updateSkills);
  *             schema:
  *               type: object
  *               properties:
- *                 successful:
- *                   type: boolean
- *                   example: true
  *                 message:
  *                   type: string
  *                   example: "Skill deleted successfully"
@@ -211,9 +216,6 @@ router.put("/skills/:id", updateSkills);
  *             schema:
  *               type: object
  *               properties:
- *                 successful:
- *                   type: boolean
- *                   example: false
  *                 message:
  *                   type: string
  *                   example: "Skill not found"
@@ -224,17 +226,11 @@ router.put("/skills/:id", updateSkills);
  *             schema:
  *               type: object
  *               properties:
- *                 successful:
- *                   type: boolean
- *                   example: false
  *                 message:
  *                   type: string
  *                   example: "Failed to delete skill"
- *                 data:
- *                   type: null
  *     tags:
  *       - Skills
- */
-router.delete("/delete-skills/:id", deleteSkills);
+ */ router.delete("/skills/:id", deleteSkills);
 
 module.exports = router;
