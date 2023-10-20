@@ -105,7 +105,8 @@ export const uploadProfileImageController: RequestHandler = async (
 
 export const uploadProfileCoverController: RequestHandler = async (
   req: Request,
-  res: Response
+  res: Response,
+  next: NextFunction
 ) => {
   try {
     if (!req.files) return error(res, "add event image", 400);
