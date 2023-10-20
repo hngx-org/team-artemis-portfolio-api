@@ -1,91 +1,122 @@
 import { NextFunction, Request, Response } from "express";
 import { RequestHandler } from "express-serve-static-core";
-import { AboutDetail, User, Section } from "../database/entities";
-import { connectionSource } from "../database/data-source";
+import {
+  createAboutService,
+  deleteAboutService,
+  getAboutByIdService,
+  updateAboutService,
+} from "../services/about.service";
+import { NotFoundError, BadRequestError } from "../middlewares";
+import {
+  ValidateCreateAbout,
+  ValidateUpdateAbout,
+} from "../middlewares/about.zod";
 
-import { NotFoundError, BadRequestError } from '../middlewares';
+// endpoint to create about details
 
+export const createAbout: RequestHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { userId } = req.params;
+    const { bio, section_id } = req.body;
 
-const aboutRepository = connectionSource.getRepository(AboutDetail);
-const userRepository = connectionSource.getRepository(User);
-const sectionRepository = connectionSource.getRepository(Section);
+    const payload = { bio, section_id };
 
-
-export const createOrUpdateAbout: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
-    try {
-        const { userId } = req.params;
-        const { bio, section_id } = req.body;
-
-        if (!bio) {
-            throw new BadRequestError("Bio is required");
-        }
-
-        const user = await userRepository.findOne({ where: { id: userId } });
-
-        if (!user) {
-            throw new NotFoundError("User not found");
-        }
-
-        const section = await sectionRepository.findOne({ where: { id: section_id } });
-        if (!section) {
-            throw new NotFoundError("Section not found");
-        }
-
-        const existingAbout = await aboutRepository.findOne({ where: { user: { id: userId } } });
-        let createdAbout
-        if (!existingAbout) {
-            createdAbout = await aboutRepository.save({
-                bio: bio,
-                section: section,
-                user: user,
-            });
-        } else {
-            await aboutRepository.update({
-                id: existingAbout.id,
-            }, {
-                bio: bio,
-                section: section,
-                user: user,
-            });
-            createdAbout = await aboutRepository.findOne({ where: { user: { id: userId } } })
-        }
-
-        return res.status(201).json({
-            message: "Successfully created about",
-            status: "success",
-            statusCode: 201,
-            createdAbout,
-        });
-    } catch (err) {
-        return next(err);
+    const isValid = await ValidateCreateAbout(payload);
+    if (!isValid) {
+      throw new BadRequestError("Validation error");
     }
-}
 
-export const getAboutByUserID = async (req: Request, res: Response, next: NextFunction) => {
-    try {
-        const { user_id } = req.params;
+    const about = await createAboutService(userId, section_id, bio);
 
-        const user = await userRepository.findOne({ where: { id: user_id } });
-        if (!user) {
-            throw new NotFoundError("User not found");
-        }
+    return res.status(201).json({
+      message: "About details successfully created.",
+      status: "Success",
+      statusCode: 201,
+      about,
+    });
+  } catch (err) {
+    return next(err);
+  }
+};
 
-        const about = await aboutRepository.findOne({ where: { user: { id: user_id } } });
-        if (!about) {
-            throw new NotFoundError("About not found");
-        }
+// ednpoint to update about details
 
-        return res.status(200).json({
-            message: "Successfully retrieved about",
-            status: "success",
-            statusCode: 200,
-            about,
-        });
-    } catch (err) {
-        return next(err);
+export const updateAbout: RequestHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const id = parseInt(req.params.id);
+    const { bio, section_id } = req.body;
+
+    const data = {
+      bio,
+      section_id,
+    };
+
+    const isValid = await ValidateUpdateAbout(data);
+    if (!isValid) {
+      throw new BadRequestError("dd");
     }
-}
 
+    const about = await updateAboutService(id, section_id, bio);
+    res.status(200).json({
+      message: "About details successfully updated.",
+      status: "Success",
+      statusCode: 200,
+      about,
+    });
+  } catch (err) {
+    console.error("Error:", err);
+    return next(err);
+  }
+};
 
+// endpoint to get about details by id
 
+export const getAboutByID = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const id = parseInt(req.params.id);
+    const about = await getAboutByIdService(id);
 
+    return res.status(200).json({
+      message: "About details successfully retrieved.",
+      status: "Success",
+      statusCode: 200,
+      about,
+    });
+  } catch (err) {
+    return next(err);
+  }
+};
+
+// endpoint to delete about details
+
+export const deleteAbout: RequestHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  console.log("q");
+  try {
+    const id = parseInt(req.params.id);
+    const result = await deleteAboutService(id);
+
+    return res.status(200).json({
+      message: "About details deleted successfully.",
+      status: "Success",
+      statusCode: 200,
+    });
+  } catch (error) {
+    return next(error);
+  }
+};

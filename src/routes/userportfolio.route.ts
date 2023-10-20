@@ -13,7 +13,7 @@ const router = Router();
 
 /**
  * @swagger
- * /api/getPortfolioDetails/{userId}:
+ * /api/v1/portfolio/{userId}:
  *   get:
  *     summary: Get all portfolio details including sections
  *     description: Get request to retrieve all portfolio details for a user.
@@ -59,7 +59,8 @@ const router = Router();
  *                   type: string
  *                   description: null
  */
-router.get("/getPortfolioDetails/:userId", getPortfolioDetails);
+router.get("/portfolio/:slug", getPortfolioDetails);
+// router.get("/portfolio/:userId", getPortfolioDetails);
 
 /**
  * @swagger

@@ -15,7 +15,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /api/award/{userId}:
+ * /api/v1/awards/{userId}:
  *   post:
  *     summary: Create a new award for a user.
  *     description: Create a new award for a user by providing the user's ID.
@@ -85,11 +85,11 @@ const router = express.Router();
  *     tags:
  *       - Award
  */
-router.post("/award/:userId", validateCreateAwardData, createAwardController);
+router.post("/awards/:userId", validateCreateAwardData, createAwardController);
 
 /**
  * @swagger
- * /api/award/{awardId}:
+ * /api/v1/awards/{awardId}:
  *   put:
  *     summary: Update an award by ID.
  *     description: Update an award's information by providing its ID.
@@ -177,11 +177,11 @@ router.post("/award/:userId", validateCreateAwardData, createAwardController);
  *     tags:
  *       - Award
  */
-router.put("/award/:awardId", updateAwardController);
+router.put("/awards/:awardId", updateAwardController);
 
 /**
  * @swagger
- * /api/award/{id}:
+ * /api/v1/awards/{id}:
  *   get:
  *     summary: Get award detail(s) for a user who's id is the params and returns an array of objects containing a user award details.
  *     description: Get award detail(s) for a user who's id is in the params and returns an array of objects containing a user award details.
@@ -228,11 +228,11 @@ router.put("/award/:awardId", updateAwardController);
  *                 'Input Error':
  *                   type: string
  */
-router.get("/award/:id", getAwardController);
+router.get("/awards/:id", getAwardController);
 
 /**
  * @swagger
- * /api/awards:
+ * /api/v1/awards
  *   get:
  *     summary: Get the award detail of all users
  *     description: All awards retrieved successfully
@@ -275,7 +275,7 @@ router.get("/awards", getAllAwardsController);
 
 /**
  * @swagger
- * /api/award/{id}:
+ * /api/v1/awards/{id}:
  *   delete:
  *     summary: Delete an award by ID.
  *     description: Delete an award by providing its ID.
@@ -309,6 +309,6 @@ router.get("/awards", getAllAwardsController);
  *     tags:
  *       - Award
  */
-router.delete("/award/:id", deleteAwardController);
+router.delete("/awards/:id", deleteAwardController);
 
 module.exports = router;

@@ -15,21 +15,49 @@ const userRepository = dataSource.getRepository(User);
 const socialUserService = new SocialUserService();
 
 export const createSocials = async (req: Request, res: Response) => {
+  const createSocialsSchema = z.object({
+    name: z
+      .string()
+      .min(1)
+      .max(50)
+      .refine((name) => !name.includes('*'), {
+        message: 'Asterisk (*) is not allowed in the name field',
+      })
+      .refine((name) => !/\d/.test(name), {
+        message: 'Numbers are not allowed in the name field',
+      })
+      .refine((name) => !name.includes('?'), {
+        message: 'question mark (?) is not allowed in the name field',
+      }),
+  });
+
   try {
-    const { name } = req.body;
-    if (!name) {
-      return res.status(400).json({ message: "Invalid input data" });
-    }
+    const validatedData = createSocialsSchema.parse(req.body);
+    const { name } = validatedData;
+
     const contactsRepo = dataSource.getRepository(SocialMedia);
-    const contact = new SocialMedia();
-    contact.name = name;
+    const contact = contactsRepo.create({
+      name,
+    });
     await contactsRepo.save(contact);
-    return res
-      .status(201)
-      .json({ message: "Social Media type created successfully" });
+
+    const response = {
+      message: 'Social Media type created successfully',
+      status: 'success',
+      statusCode: 201,
+    };
+    return res.status(201).json(response);
   } catch (error) {
-    console.error("Error creating contact:", error);
-    return res.status(400).json({ message: "Invalid input data" });
+    if (error instanceof z.ZodError) {
+      const fieldErrors = error.errors.map((err) => ({
+        message: err.message,
+      }));
+
+      return res.status(400).json({ error:fieldErrors });
+    } else {
+      console.error('Error creating contact:', error);
+      return res.status(500).json({ message: 'Internal server error' });
+    }
   }
 };
 
@@ -47,13 +75,11 @@ export const getSocials = async (req: Request, res: Response) => {
     if (response.data.length > 0) {
       return res.status(200).json(response);
     }
-    return res
-      .status(200)
-      .json({
-        statusCode: 200,
-        status: "No social media type found",
-        data: [],
-      });
+    return res.status(200).json({
+      statusCode: 200,
+      status: "No social media type found",
+      data: [],
+    });
   } catch (error) {
     return res.status(500).json({ message: "Oops something happened" });
   }
@@ -75,42 +101,127 @@ export const createContacts = async (
     user_id: z.string().uuid(),
     social_media_id: z.number(),
   });
-  const { url, user_id, social_media_id }: Icontacts = req.body;
-  const formattedId = Number(social_media_id);
-  console.log(typeof formattedId === 'number')
+  let { url, user_id, social_media_id }: Icontacts = req.body;
+
+  url = url.trim().toLocaleLowerCase(); //convert to lowercae
+  user_id = user_id.trim().toLocaleLowerCase(); //convert to lowercase and trim
+
+  const formattedId = Number(social_media_id); // convert social media id to number
+
   const isValid = schema.safeParse({
     url,
     user_id,
     social_media_id: formattedId,
-  });
+  }); // checks if parse data is valid
+
   const socialsRepo = dataSource.getRepository(SocialMedia);
-  
+
   try {
-    let social = await socialsRepo.find({where:{Id:social_media_id}});
-    console.log(url)
-    let validname = (url.toLocaleLowerCase()).includes((social[0].name ).toLocaleLowerCase())
-    let validend = url.includes(".com") ||url.includes(".net")||url.includes(".ng")||url.includes(".uk")||url.includes(".app")
-    let validprotocol = url.startsWith("https://")|| url.startsWith("http://") ||(url.toLocaleLowerCase()).startsWith("www.")
-    let invalidChar = url.includes("*") ||url.includes("+")
-    
-    if(validname === false || validend ===false || validprotocol ===false || invalidChar){// checks if social url is valid
-      return res.status(400).json({message:'invalid url please correct to match social media type'})
+    let social = await socialsRepo.find({ where: { Id: social_media_id } });
+    console.log(social);
+
+    if (social.length < 1) {
+      return res.status(400).json({
+        success: false,
+        statusCode: 400,
+        error: "BadRequest Error",
+        message: "Social media Id does not exist",
+      });
     }
-       
-       if (isValid.success) {
-      const user = await userRepository.find({where:{id:user_id}});
-      console.log(user.length)
-      if(user.length < 1){
-        return res.json({message:"user does not exist"})
+    console.log(!url.includes(social[0].name.toLocaleLowerCase()))
+    if(!url.includes(social[0].name.toLocaleLowerCase())){
+      return res.status(400).json({
+        success: false,
+        statusCode: 400,
+        error: "BadRequest Error",
+        message: "Social media Id does not match provided social link. please provide correct link",
+      });
+    }
+
+   // check if social url is valid url
+   
+    let urlArr = url.split(social[0].name.toLocaleLowerCase());
+    let validStart =
+      urlArr[0].endsWith("ttp://") ||
+      urlArr[0].endsWith("ttps://") ||
+      urlArr[0].endsWith("www.");
+      
+    let validEnd = urlArr[1].startsWith(".");
+
+    let validname = url
+      .toLocaleLowerCase()
+      .includes(social[0].name.toLocaleLowerCase());
+    let validend =
+      url.includes(".com") ||
+      url.includes(".net") ||
+      url.includes(".ng") ||
+      url.includes(".uk") ||
+      url.includes(".app");
+    let validprotocol =
+      url.startsWith("https://") ||
+      url.startsWith("http://") ||
+      url.toLocaleLowerCase().startsWith("www.");
+    let invalidChar =
+      url.includes("*") || url.includes("+") || url.includes(",");
+
+    if (
+      validStart === false ||
+      validEnd === false ||
+      validname === false ||
+      validend === false ||
+      validprotocol === false ||
+      invalidChar
+    ) {
+      // checks if social url is valid
+      return res.status(400).json({
+        success: false,
+        statusCode: 400,
+        error: "BadRequest Error",
+        message: "invalid url please provide valid url link",
+      });
+    }
+
+    if (isValid.success) {
+      const user = await userRepository.find({ where: { id: user_id } });
+      console.log(user.length);
+      if (user.length < 1) {
+        return res.status(404).json({
+          statusCode: 404,
+          success: false,
+          error: "not found error",
+          message: "user does not exist",
+        });
+      }
+      const contact = await contactsRepo.find({ where: { url } });
+      if (contact.length > 0) {
+        return res.status(200).json({
+          success: true,
+          statusCode: 200,
+          message: "contact already exists",
+        });
       }
       // check if request body details is a valid data
       await createContact(social_media_id, url, user_id);
-      return res.status(201).json({ message: MESSAGES.CREATED });
+      return res
+        .status(201)
+        .json({ statusCode: 201, success: true, message: MESSAGES.CREATED });
     } else {
-      return res.status(400).json({ message: "invalid User id" });
+      return res.status(400).json({
+        statusCode: 400,
+        error: "Bad Request Error",
+        success: false,
+        message: " User id is not valid",
+      });
     }
   } catch (error) {
-    return res.status(500).json({ message:" error creating contacts"});
+    console.log(error)
+    return res
+      .status(500)
+      .json({
+        statusCode: 500,
+        error: "Internal server Error",
+        message: " error creating contacts",
+      });
   }
 };
 
@@ -122,23 +233,33 @@ export const getContacts = async (req: Request, res: Response) => {
     const parsedUserId = schema.safeParse({ user_id });
     // const userIdRegex = /^[A-Fa-f0-9\-]+$/
     if (!parsedUserId.success) {
-      return res.status(400).json({ message: "invalid User Id" });
+      return res
+        .status(400)
+        .json({ statusCode: 400, success: false, message: "invalid User Id" });
     }
     const user = await userRepository.findOne({
       where: { id: user_id },
     });
-    
+
     if (!user) {
-      return res.status(404).json({ message: "No such user" });
+      return res
+        .status(404)
+        .json({ statusCode: 404, success: false, message: "No such user" });
     }
-    console.log(user_id)
+    console.log(user.email);
     const contacts = await contactsRepo.find({
       where: { user_id },
     });
-    return res.status(200).json(contacts);
+    return res.status(200).json({
+      success: true,
+      statusCode: 200,
+      payload: [{ email: user.email }, ...contacts],
+    });
   } catch (error) {
     console.error("Error getting contacts:", error);
-    return res.status(500).json({ message: "could not fetch contacts" });
+    return res
+      .status(500)
+      .json({ statusCode: 500, message: "could not fetch contacts" });
   }
 };
 
@@ -147,10 +268,16 @@ export const deleteContact = async (req: Request, res: Response) => {
   try {
     let { id } = req.params;
     const contact_id = parseInt(id);
+    if (isNaN(contact_id) || contact_id <= 0) {
+      return res.status(400).json({ message: 'Invalid contact ID' });
+    }
     console.log(contact_id);
     // const userIdRegex = /^[A-Fa-f0-9\-]+$/
-    const contacts = await contactsRepo.delete(contact_id);
-    return res.status(200).json(contacts);
+    const result = await contactsRepo.delete(contact_id);
+   if (result.affected === 0) {
+  return res.status(404).json({ message: 'Contact not found' });
+}
+ return res.status(204).json({ message: `Contact with ID ${contact_id} deleted successfully` });
   } catch (error) {
     console.error("Error getting contacts:", error);
     return res.status(404).json({ message: MESSAGES.NOT_FOUND });
@@ -158,32 +285,32 @@ export const deleteContact = async (req: Request, res: Response) => {
 };
 
 //update Contact controller
-export const updateContactController: RequestHandler = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const { socialMediaId, url, userId }: ContactBody = req.body;
-    const socialId: number = Number(req.params.Id);
-
-    const user = await findUser(userId);
-
-    if (!user) {
-      return res.status(404).json("user not found");
-    }
-
-    const contact = await updateContact(socialMediaId, url, socialId, userId);
-
-    if (!contact) {
-      return res.status(404).json("can not update contact");
-    }
-
-    return res.status(200).json({
-      message: "new contact updated",
-    });
+export const updateContactController = async (req: Request, res: Response) => {
+  const updateContactSchema = z.object({
+    url: z.string().nonempty(),
+    socialMediaId: z.number().int(),
+    userId: z.string().nonempty(),
+  });
+ 
+  const Id = parseInt(req.params.id);
+  const { url, socialMediaId, userId } = req.body;
+  console.log(Id)
+  if (isNaN(Id) || Id <= 0 || !Number.isInteger(Id)) {
+    return res.status(404).json("contact_Id invalid");
+  }
+   try {
+   // updateContactSchema.parse({ url, socialMediaId, userId });
+  
+    const updatedContact = await updateContact(Id, { url, socialMediaId }, userId);
+   res.json({
+    url: updatedContact.url,
+    socialMediaId: updatedContact.socialMedia,  
+});
   } catch (error) {
-    console.log(error);
-    return res.status(500).json({ message: "Failed to update contact" });
+    if (error instanceof z.ZodError) {
+      const errorMessage = error.errors.map((err) => err.message).join(', ');
+      return res.status(400).json({ error: errorMessage });
+    }
+    res.status(500).json({ error: 'Internal server error' });
   }
 };
