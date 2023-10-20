@@ -15,8 +15,7 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerOptions));
 
 connectionSource
   .initialize()
-  .then(async (conn) => {
-    await conn.runMigrations()
+  .then(async () => {
     console.log("Database Connected");
   })
   .catch((error) => console.log(error));
@@ -29,7 +28,7 @@ app.use(cors());
 
 //serve all routes dynamically using readdirsync
 readdirSync("./src/routes").map((path) =>
-  app.use("/api", require(`./routes/${path}`))
+  app.use("/api/v1", require(`./routes/${path}`))
 );
 app.get("/", sayHelloController);
 app.use(errorHandler);

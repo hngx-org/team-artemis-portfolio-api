@@ -1,9 +1,9 @@
-import express from 'express';
-import languageController from '../controllers/language.controller';
+import express from "express";
+import languageController from "../controllers/language.controller";
 import {
   postLanguageSchema,
   validateSchema,
-} from '../middlewares/language.zod';
+} from "../middlewares/language.zod";
 
 const router = express.Router();
 
@@ -34,67 +34,15 @@ const router = express.Router();
  *     responses:
  *       200:
  *         description: Successful response
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 status:
- *                   type: integer
- *                   example: 200
- *                 message:
- *                   type: string
- *                   example: success
- *                 data:
- *                   type: string
  *       404:
  *         description: Not found
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 status:
- *                   type: integer
- *                   example: 404
- *                 message:
- *                   type: string
- *                   example: Not found
- *                 data:
- *                   type: object
  *       400:
  *         description: Bad request
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 status:
- *                   type: integer
- *                   example: 400
- *                 message:
- *                   type: string
- *                   example: Bad Request
- *                 data:
- *                   type: object
  *       500:
  *         description: Internal server error
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 status:
- *                   type: integer
- *                   example: 500
- *                 message:
- *                   type: string
- *                   example: Internal server error
- *                 data:
- *                   type: object
  */
 router.post(
-  '/language',
+  "/languages",
   validateSchema(postLanguageSchema),
   languageController.addLanguage
 );
@@ -118,66 +66,14 @@ router.post(
  *     responses:
  *       200:
  *         description: Successful response
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 status:
- *                   type: integer
- *                   example: 200
- *                 message:
- *                   type: string
- *                   example: success
- *                 data:
- *                   type: string
  *       404:
  *         description: Not found
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 status:
- *                   type: integer
- *                   example: 404
- *                 message:
- *                   type: string
- *                   example: Not found
- *                 data:
- *                   type: object
  *       400:
  *         description: Bad request
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 status:
- *                   type: integer
- *                   example: 400
- *                 message:
- *                   type: string
- *                   example: Bad Request
- *                 data:
- *                   type: object
  *       500:
  *         description: Internal server error
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 status:
- *                   type: integer
- *                   example: 500
- *                 message:
- *                   type: string
- *                   example: Internal server error
- *                 data:
- *                   type: object
  */
-router.get('/language/:userId', languageController.getUserLanguages);
+router.get("/languages/:userId", languageController.getUserLanguages);
 
 /**
  * @swagger
@@ -198,65 +94,32 @@ router.get('/language/:userId', languageController.getUserLanguages);
  *     responses:
  *       200:
  *         description: Successful response
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 status:
- *                   type: integer
- *                   example: 200
- *                 message:
- *                   type: string
- *                   example: success
- *                 data:
- *                   type: string
  *       404:
  *         description: Not found
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 status:
- *                   type: integer
- *                   example: 404
- *                 message:
- *                   type: string
- *                   example: Not found
- *                 data:
- *                   type: object
  *       400:
  *         description: Bad request
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 status:
- *                   type: integer
- *                   example: 400
- *                 message:
- *                   type: string
- *                   example: Bad Request
- *                 data:
- *                   type: object
  *       500:
  *         description: Internal server error
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 status:
- *                   type: integer
- *                   example: 500
- *                 message:
- *                   type: string
- *                   example: Internal server error
- *                 data:
- *                   type: object
  */
-router.delete('/language/:userId', languageController.deleteAllUserLanguages);
+router.delete("/languages/:userId", languageController.deleteAllUserLanguages);
+
+/**
+ * @swagger
+ * /api/language:
+ *   get:
+ *     summary: Get all languages that can be chosen
+ *     description: Get all the languages that will be shown on the frontend dropdown
+ *     tags: [Language]
+ *     responses:
+ *       200:
+ *         description: Successful response
+ *       404:
+ *         description: Not found
+ *       400:
+ *         description: Bad request
+ *       500:
+ *         description: Internal server error
+ */
+router.get("/language", languageController.getAllLanguages);
 
 module.exports = router;
