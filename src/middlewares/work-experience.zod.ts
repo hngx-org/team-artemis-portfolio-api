@@ -9,18 +9,6 @@ function validateDateYYMMDD(dateString: string) {
   return yearPattern.test(dateString);
 }
 
-function checkNotIntegerString(value: any, fieldName: string) {
-  const trimmedValue = value.trim();
-
-  if (
-    typeof value !== "string" ||
-    trimmedValue === "" ||
-    !isNaN(Number(trimmedValue))
-  ) {
-    throw new BadRequestError(`The '${fieldName}' must be a string`);
-  }
-}
-
 const options: ErrorMessageOptions = {
   delimiter: {
     error: " # ",
@@ -43,7 +31,20 @@ const validMonths = [
   "December",
 ];
 
-const specialCharsPattern = /[&-]/;
+const shortToLongMonths = {
+  Jan: "January",
+  Feb: "February",
+  Mar: "March",
+  Apr: "April",
+  May: "May",
+  Jun: "June",
+  Jul: "July",
+  Aug: "August",
+  Sep: "September",
+  Oct: "October",
+  Nov: "November",
+  Dec: "December",
+};
 
 const stringValidator = z
   .string()
