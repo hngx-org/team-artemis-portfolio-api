@@ -158,15 +158,11 @@ export const workExperienceController: RequestHandler = async (
   }
 };
 
-export const updateWorkExperience: RequestHandler = async (
-  req: Request,
-  res: Response
-) => {
+export const updateWorkExperience: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
   const workId = parseInt(req.params.workId);
 
   if (!workId) {
-    res.statusCode = 400;
-    return res.json({ message: "workExpId must be provided as a parameter" });
+    return next(new BadRequestError("workExpId must be provided as a parameter"));
   }
 
   const {
@@ -183,39 +179,31 @@ export const updateWorkExperience: RequestHandler = async (
   } = req.body;
 
   if (!userId) {
-    res.statusCode = 400;
-    return res.json({ message: "userId is missing from request body" });
+    return next(new BadRequestError("userId is missing from the request body"));
   }
 
   if (sectionId === undefined) {
-    res.statusCode = 400;
-    return res.json({ message: "sectionId is missing from request body" });
+    return next(new BadRequestError("sectionId is missing from the request body"));
   }
 
   if (!company || !role) {
-    res.statusCode = 400;
-    return res.json({
-      message: "company or role is missing from request body",
-    });
+    return next(new BadRequestError("company or role is missing from the request body"));
   }
 
   try {
-    const workExperienceToUpdate = await workExperienceRepository.findOneBy({
-      id: workId,
-    });
+    const workExperienceToUpdate = await workExperienceRepository.findOneBy({ id: workId });
 
     if (!workExperienceToUpdate) {
-      res.statusCode = 404;
-      return res.json({ message: "Work Experience not found" });
-    }
-    if (endYear && startYear && endYear < startYear) {
-      res.statusCode = 400;
-      return res.json({
-        message: "EndYear must be greater than startYear",
-      });
+      return next(new NotFoundError("Work Experience not found"));
     }
 
-    // Update the work experience details
+    // Validate the request body against the schema
+    await validateWorkExperience(req, res, next);
+
+    if (endYear && startYear && endYear < startYear) {
+      return next(new BadRequestError("EndYear must be greater than startYear"));
+    }
+
     workExperienceToUpdate.company = company;
     workExperienceToUpdate.role = role;
     workExperienceToUpdate.startMonth = startMonth;
@@ -227,7 +215,6 @@ export const updateWorkExperience: RequestHandler = async (
     workExperienceToUpdate.user = userId;
     workExperienceToUpdate.section = sectionId;
 
-    // Save the updated work experience
     await workExperienceRepository.save(workExperienceToUpdate);
 
     return res.json({
@@ -235,7 +222,6 @@ export const updateWorkExperience: RequestHandler = async (
       data: workExperienceToUpdate,
     });
   } catch (err) {
-    res.statusCode = 500;
-    res.json({ error: err, message: (err as Error).message });
+    next(err);
   }
 };
