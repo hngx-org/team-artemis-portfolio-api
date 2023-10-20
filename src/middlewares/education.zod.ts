@@ -45,8 +45,7 @@ const options: ErrorMessageOptions = {
   delimiter: {
     error: " # ",
   },
-  transform: ({ errorMessage, index }) =>
-    `Error #${index + 1}: ${errorMessage}`,
+  transform: ({ errorMessage, index }) => `${errorMessage}`,
 };
 
 async function validateUpdateData(
@@ -75,9 +74,9 @@ async function validateUpdateData(
 
     // Usage:
 
-    checkNotEmptyString(data.school, "school");
-    checkNotEmptyString(data.description, "description");
-    checkNotEmptyString(data.fieldOfStudy, "fieldOfStudy");
+    // checkNotEmptyString(data.school, "school");
+    // checkNotEmptyString(data.description, "description");
+    // checkNotEmptyString(data.fieldOfStudy, "fieldOfStudy");
 
     // Validate date strings in "yy-mm-dd" format
     if (data.from && !validateDateYYMMDD(data.from)) {
@@ -94,6 +93,7 @@ async function validateUpdateData(
     console.log(validatedData);
     next(); // Continue to the next middleware or route handler
   } catch (error) {
+    console.log(error.message);
     next(new BadRequestError(error.message));
     return;
   }

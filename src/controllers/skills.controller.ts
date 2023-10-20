@@ -1,5 +1,6 @@
 import express, { Request, RequestHandler, Response } from "express";
 import { z } from "zod";
+import { validate as isUUID } from "uuid";
 import {
   createSkillsService,
   updateSkillsService,
@@ -7,19 +8,48 @@ import {
   getSkillsService,
 } from "../services/skills.service";
 import { error, success } from "../utils";
+import {
+  CustomError,
+  NotFoundError,
+  BadRequestError,
+  UnauthorizedError,
+  ForbiddenError,
+  InternalServerError,
+  MethodNotAllowedError,
+  errorHandler,
+} from "../middlewares";
 
 // Schema to validate req body
 const skillsSchema = z.object({
-  skills: z.array(z.string()),
+  skills: z.array(z.string().min(1, {
+    message: "Skill has to be at least 1 letter"
+  })),
   sectionId: z.number(),
-  userId: z.string(),
+  userId: z.string().refine((val) => isUUID(val), {
+    message: "userId has to be a valid UUID",
+  }),
 });
 
+const updateSkillsSchema = z.object({
+  skills: z.string().min(1, {
+    message: "Skill has to be at least 1 letter"
+  }).optional(),
+  sectionId: z.number().optional(),
+  userId: z.string().refine((val) => isUUID(val), {
+    message: "userId has to be a valid UUID",
+  }).optional(),
+});
+
+// controller functions
 export const createSkills: RequestHandler = async (
   req: Request,
   res: Response
 ) => {
   try {
+    if (!req.body) {
+      throw new BadRequestError("No data to create");
+    }
+
     const { skills, sectionId, userId } = skillsSchema.parse(req.body);
 
     const existingData = await getSkillsService(userId);
@@ -27,10 +57,11 @@ export const createSkills: RequestHandler = async (
     const newSkills = [];
 
     skills.forEach((skill) => {
-      skill = skill.trim();
-      if (!existingSkills.includes(skill)) {
+      skill = skill.trim().toLowerCase();
+      if (!existingSkills.includes(skill) && !newSkills.includes(skill)) {
         newSkills.push(skill);
       }
+      console.error(`${skill} already exists`);
     })
 
     const skillData = newSkills.map((skill) => ({
@@ -44,9 +75,10 @@ export const createSkills: RequestHandler = async (
   } catch (err) {
     if (err instanceof z.ZodError) {
       const errorMessages = err.issues.map((issue) => issue.message);
-      error(res, errorMessages.join(", "), 400);
+      const errors = errorMessages.join("; ");
+      throw new BadRequestError(errors);
     }
-    error(res, err instanceof Error ? err.message : "An error occurred");
+    throw new InternalServerError("An error occurred");
   }
 };
 
@@ -55,17 +87,27 @@ export const updateSkills: RequestHandler = async (
   res: Response
 ) => {
   try {
-    const id = parseInt((req as any).params.id);
-    const { skills, sectionId, userId } = (req as any).body;
+    const id = parseInt(req.params.id);
+
+    if (isNaN(id) || id < 1) {
+      throw new BadRequestError("Invalid ID");
+    }
+
+    if (!req.body) {
+      throw new BadRequestError("No data to update");
+    }
+
+    const { skills, sectionId, userId } = updateSkillsSchema.parse(req.body);
 
     const data = await updateSkillsService(id, { skills, sectionId, userId });
     if (data.successful) {
       success(res, data);
     } else {
-      error(res, data.message);
+      throw new BadRequestError(data.message);
     }
   } catch (err) {
-    error(res, (err as Error).message);
+    console.error("Error updating skill: ", err.message);
+    throw new InternalServerError("An error occurred");
   }
 };
 
