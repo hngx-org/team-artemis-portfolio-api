@@ -1,20 +1,12 @@
-import { object, string, z } from "zod";
+import { object, string, z, ZodError } from "zod";
 import { NextFunction, Request, Response } from "express";
 import { BadRequestError } from "../middlewares";
-import { parseAsync, ErrorMessageOptions } from "zod-error";
 
 // Custom function to validate date strings in "yy-mm-dd" format
 function validateDateYYMMDD(dateString: string) {
   const yearPattern = /^\d{4}$/;
   return yearPattern.test(dateString);
 }
-
-const options: ErrorMessageOptions = {
-  delimiter: {
-    error: " # ",
-  },
-  transform: ({ errorMessage, index }) => `${errorMessage}`,
-};
 
 const validMonths = [
   "January",
@@ -114,7 +106,7 @@ async function validateWorkExperience(
   const errors = [];
   try {
     if (!req.body) {
-      errors.push("Missing request body");
+      errors.push("Cannot Submit empty form");
     }
     const data = req.body;
     if (data) {
@@ -144,6 +136,10 @@ async function validateWorkExperience(
     if (data.endMonth !== "" && data.endYear !== "") {
       processAndValidateMonth(data, "endMonth", errors);
       validateDate(data, "endYear", errors);
+    }
+
+    if (!data.isEmployee && (!data.endMonth || !data.endYear)) {
+      errors.push("End Dates Cannot be empty");
     }
     // Function to get the numeric representation of a month
     const getMonthNumber = (month: string): number => {
@@ -176,7 +172,7 @@ async function validateWorkExperience(
         getMonthNumber(data.endMonth) < getMonthNumber(data.startMonth)
       ) {
         errors.push(
-          "End month must be greater than or equal to start month when end year is the same as start year"
+          "End month must match or exceed start month in the same year."
         );
       }
     }
@@ -189,16 +185,40 @@ async function validateWorkExperience(
         getMonthNumber(data.endMonth) < getMonthNumber(data.startMonth)
       ) {
         errors.push(
-          "End month must be greater than or equal to start month when end year is the same as start year"
+          "End month must be at or after start month for the same year."
         );
       }
     }
 
     try {
-      const result = await parseAsync(workExperienceSchema, data, options);
+      const result = workExperienceSchema.parse(data);
       const validatedData = result; // Store the validated data in the request object if needed
     } catch (zodError) {
-      errors.push(zodError.message);
+      // Handle Zod errors
+      if (zodError instanceof z.ZodError) {
+        const errorGroups = {};
+
+        for (const issue of zodError.issues) {
+          const Message = issue.message.replace(/,\s?/g, " ");
+          const errorMessage = `${Message} in ${issue.path.join(", ")}`;
+          if (!errorGroups[errorMessage]) {
+            errorGroups[errorMessage] = [];
+          }
+          errorGroups[errorMessage].push(issue.path);
+        }
+
+        for (const errorMessage in errorGroups) {
+          if (errorGroups.hasOwnProperty(errorMessage)) {
+            const errorPaths = errorGroups[errorMessage];
+            console.log(errorMessage);
+            console.log(errorPaths);
+
+            errors.push(errorMessage);
+          }
+        }
+      } else {
+        errors.push(`Zod Error: ${zodError.message}`);
+      }
     }
   } catch (error) {
     errors.push(error.message);
@@ -206,6 +226,7 @@ async function validateWorkExperience(
 
   if (errors.length > 0) {
     // If there are errors in the array, pass them to the error handler
+    console.log(errors);
     throw new BadRequestError(errors.join(", "));
   }
 }
