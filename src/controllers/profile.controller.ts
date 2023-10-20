@@ -39,6 +39,7 @@ import {
   NotFoundError,
 } from "../middlewares";
 import { createPorfolioDataSchema } from "../middlewares/profile.zod";
+import { nextTick } from 'process';
 
 // Get the repository for the PortfolioDetails entity
 const userRepository = connectionSource.getRepository(User);
@@ -104,7 +105,8 @@ export const uploadProfileImageController: RequestHandler = async (
 
 export const uploadProfileCoverController: RequestHandler = async (
   req: Request,
-  res: Response
+  res: Response,
+  next: NextFunction
 ) => {
   try {
     if (!req.files) return error(res, "add event image", 400);
@@ -127,11 +129,7 @@ export const uploadProfileCoverController: RequestHandler = async (
 
     return success(res, data, "Cover photo uploaded successfully");
   } catch (err) {
-    if (err instanceof Error) {
-      return error(res, err.message, 500);
-    } else {
-      return error(res, "An unknown error occurred", 500);
-    }
+    return next(err)
   }
 };
 
@@ -173,7 +171,7 @@ export const getUserById = async (req: Request, res: Response) => {
 export const updateProfileController = async (
   req: Request,
   res: Response,
-  Next: NextFunction
+  next: NextFunction
 ) => {
   try {
     try {
@@ -278,15 +276,15 @@ export const updateProfileController = async (
       "Successfully Updated Portfolio profile"
     );
   } catch (err) {
-    console.error(err);
-    return error(res, err.message, 500);
+    return next(err);
   }
 };
 
 // delete Portfolio Profile details
 export const deletePortfolioDetails: RequestHandler = async (
   req: Request,
-  res: Response
+  res: Response,
+  next: NextFunction
 ) => {
   try {
     // convert the id to number
@@ -299,7 +297,7 @@ export const deletePortfolioDetails: RequestHandler = async (
 
     // return error if porfolio is not found
     if (!portfolioToRemove) {
-      return res.status(404).json({ error: "Portfolio Details not found!" });
+      throw new NotFoundError("Portfolio Details not found!");
     }
 
     // delete the porfolio
@@ -310,7 +308,7 @@ export const deletePortfolioDetails: RequestHandler = async (
       portfolio,
     });
   } catch (error) {
-    res.status(500).json(error as Error);
+    return next(error)
   }
 };
 
