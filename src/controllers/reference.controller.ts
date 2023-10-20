@@ -140,6 +140,6 @@ export const updateReference = async (req: Request, res: Response) => {
 
     success(res, refByid);
   } catch (err) {
-    error(res, "invalid userid");
+    error(res, "invalid reference id");
   }
 };
