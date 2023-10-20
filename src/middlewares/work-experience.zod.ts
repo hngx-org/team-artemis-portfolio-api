@@ -74,6 +74,7 @@ function convertMonthToLongForm(month: string) {
 
 // Helper function to convert a month to title case and validate it
 function processAndValidateMonth(data, key, errors) {
+  data[key] = data[key].toString();
   if (data[key]) {
     // Convert to title case
     data[key] = data[key]
