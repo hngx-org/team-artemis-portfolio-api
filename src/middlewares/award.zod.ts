@@ -14,12 +14,15 @@ const urlRegex = new RegExp(
   'i'
 )
 
+const charRegex = /^[a-zA-Z0-9\s]+$/
+
 const CreateAwardDataSchema = z.object({
-  title: z.string().min(3),
-
+  title: z
+    .string()
+    .min(3)
+    .regex(charRegex, { message: 'Title cannot contain special characters' }),
   year: z.string().min(3),
-  presented_by: z.string().min(3, { message: 'field cannot be empty' }),
-
+  presented_by: z.string().min(3, { message: 'field cannot be empty' }).regex(charRegex, { message: 'Title cannot contain special characters' }),
   url: z
     .string()
     .min(3, { message: 'field cannot be empty' })
