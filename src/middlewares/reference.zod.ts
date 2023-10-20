@@ -25,7 +25,7 @@ export const CreateReferenceDetailSchema = object({
 
   phoneNumber: string()
     .min(6, "Invalid Phone Number")
-    .max(15, "Invalid Phone Number")
+    .max(30, "Invalid Phone Number")
     .optional(),
 
   userId: string()
@@ -53,7 +53,7 @@ export const updatereferenceschema = z.object({
   email: string().email().optional(),
 
   phone_number: string()
-    .max(15, "Invalid Phone Number!")
+    .max(30, "Invalid Phone Number!")
     .min(6, "invalid Phone !")
     .optional(),
 });
