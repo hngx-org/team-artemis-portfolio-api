@@ -21,11 +21,17 @@ function isYearInRange(year, startYear = 1970, endYear =  new Date().getFullYear
 
 export const CreateEducationDetailDataSchema = z.object({
   degree_id: z.number().nullable(),
-  fieldOfStudy: z.string(),
-  school: z.string(),
-  from: z.string(),
+  fieldOfStudy: z.string().min(3, "please input a valid field of study"),
+  school: z.string().min(3, "Please type in school full name"),
+  from: z
+    .string()
+    .min(4, "Please Select a valid year")
+    .max(4, "please select a valid year"),
   description: z.string().optional(),
-  to: z.string(),
+  to: z
+    .string()
+    .min(4, "Please Select a valid year")
+    .max(4, "please select a valid year"),
   user_id: z.string().refine((value) => isUUID(value), {
     message: "userId has to be a valid UUID",
   }),
