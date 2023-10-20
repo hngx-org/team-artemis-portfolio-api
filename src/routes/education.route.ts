@@ -198,7 +198,7 @@ router.get("/education/:id", getEducationDetailById);
 
 /**
  * @swagger
- * /api/updateEducationDetail/{id}:
+ * /api/v1updateEducationDetail/{id}:
  *   patch:
  *     summary: Update education details for a user by its ID.
  *     description: Update education details for a user by its ID.
