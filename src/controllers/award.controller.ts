@@ -83,7 +83,7 @@ const getAwardController = async (req: Request, res: Response) => {
     });
   } catch (error) {
     console.error("Error getting award", error);
-    res.status(500).json({ message: "Internal server error" });
+    res.status(500).json({ message: "Error getting awards" });
   }
 };
 
@@ -100,7 +100,7 @@ const getAllAwardsController = async (req: Request, res: Response) => {
     });
   } catch (error) {
     console.error("Error getting awards", error);
-    res.status(500).json({ message: "Internal server error" });
+    res.status(500).json({ message: "Error getting awards" });
   }
 };
 
@@ -125,7 +125,7 @@ const deleteAwardController = async (req: Request, res: Response) => {
     });
   } catch (error) {
     console.error("Error deleting award", error);
-    res.status(500).json({ message: "Internal server error" });
+    res.status(500).json({ message: "Error deleting awards" });
   }
 };
 
