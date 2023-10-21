@@ -434,26 +434,21 @@ const findOneCustomField = async (req: Request, res: Response) => {
 
 export const deleteCustomFields = async (
   req: Request<IGetSingleSection, {}, {}, {}>,
-  res: Response
+  res: Response,
+  next: NextFunction
 ) => {
-  const { id } = req.params;
-  const idValidator = z
-  .number({
-    required_error: "id is required",
-    invalid_type_error: "id must be a number",
-  })
-  .int({ message: "id must be an integer" })
-  .positive({ message: "id must be a positive integer" });
 
-  const idValidate = idValidator.safeParse(parseInt(id as any));
-
-  if (idValidate.success === false) {
-    const err = new BadRequestError(idValidate.error.message);
-    return res
-      .status(err.statusCode)
-      .json({ err: JSON.parse(err.message).map((message)=>`${message.message}`) });
-  }
   try {
+    const { id } = req.params;
+    const idValidator = z
+    .number({
+      required_error: "id is required",
+      invalid_type_error: "id must be a number",
+    })
+    .int({ message: "id must be an integer" })
+    .positive({ message: "id must be a positive integer" });
+  
+    idValidator.parse(parseInt(id as any));
     const field = await customFieldRepository.findOne({
       where: { id },
     });
@@ -461,8 +456,12 @@ export const deleteCustomFields = async (
     await customFieldRepository.delete(id);
     return success(res, true, "Success");
   } catch (err) {
-    console.log(err);
-    return error(res, "An error occurred", 500);
+    if (err instanceof z.ZodError) {
+      const errorMessages = err.issues.map((issue) => issue.message);
+      const errors = errorMessages.join("; ");
+      next(new BadRequestError(errors));
+    }
+     next(new InternalServerError(err.message));
   }
 };
 const customUserSectionSchema = z.object({
