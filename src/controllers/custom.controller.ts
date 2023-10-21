@@ -588,7 +588,7 @@ const validateSchema =
   };
 
 // updated customsection field
-const updateCustomField = async (req: Request, res: Response) => {
+const updateCustomField = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const id = parseInt(req.params.id);
 
@@ -614,14 +614,9 @@ const updateCustomField = async (req: Request, res: Response) => {
       }).optional(),
     });
 
-    const data = customFieldSchema.safeParse(req.body);
+   customFieldSchema.parse(req.body);
 
-    if (data.success === false) {
-      const err = new BadRequestError(data.error.message);
-      return res
-        .status(err.statusCode)
-        .json({ err: JSON.parse(err.message).map((message)=>`${message.path}: ${message.message}`) });
-    }
+    
 
     // validator for idValidator
     const idValidator = z
@@ -632,14 +627,9 @@ const updateCustomField = async (req: Request, res: Response) => {
       .int({ message: "id must be an integer" })
       .positive({ message: "id must be a positive integer" });
 
-    const idValidate = idValidator.safeParse(id);
+    idValidator.parse(id);
 
-    if (idValidate.success === false) {
-      const err = new BadRequestError(idValidate.error.message);
-      return res
-        .status(err.statusCode)
-        .json({ err: JSON.parse(err.message).map((message)=>`${message.message}`) });
-    }
+    
     const { customSectionId } = req.body;
     const existingRecord = await customFieldRepository.findOne({
       where: { id: Number(id) },
@@ -657,9 +647,13 @@ const updateCustomField = async (req: Request, res: Response) => {
     existingRecord.value = req.body.value;
     const updatedRecord = await customFieldRepository.save(existingRecord);
     return res.status(200).json(updatedRecord);
-  } catch (error: any) {
-    const err = new InternalServerError(error.message);
-    return res.status(err.statusCode).json({ err: err.message });
+  } catch (err: any) {
+    if (err instanceof z.ZodError) {
+      const errorMessages = err.issues.map((issue) => issue.message);
+      const errors = errorMessages.join("; ");
+      next(new BadRequestError(errors));
+    }
+     next(new InternalServerError(err.message));
   }
 };
 
