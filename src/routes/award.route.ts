@@ -182,7 +182,7 @@ router.put("/awards/:awardId", updateAwardController);
 
 /**
  * @swagger
- * /api/v1/awards/{id}:
+ * /api/v1/awards/{userId}:
  *   get:
  *     summary: Get award detail(s) for a user who's id is the params and returns an array of objects containing a user award details.
  *     description: Get award detail(s) for a user who's id is in the params and returns an array of objects containing a user award details.
@@ -197,7 +197,7 @@ router.put("/awards/:awardId", updateAwardController);
  *         required: true
  *         schema:
  *           type: string
- *         description: The ID of the user for whom to get an award.
+ *         description: The ID of the user for whom to get award details.
  *     responses:
  *       200:
  *         description: Award retrieved successfully
