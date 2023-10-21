@@ -454,9 +454,9 @@ export const deleteCustomFields = async (
     const field = await customFieldRepository.findOne({
       where: { id },
     });
-    if (!field) return error(res, "Custom section not found", 404);
+    if (!field) throw new NotFoundError("Custom field not found");
     await customFieldRepository.delete(id);
-    return success(res, true, "Success");
+    return success(res, "custom field deleted successfully");
   } catch (err) {
     if (err instanceof z.ZodError) {
       const errorMessages = err.issues.map((issue) => issue.message);
