@@ -1,9 +1,8 @@
-import { ZodError, z } from "zod";
 import { NextFunction, Request, Response } from "express";
-import { BadRequestError } from "../middlewares";
-import { parseAsync, ErrorMessageOptions } from "zod-error";
 import { validate as isUUID } from "uuid";
-import { error } from "console";
+import { z } from "zod";
+import { ErrorMessageOptions, parseAsync } from "zod-error";
+import { BadRequestError } from "../middlewares";
 
 function checkNotEmptyString(value, fieldName) {
   if (!value || value.trim().length === 0) {
@@ -11,13 +10,41 @@ function checkNotEmptyString(value, fieldName) {
   }
 }
 
+const goodStringReg = /[A-Za-z]/
+
+
+function isYearInRange(year, startYear = 1970, endYear =  new Date().getFullYear()) {
+  const currentYear = new Date().getFullYear();
+  return year >= startYear && year <= endYear && year <= currentYear;
+}
+
+
 export const CreateEducationDetailDataSchema = z.object({
   degree_id: z.number().nullable(),
-  fieldOfStudy: z.string(),
-  school: z.string(),
-  from: z.string(),
+  fieldOfStudy: z.string().min(3, "please input a valid field of study"),
+  school: z.string().min(3, "Please type in school full name"),
+  from: z
+    .string()
+    .min(4, "Please Select a valid year")
+    .max(4, "please select a valid year"),
   description: z.string().optional(),
-  to: z.string(),
+  to: z
+    .string()
+    .min(4, "Please Select a valid year")
+    .max(4, "please select a valid year"),
+  user_id: z.string().refine((value) => isUUID(value), {
+    message: "userId has to be a valid UUID",
+  }),
+});
+
+
+export const UpdateEducationDetailDataSchema = z.object({
+  degree_id: z.number({invalid_type_error: "degree Id must be a number"}).optional().nullable(),
+  fieldOfStudy: z.string().optional().refine(val => goodStringReg.test(val), {message: "field of Study must be a string and must not contain any characters"}),
+  school: z.string().optional().refine(val => goodStringReg.test(val), {message: "school must be a string and must not contain any characters"}),
+  from: z.string().optional(),
+  description: z.string().min(5, {message: "Description must have at least minimum characters of 5"}).optional(),
+  to: z.string().optional(),
   user_id: z.string().refine((value) => isUUID(value), {
     message: "userId has to be a valid UUID",
   }),
@@ -70,6 +97,19 @@ async function validateUpdateData(
           "The 'from' date cannot be greater than the 'to' date"
         );
       }
+
+
+      if(!isYearInRange(fromDate)) {
+        throw new BadRequestError(
+          `The 'from' date should be in range from 1970 - ${new Date().getFullYear()}`
+        );
+      }
+
+      if(!isYearInRange(toDate)) {
+        throw new BadRequestError(
+          `The 'to' date should be in range from 1970 - ${new Date().getFullYear()}`
+        );
+      }
     }
 
     // Usage:
@@ -87,7 +127,7 @@ async function validateUpdateData(
       throw new BadRequestError("Invalid 'to' date format");
     }
 
-    const result = await parseAsync(EducationDetailDataSchema, data, options);
+    const result = await parseAsync(UpdateEducationDetailDataSchema, data, options);
 
     const validatedData = result; // Store the validated data in the request object if needed
     console.log(validatedData);
@@ -117,4 +157,5 @@ async function validateCreateData(
   }
 }
 
-export { validateUpdateData, validateCreateData, EducationDetailDataSchema };
+export { EducationDetailDataSchema, validateCreateData, validateUpdateData };
+

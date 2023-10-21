@@ -147,37 +147,36 @@ export const updateWorkExperience: RequestHandler = async (
   next: NextFunction
 ) => {
   const workId = parseInt(req.params.workId);
-
-  if (!workId) {
-    throw new BadRequestError("workId is missing from request params");
-  }
-
-  const {
-    company,
-    role,
-    startMonth,
-    startYear,
-    endMonth,
-    endYear,
-    description,
-    isEmployee,
-    userId,
-    sectionId,
-  } = req.body;
-
-  if (!userId) {
-    throw new BadRequestError("userId is missing from request body");
-  }
-
-  if (sectionId === undefined) {
-    throw new BadRequestError("sectionId is missing from request body");
-  }
-
-  if (!company || !role) {
-    throw new BadRequestError("company or role is missing from request body");
-  }
-
   try {
+    if (!workId) {
+      throw new BadRequestError("workId is missing from request params");
+    }
+
+    const {
+      company,
+      role,
+      startMonth,
+      startYear,
+      endMonth,
+      endYear,
+      description,
+      isEmployee,
+      userId,
+      sectionId,
+    } = req.body;
+
+    if (!userId) {
+      throw new BadRequestError("userId is missing from request body");
+    }
+
+    if (sectionId === undefined) {
+      throw new BadRequestError("sectionId is missing from request body");
+    }
+
+    if (!company || !role) {
+      throw new BadRequestError("company or role is missing from request body");
+    }
+
     const workExperienceToUpdate = await workExperienceRepository.findOneBy({
       id: workId,
     });

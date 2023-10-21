@@ -51,6 +51,7 @@ export const validateUser = async (authHeader: any, permission: any) => {
 
     return responseData.data;
   } catch (error) {
+    console.log(error);
     throw new Error();
   }
 };
