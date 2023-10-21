@@ -22,8 +22,11 @@ import { SkillsDetail } from "../database/entities";
 
 // Schema to validate req body
 const skillsSchema = z.object({
-  skills: z.array(z.string().min(1, {
-    message: "Skill has to be at least 1 letter"
+  skills: z.array(z.string().refine((skill) => {
+    const regex = /^[a-zA-Z ]{3,}$/;
+    return regex.test(skill);
+  }, {
+    message: "Skill must not contain special characters and should be at least 3 letters"
   })),
   sectionId: z.number(),
   userId: z.string().refine((val) => isUUID(val), {
@@ -32,8 +35,11 @@ const skillsSchema = z.object({
 });
 
 const updateSkillsSchema = z.object({
-  skills: z.string().min(1, {
-    message: "Skill has to be at least 1 letter"
+  skills: z.string().refine((skill) => {
+    const regex = /^[a-zA-Z ]{3,}$/;
+    return regex.test(skill);
+  }, {
+    message: "Skill must not contain special characters and should be at least 3 letters"
   }).optional(),
   sectionId: z.number().optional(),
   userId: z.string().refine((val) => isUUID(val), {
