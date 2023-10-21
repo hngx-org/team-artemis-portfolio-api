@@ -98,12 +98,14 @@ export const updateAboutService = async (
   }
 };
 
-export const getAboutByIdService = async (id: number) => {
+export const getAboutByIdService = async (userId: string) => {
   try {
-    const about = await aboutRepository.findOne({ where: { id: id } });
+    const about = await aboutRepository.findOne({
+      where: { user: { id: userId } },
+    });
 
     if (!about) {
-      throw new NotFoundError(`Cannot find about details for the id ${id}`);
+      throw new NotFoundError(`Cannot find about details for the id ${userId}`);
     }
     return about;
   } catch (error) {

@@ -32,12 +32,10 @@ const createAwardController = async (
     const missingFields = requiredFields.filter((field) => !req.body[field]);
 
     if (missingFields.length > 0) {
-      // Create a CustomError with a 400 status code
-      const err = new CustomError(
+    throw new CustomError(
         `Missing fields: ${missingFields.join(", ")}`,
         400
       );
-      res.status(err.statusCode).json({ err: err.message });
     }
 
     const userRepository = connectionSource.getRepository(User);
@@ -83,7 +81,7 @@ const getAwardController = async (req: Request, res: Response) => {
     });
   } catch (error) {
     console.error("Error getting award", error);
-    res.status(500).json({ message: "Internal server error" });
+    res.status(500).json({ message: "Error getting awards" });
   }
 };
 
@@ -100,7 +98,7 @@ const getAllAwardsController = async (req: Request, res: Response) => {
     });
   } catch (error) {
     console.error("Error getting awards", error);
-    res.status(500).json({ message: "Internal server error" });
+    res.status(500).json({ message: "Error getting awards" });
   }
 };
 
@@ -125,7 +123,7 @@ const deleteAwardController = async (req: Request, res: Response) => {
     });
   } catch (error) {
     console.error("Error deleting award", error);
-    res.status(500).json({ message: "Internal server error" });
+    res.status(500).json({ message: "Error deleting awards" });
   }
 };
 
@@ -150,7 +148,6 @@ const updateAwardController = async (
 
     const updateAward = req.body;
 
-    // fields that must be strings
     const stringFields = [
       "year",
       "title",
@@ -158,22 +155,34 @@ const updateAwardController = async (
       "presented_by",
       "url",
     ];
-
-    // update the award dynamically based on the data passed
+    
+    const isValidUrl = (url) => {
+      const urlPattern = /^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$/i;
+      return urlPattern.test(url);
+    };
+    
     for (const key in updateAward) {
       if (updateAward.hasOwnProperty(key)) {
-        if (
-          stringFields.includes(key) &&
-          typeof updateAward[key] !== "string"
-        ) {
-          return res
-            .status(400)
-            .json({ "Input Error": `Field '${key}' should be a string` });
-        }
+        if (stringFields.includes(key)) {
+          if (typeof updateAward[key] !== "string" || updateAward[key].trim() === "") {
+            return res.status(400).json({ Error: `Field '${key}' should be a non-empty string` });
+          }
+          else if (key === "url") {
+            const url = isValidUrl(updateAward[key])
+            if(!url) {
+              return res.status(400).json({ Error: `Field 'url' should be a valid URL` });
+            }
+          }
+        } 
         award[key] = updateAward[key];
       }
     }
+    
+    
+    
+    
 
+    
     await awardRepository.save(award);
 
     console.log("Award updated successfully");

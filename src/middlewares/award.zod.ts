@@ -21,11 +21,8 @@ const CreateAwardDataSchema = z.object({
     .string()
     .min(3)
     .regex(charRegex, { message: 'Title cannot contain special characters' }),
-  year: z.string().min(3, { message: 'field cannot be empty' }),
-  presented_by: z
-    .string()
-    .min(3, { message: 'field cannot be empty' })
-    .regex(charRegex, { message: 'Message cannot contain special characters' }),
+  year: z.string().min(3),
+  presented_by: z.string().min(3, { message: 'field cannot be empty' }).regex(charRegex, { message: 'Title cannot contain special characters' }),
   url: z
     .string()
     .min(3, { message: 'field cannot be empty' })
@@ -79,6 +76,13 @@ async function validateCreateAwardData(
   try {
     const data = req.body
 
+    // Validate date strings in "yy-mm-dd" format
+    if (data.year && !validateDateYYYY(data.year)) {
+      throw new BadRequestError(
+        "Invalid 'year' date format, it must be 'yyyy' "
+      )
+    }
+
     // Retrieve the "userId" from request parameters
     const userId = req.params.userId
 
@@ -94,6 +98,12 @@ async function validateCreateAwardData(
     console.log(validatedData)
     next() // Continue to the next middleware or route handler
   } catch (error) {
+    const err = new BadRequestError(error.message)
+    // return res.status(400).json({
+    //   success: false,
+    //   message: error.message,
+    // })
+    //  let message = 'Invalid input'
     const errorMessage = error.message.split(':').pop().trim()
     console.log(errorMessage)
 
