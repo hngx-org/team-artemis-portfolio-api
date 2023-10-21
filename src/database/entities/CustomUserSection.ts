@@ -18,7 +18,7 @@ export class CustomUserSection {
   id: number;
 
   @Column("character varying", { name: "title", nullable: true })
-  titile: string | null;
+  title: string | null;
 
   @OneToMany(() => CustomField, (customField) => customField.customSection)
   customFields: CustomField[];
