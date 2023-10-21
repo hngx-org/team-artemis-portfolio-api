@@ -1,4 +1,4 @@
-import z from "zod";
+import z, { ZodError } from "zod";
 import bcrypt from "bcryptjs";
 import { Request, Response, NextFunction } from "express";
 import { check, validationResult } from "express-validator";
@@ -119,4 +119,51 @@ export const validate = (req: Request, res: Response, next: NextFunction) => {
   }
 
   next();
+};
+
+export const validateNotificataionSettingsData = async (
+  req: Request,
+  res: Response,
+  isUpdate: boolean = false
+) => {
+  let isValidData: boolean;
+
+  try {
+    if (isUpdate) {
+      await updateNotificationSettingSchema.parseAsync(req.body);
+    } else {
+      await notificationSettingSchema.parseAsync(req.body);
+    }
+    isValidData = true;
+  } catch (err) {
+    const { errors } = err as ZodError;
+
+    const errorMessages = errors.map((error) => {
+      return {
+        field: error.path.join("."),
+        message: error.message,
+      };
+    });
+
+    errorResponse(req, res, errorMessages);
+    isValidData = false;
+  }
+
+  return isValidData;
+};
+
+const errorResponse = (
+  req: Request,
+  res: Response,
+  message: any,
+  statusCode?: number
+) => {
+  res.status(400).json({
+    timestamp: new Date().toISOString(),
+    status: 400,
+    error: "BadRequest Error",
+    message: message,
+    path: req.path,
+    success: false,
+  });
 };

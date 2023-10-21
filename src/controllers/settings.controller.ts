@@ -5,12 +5,12 @@ import { connectionSource } from "../database/data-source";
 import {
   accountSettingSchema,
   hashPassword,
-  notificationSettingSchema,
-  updateNotificationSettingSchema,
+  validateNotificataionSettingsData,
   verifyPassword,
 } from "../services/settings.service";
 import { NotificationSettings } from "../interfaces/settings.interface";
 import { NotificationSetting, User } from "../database/entities";
+import { NotFoundError, errorHandler } from "../middlewares";
 const userRespository = connectionSource.getRepository(User);
 
 export const updateUserAccountSettingController = async (
@@ -122,11 +122,7 @@ export const createNotificationSettingController = async (
     });
 
     if (!isExistingUser) {
-      return res.status(404).json({
-        status: `error`,
-        message: `User does not exist`,
-        success: false,
-      });
+      throw new NotFoundError(`User does not exist`);
     }
 
     const hasExistingNotificationPreferences =
@@ -135,13 +131,14 @@ export const createNotificationSettingController = async (
       });
 
     if (hasExistingNotificationPreferences.length > 0) {
-      const err = updateNotificationSettingSchema.parse({
-        communityUpdate,
-        emailSummary,
-        newMessages,
-        followUpdate,
-        specialOffers,
-      });
+      const isValidData = await validateNotificataionSettingsData(
+        req,
+        res,
+        true
+      );
+      if (!isValidData) {
+        return;
+      }
 
       const updateNotification =
         hasExistingNotificationPreferences.slice(-1)?.[0];
@@ -168,20 +165,12 @@ export const createNotificationSettingController = async (
       );
     }
 
-    const error = notificationSettingSchema.parse({
-      communityUpdate,
-      emailSummary,
-      newMessages,
-      followUpdate,
-      specialOffers,
-    });
-
-    if (error instanceof ZodError) {
-      return res.status(404).json({
-        status: `error`,
-        message: error.errors,
-        success: false,
-      });
+    const hasPassedValidation = await validateNotificataionSettingsData(
+      req,
+      res
+    );
+    if (!hasPassedValidation) {
+      return;
     }
 
     const notificationSetting = new NotificationSetting();
@@ -197,11 +186,9 @@ export const createNotificationSettingController = async (
     );
 
     if (!notificationInfo) {
-      res.status(404).json({
-        status: `error`,
-        message: `Notification settings not activated`,
-        success: false,
-      });
+      throw new NotFoundError(
+        "Notification not found. Ensure you are passing a valid User ID"
+      );
     }
 
     // Remove the user property from the response object
@@ -209,12 +196,7 @@ export const createNotificationSettingController = async (
 
     success(res, notificationInfo, `activated notification`);
   } catch (error) {
-    console.log(error),
-      res.status(500).json({
-        status: `error`,
-        message: `Internet error`,
-        success: false,
-      });
+    console.log(error), errorHandler(error, req, res, next);
   }
 };
 
