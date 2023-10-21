@@ -200,6 +200,9 @@ const updateAwardController = async (
   }
 };
 
+// Get award by UserId
+
+
 export {
   createAwardController,
   getAwardController,

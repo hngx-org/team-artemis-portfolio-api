@@ -196,7 +196,7 @@ router.put("/awards/:awardId", updateAwardController);
  *         required: true
  *         schema:
  *           type: string
- *         description: The ID of the user for whom to create education details.
+ *         description: The ID of the user for whom to get an award for.
  *     responses:
  *       200:
  *         description: Award retrieved successfully
@@ -290,5 +290,6 @@ router.get("/awards", getAllAwardsController);
  *       - Award
  */
 router.delete("/awards/:id", deleteAwardController);
+
 
 module.exports = router;
