@@ -154,7 +154,7 @@ const getPortfolioDetails = async (
 
     const languageObject = await connectionSource.manager.find(LanguageDetail, {
       where: { user: { id: user.id } },
-      relations: ['language'],
+      relations: ['language', 'user'],
     });
     const languages = languageObject.map((language) => ({
       id: language.id,
