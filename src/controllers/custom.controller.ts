@@ -235,7 +235,7 @@ const create = async (
     const newRecord = new CustomUserSection();
     newRecord.user = user;
     newRecord.section = section;
-    newRecord.titile = req.body.title;
+    // newRecord.titile = req.body.title;
     const record = await customRepository.save(newRecord);
     delete record.user.password;
     return success(res, record, "Success");
