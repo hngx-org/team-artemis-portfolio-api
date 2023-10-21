@@ -1,8 +1,8 @@
 import express from "express";
 import {
-  createCustomSection,
-  findAllCustomSection,
-  findOneCustomSection,
+  create,
+  findAll,
+  findOne,
   createCustomField,
   updateCustomField,
   findOneCustomField,
@@ -97,10 +97,9 @@ router.post("/section", validateSchema(sectionSchema), createSection);
  *     description: Create a new custom section
  *     tags: [Custom]
  *     parameters:
- *        - in: header
- *         name: Authorization
- *         type: string
- *         description: required token
+ *       - in: body
+ *         name: Section details
+ *         description: The data for the Section details to be created.
  *         required: true
  *         schema:
  *           type: object
@@ -142,7 +141,7 @@ router.post("/section", validateSchema(sectionSchema), createSection);
  *                 data:
  *                   type: null
  */
-router.post("/custom", validateSchema(customUserSectionSchema), createCustomSection);
+router.post("/custom",  validateSchema(customUserSectionSchema), create);
 
 /**
  * @swagger
@@ -163,7 +162,7 @@ router.post("/custom", validateSchema(customUserSectionSchema), createCustomSect
  *     tags:
  *       - Custom
  */
-router.get("/custom", findAllCustomSection );
+router.get("/custom", findAll);
 
 /**
  * @swagger
@@ -208,7 +207,10 @@ router.get("/custom", findAllCustomSection );
  *                 message:
  *                   type: string
  */
-router.get("/custom/user/:id",getAllCustomSections);
+router.get(
+  "/custom/user/:id",
+  getAllCustomSections
+);
 /**
  * @swagger
  * /api/v1/section:
@@ -327,7 +329,7 @@ router.get("/custom-fields", validateQuery(getcustomfieldsSchema), findAllCustom
  *     tags:
  *       - Custom
  */
-router.get("/custom/:id", findOneCustomSection);
+router.get("/custom/:id", findOne);
 
 /**
  * @swagger
@@ -854,7 +856,6 @@ router.put("/section/:id", validateSchema(updateSectionSchema), UpdateSection);
  *                 data:
  *                   type: null
  */
-router.put("/custom/:id",validateSchema(updateCustomSectionSchema),updateCustomSection
-);
+router.put("/custom/:id",updateCustomSection);
 
 module.exports = router;
