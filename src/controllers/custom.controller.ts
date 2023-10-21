@@ -371,7 +371,8 @@ const createCustomField = async (
 
 export const findAllCustomField = async (
   req: Request<{}, {}, {}, { customSection?: number }>,
-  res: Response
+  res: Response,
+  next: NextFunction
 ) => {
   try {
     const filter: any = {};
@@ -384,6 +385,7 @@ export const findAllCustomField = async (
     return success(res, records, "Success");
   } catch (err) {
     console.log(err);
+    next(new InternalServerError(err.message))
   }
 };
 
@@ -645,7 +647,7 @@ const updateCustomField = async (req: Request, res: Response, next: NextFunction
     existingRecord.customSection = currCustomUserSection;
     existingRecord.value = req.body.value;
     const updatedRecord = await customFieldRepository.save(existingRecord);
-    return res.status(200).json(updatedRecord);
+    return success(res, updatedRecord, "field updated successfully")
   } catch (err: any) {
     if (err instanceof z.ZodError) {
       const errorMessages = err.issues.map((issue) => issue.message);
