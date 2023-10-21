@@ -94,6 +94,7 @@ function processAndValidateMonth(data, key, errors) {
 
 // Helper function to validate date format
 function validateDate(data, key, errors) {
+
   if (data[key] && !validateDateYYMMDD(data[key])) {
     errors.push(`Invalid '${key}' date format`);
   }
@@ -135,8 +136,11 @@ async function validateWorkExperience(
 
     // Check if endMonth and endYear are not empty
     if (data.endMonth !== "" && data.endYear !== "") {
-      processAndValidateMonth(data, "endMonth", errors);
-      validateDate(data, "endYear", errors);
+      console.log(data.endMonth)
+      if(data.endYear.toLocaleLowerCase()!=="present"){
+        processAndValidateMonth(data, "endMonth", errors);
+        validateDate(data, "endYear", errors);
+      }
     }
 
     if (!data.isEmployee && (!data.endMonth || !data.endYear)) {
