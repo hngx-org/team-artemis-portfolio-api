@@ -5,7 +5,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /api/tracks:
+ * /api/v1/tracks:
  *   get:
  *     summary: Get all the tracks
  *     description: Retrieve all tracks using a GET request.
