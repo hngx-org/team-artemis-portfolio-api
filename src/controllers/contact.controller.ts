@@ -65,6 +65,7 @@ export const createSocials = async (req: Request, res: Response) => {
 export const getSocials = async (req: Request, res: Response) => {
   try {
     const socialsRepo = dataSource.getRepository(SocialMedia);
+  
 
     const data = await socialsRepo.find();
     const response = {
@@ -194,9 +195,9 @@ export const createContacts = async (
       }
       const contact = await contactsRepo.find({ where: { url } });
       if (contact.length > 0) {
-        return res.status(200).json({
-          success: true,
-          statusCode: 200,
+        return res.status(409).json({
+          success: false,
+          statusCode: 409,
           message: "contact already exists",
         });
       }
