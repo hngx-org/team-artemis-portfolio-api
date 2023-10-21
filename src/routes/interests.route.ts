@@ -43,10 +43,10 @@ const router = express.Router();
  *               example: ["Sports", "Music"]
  *             userId:
  *               type: string
- *               example: "550e8400-e29b-41d4-a716-446655440000"
+ *               example: "ba9064cc-8208-4092-8f94-ff94e281d534"
  *             sectionId:
  *               type: number
- *               example: 323
+ *               example: 2
  *     responses:
  *       201:
  *         description: Interests details successfully created.
@@ -78,7 +78,7 @@ const router = express.Router();
  *                   example: 500
  *                 message:
  *                   type: string
- *                   example: "invalid input syntax for type integer: \"\""
+ *                   example: "Could not create interests."
  *                 error:
  *                   type: string
  */
@@ -108,6 +108,7 @@ router.post(
  *         required: true
  *         schema:
  *           type: string
+ *           example: "ba9064cc-8208-4092-8f94-ff94e281d534"
  *     responses:
  *       200:
  *         description: Successful response with user interest details.
@@ -184,7 +185,7 @@ router.get("/interests/:userId", validateUserId(userIdSchema), getInterests);
  *         required: true
  *         schema:
  *           type: string
- *         example: "550e8400-e29b-41d4-a716-446655440000"
+ *           example: "ba9064cc-8208-4092-8f94-ff94e281d534"
  *       - in: body
  *         name: UpdateDetails
  *         description: Data for updating user interests.
@@ -262,7 +263,7 @@ router.put(
  *         required: true
  *         schema:
  *           type: string
- *         example: "550e8400-e29b-41d4-a716-446655440000"
+ *           example: "ba9064cc-8208-4092-8f94-ff94e281d534"
  *     responses:
  *       200:
  *         description: Interests details successfully deleted.

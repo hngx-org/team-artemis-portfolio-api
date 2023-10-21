@@ -232,35 +232,15 @@ router.get("/awards/:id", getAwardController);
 
 /**
  * @swagger
- * /api/v1/awards:
+ * /api/v1/awards/:
  *   get:
- *     summary: Get the award detail of all users
- *     description: All awards retrieved successfully
+ *     summary: Get all awards.
+ *     description: View all awards.
  *     responses:
- *       200:
- *         description: Award retrieved successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                 awards:
- *                   type: array
- *                   items:
- *                     type: object
- *       500:
- *         description: Internal server error
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *       '404':
- *         description: Not Found
+ *       '200':
+ *         description: Successful
+ *       '500':
+ *         description: Error
  *         content:
  *           application/json:
  *             schema:
