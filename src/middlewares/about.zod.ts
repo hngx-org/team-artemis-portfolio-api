@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { ZodError, z } from "zod";
 import { NextFunction, Request, Response } from "express";
 import { BadRequestError } from "../middlewares";
 import { parseAsync, ErrorMessageOptions } from "zod-error";
@@ -29,6 +29,31 @@ export const CreateAboutDataSchema = z.object({
   //  message: "userId has to be a valid UUID",
   // }),
 });
+
+async function validateUserId(userId: string) {
+  const userIdSchema = z.string().trim().uuid("userId must be in UUID format");
+
+  try {
+    userIdSchema.parse(userId)
+  } catch(err) {
+    const { errors } = err as ZodError;
+    throw new BadRequestError(errors[0].message)
+  }
+}
+
+async function validateAboutId(id:unknown) {
+  const aboutIdSchema = z.number({
+    required_error: "id is required in params",
+    invalid_type_error: "id must be a number"
+  }).int("id must be an integer")
+
+  try {
+    aboutIdSchema.parse(id)
+  } catch (err) {
+    const { errors } = err as ZodError;
+    throw new BadRequestError(errors[0].message)
+  }
+}
 
 async function ValidateCreateAbout(data: any) {
   try {
@@ -75,4 +100,4 @@ async function ValidateUpdateAbout(data: any) {
   }
 }
 
-export { ValidateCreateAbout, ValidateUpdateAbout };
+export { ValidateCreateAbout, ValidateUpdateAbout, validateUserId, validateAboutId };
