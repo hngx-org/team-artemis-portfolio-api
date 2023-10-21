@@ -25,6 +25,7 @@ import {
   SocialUser,
   Language,
   ReferenceDetail,
+  LanguageDetail,
 } from "../database/entities";
 import {
   cloudinaryService,
@@ -57,7 +58,7 @@ const portfolioDetailsRepository =
 const trackRepository = connectionSource.getRepository(Tracks);
 const certificateRepository = connectionSource.getRepository(Certificate);
 const awardRepository = connectionSource.getRepository(Award);
-const languageRepository = connectionSource.getRepository(Language);
+const languageDetailsRepository = connectionSource.getRepository(LanguageDetail);
 const contactsRepository = connectionSource.getRepository(SocialUser);
 const referenceRepository = connectionSource.getRepository(ReferenceDetail);
 // Export the uploadProfileImageController function
@@ -330,7 +331,7 @@ export const deleteAllSectionEntries: RequestHandler = async (
       certificates: certificateRepository,
       skills: skillsDetailRepository,
       awards: awardRepository,
-      languages: languageRepository,
+      languages: languageDetailsRepository,
       reference: referenceRepository,
       contacts: contactsRepository
     };
@@ -351,14 +352,7 @@ export const deleteAllSectionEntries: RequestHandler = async (
     if (!user) {
       return next(new BadRequestError("User not found"));
     }
-
-    /* Please do not delete */
-    if (section == "languages") {
-      const hostUrl = "https://hng-u6fu.vercel.app";
-      await axios.delete(`${hostUrl}/deleteLanguages/${userId}`);
-      return success(res, "Successfully deleted all entries");
-    }
-
+	
     const alluserEntries = await currentRepo.find({
       where: { user: { id: user.id } },
     });

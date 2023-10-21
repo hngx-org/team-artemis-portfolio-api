@@ -232,7 +232,7 @@ router.get("/awards/:id", getAwardController);
 
 /**
  * @swagger
- * /api/v1/awards
+ * /api/v1/awards:
  *   get:
  *     summary: Get the award detail of all users
  *     description: All awards retrieved successfully
