@@ -1,24 +1,36 @@
 import { Request, RequestHandler, Response } from 'express';
 import { connectionSource } from '../database/data-source';
-import { User } from '../database/entities';
+import { Language, LanguageDetail, User } from '../database/entities';
 import { validate as isValidUUID } from 'uuid';
 import responseHandler, {
   programmingLanguages,
 } from '../services/language.service';
 import axios from 'axios';
+import { ILike, QueryBuilder } from 'typeorm';
 
-// const languageRepository = connectionSource.getRepository(Language);
+const languageRepository = connectionSource.getRepository(Language);
+const languageDetailRepository = connectionSource.getRepository(LanguageDetail);
+
 const userRepository = connectionSource.getRepository(User);
-const hostUrl = 'https://hng-u6fu.vercel.app';
 
 const addLanguage: RequestHandler = async (req: Request, res: Response) => {
   try {
     let { userId, languages } = req.body;
+    const programmingLanguages = await languageRepository.find();
+
+    if (programmingLanguages.length < 1) {
+      await languageRepository.createQueryBuilder().delete().execute();
+      for (const lang of programmingLanguages) {
+        const savedLang = languageRepository.create({ name: lang.name });
+        await languageRepository.save(savedLang);
+      }
+    }
 
     languages = languages.map((language: string) => language.toLowerCase());
     let checkLanguageArray = programmingLanguages.map((language) =>
-      language.toLowerCase()
+      language.name.toLowerCase()
     );
+
     let misMatchFound = false;
 
     for (const language of languages) {
@@ -29,18 +41,41 @@ const addLanguage: RequestHandler = async (req: Request, res: Response) => {
     }
 
     if (misMatchFound)
-      return responseHandler.badRequest(res, "Chosen language must be in the recommended list");
+      return responseHandler.badRequest(
+        res,
+        'Chosen language must be in the recommended list'
+      );
+
+    languages = Array.from(new Set(languages));
 
     const user = await userRepository.findOneBy({ id: userId });
 
     if (!user) return responseHandler.notFound(res, 'User not found');
 
-    const result = await axios.post(`${hostUrl}/createLanguage`, {
-      userId,
-      languages,
+    const oldLangs = await languageDetailRepository.find({
+      where: { user: { id: userId } },
     });
 
-    responseHandler.success(res, result.data.data);
+    for (const lang of oldLangs) await languageDetailRepository.remove(lang);
+
+    const addedLanguages = await Promise.all(
+      languages.map(async (language: string) => {
+        const languageRef = await languageRepository.findOne({
+          where: { name: ILike(`%${language}%`) },
+        });
+
+        let addedLang = languageDetailRepository.create({
+          language: languageRef,
+          section: { id: 24 },
+          user,
+        });
+
+        let toAdd = await languageDetailRepository.save(addedLang);
+        return toAdd.language.name.toLowerCase();
+      })
+    );
+
+    return responseHandler.success(res, addedLanguages);
   } catch (error) {
     return responseHandler.serverError(res, error);
   }
@@ -62,9 +97,16 @@ const getUserLanguages: RequestHandler = async (
     const user = await userRepository.findOneBy({ id: userId });
     if (!user) return responseHandler.notFound(res, 'User not found');
 
-    const userLanguages = await axios.get(`${hostUrl}/getLanguages/${userId}`);
+    const allLanguageDetails = await languageDetailRepository.find({
+      where: {
+        user: { id: userId },
+      },
+      relations: ['language'],
+    });
 
-    return responseHandler.success(res, userLanguages.data.data);
+    const userLanguages = allLanguageDetails.map((v) => v.language.name);
+
+    return responseHandler.success(res, userLanguages);
   } catch (error) {
     return responseHandler.serverError(res, error.message);
   }
@@ -86,19 +128,45 @@ const deleteAllUserLanguages: RequestHandler = async (
     const user = await userRepository.findOneBy({ id: userId });
     if (!user) return responseHandler.notFound(res, 'User not found');
 
-    const userLanguages = await axios.delete(
-      `${hostUrl}/deleteLanguages/${userId}`
-    );
+    await languageDetailRepository.delete({ user: { id: userId } });
 
-    return responseHandler.success(res, userLanguages.data.data);
+    return responseHandler.success(res, []);
   } catch (error) {
     return responseHandler.serverError(res, error.message);
   }
 };
 
-const getAllLanguages: RequestHandler = (req: Request, res: Response) => {
+const addProgrammingLanguages: RequestHandler = async (
+  req: Request,
+  res: Response
+) => {
   try {
-    return responseHandler.success(res, programmingLanguages);
+    const savedLangsObject = await languageRepository.find();
+    const savedLanguages = savedLangsObject.map((v) => v.name);
+
+    programmingLanguages.map(async (language) => {
+      if (!savedLanguages.includes(language)) {
+        const lang = languageRepository.create({
+          name: language,
+        });
+        await languageRepository.save(lang);
+      }
+    });
+
+    return responseHandler.success(res, 'saved all languages');
+  } catch (error) {
+    return responseHandler.serverError(res, error.message);
+  }
+};
+
+const getProgrammingLanguages: RequestHandler = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    let languageObject = await languageRepository.find();
+    const languages = languageObject.map((v) => v.name);
+    return responseHandler.success(res, languages);
   } catch (error) {
     return responseHandler.serverError(res, error.message);
   }
@@ -108,5 +176,6 @@ export default {
   addLanguage,
   getUserLanguages,
   deleteAllUserLanguages,
-  getAllLanguages,
+  addProgrammingLanguages,
+  getProgrammingLanguages,
 };

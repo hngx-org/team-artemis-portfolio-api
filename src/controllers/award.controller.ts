@@ -32,7 +32,7 @@ const createAwardController = async (
     const missingFields = requiredFields.filter((field) => !req.body[field]);
 
     if (missingFields.length > 0) {
-    throw new CustomError(
+      throw new CustomError(
         `Missing fields: ${missingFields.join(", ")}`,
         400
       );
@@ -66,14 +66,11 @@ const createAwardController = async (
 // Get award by Id
 const getAwardController = async (req: Request, res: Response) => {
   const awardRepo = connectionSource.getRepository(Award);
-
+  const userRepo = connectionSource.getRepository(User);
   try {
-    const id = parseInt(req.params.id);
-    const award = await awardRepo.findOne({ where: { id } });
-
-    if (!award) {
-      return res.status(404).json({ message: "Award not found" });
-    }
+    const id = req.params.id
+    const user = await userRepo.findOne({ where: { id } });
+    const award = await awardRepo.findOne({ where: { user } });
 
     res.status(200).json({
       message: "Award retrieved successfully",
@@ -155,12 +152,12 @@ const updateAwardController = async (
       "presented_by",
       "url",
     ];
-    
+
     const isValidUrl = (url) => {
       const urlPattern = /^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$/i;
       return urlPattern.test(url);
     };
-    
+
     for (const key in updateAward) {
       if (updateAward.hasOwnProperty(key)) {
         if (stringFields.includes(key)) {
@@ -169,20 +166,20 @@ const updateAwardController = async (
           }
           else if (key === "url") {
             const url = isValidUrl(updateAward[key])
-            if(!url) {
+            if (!url) {
               return res.status(400).json({ Error: `Field 'url' should be a valid URL` });
             }
           }
-        } 
+        }
         award[key] = updateAward[key];
       }
     }
-    
-    
-    
-    
 
-    
+
+
+
+
+
     await awardRepository.save(award);
 
     console.log("Award updated successfully");
@@ -200,9 +197,57 @@ const updateAwardController = async (
   }
 };
 
+// Get award by UserId
+const getAwardByUserId = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const awardRepo = connectionSource.getRepository(Award)
+
+  try {
+    const userId = req.params.userId
+    const data = await awardRepo.find({
+      where: { user: { id: userId } },
+      relations: ['user'],
+    })
+
+    if (!data) {
+      throw new NotFoundError('Awards not found')
+    }
+
+    if (data.length === 0) {
+      throw new NotFoundError('No awards found for the user')
+    }
+
+    const awards = data.map((award) => {
+      const { id, firstName, lastName } = award.user
+      return {
+        title: award.title,
+        year: award.year,
+        presented_by: award.presented_by,
+        url: award.url,
+        description: award.description,
+        user: {
+          id,
+          firstName,
+          lastName,
+        },
+      }
+    })
+    res.status(200).json({
+      message: 'Awards retrieved successfully',
+      awards,
+    })
+  } catch (error) {
+    return next(error)
+  }
+}
+
 export {
   createAwardController,
   getAwardController,
+  getAwardByUserId,
   getAllAwardsController,
   deleteAwardController,
   updateAwardController,
