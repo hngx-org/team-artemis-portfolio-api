@@ -92,6 +92,7 @@ export const getAboutByID = async (
 ) => {
   try {
     const userId = req.params.userId;
+    await validateUserId(userId);
     const about = await getAboutByIdService(userId);
 
     return res.status(200).json({
