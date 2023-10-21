@@ -40,7 +40,7 @@ import {
   NotFoundError,
 } from "../middlewares";
 import { createPorfolioDataSchema } from "../middlewares/profile.zod";
-import { nextTick } from 'process';
+import { nextTick } from "process";
 
 // Get the repository for the PortfolioDetails entity
 const userRepository = connectionSource.getRepository(User);
@@ -59,7 +59,8 @@ const portfolioDetailsRepository =
 const trackRepository = connectionSource.getRepository(Tracks);
 const certificateRepository = connectionSource.getRepository(Certificate);
 const awardRepository = connectionSource.getRepository(Award);
-const languageDetailsRepository = connectionSource.getRepository(LanguageDetail);
+const languageDetailsRepository =
+  connectionSource.getRepository(LanguageDetail);
 const contactsRepository = connectionSource.getRepository(SocialUser);
 const referenceRepository = connectionSource.getRepository(ReferenceDetail);
 // Export the uploadProfileImageController function
@@ -101,7 +102,7 @@ export const uploadProfileImageController: RequestHandler = async (
 
     return success(res, data, "Profile picture uploaded successfully");
   } catch (err) {
-    return next(err)
+    return next(err);
   }
 };
 
@@ -131,7 +132,7 @@ export const uploadProfileCoverController: RequestHandler = async (
 
     return success(res, data, "Cover photo uploaded successfully");
   } catch (err) {
-    return next(err)
+    return next(err);
   }
 };
 
@@ -140,7 +141,11 @@ export const getAllUsers = async (req: Request, res: Response) => {
   res.status(200).json({ users });
 };
 
-export const getUserById = async (req: Request, res: Response, next: NextFunction) => {
+export const getUserById = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const { userId: id } = req.params;
     const userId = id.trim();
@@ -178,15 +183,14 @@ export const getUserById = async (req: Request, res: Response, next: NextFunctio
     );
     let badges = [];
     if (allBadges.length > 0) {
-      const badgeIds = allBadges?.map(badge => badge.badge_id) || [];
+      const badgeIds = allBadges?.map((badge) => badge.badge_id) || [];
 
       badges = await connectionSource.manager.query(
-        `SELECT id, name, badge_image  FROM "skill_badge" WHERE "id" IN (${badgeIds.join(',')})`
+        `SELECT id, name, badge_image  FROM "skill_badge" WHERE "id" IN (${badgeIds.join(
+          ","
+        )})`
       );
-
     }
-
-
 
     return success(
       res,
@@ -339,7 +343,7 @@ export const deletePortfolioDetails: RequestHandler = async (
       portfolio,
     });
   } catch (error) {
-    return next(error)
+    return next(error);
   }
 };
 
@@ -356,12 +360,12 @@ export const deleteAllSectionEntries: RequestHandler = async (
       projects: projectRepository,
       interests: interestRepository,
       sections: sectionRepository,
-      certificates: certificateRepository,
+      certificate: certificateRepository,
       skills: skillsDetailRepository,
       awards: awardRepository,
       languages: languageDetailsRepository,
       reference: referenceRepository,
-      contacts: contactsRepository
+      contacts: contactsRepository,
     };
 
     const { userId } = req.params;
@@ -380,7 +384,7 @@ export const deleteAllSectionEntries: RequestHandler = async (
     if (!user) {
       return next(new BadRequestError("User not found"));
     }
-	
+
     const alluserEntries = await currentRepo.find({
       where: { user: { id: user.id } },
     });
