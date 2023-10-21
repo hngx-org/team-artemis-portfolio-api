@@ -650,7 +650,7 @@ const updateCustomField = async (req: Request, res: Response, next: NextFunction
     return success(res, updatedRecord, "field updated successfully")
   } catch (err: any) {
     if (err instanceof z.ZodError) {
-      const errorMessages = err.issues.map((issue) => issue.message);
+      const errorMessages = err.issues.map((issue) => `${issue.path}: ${issue.message}`);
       const errors = errorMessages.join("; ");
       next(new BadRequestError(errors));
     }
