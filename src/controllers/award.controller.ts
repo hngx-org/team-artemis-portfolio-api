@@ -1,11 +1,11 @@
-import { Award } from "../database/entity/model";
 import { NextFunction, Request, Response } from "express";
 import { createAwardService } from "../services/award.service";
 import { AwardData } from "../interfaces/";
-import { User } from "../database/entity/user";
 import { connectionSource } from "../database/data-source";
 import { NotFoundError } from "../middlewares";
 import { QueryFailedError } from "typeorm";
+import { Award } from "../database/entities/Award";
+import { User } from "../database/entities/User";
 
 // Controller function to create an award
 const createAwardController = async (
@@ -32,12 +32,10 @@ const createAwardController = async (
     const missingFields = requiredFields.filter((field) => !req.body[field]);
 
     if (missingFields.length > 0) {
-      // Create a CustomError with a 400 status code
-      const err = new CustomError(
+      throw new CustomError(
         `Missing fields: ${missingFields.join(", ")}`,
         400
       );
-      res.status(err.statusCode).json({ err: err.message });
     }
 
     const userRepository = connectionSource.getRepository(User);
@@ -68,14 +66,11 @@ const createAwardController = async (
 // Get award by Id
 const getAwardController = async (req: Request, res: Response) => {
   const awardRepo = connectionSource.getRepository(Award);
-
+  const userRepo = connectionSource.getRepository(User);
   try {
-    const id = parseInt(req.params.id);
-    const award = await awardRepo.findOne({ where: { id } });
-
-    if (!award) {
-      return res.status(404).json({ message: "Award not found" });
-    }
+    const id = req.params.id
+    const user = await userRepo.findOne({ where: { id } });
+    const award = await awardRepo.findOne({ where: { user } });
 
     res.status(200).json({
       message: "Award retrieved successfully",
@@ -83,7 +78,7 @@ const getAwardController = async (req: Request, res: Response) => {
     });
   } catch (error) {
     console.error("Error getting award", error);
-    res.status(500).json({ message: "Internal server error" });
+    res.status(500).json({ message: "Error getting awards" });
   }
 };
 
@@ -100,7 +95,7 @@ const getAllAwardsController = async (req: Request, res: Response) => {
     });
   } catch (error) {
     console.error("Error getting awards", error);
-    res.status(500).json({ message: "Internal server error" });
+    res.status(500).json({ message: "Error getting awards" });
   }
 };
 
@@ -125,7 +120,7 @@ const deleteAwardController = async (req: Request, res: Response) => {
     });
   } catch (error) {
     console.error("Error deleting award", error);
-    res.status(500).json({ message: "Internal server error" });
+    res.status(500).json({ message: "Error deleting awards" });
   }
 };
 
@@ -150,7 +145,6 @@ const updateAwardController = async (
 
     const updateAward = req.body;
 
-    // fields that must be strings
     const stringFields = [
       "year",
       "title",
@@ -159,20 +153,32 @@ const updateAwardController = async (
       "url",
     ];
 
-    // update the award dynamically based on the data passed
+    const isValidUrl = (url) => {
+      const urlPattern = /^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$/i;
+      return urlPattern.test(url);
+    };
+
     for (const key in updateAward) {
       if (updateAward.hasOwnProperty(key)) {
-        if (
-          stringFields.includes(key) &&
-          typeof updateAward[key] !== "string"
-        ) {
-          return res
-            .status(400)
-            .json({ "Input Error": `Field '${key}' should be a string` });
+        if (stringFields.includes(key)) {
+          if (typeof updateAward[key] !== "string" || updateAward[key].trim() === "") {
+            return res.status(400).json({ Error: `Field '${key}' should be a non-empty string` });
+          }
+          else if (key === "url") {
+            const url = isValidUrl(updateAward[key])
+            if (!url) {
+              return res.status(400).json({ Error: `Field 'url' should be a valid URL` });
+            }
+          }
         }
         award[key] = updateAward[key];
       }
     }
+
+
+
+
+
 
     await awardRepository.save(award);
 
@@ -191,9 +197,57 @@ const updateAwardController = async (
   }
 };
 
+// Get award by UserId
+const getAwardByUserId = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const awardRepo = connectionSource.getRepository(Award)
+
+  try {
+    const userId = req.params.userId
+    const data = await awardRepo.find({
+      where: { user: { id: userId } },
+      relations: ['user'],
+    })
+
+    if (!data) {
+      throw new NotFoundError('Awards not found')
+    }
+
+    if (data.length === 0) {
+      throw new NotFoundError('No awards found for the user')
+    }
+
+    const awards = data.map((award) => {
+      const { id, firstName, lastName } = award.user
+      return {
+        title: award.title,
+        year: award.year,
+        presented_by: award.presented_by,
+        url: award.url,
+        description: award.description,
+        user: {
+          id,
+          firstName,
+          lastName,
+        },
+      }
+    })
+    res.status(200).json({
+      message: 'Awards retrieved successfully',
+      awards,
+    })
+  } catch (error) {
+    return next(error)
+  }
+}
+
 export {
   createAwardController,
   getAwardController,
+  getAwardByUserId,
   getAllAwardsController,
   deleteAwardController,
   updateAwardController,

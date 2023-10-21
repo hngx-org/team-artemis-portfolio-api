@@ -1,17 +1,19 @@
 import {
   getAllPortfolioDetails,
   getPortfolioDetails,
-  updatePortfolioDetails,
   deletePortfolioDetails,
 } from "../controllers/userportfolio.controller";
 import { Router } from "express";
-import { updatePortfolioDataSchema, validateUpdatePortfolioDetails } from "../middlewares/profile.zod";
+import {
+  updatePortfolioDataSchema,
+  validateUpdatePortfolioDetails,
+} from "../middlewares/profile.zod";
 
 const router = Router();
 
 /**
  * @swagger
- * /api/getPortfolioDetails/{userId}:
+ * /api/v1/portfolio/{userId}:
  *   get:
  *     summary: Get all portfolio details including sections
  *     description: Get request to retrieve all portfolio details for a user.
@@ -57,7 +59,8 @@ const router = Router();
  *                   type: string
  *                   description: null
  */
-router.get("/getPortfolioDetails/:userId", getPortfolioDetails);
+router.get("/portfolio/:slug", getPortfolioDetails);
+// router.get("/portfolio/:userId", getPortfolioDetails);
 
 /**
  * @swagger
@@ -78,7 +81,6 @@ router.get("/getPortfolioDetails/:userId", getPortfolioDetails);
  *                   type: string
  */
 router.get("/portfolioDetails", getAllPortfolioDetails);
-
 
 /**
  * @swagger
@@ -171,7 +173,7 @@ router.get("/portfolioDetails", getAllPortfolioDetails);
  *                   type: null
  */
 
-router.put("/update-profile-details/:userId", validateUpdatePortfolioDetails(updatePortfolioDataSchema), updatePortfolioDetails);
+// router.put("/update-profile-details/:userId", validateUpdatePortfolioDetails(updatePortfolioDataSchema), updatePortfolioDetail);
 
 /**
  * @swagger

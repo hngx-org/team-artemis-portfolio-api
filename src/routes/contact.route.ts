@@ -13,7 +13,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /api/contacts/{user_id}:
+ * /api/v1/contacts/{user_id}:
  *   get:
  *     summary: Get contacts by user ID
  *     description: Retrieve contacts for a specific user by their ID.
@@ -27,24 +27,36 @@ const router = express.Router();
  *       200:
  *         description: Contacts retrieved successfully.
  *         schema:
- *           type: array
- *           items:
- *             type: object
- *             properties:
- *               name:
- *                 type: string
- *               email:
- *                 type: string
+ *            type: object
+ *            properties:
+ *                statusCode:
+ *                   type: string
+ *                message: 
+ *                   type: string
+ *                success: 
+ *                   type: boolean
+ *                payload: 
+ *                   type: Array
  *         example:
- *           - name: "John Doe"
- *             email: "john@example.com"
+ *           - success: true
+ *             statusCode: 200
+ *             message: success
+ *             payload: []
  *       404:
- *         description: Contacts not found for the specified user.
+ *         description:  user does not exist.
  *         schema:
  *           type: object
  *           properties:
  *             message:
  *               type: string
+ *       400:
+ *         description: Bad request .
+ *         schema:
+ *           type: object
+ *           properties:
+ *             message:
+ *               type: string
+ *      
  *       500:
  *         description: Internal server error.
  *         schema:
@@ -59,7 +71,7 @@ router.get("/contacts/:user_id", getContacts);
 
 /**
  * @swagger
- * /api/contacts:
+ * /api/v1/contacts:
  *   post:
  *     summary: Create a new contact
  *     description: Create a new contact for a user.
@@ -98,7 +110,7 @@ router.get("/contacts/:user_id", getContacts);
  *                     message:
  *                       type: string
  *       400:
- *         description: Failed to create contact.
+ *         description: bad request error.
  *         content:
  *           application/json:
  *             schema:
@@ -112,6 +124,7 @@ router.get("/contacts/:user_id", getContacts);
  *                   example: "Failed to create contact"
  *                 data:
  *                   type: null
+ * 
  *     tags:
  *       - Contacts
  */
@@ -120,7 +133,7 @@ router.post("/contacts/", createContacts);
 
 /**
  * @swagger
- * /api/contacts/{id}:
+ * /api/v1/contacts/{id}:
  *   delete:
  *     summary: Delete a contact by ID
  *     description: Delete a contact by providing its ID.
@@ -154,7 +167,7 @@ router.delete("/contacts/:id", deleteContact);
 
 /**
  * @swagger
- * /api/socials:
+ * /api/v1/socials:
  *   post:
  *     summary: Create a new social media type
  *     description: Create a new social media type.
@@ -190,7 +203,7 @@ router.post("/socials", createSocials);
 
 /**
  * @swagger
- * /api/socials:
+ * /api/v1/socials:
  *   get:
  *     summary: fetches all social media types 
  *     description: Create a new social media type.
@@ -221,7 +234,7 @@ router.get('/socials/', getSocials)
 
 /**
  * @swagger
- * /api/contact/{Id}:
+ * /api/v1/contact/{Id}:
  *   patch:
  *     summary: Update a contact by ID
  *     description: Update a contact by providing its ID.
@@ -282,6 +295,6 @@ router.get('/socials/', getSocials)
  *     tags:
  *       - Contacts
  */
-router.patch("/contact/:Id", updateContactController);
+router.patch("/contacts/:id", updateContactController);
 
 module.exports = router;

@@ -43,10 +43,42 @@ export const notFound = (res: Response, data: string | Object) => {
   });
 };
 
+export const programmingLanguages = [
+	'JavaScript',
+	'TypeScript',
+	'Python',
+	'Java',
+	'C',
+	'C++',
+	'C#',
+	'Go',
+	'Rust',
+	'Swift',
+	'Kotlin',
+	'Ruby',
+	'PHP',
+	'Scala',
+	'Elixir',
+	'Clojure',
+	'Haskell',
+	'Lua',
+	'Dart',
+	'R',
+	'Julia',
+	'Groovy',
+	'Objective-C',
+	'CoffeeScript',
+	'F#',
+	'Perl',
+	'MATLAB',
+	'VB.NET',
+	'Shell Scripting',
+  ];
+
 export default {
   success,
   badRequest,
   serverError,
   created,
-  notFound,
+  notFound
 };
