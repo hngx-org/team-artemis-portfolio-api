@@ -292,7 +292,7 @@ export const deleteContact = async (req: Request, res: Response) => {
        success: false,
       statusCode: 404,
       error: "BadRequest Error",
-      message: MESSAGES.NOT_FOUND
+      message: MESSAGES.NOT_FOUND,
     });
   }
 };
