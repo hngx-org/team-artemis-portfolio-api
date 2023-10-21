@@ -178,11 +178,11 @@ const create = async (
     const user = await userRepository.findOne({
       where: { id: req.body.userId },
     });
-    if (!user) return error(res, "User not found", 400);  
+    if (!user) return error(res, "User not found", 400);
     const newRecord = new CustomUserSection();
     newRecord.user = user;
     newRecord.section = section;
-    // newRecord.titile = req.body.title;
+    newRecord.title = req.body.title;
     const record = await customRepository.save(newRecord);
     delete record.user.password;
     return success(res, record, "Success"); 
@@ -244,7 +244,7 @@ export const updateCustomSection = async (
   req: Request<
     { id: string },
     {},
-    { userId: string; sectionId: number; titile: string },
+    { userId: string; sectionId: number; title: string },
     {}
   >,
   res: Response,
@@ -256,11 +256,11 @@ export const updateCustomSection = async (
     const updateCustomSectionSchema: any = z.object({
       sectionId: z.number().positive().int().optional(),
 
-      titile: z
+      title: z
         .string()
         .min(3)
         .refine((value) => !/^\s*$/.test(value), {
-          message: "The titile must not be empty or consist of only spaces",
+          message: "The title must not be empty or consist of only spaces",
         })
         .optional(),
     });
@@ -294,8 +294,8 @@ export const updateCustomSection = async (
       });
       if (!section) return error(res, "Section does not exist", 400);
       newRecord.section = section;
-      if (req.body.titile) {
-        newRecord.titile = req.body.titile;
+      if (req.body.title) {
+        newRecord.title = req.body.title;
       }
     }
     await customRepository.update(id, newRecord);
@@ -677,6 +677,6 @@ export {
   UpdateSection,
   deleteSection,
   updateSectionSchema,
-  updateCustomSectionSchema,
+  // updateCustomSectionSchema,
   customGetUserSectionSchema,
 };

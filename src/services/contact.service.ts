@@ -15,7 +15,7 @@ export const findUser = async (userId: string) => {
 const checkResourceAndPermission = async (socialId: number, userId: string) => {
   const socialRepository = connectionSource.getRepository(SocialUser);
   const findSocial = await socialRepository.findOne({
-    where: { id: socialId },
+    where: { Id: socialId },
   });
 
   if (!findSocial) {
@@ -35,13 +35,13 @@ const checkResourceAndPermission = async (socialId: number, userId: string) => {
 export const updateContact = async (
   id: number,
   updatedData: { url?: string; socialMediaId?: number },
-  userId: string 
+  userId: string
 ) => {
   const contactsRepo = connectionSource.getRepository(SocialUser);
 
   // Check if the contact with the given ID exists and belongs to the user
   const existingContact = await contactsRepo.findOne({
-    where: {Id:id, user_id: userId},
+    where: { Id: id, user_id: userId },
   });
 
   if (!existingContact) {
@@ -52,7 +52,7 @@ export const updateContact = async (
       existingContact.url = updatedData.url;
     }
     if (updatedData.socialMediaId) {
-      existingContact.socialMedia = updatedData.socialMediaId;
+      existingContact.socialMedia.Id = updatedData.socialMediaId;
     }
     const updatedContact = await contactsRepo.save(existingContact);
     return updatedContact;
@@ -78,12 +78,12 @@ export const createContact = async (
     const contact = contactsRepo.save({
       url,
       user: { id: userId },
-      socialMedia: {Id: socialMediaId}
+      socialMedia: { Id: socialMediaId }
 
     });
     const promise = new Promise(async (resolve, reject) => {
       try {
-        const data = await contactsRepo.findOneBy({ Id: (await contact).Id })
+        const data = await contactsRepo.findOne({ where: { Id: (await contact).Id } })
         console.log(data)
         resolve(data)
       } catch (err) {
@@ -107,7 +107,7 @@ export class SocialUserService {
     console.log(typeof socialUserId);
 
     const socialUser = await socialUserRepository.findOne({
-      where: { id: socialUserId },
+      where: { Id: socialUserId },
     });
 
     if (!socialUser) {
@@ -120,7 +120,7 @@ export class SocialUserService {
     await socialUserRepository.remove(socialUser);
 
     const usersCount = await socialMediaRepository.count({
-      where: { id: socialMedia.id },
+      where: { Id: socialMedia.Id },
     });
 
     if (usersCount === 0) {
