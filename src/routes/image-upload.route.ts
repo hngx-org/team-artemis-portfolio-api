@@ -9,7 +9,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /api/upload:
+ * /api/v1/upload:
  *   post:
  *     summary: Upload images
  *     description: Upload multiple images using a POST request.
