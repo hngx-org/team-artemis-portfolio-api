@@ -5,6 +5,7 @@ import {
   getAllAwardsController,
   deleteAwardController,
   updateAwardController,
+  getAwardByUserId
 } from "../controllers/award.controller";
 import {
   validateCreateAwardData,
@@ -290,5 +291,56 @@ router.get("/awards", getAllAwardsController);
  *       - Award
  */
 router.delete("/awards/:id", deleteAwardController);
+
+/**
+ * @swagger
+ * /api/v1/awards/{userId}:
+ *   get:
+ *     summary: Get awards for a user who's userId was passed and returns an array of objects containing the user's awards.
+ *     description: Get awards for a user who's userId is in the params and returns an array of objects containing the user's awards.
+ *     tags: [Award]
+ *     parameters:
+ *       - in: header
+ *         name: Authorization
+ *         type: string
+ *         description: Optional authorization header
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The userId of the user to retrieve awards
+ *     responses:
+ *       200:
+ *         description: Awards retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 award:
+ *                   type: object
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *       404:
+ *         description: Awards not Found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 'Input Error':
+ *                   type: string
+ */
+router.get("awards/:userId", getAwardByUserId)
 
 module.exports = router;

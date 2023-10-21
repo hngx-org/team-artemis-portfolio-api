@@ -20,6 +20,15 @@ export const createSocials = async (req: Request, res: Response) => {
       .string()
       .min(1)
       .max(50)
+      .refine((name) => {
+        const forbiddenChars = ['*', '?', '+', '-', '_', 
+        '<', '>', '!', ',', '.', '[', ']', ';', '=', '|', 
+        '&', '#', '(', ')', '\'', '\n', '\r', '\t', '\b', 
+        '\f', '\v'];
+        return !forbiddenChars.some(char => name.includes(char));
+      }, {
+        message: 'Forbidden characters are not allowed in the name field',
+      })
       .refine((name) => !name.includes('*'), {
         message: 'Asterisk (*) is not allowed in the name field',
       })
@@ -27,7 +36,7 @@ export const createSocials = async (req: Request, res: Response) => {
         message: 'Numbers are not allowed in the name field',
       })
       .refine((name) => !name.includes('?'), {
-        message: 'question mark (?) is not allowed in the name field',
+        message: 'Question mark (?) is not allowed in the name field',
       }),
   });
 
