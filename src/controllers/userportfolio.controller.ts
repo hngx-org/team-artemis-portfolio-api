@@ -46,7 +46,7 @@ const contactsRepository = connectionSource.getRepository(SocialUser);
 
 export interface UpdatePortfolioDetailsDTO {
   name?: string;
-  city?: string;
+  location?: string;
   country?: string;
 }
 
@@ -134,6 +134,9 @@ const getPortfolioDetails = async (
     const contactsPromise = contactsRepository.find({
       where: { user: { id: user.id } },
     });
+    const portfolioPromise = portfolioRepository.findOne({
+      where: { user: { id: user.id } },
+    });
 
     try {
       const [
@@ -149,6 +152,7 @@ const getPortfolioDetails = async (
         certificates,
         reference,
         contacts,
+        portfolio,
       ] = await Promise.all([
         educationPromise,
         skillsPromise,
@@ -162,6 +166,7 @@ const getPortfolioDetails = async (
         certificatesPromise,
         referencePromise,
         contactsPromise,
+        portfolioPromise,
       ]);
 
       const interestArray = interests[0]?.interest?.split(","); //convert interest to Array of interests
@@ -193,6 +198,7 @@ const getPortfolioDetails = async (
 
       res.status(200).json({
         user,
+        portfolio,
         education,
         skills,
         interests,
