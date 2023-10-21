@@ -183,7 +183,7 @@ const create = async (
     newRecord.user = user;
     newRecord.section = section;
     // newRecord.titile = req.body.title;
-    const record = await customRepository.save(newRecord); 
+    const record = await customRepository.save(newRecord);
     delete record.user.password;
     return success(res, record, "Success"); 
   } catch (err) {
