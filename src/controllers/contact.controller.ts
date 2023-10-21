@@ -21,10 +21,10 @@ export const createSocials = async (req: Request, res: Response) => {
       .min(1)
       .max(50)
       .refine((name) => {
-        const forbiddenChars = ['*', '?', '+', '-', '_', 
-        '<', '>', '!', ',', '.', '[', ']', ';', '=', '|', 
-        '&', '#', '(', ')', '\'', '\n', '\r', '\t', '\b', 
-        '\f', '\v'];
+        const forbiddenChars = ['*', '?', '+', '-', '_',
+          '<', '>', '!', ',', '.', '[', ']', ';', '=', '|',
+          '&', '#', '(', ')', '\'', '\n', '\r', '\t', '\b',
+          '\f', '\v'];
         return !forbiddenChars.some(char => name.includes(char));
       }, {
         message: 'Forbidden characters are not allowed in the name field',
@@ -62,7 +62,7 @@ export const createSocials = async (req: Request, res: Response) => {
         message: err.message,
       }));
 
-      return res.status(400).json({ error:fieldErrors });
+      return res.status(400).json({ error: fieldErrors });
     } else {
       console.error('Error creating contact:', error);
       return res.status(500).json({ message: 'Internal server error' });
@@ -73,7 +73,7 @@ export const createSocials = async (req: Request, res: Response) => {
 export const getSocials = async (req: Request, res: Response) => {
   try {
     const socialsRepo = dataSource.getRepository(SocialMedia);
-  
+
 
     const data = await socialsRepo.find();
     const response = {
@@ -137,8 +137,8 @@ export const createContacts = async (
         message: "Social media Id does not exist",
       });
     }
-    console.log(!url.includes(social[0].name.toLocaleLowerCase()))
-    if(!url.includes(social[0].name.toLocaleLowerCase())){
+
+    if (!url.includes(social[0].name.toLocaleLowerCase()) && social[0].name.toLocaleLowerCase() !== 'other') {
       return res.status(400).json({
         success: false,
         statusCode: 400,
@@ -147,25 +147,32 @@ export const createContacts = async (
       });
     }
 
-   // check if social url is valid url
-   
-    let urlArr = url.split(social[0].name.toLocaleLowerCase());
-    let validStart =
-      urlArr[0].endsWith("ttp://") ||
-      urlArr[0].endsWith("ttps://") ||
-      urlArr[0].endsWith("www.");
-      
-    let validEnd = urlArr[1].startsWith(".");
+    // check if social url is valid url
+    let urlArr;
+    let validStart = true;
+    let validEnd = true;
+    let validname = true;
+    let validend = true;
 
-    let validname = url
-      .toLocaleLowerCase()
-      .includes(social[0].name.toLocaleLowerCase());
-    let validend =
-      url.includes(".com") ||
-      url.includes(".net") ||
-      url.includes(".ng") ||
-      url.includes(".uk") ||
-      url.includes(".app");
+    if (social[0].name.toLocaleLowerCase() !== 'other') {
+      urlArr = url.split(social[0].name.toLocaleLowerCase()); //facebook.com
+      validStart =
+        urlArr[0].endsWith("ttp://") ||
+        urlArr[0].endsWith("ttps://") ||
+        urlArr[0].endsWith("www.");
+
+      validEnd = urlArr[1].startsWith(".");
+
+      validname = url
+        .toLocaleLowerCase()
+        .includes(social[0].name.toLocaleLowerCase());
+      validend =
+        url.includes(".com") ||
+        url.includes(".net") ||
+        url.includes(".ng") ||
+        url.includes(".uk") ||
+        url.includes(".app");
+    }
     let validprotocol =
       url.startsWith("https://") ||
       url.startsWith("http://") ||
@@ -201,7 +208,7 @@ export const createContacts = async (
           message: "user does not exist",
         });
       }
-      const contact = await contactsRepo.find({ where: { url } });
+      const contact = await contactsRepo.find({ where: { user_id, url } });
       if (contact.length > 0) {
         return res.status(409).json({
           success: false,
@@ -257,7 +264,7 @@ export const getContacts = async (req: Request, res: Response) => {
     }
     console.log(user.email);
     const contacts = await contactsRepo.find({
-      where: { user_id },
+      where: { user_id }, relations: ['socialMedia']
     });
     return res.status(200).json({
       success: true,
@@ -283,10 +290,10 @@ export const deleteContact = async (req: Request, res: Response) => {
     console.log(contact_id);
     // const userIdRegex = /^[A-Fa-f0-9\-]+$/
     const result = await contactsRepo.delete(contact_id);
-   if (result.affected === 0) {
-  return res.status(404).json({ message: 'Contact not found' });
-}
- return res.status(204).json({ message: `Contact with ID ${contact_id} deleted successfully` });
+    if (result.affected === 0) {
+      return res.status(404).json({ message: 'Contact not found' });
+    }
+    return res.status(204).json({ message: `Contact with ID ${contact_id} deleted successfully` });
   } catch (error) {
     console.error("Error getting contacts:", error);
     return res.status(404).json({ message: MESSAGES.NOT_FOUND });
@@ -300,9 +307,9 @@ export const updateContactController = async (req: Request, res: Response) => {
     socialMediaId: z.number(),
     userId: z.string().min(1),
   });
-  
+
   const { url, socialMediaId, userId } = req.body;
-  
+
   try {
     const formattedId = parseInt(socialMediaId);
     if (isNaN(formattedId) || formattedId <= 0 || !Number.isInteger(formattedId)) {
@@ -313,7 +320,7 @@ export const updateContactController = async (req: Request, res: Response) => {
         message: "socialMediaId is invalid"
       });
     }
-  
+
     const isValid = updateContactSchema.safeParse({
       url,
       userId,
@@ -380,7 +387,7 @@ export const updateContactController = async (req: Request, res: Response) => {
           message: errorMessage
         });
       }
-     
+
     }
   } catch (error) {
     res.status(500).json({
