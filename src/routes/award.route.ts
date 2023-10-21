@@ -294,7 +294,7 @@ router.delete("/awards/:id", deleteAwardController);
 
 /**
  * @swagger
- * /api/v1/awards/{userId}:
+ * /api/v1/awards/user/{userId}:
  *   get:
  *     summary: Get awards for a user who's userId was passed and returns an array of objects containing the user's awards.
  *     description: Get awards for a user who's userId is in the params and returns an array of objects containing the user's awards.
@@ -341,6 +341,6 @@ router.delete("/awards/:id", deleteAwardController);
  *                 'Input Error':
  *                   type: string
  */
-router.get("awards/:userId", getAwardByUserId)
+router.get("/awards/user/:userId", getAwardByUserId)
 
 module.exports = router;
