@@ -237,7 +237,7 @@ const createCustomSection = async (
     const newRecord = new CustomUserSection();
     newRecord.user = (req as any).user;
     newRecord.section = section;
-    newRecord.title = req.body.title;
+    newRecord.titile = req.body.title;
     const record = await customRepository.save(newRecord);
     delete record.user.password;
     return success(res, record, "Success");
@@ -315,7 +315,7 @@ const findOneCustomSection = async (req: Request, res: Response) => {
 };
 
 export const updateCustomSection = async (
-  req: Request<{ id: string }, {}, { userId: string; sectionId: number; title: string }, {}>,
+  req: Request<{ id: string }, {}, { userId: string; sectionId: number; titile: string }, {}>,
   res: Response
 ) => {
   const id = parseInt(req.params.id);
@@ -350,17 +350,19 @@ export const updateCustomSection = async (
       if (!section) return error(res, "Section does not exist", 404);
       newRecord.section = section;
     }
-    if(req.body.title){
-      const newTitle = await sectionRepository.findOne({
-        where: {title: req.body.title },
-      })
-      if(!newTitle) return error(res, "Title does not exist", 404);
-      newRecord.title = newTitle; 
+
+    if(req.body.titile){
+      // const newTitle = await sectionRepository.findOne({
+      //   where: {title: req.body.title },
+      // })
+      // if(!newTitle) return error(res, "Title does not exist", 404);
+      // newRecord.title = newTitle; 
+      newRecord.titile = req.body.titile
     }
     await customRepository.update(id, newRecord);
     const custom = await customRepository.findOne({
       where: { id: Number(id) },
-      relations: ["customFields", "section"],
+      relations: ["customFields", "section", "title"],
     });
     return success(res, custom, "Success");
   } catch (err) {
