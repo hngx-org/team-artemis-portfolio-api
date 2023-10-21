@@ -1,17 +1,20 @@
 export interface ICustomSection {
-  userId: string;
+  // userId: string;
+  title: string;
   sectionId: number;
 }
 
 export interface ICustomField {
   fieldType: string;
   fieldName: string;
-  customSectionId: number;
-  customUserSectionId: number;
+  // customSectionId: number;
+  // customUserSectionId: number;
   value: string;
 }
 
 export interface IField {
+  customSectionId: number;
+  customUserSectionId: number;
   fields: Array<ICustomField>;
 }
 

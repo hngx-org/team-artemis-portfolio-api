@@ -1,8 +1,8 @@
 import express from "express";
 import {
-  create,
+  createCustomSection,
   findAll,
-  findOne,
+  findOneCustomSection,
   createCustomField,
   updateCustomField,
   findOneCustomField,
@@ -24,14 +24,17 @@ import {
   updateCustomSectionSchema,
   findAllCustomField,
   deleteCustomFields,
+  getcustomfieldsSchema,
+  getAllCustomSections,
 } from "../controllers/custom.controller";
 import { validateQuery } from "../middlewares/custom.zod";
+import { validate } from "../middlewares/auth";
 
 const router = express.Router();
 
 /**
  * @swagger
- * /api/section:
+ * /api/v1/section:
  *   post:
  *     summary: Create a new section.
  *     description: Create education details for a user.
@@ -87,22 +90,23 @@ router.post("/section", validateSchema(sectionSchema), createSection);
 
 /**
  * @swagger
- * /api/custom:
+ * /api/v1/custom:
  *   post:
  *     summary: Create a new custom section
  *     description: Create a new custom section
  *     tags: [Custom]
  *     parameters:
- *       - in: body
- *         name: Section details
- *         description: The data for the Section details to be created.
+ *        - in: header
+ *         name: Authorization
+ *         type: string
+ *         description: required token
  *         required: true
  *         schema:
  *           type: object
  *           properties:
  *             sectionId:
  *               type: number
- *             userId:
+ *             title:
  *               type: string
  *
  *     responses:
@@ -135,11 +139,11 @@ router.post("/section", validateSchema(sectionSchema), createSection);
  *                 data:
  *                   type: null
  */
-router.post("/custom", validateSchema(customUserSectionSchema), create);
+ router.post("/custom", [validate, validateSchema(customUserSectionSchema)], createCustomSection);
 
 /**
  * @swagger
- * /api/custom:
+ * /api/v1/custom:
  *   get:
  *     summary: Get all Custom records for user
  *     description: Get custom fields
@@ -157,9 +161,53 @@ router.post("/custom", validateSchema(customUserSectionSchema), create);
  *       - Custom
  */
 router.get("/custom", findAll);
+
 /**
  * @swagger
- * /api/section:
+ * /api/v1/custom/user:
+ *   get:
+ *     summary: Get All custom sections for a user.
+ *     description: Gets all custom section for a user along with their fields
+ *     tags: [Custom]
+ *     parameters:
+ *       - in: header
+ *         name: Authorization
+ *         type: string
+ *         description: required token
+ *     responses:
+ *       200:
+ *         description: Custom section detail retrieved successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 educationDetail:
+ *                   type: object
+ *       404:
+ *         description: Custom section detail not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ */
+ router.get("/custom/user", validate, getAllCustomSections);
+
+/**
+ * @swagger
+ * /api/v1/section:
  *   get:
  *     summary: Get section details.
  *     description: all sections.
@@ -208,7 +256,7 @@ router.get("/section", validateQuery(getSectionSchema), getSection);
 
 /**
  * @swagger
- * /api/custom-fields:
+ * /api/v1/custom-fields:
  *   get:
  *     summary: Get section details.
  *     description: all sections.
@@ -249,10 +297,10 @@ router.get("/section", validateQuery(getSectionSchema), getSection);
  *                   type: null
  */
 
-router.get("/custom-fields", findAllCustomField);
+ router.get("/custom-fields", validateQuery(getcustomfieldsSchema), findAllCustomField);
 /**
  * @swagger
- * /api/custom/{id}:
+ * /api/v1/custom/{id}:
  *   get:
  *     summary: Get single custom record
  *     parameters:
@@ -275,11 +323,11 @@ router.get("/custom-fields", findAllCustomField);
  *     tags:
  *       - Custom
  */
-router.get("/custom/:id", findOne);
+router.get("/custom/:id", findOneCustomSection);
 
 /**
  * @swagger
- * /api/section/{id}:
+ * /api/v1/section/{id}:
  *   get:
  *     summary: Get section by id.
  *     description: Get section by id.
@@ -327,7 +375,7 @@ router.get("/custom/:id", findOne);
 router.get("/section/:id", getSingleSection);
 /**
  * @swagger
- * /api/custom/field:
+ * /api/v1/custom/field:
  *   post:
  *     summary: Create a new custom field
  *     description: Create a new custom field
@@ -337,20 +385,21 @@ router.get("/section/:id", getSingleSection);
  *         name: fields
  *         type: string
  *         schema:
- *           type: array
- *           items:
- *             type: object
- *             properties:
- *               fieldType:
- *                 type: string
- *               customSectionId:
- *                 type: number
- *               customUserSectionId:
- *                 type: number
- *               fieldName:
- *                 type: string
- *               value:
- *                 type: string
+ *                    type: object
+ *           properties:
+ *             customUserSectionId:
+ *               type: number
+ *             fields:
+ *              type: array
+ *              items:
+ *                 type: object
+ *                 properties:
+ *                     fieldType:
+ *                       type: string
+ *                     fieldName:
+ *                       type: string
+ *                     value:
+ *                       type: string
  *
  *     responses:
  *       201:
@@ -388,7 +437,7 @@ router.post("/custom/field", validateSchema(fieldsSchema), createCustomField);
 
 /**
  * @swagger
- * /api/custom/field/{id}:
+ * /api/v1/custom/field/{id}:
  *   get:
  *     summary: Get single custom field record
  *     parameters:
@@ -416,7 +465,7 @@ router.get("/custom/field/:id", findOneCustomField);
 
 /**
  * @swagger
- * /api/custom-section/{id}:
+ * /api/v1/custom-section/{id}:
  *   delete:
  *     summary: Delete a custom section by ID
  *     description: Delete a custom section by providing its ID.
@@ -497,7 +546,7 @@ router.delete("/custom-section/:id", deleteCustomSection);
 
 /**
  * @swagger
- * /api/section/{id}:
+ * /api/v1/section/{id}:
  *   delete:
  *     summary: Delete section by id.
  *     description: Delete section by id.
@@ -546,7 +595,7 @@ router.delete("/section/:id", deleteSection);
 
 /**
  * @swagger
- * /api/custom/field/{id}:
+ * /api/v1/custom/field/{id}:
  *   delete:
  *     summary: Delete custom field by id.
  *     description: Delete custom field by id.
@@ -595,7 +644,7 @@ router.delete("/custom/field/:id", deleteCustomFields);
 
 /**
  * @swagger
- * /api/custom/field/{id}:
+ * /api/v1/custom/field/{id}:
  *   put:
  *     summary: Update a custom field by ID
  *     description: Update a custom field by providing its ID and the new field data.
@@ -801,10 +850,7 @@ router.put("/section/:id", validateSchema(updateSectionSchema), UpdateSection);
  *                 data:
  *                   type: null
  */
-router.put(
-  "/custom/:id",
-  validateSchema(updateCustomSectionSchema),
-  updateCustomSection
+router.put("/custom/:id",validateSchema(updateCustomSectionSchema),updateCustomSection
 );
 
 module.exports = router;

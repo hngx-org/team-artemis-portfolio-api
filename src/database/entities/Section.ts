@@ -26,8 +26,8 @@ export class Section {
   @Column("character varying", { name: "name", nullable: true })
   name: string | null;
 
-  @Column("character varying", { name: "title", nullable: true })
-  title: string | null;
+  // @Column("character varying", { name: "title", nullable: true })
+  // title: string | null;
 
   @Column("text", { name: "description", nullable: true })
   description: string | null;
