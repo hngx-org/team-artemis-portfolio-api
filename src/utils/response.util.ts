@@ -5,7 +5,7 @@ export const success = (
   data: any,
   message: string = "Success"
 ) => {
-  return res.status(200).json({ successful: true, message, data });
+  return res.status(200).json({ success: true, message, data });
 };
 
 export const error = (
@@ -15,5 +15,5 @@ export const error = (
 ) => {
   return res
     .status(statusCode)
-    .json({ successful: false, message, data: null });
+    .json({ success: false, message, data: null });
 };

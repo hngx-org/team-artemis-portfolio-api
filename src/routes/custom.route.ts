@@ -10,7 +10,6 @@ import {
   createSection,
   validateSchema,
   sectionSchema,
-  customUserSectionSchema,
   // updateCustomSection,
   customFieldSchema,
   fieldsSchema,
@@ -24,8 +23,13 @@ import {
   updateCustomSectionSchema,
   findAllCustomField,
   deleteCustomFields,
+  getcustomfieldsSchema,
+  getAllCustomSections,
+  customUserSectionSchema,
+  customGetUserSectionSchema 
 } from "../controllers/custom.controller";
 import { validateQuery } from "../middlewares/custom.zod";
+import { validate } from "../middlewares/auth";
 
 const router = express.Router();
 
@@ -102,6 +106,8 @@ router.post("/section", validateSchema(sectionSchema), createSection);
  *           properties:
  *             sectionId:
  *               type: number
+ *             title:
+ *               type: string
  *             userId:
  *               type: string
  *
@@ -135,7 +141,7 @@ router.post("/section", validateSchema(sectionSchema), createSection);
  *                 data:
  *                   type: null
  */
-router.post("/custom", validateSchema(customUserSectionSchema), create);
+router.post("/custom",  validateSchema(customUserSectionSchema), create);
 
 /**
  * @swagger
@@ -157,6 +163,54 @@ router.post("/custom", validateSchema(customUserSectionSchema), create);
  *       - Custom
  */
 router.get("/custom", findAll);
+
+/**
+ * @swagger
+ * /api/v1/custom/user/{id}:
+ *   get:
+ *     summary: Get All custom sections for a user.
+ *     description: Gets all custom section for a user along with their fields
+ *     tags: [Custom]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: The ID of the user
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Custom section detail retrieved successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 educationDetail:
+ *                   type: object
+ *       404:
+ *         description: Custom section detail not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ */
+router.get(
+  "/custom/user/:id",
+  getAllCustomSections
+);
 /**
  * @swagger
  * /api/v1/section:
@@ -249,7 +303,7 @@ router.get("/section", validateQuery(getSectionSchema), getSection);
  *                   type: null
  */
 
-router.get("/custom-fields", findAllCustomField);
+router.get("/custom-fields", validateQuery(getcustomfieldsSchema), findAllCustomField);
 /**
  * @swagger
  * /api/v1/custom/{id}:
@@ -337,20 +391,21 @@ router.get("/section/:id", getSingleSection);
  *         name: fields
  *         type: string
  *         schema:
- *           type: array
- *           items:
- *             type: object
- *             properties:
- *               fieldType:
- *                 type: string
- *               customSectionId:
- *                 type: number
- *               customUserSectionId:
- *                 type: number
- *               fieldName:
- *                 type: string
- *               value:
- *                 type: string
+ *           type: object
+ *           properties:
+ *             customUserSectionId:
+ *               type: number
+ *             fields:
+ *              type: array
+ *              items:
+ *                 type: object
+ *                 properties:
+ *                     fieldType:
+ *                       type: string
+ *                     fieldName:
+ *                       type: string
+ *                     value:
+ *                       type: string
  *
  *     responses:
  *       201:

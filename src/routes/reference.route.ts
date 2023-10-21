@@ -46,12 +46,11 @@ const router = express.Router();
  *             sectionId:
  *               type: number
  *           example:
- *             referer: "Sapphire"
- *             company: "Zuri"
+ *             referer: "Dami"
+ *             company: "RooTek"
  *             position: "Backend Developer"
- *             email: "sofiyyahabidoye@gmail.com"
- *             phoneNumber: "08101695397"
- *             sectionId: 25
+ *             email: "ogundele.damilare4@gmail.com"
+ *             phoneNumber: "+2348070859502"
  *     responses:
  *       201:
  *         description: Reference created successfully
@@ -175,20 +174,20 @@ router.delete("/references/:id", deleteReferenceDetail);
 
 /**
  * @swagger
- * /api/v1/references/{userId}:
+ * /api/v1/references/{referenceId}:
  *   put:
- *     summary: update a new reference.
- *     description: update  reference detail for a user.
+ *     summary: Create a new reference.
+ *     description: Create a new reference detail for a user.
  *     tags:
  *       - References
  *     parameters:
  *       - in: path
- *         name: userId
- *         description: The ID of the user for whom the reference is created.
+ *         name: referenceId
+ *         description:  ID f the reference to be updated.
  *         required: false
  *         schema:
  *           type: string
- *         example: "6ba7b810-9dad-11d1-80b4-00c04fd430c8"
+ *         example: 2
  *       - in: body
  *         name: body
  *         description: Data for creating a reference detail.
@@ -196,33 +195,29 @@ router.delete("/references/:id", deleteReferenceDetail);
  *         schema:
  *           type: object
  *           properties:
- *             name:
+ *             referer:
  *               type: string
- *                  required:false
- *
  *             company:
  *               type: string
- *
  *             position:
  *               type: string
- *
- *             emailAddress:
+ *             email:
  *               type: string
- *             phoneNumber:
+ *             phone_number:
  *               type: string
  *           example:
- *             name: "Sapphire"
+ *             referer: "Sapphire"
  *             company: "Zuri"
  *             position: "Backend Developer"
- *             emailAddress: "sofiyyahabidoye@gmail.com"
- *             phoneNumber: "08101695397"
+ *             email: "sofiyyahabidoye@gmail.com"
+ *             phone_number: "08101695397"
  *     responses:
  *       201:
  *         description: Reference updated successfully
  *         content:
  *           application/json:
  *             example:
- *               message: "Reference updated successfully"
+ *               message: "Reference created successfully"
  *       400:
  *         description: Bad request
  *         content:

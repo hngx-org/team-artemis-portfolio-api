@@ -80,6 +80,10 @@ const getPortfolioDetails = async (
       ],
     });
 
+    if (!user) {
+      throw new NotFoundError("User not found");
+    }
+
     const educationPromise = connectionSource.manager.find(EducationDetail, {
       where: { user: { id: user.id } },
       relations: ["degree"],

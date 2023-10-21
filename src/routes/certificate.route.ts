@@ -11,7 +11,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /api/v1/add-certificate/{userId}:
+ * /api/v1/certificates/{userId}:
  *   post:
  *     summary: Create certificate details for a user with a specified ID.
  *     description: Create certificate details for a user.
@@ -94,7 +94,7 @@ const router = express.Router();
  *                 data:
  *                   type: null
  */
-router.post("/add-certificate/:userId", addCertificateController);
+router.post("/certificates/:userId", addCertificateController);
 
 /**
  * @swagger
@@ -162,12 +162,18 @@ router.get("/certificates/:userId", getAllCertificates);
 
 /**
  * @swagger
- * /api/v1/certificates/{certId}:
+ * /api/v1/certificates/{userId}/{certId}:
  *   delete:
  *     summary: Delete a certificate by ID.
  *     description: Delete a certificate by its unique certificate ID.
  *     tags: [Certificates]
  *     parameters:
+ *       - in: path
+ *         name: userId  
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The ID of the user who owns the certificate.
  *       - in: path
  *         name: certId
  *         required: true
@@ -208,7 +214,7 @@ router.get("/certificates/:userId", getAllCertificates);
  *                 error:
  *                   type: string
  */
-router.delete("/certificates/:certId", deleteCertificate);
+router.delete("/certificates/:userId/:certId", deleteCertificate);
 
 /**
  * @swagger
@@ -270,11 +276,11 @@ router.delete("/certificates/:certId", deleteCertificate);
  *                 error:
  *                   type: string
  */
-router.get("/certificate/:userId/:certId", getCertificateById);
+router.get("/certificates/:userId/:certId", getCertificateById);
 
 /**
  * @swagger
- * /api/v1/certificate/{userId}/{certId}:
+ * /api/v1/certificates/{userId}/{certId}:
  *   put:
  *     summary: Update certificate details for a user with a specified certificate ID.
  *     description: Update certificate details for a user.
@@ -360,6 +366,6 @@ router.get("/certificate/:userId/:certId", getCertificateById);
  *                 data:
  *                   type: null
  */
-router.put("/certificate/:userId/:certId", updateCertificate);
+router.put("/certificates/:userId/:certId", updateCertificate);
 
 module.exports = router;
