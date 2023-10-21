@@ -201,11 +201,56 @@ const updateAwardController = async (
 };
 
 // Get award by UserId
+const getAwardByUserId = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const awardRepo = connectionSource.getRepository(Award)
 
+  try {
+    const userId = req.params.userId
+    const data = await awardRepo.find({
+      where: { user: { id: userId } },
+      relations: ['user'],
+    })
+
+    if (!data) {
+      throw new NotFoundError('Awards not found')
+    }
+
+    if (data.length === 0) {
+      throw new NotFoundError('No awards found for the user')
+    }
+
+    const awards = data.map((award) => {
+      const { id, firstName, lastName } = award.user
+      return {
+        title: award.title,
+        year: award.year,
+        presented_by: award.presented_by,
+        url: award.url,
+        description: award.description,
+        user: {
+          id,
+          firstName,
+          lastName,
+        },
+      }
+    })
+    res.status(200).json({
+      message: 'Awards retrieved successfully',
+      awards,
+    })
+  } catch (error) {
+    return next(error)
+  }
+}
 
 export {
   createAwardController,
   getAwardController,
+  getAwardByUserId,
   getAllAwardsController,
   deleteAwardController,
   updateAwardController,
