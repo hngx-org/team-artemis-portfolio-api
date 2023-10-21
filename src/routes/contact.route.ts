@@ -31,17 +31,17 @@ const router = express.Router();
  *            properties:
  *                statusCode:
  *                   type: string
- *                message: 
+ *                message:
  *                   type: string
- *                success: 
+ *                success:
  *                   type: boolean
- *                payload: 
- *                   type: Array
- *         example:
- *           - success: true
- *             statusCode: 200
- *             message: success
- *             payload: []
+ *                payload:
+ *                   type: array
+ *                   items:
+ *                      type: object
+ *                      properties:
+ *                          email:
+ *                             type: string
  *       404:
  *         description:  user does not exist.
  *         schema:
@@ -49,6 +49,16 @@ const router = express.Router();
  *           properties:
  *             message:
  *               type: string
+ *             timestamp:
+ *               type: string
+ *             status:
+ *               type: number
+ *             error:
+ *               type: string
+ *             path:
+ *               type: string
+ *             success:
+ *               type: boolean
  *       400:
  *         description: Bad request .
  *         schema:
@@ -56,7 +66,17 @@ const router = express.Router();
  *           properties:
  *             message:
  *               type: string
- *      
+ *             timestamp:
+ *               type: string
+ *             status:
+ *               type: number
+ *             error:
+ *               type: string
+ *             path:
+ *               type: string
+ *             success:
+ *               type: boolean
+ *
  *       500:
  *         description: Internal server error.
  *         schema:
@@ -64,6 +84,16 @@ const router = express.Router();
  *           properties:
  *             message:
  *               type: string
+ *             timestamp:
+ *               type: string
+ *             status:
+ *               type: number
+ *             error:
+ *               type: string
+ *             path:
+ *               type: string
+ *             success:
+ *               type: boolean
  *     tags:
  *       - Contacts
  */
@@ -93,38 +123,28 @@ router.get("/contacts/:user_id", getContacts);
  *     responses:
  *       201:
  *         description: Resource created successfully.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 successful:
+ *         schema:
+ *            type: object
+ *            properties:
+ *                 success:
  *                   type: boolean
  *                 message:
  *                   type: string
- *                 data:
- *                   type: object
- *                   properties:
- *                     successful:
- *                       type: boolean
- *                     message:
- *                       type: string
+ *                 statusCode:
+ *                   type: number
  *       400:
  *         description: bad request error.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 successful:
- *                   type: boolean
- *                   example: false
- *                 message:
- *                   type: string
- *                   example: "Failed to create contact"
- *                 data:
- *                   type: null
- * 
+ *         schema:
+ *           type: object
+ *           properties:
+ *             message:
+ *               type: string
+ *             statusCode:
+ *               type: number
+ *             error:
+ *               type: string
+ *             success:
+ *               type: boolean
  *     tags:
  *       - Contacts
  */
@@ -205,7 +225,7 @@ router.post("/socials", createSocials);
  * @swagger
  * /api/v1/socials:
  *   get:
- *     summary: fetches all social media types 
+ *     summary: fetches all social media types
  *     description: Create a new social media type.
  *     responses:
  *       200:
@@ -230,7 +250,7 @@ router.post("/socials", createSocials);
  *       - Contacts
  */
 
-router.get('/socials/', getSocials)
+router.get("/socials/", getSocials);
 
 /**
  * @swagger
@@ -272,8 +292,16 @@ router.get('/socials/', getSocials)
  *           properties:
  *             message:
  *               type: string
- *         example:
- *           message: "Invalid input data"
+ *             timestamp:
+ *               type: string
+ *             status:
+ *               type: number
+ *             error:
+ *               type: string
+ *             path:
+ *               type: string
+ *             success:
+ *               type: boolean
  *       404:
  *         description: User not found or contact update failed.
  *         schema:
@@ -281,8 +309,16 @@ router.get('/socials/', getSocials)
  *           properties:
  *             message:
  *               type: string
- *         example:
- *           message: "User not found or contact update failed"
+ *             timestamp:
+ *               type: string
+ *             status:
+ *               type: number
+ *             error:
+ *               type: string
+ *             path:
+ *               type: string
+ *             success:
+ *               type: boolean
  *       500:
  *         description: Internal server error.
  *         schema:
@@ -290,8 +326,16 @@ router.get('/socials/', getSocials)
  *           properties:
  *             message:
  *               type: string
- *         example:
- *           message: "Internal server error"
+ *             timestamp:
+ *               type: string
+ *             status:
+ *               type: number
+ *             error:
+ *               type: string
+ *             path:
+ *               type: string
+ *             success:
+ *               type: boolean
  *     tags:
  *       - Contacts
  */
