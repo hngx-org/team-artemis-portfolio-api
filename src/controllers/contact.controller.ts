@@ -269,18 +269,31 @@ export const deleteContact = async (req: Request, res: Response) => {
     let { id } = req.params;
     const contact_id = parseInt(id);
     if (isNaN(contact_id) || contact_id <= 0) {
-      return res.status(400).json({ message: 'Invalid contact ID' });
+      return res.status(400).json({
+        success: false,
+        statusCode: 400,
+        error: "BadRequest Error",
+        message: 'Invalid contact ID provided'
+      });
     }
-    console.log(contact_id);
-    // const userIdRegex = /^[A-Fa-f0-9\-]+$/
     const result = await contactsRepo.delete(contact_id);
    if (result.affected === 0) {
-  return res.status(404).json({ message: 'Contact not found' });
+     return res.status(404).json({
+       success: false,
+       statusCode: 404,
+       error: "BadRequest Error",
+       message: 'Contact not found'
+     });
 }
  return res.status(204).json({ message: `Contact with ID ${contact_id} deleted successfully` });
   } catch (error) {
     console.error("Error getting contacts:", error);
-    return res.status(404).json({ message: MESSAGES.NOT_FOUND });
+    return res.status(404).json({
+       success: false,
+      statusCode: 404,
+      error: "BadRequest Error",
+      message: MESSAGES.NOT_FOUND
+    });
   }
 };
 
