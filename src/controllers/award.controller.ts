@@ -32,12 +32,10 @@ const createAwardController = async (
     const missingFields = requiredFields.filter((field) => !req.body[field]);
 
     if (missingFields.length > 0) {
-      // Create a CustomError with a 400 status code
-      const err = new CustomError(
+    throw new CustomError(
         `Missing fields: ${missingFields.join(", ")}`,
         400
       );
-      res.status(err.statusCode).json({ err: err.message });
     }
 
     const userRepository = connectionSource.getRepository(User);
