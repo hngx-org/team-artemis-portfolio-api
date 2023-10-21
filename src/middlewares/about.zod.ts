@@ -44,7 +44,7 @@ async function validateUserId(userId: string) {
 async function validateAboutId(id:unknown) {
   const aboutIdSchema = z.number({
     required_error: "id is required in params",
-    invalid_type_error: "is must be a number"
+    invalid_type_error: "id must be a number"
   }).int("id must be an integer")
 
   try {
