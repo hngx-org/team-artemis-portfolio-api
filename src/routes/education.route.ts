@@ -1,15 +1,14 @@
 import express from "express";
 import {
   createEducationDetailController,
-  updateEducationDetail,
-  getEducationDetailById,
-  fetchUserEducationDetail,
   deleteEducationDetail,
+  fetchUserEducationDetail,
+  getEducationDetailById,
+  updateEducationDetail,
 } from "../controllers/education.controller";
 
 import {
-  validateCreateData,
-  validateUpdateData,
+  validateUpdateData
 } from "../middlewares/education.zod";
 
 const router = express.Router();
