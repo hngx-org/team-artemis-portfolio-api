@@ -144,6 +144,32 @@ export const createNotificationSettingController = async (
       });
     }
 
+    const hasExistingNotificationPreferences =
+      await notificationSettingRepository.find({
+        where: { user: { id: userId } },
+      });
+
+    if (hasExistingNotificationPreferences.length > 0) {
+      const updateNotification =
+        hasExistingNotificationPreferences.slice(-1)?.[0];
+
+      updateNotification.communityUpdate = communityUpdate;
+      updateNotification.emailSummary = emailSummary;
+      updateNotification.newMessages = newMessages;
+      updateNotification.followUpdate = followUpdate;
+      updateNotification.specialOffers = specialOffers;
+
+      const updatedNotification = await notificationSettingRepository.save(
+        updateNotification
+      );
+
+      return success(
+        res,
+        updatedNotification,
+        `Notification updated successfully`
+      );
+    }
+
     const notificationSetting = new NotificationSetting();
     notificationSetting.communityUpdate = communityUpdate || false;
     notificationSetting.emailSummary = emailSummary || false;
@@ -163,6 +189,9 @@ export const createNotificationSettingController = async (
         success: false,
       });
     }
+
+    // Remove the user property from the response object
+    Reflect.deleteProperty(notificationInfo, "user");
 
     success(res, notificationInfo, `activated notification`);
   } catch (error) {
