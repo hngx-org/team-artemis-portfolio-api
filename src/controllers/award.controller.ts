@@ -150,7 +150,6 @@ const updateAwardController = async (
 
     const updateAward = req.body;
 
-    // fields that must be strings
     const stringFields = [
       "year",
       "title",
@@ -158,22 +157,34 @@ const updateAwardController = async (
       "presented_by",
       "url",
     ];
-
-    // update the award dynamically based on the data passed
+    
+    const isValidUrl = (url) => {
+      const urlPattern = /^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$/i;
+      return urlPattern.test(url);
+    };
+    
     for (const key in updateAward) {
       if (updateAward.hasOwnProperty(key)) {
-        if (
-          stringFields.includes(key) &&
-          typeof updateAward[key] !== "string"
-        ) {
-          return res
-            .status(400)
-            .json({ "Input Error": `Field '${key}' should be a string` });
-        }
+        if (stringFields.includes(key)) {
+          if (typeof updateAward[key] !== "string" || updateAward[key].trim() === "") {
+            return res.status(400).json({ Error: `Field '${key}' should be a non-empty string` });
+          }
+          else if (key === "url") {
+            const url = isValidUrl(updateAward[key])
+            if(!url) {
+              return res.status(400).json({ Error: `Field 'url' should be a valid URL` });
+            }
+          }
+        } 
         award[key] = updateAward[key];
       }
     }
+    
+    
+    
+    
 
+    
     await awardRepository.save(award);
 
     console.log("Award updated successfully");
