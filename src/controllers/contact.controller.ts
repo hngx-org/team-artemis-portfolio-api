@@ -20,6 +20,15 @@ export const createSocials = async (req: Request, res: Response) => {
       .string()
       .min(1)
       .max(50)
+      .refine((name) => {
+        const forbiddenChars = ['*', '?', '+', '-', '_', 
+        '<', '>', '!', ',', '.', '[', ']', ';', '=', '|', 
+        '&', '#', '(', ')', '\'', '\n', '\r', '\t', '\b', 
+        '\f', '\v'];
+        return !forbiddenChars.some(char => name.includes(char));
+      }, {
+        message: 'Forbidden characters are not allowed in the name field',
+      })
       .refine((name) => !name.includes('*'), {
         message: 'Asterisk (*) is not allowed in the name field',
       })
@@ -27,7 +36,7 @@ export const createSocials = async (req: Request, res: Response) => {
         message: 'Numbers are not allowed in the name field',
       })
       .refine((name) => !name.includes('?'), {
-        message: 'question mark (?) is not allowed in the name field',
+        message: 'Question mark (?) is not allowed in the name field',
       }),
   });
 
@@ -60,11 +69,11 @@ export const createSocials = async (req: Request, res: Response) => {
     }
   }
 };
-
 // get all social media types
 export const getSocials = async (req: Request, res: Response) => {
   try {
     const socialsRepo = dataSource.getRepository(SocialMedia);
+  
 
     const data = await socialsRepo.find();
     const response = {
@@ -194,9 +203,9 @@ export const createContacts = async (
       }
       const contact = await contactsRepo.find({ where: { url } });
       if (contact.length > 0) {
-        return res.status(200).json({
-          success: true,
-          statusCode: 200,
+        return res.status(409).json({
+          success: false,
+          statusCode: 409,
           message: "contact already exists",
         });
       }
@@ -287,30 +296,98 @@ export const deleteContact = async (req: Request, res: Response) => {
 //update Contact controller
 export const updateContactController = async (req: Request, res: Response) => {
   const updateContactSchema = z.object({
-    url: z.string().nonempty(),
-    socialMediaId: z.number().int(),
-    userId: z.string().nonempty(),
+    url: z.string().min(1),
+    socialMediaId: z.number(),
+    userId: z.string().min(1),
   });
- 
-  const Id = parseInt(req.params.id);
-  const { url, socialMediaId, userId } = req.body;
-  console.log(Id)
-  if (isNaN(Id) || Id <= 0 || !Number.isInteger(Id)) {
-    return res.status(404).json("contact_Id invalid");
-  }
-   try {
-   // updateContactSchema.parse({ url, socialMediaId, userId });
   
-    const updatedContact = await updateContact(Id, { url, socialMediaId }, userId);
-   res.json({
-    url: updatedContact.url,
-    socialMediaId: updatedContact.socialMedia,  
-});
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      const errorMessage = error.errors.map((err) => err.message).join(', ');
-      return res.status(400).json({ error: errorMessage });
+  const { url, socialMediaId, userId } = req.body;
+  
+  try {
+    const formattedId = parseInt(socialMediaId);
+    if (isNaN(formattedId) || formattedId <= 0 || !Number.isInteger(formattedId)) {
+      return res.status(404).json({
+        success: false,
+        statusCode: 400,
+        error: "BadRequest Error",
+        message: "socialMediaId is invalid"
+      });
     }
-    res.status(500).json({ error: 'Internal server error' });
+  
+    const isValid = updateContactSchema.safeParse({
+      url,
+      userId,
+      socialMediaId: formattedId,
+    });
+    const socialsRepo = dataSource.getRepository(SocialMedia);
+
+    try {
+      let social = await socialsRepo.find({ where: { Id: socialMediaId } });
+      console.log(social);
+
+      if (social.length < 1) {
+        return res.status(400).json({
+          success: false,
+          statusCode: 400,
+          error: "BadRequest Error",
+          message: "Social media Id does not exist",
+        });
+      }
+      console.log(!url.includes(social[0].name.toLocaleLowerCase()))
+      if (!url.includes(social[0].name.toLocaleLowerCase())) {
+        return res.status(400).json({
+          success: false,
+          statusCode: 400,
+          error: "BadRequest Error",
+          message: "Social media Id does not match provided social link. please provide correct link",
+        });
+      }
+
+      if (isValid.success) {
+        const Id = parseInt(req.params.id);
+        if (isNaN(Id) || Id <= 0 || !Number.isInteger(Id)) {
+          return res.status(404).json({
+            success: false,
+            statusCode: 400,
+            error: "Bad Request Error",
+            message: "contact_Id is invalid"
+          });
+        }
+
+        const updatedContact = await updateContact(Id, { url, socialMediaId: formattedId }, userId);
+
+        res.status(200).json({
+          success: true,
+          statusCode: 200,
+          url: updatedContact.url,
+          socialMediaId: updatedContact.socialMedia,
+        });
+      } else {
+        return res.status(400).json({
+          success: false,
+          statusCode: 400,
+          error: "Bad Request Error",
+          message: "Invalid input",
+        });
+      }
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        const errorMessage = error.errors.map((err) => err.message).join(', ');
+        return res.status(400).json({
+          success: false,
+          statusCode: 400,
+          error: "Bad Request Error",
+          message: errorMessage
+        });
+      }
+     
+    }
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      statusCode: 500,
+      error: "Internal Server Error",
+      message: error.message
+    });
   }
 };

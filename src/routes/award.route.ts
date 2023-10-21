@@ -5,6 +5,7 @@ import {
   getAllAwardsController,
   deleteAwardController,
   updateAwardController,
+  getAwardByUserId
 } from "../controllers/award.controller";
 import {
   validateCreateAwardData,
@@ -183,49 +184,23 @@ router.put("/awards/:awardId", updateAwardController);
  * @swagger
  * /api/v1/awards/{id}:
  *   get:
- *     summary: Fetch user award by ID.
- *     description: Fetch the award of a user.
- *     tags:
- *       - Award
+ *     summary: Get award detail(s) for a user who's id is the params and returns an array of objects containing a user award details.
+ *     description: Get award detail(s) for a user who's id is in the params and returns an array of objects containing a user award details.
+ *     tags: [Award]
  *     parameters:
+ *       - in: header
+ *         name: Authorization
+ *         type: string
+ *         description: Optional authorization header
  *       - in: path
  *         name: id
- *         description: The ID of the user whose awards are to be fetched.
  *         required: true
  *         schema:
  *           type: string
+ *         description: The ID of the user for whom to get award details.
  *     responses:
  *       200:
- *         description: Award retrieved successfully.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message: 
- *                   type: string
- *                   example: "Award retrieved successfully"
- *                 award:
- *                   type: object
- *                   properties:
- *                     id:
- *                       type: number
- *                     title: 
- *                       type: string
- *                     year:
- *                       type: string
- *                     user_id:
- *                       type: string
- *                     presented_by:
- *                       type: string
- *                     url:
- *                       type: string
- *                     description:
- *                       type: string
- *                     createdAt:
- *                       type: string                  
- *       500:
- *         description: Internal server error.
+ *         description: Award retrieved successfully
  *         content:
  *           application/json:
  *             schema:
@@ -233,56 +208,8 @@ router.put("/awards/:awardId", updateAwardController);
  *               properties:
  *                 message:
  *                   type: string
- *                   example: "Internal server error."                
- *       404:
- *         description: Award not found.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: "Award not found."           
- */
-router.get("/awards/:id", getAwardController);
-
-/**
- * @swagger
- * /api/v1/awards
- *   get:
- *     summary: Fetch all user award.
- *     description: Fetch the award of all user.
- *     tags:
- *       - Award
- *     responses:
- *       200:
- *         description: Award retrieved successfully.
- *         content:
- *           application/json:           
- *              properties:
- *                 message: 
- *                   type: string
- *                   example: "All awards retrieved successfully"
  *                 award:
  *                   type: object
- *                   properties:
- *                     id:
- *                       type: number
- *                     title: 
- *                       type: string
- *                     year:
- *                       type: string
- *                     user_id:
- *                       type: string
- *                     presented_by:
- *                       type: string
- *                     url:
- *                       type: string
- *                     description:
- *                       type: string
- *                     createdAt:
- *                       type: string                
  *       500:
  *         description: Internal server error
  *         content:
@@ -292,6 +219,38 @@ router.get("/awards/:id", getAwardController);
  *               properties:
  *                 message:
  *                   type: string
+ *       '404':
+ *         description: Not Found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 'Input Error':
+ *                   type: string
+ */
+router.get("/awards/:id", getAwardController);
+
+/**
+ * @swagger
+ * /api/v1/awards/:
+ *   get:
+ *     summary: Get all awards.
+ *     description: View all awards.
+ *     responses:
+ *       '200':
+ *         description: Successful
+ *       '500':
+ *         description: Error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 'Input Error':
+ *                   type: string
+ *     tags:
+ *       - Award
  */
 router.get("/awards", getAllAwardsController);
 
@@ -300,16 +259,71 @@ router.get("/awards", getAllAwardsController);
  * /api/v1/awards/{id}:
  *   delete:
  *     summary: Delete an award by ID.
- *     description: Delete an award by its unique ID.
+ *     description: Delete an award by providing its ID.
  *     parameters:
  *       - in: path
  *         name: id
+ *         description: The ID of the award to delete.
+ *         required: true
+ *         type: integer
+ *     responses:
+ *       '204':
+ *         description: Successful deletion
+ *       '404':
+ *         description: Not Found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 'Input Error':
+ *                   type: string
+ *       '500':
+ *         description: Internal Server Error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 'Input Error':
+ *                   type: string
+ *     tags:
+ *       - Award
+ */
+router.delete("/awards/:id", deleteAwardController);
+
+/**
+ * @swagger
+ * /api/v1/awards/{userId}:
+ *   get:
+ *     summary: Get awards for a user who's userId was passed and returns an array of objects containing the user's awards.
+ *     description: Get awards for a user who's userId is in the params and returns an array of objects containing the user's awards.
+ *     tags: [Award]
+ *     parameters:
+ *       - in: header
+ *         name: Authorization
+ *         type: string
+ *         description: Optional authorization header
+ *       - in: path
+ *         name: userId
  *         required: true
  *         schema:
- *           type: integer
+ *           type: string
+ *         description: The userId of the user to retrieve awards
  *     responses:
  *       200:
- *         description: Award deleted successfully. Returns the deleted award.
+ *         description: Awards retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 award:
+ *                   type: object
+ *       500:
+ *         description: Internal server error
  *         content:
  *           application/json:
  *             schema:
@@ -318,28 +332,15 @@ router.get("/awards", getAllAwardsController);
  *                 message:
  *                   type: string
  *       404:
- *         description: Award not found.
+ *         description: Awards not Found
  *         content:
  *           application/json:
  *             schema:
  *               type: object
  *               properties:
- *                 message:
+ *                 'Input Error':
  *                   type: string
- *                   example: "Award not found." 
- *       500:
- *         description: Internal Server Error.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: "Internal server error."  
- *     tags:
- *       - Award
  */
-router.delete("/awards/:id", deleteAwardController);
+router.get("awards/:userId", getAwardByUserId)
 
 module.exports = router;

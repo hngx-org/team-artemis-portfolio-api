@@ -1,6 +1,6 @@
-import { Request, Response, RequestHandler, NextFunction } from "express";
-import { connectionSource } from "../database/data-source";
-import { validate as isValidUUID } from "uuid";
+import { Request, Response, RequestHandler, NextFunction } from 'express';
+import { connectionSource } from '../database/data-source';
+import { validate as isValidUUID } from 'uuid';
 import {
   PortfolioDetail,
   User,
@@ -22,9 +22,8 @@ import {
   LanguageDetail,
   Images,
   ProjectsImage,
-} from "../database/entities";
-import { NotFoundError, BadRequestError } from "../middlewares/index";
-import { getAllLanguages } from "../services/language.service";
+} from '../database/entities';
+import { NotFoundError, BadRequestError } from '../middlewares/index';
 
 const portfolioDetailsRepository =
   connectionSource.getRepository(PortfolioDetail);
@@ -46,7 +45,7 @@ const contactsRepository = connectionSource.getRepository(SocialUser);
 
 export interface UpdatePortfolioDetailsDTO {
   name?: string;
-  city?: string;
+  location?: string;
   country?: string;
 }
 
@@ -56,31 +55,37 @@ const getPortfolioDetails = async (
   next: NextFunction
 ) => {
   try {
-    const { userId } = req.params;
-    if (!userId || !isValidUUID(`${userId}`)) {
-      throw new BadRequestError(`${userId} is not a valid UUID`);
-    }
+    // const { userId } = req.params;
+    const { slug } = req.params;
+    // if (!userId || !isValidUUID(`${userId}`)) {
+    //   throw new BadRequestError(`${userId} is not a valid UUID`);
+    // }
 
     const user = await userRepository.findOne({
-      where: { id: userId },
+      // where: { id: userId },
+      where: { slug },
       select: [
-        "id",
-        "firstName",
-        "lastName",
-        "email",
-        "profilePic",
-        "profileCoverPhoto",
-        "phoneNumber",
-        "location",
-        "username",
-        "country",
-        "slug",
+        'id',
+        'firstName',
+        'lastName',
+        'email',
+        'profilePic',
+        'profileCoverPhoto',
+        'phoneNumber',
+        'location',
+        'username',
+        'country',
+        'slug',
       ],
     });
 
+    if (!user) {
+      throw new NotFoundError("User not found");
+    }
+
     const educationPromise = connectionSource.manager.find(EducationDetail, {
       where: { user: { id: user.id } },
-      relations: ["degree"],
+      relations: ['degree'],
     });
 
     const skillsPromise = connectionSource.manager.find(SkillsDetail, {
@@ -97,7 +102,7 @@ const getPortfolioDetails = async (
 
     const allProjectsPromise = connectionSource.manager.find(Project, {
       where: { user: { id: user.id } },
-      relations: ["projectsImages"],
+      relations: ['projectsImages'],
     });
 
     const sectionsPromise = connectionSource.manager.find(CustomUserSection, {
@@ -106,7 +111,7 @@ const getPortfolioDetails = async (
 
     const tracksPromise = userTrackRepository.findOne({
       where: { user: { id: user.id } },
-      relations: ["track"],
+      relations: ['track'],
     });
 
     const workExperiencePromise = workExperienceRepository.find({
@@ -128,6 +133,15 @@ const getPortfolioDetails = async (
     const contactsPromise = contactsRepository.find({
       where: { user: { id: user.id } },
     });
+    const portfolioPromise = portfolioRepository.findOne({
+      where: { user: { id: user.id } },
+    });
+
+    const languageObject = await connectionSource.manager.find(LanguageDetail, {
+      where: { user: { id: user.id } },
+      relations: ['language'],
+    });
+    const languages = languageObject.map((language) => language.language.name);
 
     try {
       const [
@@ -143,6 +157,7 @@ const getPortfolioDetails = async (
         certificates,
         reference,
         contacts,
+        portfolio,
       ] = await Promise.all([
         educationPromise,
         skillsPromise,
@@ -156,16 +171,17 @@ const getPortfolioDetails = async (
         certificatesPromise,
         referencePromise,
         contactsPromise,
+        portfolioPromise,
       ]);
 
-      const interestArray = interests[0]?.interest?.split(","); //convert interest to Array of interests
+      const interestArray = interests[0]?.interest?.split(','); //convert interest to Array of interests
 
       const imagePromises = allProjects.map(async (project) => {
         const imageUrlsPromises = project?.projectsImages?.map(
           async (image) => {
             const imageEntity = await projectImageRepository.findOne({
               where: { id: image.id },
-              relations: ["image"],
+              relations: ['image'],
             });
 
             return imageEntity ? imageEntity.image.url : null;
@@ -183,10 +199,9 @@ const getPortfolioDetails = async (
 
       const track = tracks?.track;
 
-      const languages = await getAllLanguages(user.id); // Please do not delete
-
       res.status(200).json({
         user,
+        portfolio,
         education,
         skills,
         interests,
@@ -232,14 +247,14 @@ const deletePortfolioDetails: RequestHandler = async (
 
     // return error if porfolio is not found
     if (!portfolioToRemove) {
-      throw new NotFoundError("Portfolio profile details not found");
+      throw new NotFoundError('Portfolio profile details not found');
     }
 
     const portfolio = await portfolioDetailsRepository.remove(
       portfolioToRemove
     );
     res.status(200).json({
-      message: "Portfolio profile details deleted successfully",
+      message: 'Portfolio profile details deleted successfully',
       portfolio,
     });
   } catch (error) {

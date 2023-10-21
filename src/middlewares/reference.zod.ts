@@ -1,22 +1,21 @@
-import { object, string, ZodIssue, ZodError } from "zod";
+import { object, string, ZodIssue, ZodError,z} from "zod";
 import { NextFunction, Request, Response } from "express";
 import { BadRequestError } from "../middlewares";
 import { parseAsync, ErrorMessageOptions } from "zod-error";
+const regx = new RegExp("[^$@0-9]+");
 
 export const CreateReferenceDetailSchema = object({
   referer: string()
     .min(1, { message: "Name must not be an empty string" })
-    .refine((name) => !!name, {
-      message: "Name is required in the request body",
-    }),
+    .regex(regx, "Name cannot be a number or special character"),
 
   company: string()
     .min(1, { message: "Company must not be an empty string" })
-    .refine((company) => !!company, {
-      message: "Company is required in the request body",
-    }),
+    .regex(regx, "Company cannot be a number or special character"),
 
-  position: string().optional(),
+  position: string()
+     .regex(regx, "Position cannot be a number or special character")
+     .optional(),
 
   email: string()
     .min(1, { message: "Email address must not be an empty string" })
@@ -24,12 +23,39 @@ export const CreateReferenceDetailSchema = object({
       message: "Email address is required in the request body",
     }),
 
-  phoneNumber: string().optional(),
+  phoneNumber: string()
+    .min(6, "Invalid Phone Number")
+    .max(30, "Invalid Phone Number")
+    .optional(),
 
   userId: string()
     .min(1, { message: "User ID must not be an empty string" })
     .optional()
     .nullish(),
+});
+const name = new RegExp("[^$@0-9]+");
+export const updatereferenceschema = z.object({
+  referer: string()
+    .min(1, { message: "Name must not be an empty string" })
+    .regex(name, "name cannot contain number or special character")
+    .optional(),
+
+  company: string()
+    .min(1, { message: "Company must not be an empty string" })
+    .regex(name,"cannot contain special characters")
+    .optional(),
+
+  position: string()
+    .min(1, { message: "position cannot be an empty string" })
+    .regex(name,"cannot contain special characters")
+    .optional(),
+
+  email: string().email().optional(),
+
+  phone_number: string()
+    .max(30, "Invalid Phone Number!")
+    .min(6, "invalid Phone !")
+    .optional(),
 });
 
 // Custom function to validate email addresses
