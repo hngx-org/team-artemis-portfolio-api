@@ -18,6 +18,14 @@ const addLanguage: RequestHandler = async (req: Request, res: Response) => {
     let { userId, languages } = req.body;
     const programmingLanguages = await languageRepository.find();
 
+    if (programmingLanguages.length < 1) {
+      await languageRepository.createQueryBuilder().delete().execute();
+      for (const lang of programmingLanguages) {
+        const savedLang = languageRepository.create({ name: lang.name });
+        await languageRepository.save(savedLang);
+      }
+    }
+
     languages = languages.map((language: string) => language.toLowerCase());
     let checkLanguageArray = programmingLanguages.map((language) =>
       language.name.toLowerCase()
