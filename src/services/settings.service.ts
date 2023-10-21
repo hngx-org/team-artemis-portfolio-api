@@ -3,9 +3,8 @@ import bcrypt from "bcryptjs";
 import { Request, Response, NextFunction } from "express";
 import { check, validationResult } from "express-validator";
 
-
 export const hashPassword = async (plainPassword: string) => {
-  const salt = 10
+  const salt = 10;
   return bcrypt.hash(plainPassword, salt);
 };
 
@@ -64,6 +63,39 @@ export const notificationSettingSchema = z.object({
     required_error: "specialOffers is required",
     invalid_type_error: "specialOffers must be a boolean",
   }),
+});
+
+export const updateNotificationSettingSchema = z.object({
+  communityUpdate: z
+    .boolean({
+      required_error: "communityUpdate is required",
+      invalid_type_error: "communityUpdate must be a boolean",
+    })
+    .optional(),
+  emailSummary: z
+    .boolean({
+      required_error: "emailSummary is required",
+      invalid_type_error: "emailSummary must be a boolean",
+    })
+    .optional(),
+  newMessages: z
+    .boolean({
+      required_error: "newMessages is required",
+      invalid_type_error: "newMessages must be a boolean",
+    })
+    .optional(),
+  followUpdate: z
+    .boolean({
+      required_error: "followUpdate is required",
+      invalid_type_error: "followUpdate must be a boolean",
+    })
+    .optional(),
+  specialOffers: z
+    .boolean({
+      required_error: "specialOffers is required",
+      invalid_type_error: "specialOffers must be a boolean",
+    })
+    .optional(),
 });
 
 // validate User Id

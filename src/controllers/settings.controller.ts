@@ -6,6 +6,7 @@ import {
   accountSettingSchema,
   hashPassword,
   notificationSettingSchema,
+  updateNotificationSettingSchema,
   verifyPassword,
 } from "../services/settings.service";
 import { NotificationSettings } from "../interfaces/settings.interface";
@@ -116,22 +117,6 @@ export const createNotificationSettingController = async (
     const notificationSettingRepository =
       connectionSource.getRepository(NotificationSetting);
 
-    const error = notificationSettingSchema.parse({
-      communityUpdate,
-      emailSummary,
-      newMessages,
-      followUpdate,
-      specialOffers,
-    });
-
-    if (error instanceof ZodError) {
-      return res.status(404).json({
-        status: `error`,
-        message: error.errors,
-        success: false,
-      });
-    }
-
     const isExistingUser = await userRespository.findOneBy({
       id: userId,
     });
@@ -150,14 +135,27 @@ export const createNotificationSettingController = async (
       });
 
     if (hasExistingNotificationPreferences.length > 0) {
+      const err = updateNotificationSettingSchema.parse({
+        communityUpdate,
+        emailSummary,
+        newMessages,
+        followUpdate,
+        specialOffers,
+      });
+
       const updateNotification =
         hasExistingNotificationPreferences.slice(-1)?.[0];
 
-      updateNotification.communityUpdate = communityUpdate;
-      updateNotification.emailSummary = emailSummary;
-      updateNotification.newMessages = newMessages;
-      updateNotification.followUpdate = followUpdate;
-      updateNotification.specialOffers = specialOffers;
+      updateNotification.communityUpdate =
+        communityUpdate || updateNotification.communityUpdate;
+      updateNotification.emailSummary =
+        emailSummary || updateNotification.emailSummary;
+      updateNotification.newMessages =
+        newMessages || updateNotification.newMessages;
+      updateNotification.followUpdate =
+        followUpdate || updateNotification.followUpdate;
+      updateNotification.specialOffers =
+        specialOffers || updateNotification.specialOffers;
 
       const updatedNotification = await notificationSettingRepository.save(
         updateNotification
@@ -168,6 +166,22 @@ export const createNotificationSettingController = async (
         updatedNotification,
         `Notification updated successfully`
       );
+    }
+
+    const error = notificationSettingSchema.parse({
+      communityUpdate,
+      emailSummary,
+      newMessages,
+      followUpdate,
+      specialOffers,
+    });
+
+    if (error instanceof ZodError) {
+      return res.status(404).json({
+        status: `error`,
+        message: error.errors,
+        success: false,
+      });
     }
 
     const notificationSetting = new NotificationSetting();
