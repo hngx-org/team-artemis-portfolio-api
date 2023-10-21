@@ -36,7 +36,7 @@ const skillsSchema = z.object({
 
 const updateSkillsSchema = z.object({
   skills: z.string().refine((skill) => {
-    const regex = /^[a-zA-Z ]{1,}$/;
+    const regex = /^[a-zA-Z ]{3,}$/;
     return regex.test(skill);
   }, {
     message: "Skill must not contain special characters and should be at least 3 letters"
