@@ -144,15 +144,15 @@ export const createNotificationSettingController = async (
         hasExistingNotificationPreferences.slice(-1)?.[0];
 
       updateNotification.communityUpdate =
-        communityUpdate || updateNotification.communityUpdate;
+        communityUpdate ?? updateNotification.communityUpdate;
       updateNotification.emailSummary =
-        emailSummary || updateNotification.emailSummary;
+        emailSummary ?? updateNotification.emailSummary;
       updateNotification.newMessages =
-        newMessages || updateNotification.newMessages;
+        newMessages ?? updateNotification.newMessages;
       updateNotification.followUpdate =
-        followUpdate || updateNotification.followUpdate;
+        followUpdate ?? updateNotification.followUpdate;
       updateNotification.specialOffers =
-        specialOffers || updateNotification.specialOffers;
+        specialOffers ?? updateNotification.specialOffers;
 
       const updatedNotification = await notificationSettingRepository.save(
         updateNotification
