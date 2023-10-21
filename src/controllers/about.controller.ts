@@ -85,8 +85,8 @@ export const getAboutByID = async (
   next: NextFunction
 ) => {
   try {
-    const id = parseInt(req.params.id);
-    const about = await getAboutByIdService(id);
+    const userId = req.params.userId;
+    const about = await getAboutByIdService(userId);
 
     return res.status(200).json({
       message: "About details successfully retrieved.",

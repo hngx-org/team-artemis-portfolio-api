@@ -17,7 +17,7 @@ export class CustomUserSection {
   @PrimaryGeneratedColumn({ type: "integer", name: "id" })
   id: number;
 
-  @Column("character varying", { name: "title", nullable: true })
+  @Column("character varying", { name: "titile", nullable: true })
   titile: string | null;
 
   @OneToMany(() => CustomField, (customField) => customField.customSection)
