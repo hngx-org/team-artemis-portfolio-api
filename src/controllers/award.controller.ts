@@ -81,7 +81,7 @@ const getAwardController = async (req: Request, res: Response, next: any) => {
     });
   } catch (error) {
     next(error)
-    res.status(500).json({ message: "Error getting awards" });
+    //res.status(500).json({ message: "Error getting awards" });
   }
 };
 
