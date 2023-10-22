@@ -520,24 +520,52 @@ const createCustomField = async (
 };
 
 export const findAllCustomField = async (
-  req: Request<{}, {}, {}, { customSection?: number }>,
+  req: Request<
+    {},
+    {},
+    {},
+    { customSection?: number; page?: string; pageSize?: string }
+  >,
   res: Response,
   next: NextFunction
 ) => {
+  const { customSection, page, pageSize } = req.query;
+
   try {
     const filter: any = {};
-    if (req.query.customSection)
-      filter.customSection = { id: req.query.customSection };
-    const records = await customFieldRepository.find({
+    if (customSection) filter.customSection = { id: customSection };
+
+    const parsedPage = parseInt(page) || 1;
+    const parsedPageSize = parseInt(pageSize) || 10;
+    const skip = (parsedPage - 1) * parsedPageSize;
+
+    const [records, totalRecords] = await customFieldRepository.findAndCount({
       where: filter,
       relations: ["customSection"],
+      skip,
+      take: parsedPageSize,
     });
-    return success(res, records, "Success");
+
+    const total_pages = Math.ceil(totalRecords / parsedPageSize);
+    const current_page = parsedPage;
+    const previous_page = current_page > 1 ? current_page - 1 : null;
+    const next_page = current_page < total_pages ? current_page + 1 : null;
+
+    const response = {
+      current_page,
+      total_pages,
+      previous_page,
+      next_page,
+      data: records,
+    };
+
+    return success(res, response, "Success");
   } catch (err) {
     console.log(err);
     next(new InternalServerError(err.message));
   }
 };
+
 
 const findOneCustomField = async (req: Request, res: Response, next:NextFunction) => {
   const { id } = req.params;
@@ -659,21 +687,21 @@ const sectionSchema = z.object({
   name: z
     .string()
     .min(3, { message: "name must have at least three characters " })
-    .refine((value) => /^[A-Za-z]+$/.test(value), {
+    .refine((value) => /^[A-Za-z\s]+$/.test(value), {
       message: "Field must contain only letters (A-Z, a-z)",
     }),
   description: z
     .string()
     .min(3, { message: "description must have at least three characters " })
     .optional()
-    .refine((value) => /^[A-Za-z]+$/.test(value), {
+    .refine((value) => /^[A-Za-z\s]+$/.test(value), {
       message: "Field must contain only letters (A-Z, a-z)",
     }),
   meta: z
     .string()
     .min(3, { message: "meta must have at least three characters " })
     .optional()
-    .refine((value) => /^[A-Za-z]+$/.test(value), {
+    .refine((value) => /^[A-Za-z\s]+$/.test(value), {
       message: "Field must contain only letters (A-Z, a-z)",
     }),
 });
