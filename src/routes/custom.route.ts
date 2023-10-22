@@ -856,10 +856,6 @@ router.put("/section/:id", validateSchema(updateSectionSchema), UpdateSection);
  *                 data:
  *                   type: null
  */
-router.put(
-  "/custom/:id",
-  validateSchema(updateCustomSectionSchema),
-  updateCustomSection
-);
+router.put("/custom/:id",updateCustomSection);
 
 module.exports = router;

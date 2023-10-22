@@ -19,7 +19,7 @@ const router = express.Router();
  *         name: userId
  *         description: The ID of the user for whom to create an about.
  *         required: true
- *         type: integer
+ *         type: string
  *       - in: body
  *         name: createAbout
  *         description: About data to be created
@@ -30,10 +30,10 @@ const router = express.Router();
  *             bio:
  *               type: string
  *             section_id:
- *               type: number
+ *               type: integer
  *         example:
  *           bio: "New About details"
- *           section_id: 3
+ *           section_id: 54
  *     responses:
  *       '201':
  *         description: About details successfully created.
@@ -50,6 +50,13 @@ const router = express.Router();
  *                   type: integer
  *                 about:
  *                   type: object
+ *             example:
+ *               message: "About details created successfully"
+ *               status: "Success"
+ *               statusCode: 201
+ *               about:
+ *                 bio: "New About details"
+ *                 section_id: 3
  *       '400':
  *         description: Bad request
  *         content:
@@ -59,6 +66,8 @@ const router = express.Router();
  *               properties:
  *                 'Input Error':
  *                   type: string
+ *             example:
+ *               'Input Error': "Invalid input data"
  *       '404':
  *         description: Not Found
  *         content:
@@ -68,7 +77,9 @@ const router = express.Router();
  *               properties:
  *                 'Input Error':
  *                   type: string
- *        '500':
+ *             example:
+ *               'Input Error': "User not found"
+ *       '500':
  *         description: Internal Server Error
  *         content:
  *           application/json:
@@ -77,21 +88,24 @@ const router = express.Router();
  *               properties:
  *                 'Input Error':
  *                   type: string
+ *             example:
+ *               'Input Error': "Internal server error"
  *     tags:
  *       - About
  */
+
 router.post("/about/:userId", createAbout);
 
 /**
  * @swagger
  * /api/v1/about/{id}:
  *   put:
- *     summary: Update an existing about details by id.
+ *     summary: Update an existing about details by ID.
  *     description: Update an existing about detail for a user by providing the about ID.
  *     parameters:
  *       - in: path
  *         name: id
- *         description: The ID of the about details to update
+ *         description: The ID of the about details to update.
  *         required: true
  *         type: integer
  *       - in: body
@@ -104,10 +118,10 @@ router.post("/about/:userId", createAbout);
  *             bio:
  *               type: string
  *             section_id:
- *               type: number
+ *               type: integer
  *         example:
  *           bio: "Updated About details"
- *           section_id: 3
+ *           section_id: 54
  *     responses:
  *       '200':
  *         description: About details successfully updated.
@@ -124,6 +138,13 @@ router.post("/about/:userId", createAbout);
  *                   type: integer
  *                 about:
  *                   type: object
+ *             example:
+ *               message: "About details updated successfully"
+ *               status: "Success"
+ *               statusCode: 200
+ *               about:
+ *                 bio: "Updated About details"
+ *                 section_id: 3
  *       '400':
  *         description: Bad request
  *         content:
@@ -133,6 +154,8 @@ router.post("/about/:userId", createAbout);
  *               properties:
  *                 'Input Error':
  *                   type: string
+ *             example:
+ *               'Input Error': "Invalid input data"
  *       '404':
  *         description: Not Found
  *         content:
@@ -142,7 +165,9 @@ router.post("/about/:userId", createAbout);
  *               properties:
  *                 'Input Error':
  *                   type: string
- *         '500':
+ *             example:
+ *               'Input Error': "About not found"
+ *       '500':
  *         description: Internal Server Error
  *         content:
  *           application/json:
@@ -151,24 +176,26 @@ router.post("/about/:userId", createAbout);
  *               properties:
  *                 'Input Error':
  *                   type: string
+ *             example:
+ *               'Input Error': "Internal server error"
  *     tags:
  *       - About
  */
+
 router.put("/about/:id", updateAbout);
 
 /**
  * @swagger
  * /api/v1/about/{userId}:
  *   get:
- *     summary: Get existing about details by user id.
- *     description: Get an existing about detail for a user by providing the about user ID.
+ *     summary: Get existing about details by user ID.
+ *     description: Get an existing about detail for a user by providing the user ID.
  *     parameters:
  *       - in: path
- *         name: id
- *         description: The ID of the user
+ *         name: userId
+ *         description: The ID of the user.
  *         required: true
- *         type: integer
- *
+ *         type: string
  *     responses:
  *       '200':
  *         description: About details successfully retrieved.
@@ -185,6 +212,13 @@ router.put("/about/:id", updateAbout);
  *                   type: integer
  *                 about:
  *                   type: object
+ *             example:
+ *               message: "About details retrieved successfully"
+ *               status: "Success"
+ *               statusCode: 200
+ *               about:
+ *                 bio: "About details"
+ *                 section_id: 2
  *       '404':
  *         description: Not Found
  *         content:
@@ -194,7 +228,9 @@ router.put("/about/:id", updateAbout);
  *               properties:
  *                 'Input Error':
  *                   type: string
- *         '500':
+ *             example:
+ *               'Input Error': "User not found"
+ *       '500':
  *         description: Internal Server Error
  *         content:
  *           application/json:
@@ -203,24 +239,26 @@ router.put("/about/:id", updateAbout);
  *               properties:
  *                 'Input Error':
  *                   type: string
+ *             example:
+ *               'Input Error': "Internal server error"
  *     tags:
  *       - About
  */
+
 router.get("/about/:userId", getAboutByID);
 
 /**
  * @swagger
  * /api/v1/about/{id}:
  *   delete:
- *     summary: delete existing about details by id.
- *     description: delete an existing about detail for a user by providing the about ID.
+ *     summary: Delete existing about details by ID.
+ *     description: Delete an existing about detail for a user by providing the about ID.
  *     parameters:
  *       - in: path
  *         name: id
- *         description: The ID of the about details to delete
+ *         description: The ID of the about details to delete.
  *         required: true
  *         type: integer
- *
  *     responses:
  *       '200':
  *         description: About details successfully deleted.
@@ -235,6 +273,10 @@ router.get("/about/:userId", getAboutByID);
  *                   type: string
  *                 statusCode:
  *                   type: integer
+ *             example:
+ *               message: "About details deleted successfully"
+ *               status: "Success"
+ *               statusCode: 200
  *       '404':
  *         description: Not Found
  *         content:
@@ -244,7 +286,9 @@ router.get("/about/:userId", getAboutByID);
  *               properties:
  *                 'Input Error':
  *                   type: string
- *         '500':
+ *             example:
+ *               'Input Error': "About not found"
+ *       '500':
  *         description: Internal Server Error
  *         content:
  *           application/json:
@@ -253,9 +297,12 @@ router.get("/about/:userId", getAboutByID);
  *               properties:
  *                 'Input Error':
  *                   type: string
+ *             example:
+ *               'Input Error': "Internal server error"
  *     tags:
  *       - About
  */
+
 router.delete("/about/:id", deleteAbout);
 
 module.exports = router;

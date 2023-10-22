@@ -122,11 +122,14 @@ const createEducationDetailController = async (
       // return res.status(400).json({ errors: "Invalid 'from' date format" });
       throw new BadRequestError("Invalid 'from' date format");
     }
+    
+      if (data.to && !validateYear(data.to) && data.to.toLocaleLowerCase() !=='present') {
+        throw new BadRequestError("Invalid 'to' date format");
+        // return res.status(400).json({ errors: "Invalid 'to' date format" });
+      }
 
-    if (data.to && !validateYear(data.to)) {
-      throw new BadRequestError("Invalid 'to' date format");
-      // return res.status(400).json({ errors: "Invalid 'to' date format" });
-    }
+    
+
     await validateCreateData(data, user_id, res, next);
 
     if (!isNaN(Number(fieldOfStudy))) {
@@ -160,7 +163,7 @@ const createEducationDetailController = async (
     }
 
     // check if the from date is less than the to date
-    if (data.from && data.to) {
+    if (data.from && data.to && (data.to.toLocaleLowerCase() !== 'present')) {
       const fromDate = parseInt(data.from);
       const toDate = parseInt(data.to);
       if (fromDate > toDate) {
