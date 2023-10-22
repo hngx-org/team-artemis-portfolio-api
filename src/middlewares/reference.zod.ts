@@ -37,24 +37,24 @@ const name = new RegExp("[^$@0-9]+");
 export const updatereferenceschema = z.object({
   referer: string()
     .min(1, { message: "Name must not be an empty string" })
-    .regex(name, "name cannot contain number or special character")
+    .regex(name, "Name cannot contain number or special character")
     .optional(),
 
   company: string()
     .min(1, { message: "Company must not be an empty string" })
-    .regex(name,"cannot contain special characters")
+    .regex(name,"Company cannot contain special characters")
     .optional(),
 
   position: string()
     .min(1, { message: "position cannot be an empty string" })
-    .regex(name,"cannot contain special characters")
+    .regex(name,"Position cannot contain special characters")
     .optional(),
 
   email: string().email().optional(),
 
   phone_number: string()
     .max(30, "Invalid Phone Number!")
-    .min(6, "invalid Phone !")
+    .min(6, "invalid Phone Number!")
     .optional(),
 });
 

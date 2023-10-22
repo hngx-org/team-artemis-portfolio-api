@@ -7,7 +7,7 @@ const interestsPattern = /^[a-zA-Z]+$/;
 export const userIdSchema = z
   .string({ required_error: "userId is required." })
   .trim()
-  .uuid({ message: "userId must be a valid uuid." });
+  .uuid({ message: "userId must be a valid UUID." });
 
 export const updateInterestsSchema = z.object({
   interests: z
@@ -54,7 +54,7 @@ export const createInterestSchema = z.object({
   userId: z
     .string({ required_error: "userId is required." })
     .trim()
-    .uuid({ message: "userId must be a valid uuid." }),
+    .uuid({ message: "userId must be a valid UUID." }),
   sectionId: z
     .number({
       required_error: "sectionId is required.",
