@@ -8,7 +8,7 @@ import {
 } from "../database/entities";
 import { NotFoundError, BadRequestError } from "../middlewares";
 import { success, error } from '../utils/response.util';
-import { getShopService } from "../services/shop.service";
+import { getShopService, validateSlug } from "../services/shop.service";
 
 
 const userRepository = connectionSource.getRepository(User);
@@ -19,11 +19,15 @@ const customUserSectionRepository = connectionSource.getRepository(
 const customFieldRepository = connectionSource.getRepository(CustomField);
 
 
+
+
 //create a custom Sectionname shop
 export const createShopSection = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const sectionName = "shop";
         const { user_slug } = req.params;
+
+        await validateSlug(user_slug, res)
 
         const user = await userRepository.findOne({ where: { slug: user_slug } });
         if (!user) {
@@ -65,8 +69,8 @@ export const createShopSection = async (req: Request, res: Response, next: NextF
         customUserSection.customFields = [shopNameField];
 
         await customUserSectionRepository.save(customUserSection);
-        res.status(201).json({ message: "Shop Section retrieved with Details from your Shop", ...customUserSection, userShopDetails });
-
+        //res.status(201).json({ message: "Shop Section retrieved with Details from your Shop", ...customUserSection, userShopDetails });
+        return success(res, { ...customUserSection, userShopDetails }, "Shop Section retrieved with Details from your Shop")
 
         // await customUserSectionRepository.save(customUserSection);
         // res.status(200).json({ message: "Custom Section retrieved", userShopDetails });
@@ -79,6 +83,8 @@ export const createShopSection = async (req: Request, res: Response, next: NextF
 export const getUserShopSection = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { user_slug } = req.params;
+
+        await validateSlug(user_slug, res)
 
         const user = await userRepository.findOne({ where: { slug: user_slug } });
         if (!user) {
@@ -95,7 +101,8 @@ export const getUserShopSection = async (req: Request, res: Response, next: Next
 
         const userShopDetails = await getShopService(user.id)
 
-        res.status(200).json({ message: "Custom Section retrieved", userShopDetails });
+        //res.status(200).json({ message: "Custom Section retrieved", userShopDetails });
+        return success(res, userShopDetails, "Custom Section retrieved")
     } catch (error) {
         return next(error);
     }
