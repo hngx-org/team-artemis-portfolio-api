@@ -6,7 +6,7 @@ import { AnyZodObject, z } from 'zod';
 export const postLanguageSchema = z.object({
   userId: z.string().refine((value) => {
     return isValidUUID(value);
-  }, 'id must be a valid UUID string'),
+  }, 'ID must be a valid UUID string'),
 
   languages: z.array(z.string()).refine(
     (arr) => {

@@ -8,7 +8,7 @@ export const createPorfolioDataSchema = z.object({
     name: z.optional(z.string({ invalid_type_error: "Name should be a string" }).trim(), {}),
     city: z.optional(z.string({
       required_error: "City is required",
-      invalid_type_error: "City should be type string"
+      invalid_type_error: "City must be a string"
     })
       .trim()),
     country: z.optional(z.string({
@@ -20,7 +20,7 @@ export const createPorfolioDataSchema = z.object({
   params: z.object({
     userId: z
       .string({ required_error: "userId must be a uuid string" })
-      .uuid({ message: "User id must be a uuid" }),
+      .uuid({ message: "User id must be a UUID" }),
   }),
 });
 

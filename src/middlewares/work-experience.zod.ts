@@ -108,7 +108,7 @@ async function validateWorkExperience(
   const errors = [];
   try {
     if (!req.body) {
-      errors.push("Cannot Submit empty form");
+      errors.push("Cannot submit empty form");
     }
     const data = req.body;
     if (data) {
@@ -144,7 +144,7 @@ async function validateWorkExperience(
     }
 
     if (!data.isEmployee && (!data.endMonth || !data.endYear)) {
-      errors.push("End Dates Cannot be empty");
+      errors.push("End dates cannot be empty");
     }
     // Function to get the numeric representation of a month
     const getMonthNumber = (month: string): number => {
