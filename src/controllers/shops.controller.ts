@@ -8,8 +8,7 @@ import {
 } from "../database/entities";
 import { NotFoundError, BadRequestError } from "../middlewares";
 import { success, error } from '../utils/response.util';
-import { getShopService } from "../services/shop.service";
-import { ZodError, z } from "zod";
+import { getShopService, validateSlug } from "../services/shop.service";
 
 
 const userRepository = connectionSource.getRepository(User);
@@ -19,12 +18,8 @@ const customUserSectionRepository = connectionSource.getRepository(
 );
 const customFieldRepository = connectionSource.getRepository(CustomField);
 
-const slugSchema = z.string({
-    required_error: "user_slug is not present in params",
-    invalid_type_error: "user_slug must be a string"
-})
-.trim()
-.min(0, "user_slug cannot be an empty string")
+
+
 
 //create a custom Sectionname shop
 export const createShopSection = async (req: Request, res: Response, next: NextFunction) => {
@@ -32,12 +27,7 @@ export const createShopSection = async (req: Request, res: Response, next: NextF
         const sectionName = "shop";
         const { user_slug } = req.params;
 
-        try {
-            slugSchema.parse(user_slug)
-        } catch(err) {
-            const { errors } = err as ZodError;
-            throw new BadRequestError(errors[0].message)
-        }
+        await validateSlug(user_slug, res)
 
         const user = await userRepository.findOne({ where: { slug: user_slug } });
         if (!user) {
@@ -94,12 +84,7 @@ export const getUserShopSection = async (req: Request, res: Response, next: Next
     try {
         const { user_slug } = req.params;
 
-        try {
-            slugSchema.parse(user_slug)
-        } catch(err) {
-            const { errors } = err as ZodError;
-            throw new BadRequestError(errors[0].message)
-        }
+        await validateSlug(user_slug, res)
 
         const user = await userRepository.findOne({ where: { slug: user_slug } });
         if (!user) {
