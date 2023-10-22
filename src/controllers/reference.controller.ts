@@ -18,7 +18,11 @@ const referenceRepository = connectionSource.getRepository(ReferenceDetail);
 
 export const createReference = async (req: Request, res: Response) => {
   try {
+    if (JSON.stringify(req.body) === "{}") {
+      return error(res, "cannot send an empty Request Body");
+    }
     CreateReferenceDetailSchema.parse(req.body);
+    
     const user_id = req.params.userId;
 
     const { referer, company, position, email, phoneNumber, sectionId } =

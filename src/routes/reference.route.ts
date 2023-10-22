@@ -174,7 +174,7 @@ router.delete("/references/:id", deleteReferenceDetail);
 
 /**
  * @swagger
- * /api/v1/references/{referenceId}:
+ * /api/v1/references/{referenceId}:~
  *   put:
  *     summary: Create a new reference.
  *     description: Create a new reference detail for a user.
@@ -217,7 +217,7 @@ router.delete("/references/:id", deleteReferenceDetail);
  *         content:
  *           application/json:
  *             example:
- *               message: "Reference created successfully"
+ *               message: "Reference created succe ssfully"
  *       400:
  *         description: Bad request
  *         content:
