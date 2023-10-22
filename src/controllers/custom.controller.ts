@@ -41,15 +41,27 @@ const sectionIdSchema = z
     return true;
   });
 
+const updateCustomSectionSchema: any = z.object({
+  sectionId: z.number().positive().int().optional(),
+
+  title: z
+    .string()
+    .min(3)
+    .refine((value) => !/^\s*$/.test(value), {
+      message: "The title must not be empty or consist of only spaces",
+    })
+    .optional(),
+});
+
 export const validateSectionId = (sectionId: any, res: Response) => {
   try {
-    const parsedSectionId = parseInt(sectionId); 
+    const parsedSectionId = parseInt(sectionId);
 
     if (isNaN(parsedSectionId) || !Number.isInteger(parsedSectionId)) {
       throw new Error("Invalid section ID. Must be a valid integer.");
     }
 
-    sectionIdSchema.parse(parsedSectionId); 
+    sectionIdSchema.parse(parsedSectionId);
 
     if (parsedSectionId.toString().length > MAX_ID_LENGTH) {
       throw new Error(`Section ID must have at most ${MAX_ID_LENGTH} digits`);
@@ -66,13 +78,13 @@ export const validateSectionId = (sectionId: any, res: Response) => {
 };
 
 const createSection = async (
-  req: Request<{}, {}, ISection, {}>, 
+  req: Request<{}, {}, ISection, {}>,
   res: Response
 ) => {
   try {
-    console.log(req.body.name); 
+    console.log(req.body.name);
     const sectionExists = await sectionRepository.findOne({
-      where: { name: req.body.name }, 
+      where: { name: req.body.name },
     });
     if (sectionExists)
       return error(
@@ -80,7 +92,7 @@ const createSection = async (
         "A section with this name has already been created",
         400
       );
-    const newRecord = await sectionRepository.save(req.body); 
+    const newRecord = await sectionRepository.save(req.body);
     return success(res, newRecord, "Success");
   } catch (err) {
     console.log(err);
@@ -89,16 +101,16 @@ const createSection = async (
 };
 
 const getSection = async (
-  req: Request<{}, {}, {}, IGetSection>,  
+  req: Request<{}, {}, {}, IGetSection>,
   res: Response
 ) => {
-  const filter = req.query.name ? { where: { name: req.query.name } } : {}; 
+  const filter = req.query.name ? { where: { name: req.query.name } } : {};
   try {
     const section = await sectionRepository.find(filter);
     return success(res, section, "Success");
   } catch (err) {
     console.log(err);
-    return error(res, "An error occurred", 500); 
+    return error(res, "An error occurred", 500);
   }
 };
 
@@ -111,11 +123,11 @@ const getSingleSection = async (
     const section = await sectionRepository.findOne({
       where: { id },
     });
-    if (!section) return error(res, "Section not found", 404);  
-    return success(res, section, "Success");  
+    if (!section) return error(res, "Section not found", 404);
+    return success(res, section, "Success");
   } catch (err) {
     console.log(err);
-    return error(res, "An error occurred", 500);  
+    return error(res, "An error occurred", 500);
   }
 };
 
@@ -123,27 +135,27 @@ const UpdateSection = async (
   req: Request<{ id: string }, {}, IUpdateSection, {}>,
   res: Response
 ) => {
-  const { id } = req.params; 
+  const { id } = req.params;
   try {
     const section = await sectionRepository.findOne({
       where: { id: Number(id) },
     });
-    if (!section) return error(res, "Section not found", 404); 
+    if (!section) return error(res, "Section not found", 404);
     if (req.body.position) {
       const positionExists = await sectionRepository.findOne({
         // where: { position: req.body.position },
       });
       if (positionExists)
-        return error(res, "A section with this position already exist", 400);  
+        return error(res, "A section with this position already exist", 400);
     }
-    await sectionRepository.update(id, req.body); 
+    await sectionRepository.update(id, req.body);
     const newsection = await sectionRepository.findOne({
       where: { id: Number(id) },
     });
-    return success(res, newsection, "Success"); 
+    return success(res, newsection, "Success");
   } catch (err) {
     console.log(err);
-    return error(res, "An error occurred", 500); 
+    return error(res, "An error occurred", 500);
   }
 };
 
@@ -156,12 +168,12 @@ const deleteSection = async (
     const section = await sectionRepository.findOne({
       where: { id },
     });
-    if (!section) return error(res, "Section not found", 404);  
-    await sectionRepository.delete(id);  
-    return success(res, true, "Success");  
+    if (!section) return error(res, "Section not found", 404);
+    await sectionRepository.delete(id);
+    return success(res, true, "Success");
   } catch (err) {
     console.log(err);
-    return error(res, "An error occurred", 500); 
+    return error(res, "An error occurred", 500);
   }
 };
 
@@ -185,10 +197,10 @@ const create = async (
     newRecord.title = req.body.title;
     const record = await customRepository.save(newRecord);
     delete record.user.password;
-    return success(res, record, "Success"); 
+    return success(res, record, "Success");
   } catch (err) {
     console.log(err);
-    return error(res, "An error occurred", 500); 
+    return error(res, "An error occurred", 500);
   }
 };
 
@@ -226,17 +238,17 @@ const findOne = async (req: Request, res: Response) => {
   try {
     const sectionId = parseInt(req.params.id);
     if (!validateSectionId(sectionId, res)) {
-      return;  
+      return;
     }
     const record = await customRepository.findOne({
       where: { id: Number(id) },
       relations: ["customFields", "section"],
     });
     return record
-      ? success(res, record, "Success") 
-      : error(res, "record not found", 400);  
+      ? success(res, record, "Success")
+      : error(res, "record not found", 400);
   } catch (err) {
-    console.log(err);  
+    console.log(err);
   }
 };
 
@@ -253,17 +265,6 @@ export const updateCustomSection = async (
   try {
     const id = parseInt(req.params.id);
 
-    const updateCustomSectionSchema: any = z.object({
-      sectionId: z.number().positive().int().optional(),
-
-      title: z
-        .string()
-        .min(3)
-        .refine((value) => !/^\s*$/.test(value), {
-          message: "The title must not be empty or consist of only spaces",
-        })
-        .optional(),
-    });
     updateCustomSectionSchema.parse(req.body);
 
     const idValidator = z
@@ -668,7 +669,6 @@ export {
   customUserSectionSchema,
   customFieldSchema,
   createSection,
-  // updateCustomSection,
   sectionSchema,
   fieldsSchema,
   getSection,
@@ -677,6 +677,6 @@ export {
   UpdateSection,
   deleteSection,
   updateSectionSchema,
-  // updateCustomSectionSchema,
+  updateCustomSectionSchema,
   customGetUserSectionSchema,
 };
