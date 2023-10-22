@@ -6,6 +6,7 @@ import { NotFoundError } from "../middlewares";
 import { QueryFailedError } from "typeorm";
 import { Award } from "../database/entities/Award";
 import { User } from "../database/entities/User";
+import { validateUserId } from "../middlewares/about.zod";
 
 // Controller function to create an award
 const createAwardController = async (
@@ -69,6 +70,7 @@ const getAwardController = async (req: Request, res: Response) => {
   const userRepo = connectionSource.getRepository(User);
   try {
     const id = req.params.id
+    await validateUserId(id)
     const user = await userRepo.findOne({ where: { id } });
     const award = await awardRepo.findOne({ where: { user } });
 
@@ -207,6 +209,7 @@ const getAwardByUserId = async (
 
   try {
     const userId = req.params.userId
+    await validateUserId(userId)
     const data = await awardRepo.find({
       where: { user: { id: userId } },
       relations: ['user'],
@@ -235,9 +238,10 @@ const getAwardByUserId = async (
         },
       }
     })
-    res.status(200).json({
+    return res.status(200).json({
       message: 'Awards retrieved successfully',
       awards,
+      successful: true
     })
   } catch (error) {
     return next(error)
