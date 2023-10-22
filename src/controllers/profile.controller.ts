@@ -26,6 +26,7 @@ import {
   Language,
   ReferenceDetail,
   LanguageDetail,
+  CustomUserSection,
 } from "../database/entities";
 import {
   cloudinaryService,
@@ -63,6 +64,7 @@ const languageDetailsRepository =
   connectionSource.getRepository(LanguageDetail);
 const contactsRepository = connectionSource.getRepository(SocialUser);
 const referenceRepository = connectionSource.getRepository(ReferenceDetail);
+const customRepository = connectionSource.getRepository(CustomUserSection);
 // Export the uploadProfileImageController function
 export const uploadProfileImageController: RequestHandler = async (
   req: Request,
@@ -366,6 +368,7 @@ export const deleteAllSectionEntries: RequestHandler = async (
       languages: languageDetailsRepository,
       reference: referenceRepository,
       contacts: contactsRepository,
+      custom: customRepository,
     };
 
     const { userId } = req.params;
@@ -390,6 +393,18 @@ export const deleteAllSectionEntries: RequestHandler = async (
     });
     if (alluserEntries.length === 0) {
       return next(new BadRequestError("No entries to delete"));
+    }
+    if (section === "custom") {
+      const { custom_id } = req.body
+      if (!custom_id) {
+        return next(new BadRequestError("Custom id is missing"));
+      }
+      const allEntries = await currentRepo.find({ where: { id: custom_id } })
+      if (allEntries.length === 0) {
+        return next(new BadRequestError("No entries to delete"));
+      }
+      await customRepository.remove(allEntries);
+
     }
     const response = await currentRepo.remove(alluserEntries);
     if (response.affected === 0) {
