@@ -20,6 +20,7 @@ export const getShopService = async (user_id: string) => {
             FROM shop
             WHERE shop.merchant_id = '${user_id}';`);
 
+
     if (shopIds.length < 1) {
         throw new NotFoundError("User does not have a shop");
     }
@@ -35,6 +36,18 @@ export const getShopService = async (user_id: string) => {
             GROUP BY shop.id, shop.name;`);
 
     return userShopDetails;
+}
+
+export const checkForShop = async (user_id: string) => {
+    const shopIds = await connectionSource.manager.query(
+        `SELECT
+            id AS shop_id
+            FROM shop
+            WHERE shop.merchant_id = '${user_id}';`);
+
+
+    return shopIds.length < 1 ? false : true;
+
 }
 
 
