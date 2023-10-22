@@ -12,7 +12,7 @@ const router = express.Router();
  * @swagger
  * /api/v1/about/{userId}:
  *   post:
- *      tags:
+ *     tags:
  *        - About
  *     summary: Create About
  *     description: Create a new About entry.

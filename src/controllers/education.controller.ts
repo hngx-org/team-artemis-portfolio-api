@@ -130,32 +130,32 @@ const createEducationDetailController = async (
     await validateCreateData(data, user_id, res, next);
 
     if (!isNaN(Number(fieldOfStudy))) {
-      throw new UnprocessableEntityError("field Of Study should be a string");
+      throw new UnprocessableEntityError("Field Of study should be a string");
     }
 
     if (!isNaN(Number(school))) {
-      throw new UnprocessableEntityError("school should be a string");
+      throw new UnprocessableEntityError("School should be a string");
     }
 
     if (!isNaN(Number(description))) {
-      throw new UnprocessableEntityError("description should be a string");
+      throw new UnprocessableEntityError("Description should be a string");
     }
 
     const pattern = /^[a-zA-Z0-9 ,.]+$/;
 
     if (!pattern.test(fieldOfStudy)) {
       throw new UnprocessableEntityError(
-        "field Of Study should not contain sepecial characters"
+        "Field Of study should not contain sepecial characters"
       );
     }
     if (!pattern.test(school)) {
       throw new UnprocessableEntityError(
-        "school should not contain sepecial characters"
+        "School should not contain sepecial characters"
       );
     }
     if (!pattern.test(description)) {
       throw new UnprocessableEntityError(
-        "description should not contain sepecial characters"
+        "Description should not contain sepecial characters"
       );
     }
 

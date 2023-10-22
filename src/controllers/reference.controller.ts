@@ -25,7 +25,7 @@ export const createReference = async (req: Request, res: Response) => {
       req.body as IReference;
 
     if (!isNaN(Number(referer))) {
-      return error(res, "Referer should be a string", 422);
+      return error(res, "Name should be a string", 422);
     }
 
     if (!isNaN(Number(company))) {
@@ -43,7 +43,7 @@ export const createReference = async (req: Request, res: Response) => {
     const pattern = /^[a-zA-Z0-9 ,.]+$/;
 
     if (!pattern.test(referer)) {
-      return error(res, "Referer should not contain sepecial characters", 422);
+      return error(res, "Name should not contain special characters", 422);
     }
 
     const data = {
@@ -107,7 +107,7 @@ export const deleteReferenceDetail = async (
 
     success(res, {}, d.message);
   } catch (err) {
-    console.error("Error deleting reference detail:", error);
+    console.error("Error deleting reference details:", error);
     error(res, (err as Error).message); // Use type assertion to cast 'err' to 'Error' type
   }
 };
@@ -158,7 +158,7 @@ export const updateReference = async (req: Request, res: Response) => {
   try {
     updatereferenceschema.parse(req.body);
     if (JSON.stringify(req.body) === "{}") {
-      return error(res, "cannot send an empty Request Body");
+      return error(res, "Cannot send an empty request body");
     }
     const { id }: any = req.params;
     await connectionSource
@@ -176,7 +176,7 @@ export const updateReference = async (req: Request, res: Response) => {
     if (err instanceof z.ZodError) {
       error(res, err.flatten().fieldErrors);
     } else {
-      error(res, "invalid Reference ID");
+      error(res, "Invalid reference ID");
     }
   }
 };

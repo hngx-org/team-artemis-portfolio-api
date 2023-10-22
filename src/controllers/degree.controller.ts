@@ -80,7 +80,7 @@ export const fetchAllDegree = async (
     }
     res
       .status(200)
-      .json({ message: "degrees gotten successfully!", data: degrees });
+      .json({ message: "Degrees gotten successfully!", data: degrees });
   } catch (error) {
     next(error);
   }

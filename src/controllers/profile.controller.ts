@@ -68,7 +68,7 @@ export const uploadProfileImageController: RequestHandler = async (
   next: NextFunction
 ) => {
   try {
-    if (!req.files) return error(res, "add event image", 400);
+    if (!req.files) return error(res, "Add event image", 400);
     const { service, userId } = req.body;
     const files = req.files as any;
     const imagesRes = await cloudinaryService(files, req.body.service);
@@ -110,7 +110,7 @@ export const uploadProfileCoverController: RequestHandler = async (
   next: NextFunction
 ) => {
   try {
-    if (!req.files) return error(res, "add event image", 400);
+    if (!req.files) return error(res, "Add event image", 400);
     const { service, userId } = req.body;
 
     const files = req.files as any;
@@ -303,7 +303,7 @@ export const updateProfileController = async (
     return success(
       res,
       { portfolio: portfolio, track: userTrack?.track },
-      "Successfully Updated Portfolio profile"
+      "Successfully updated Portfolio profile"
     );
   } catch (err) {
     return next(err);
@@ -327,7 +327,7 @@ export const deletePortfolioDetails: RequestHandler = async (
 
     // return error if porfolio is not found
     if (!portfolioToRemove) {
-      throw new NotFoundError("Portfolio Details not found!");
+      throw new NotFoundError("Portfolio details not found!");
     }
 
     // delete the porfolio
