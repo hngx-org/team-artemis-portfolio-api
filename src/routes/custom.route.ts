@@ -20,13 +20,11 @@ import {
   deleteSection,
   updateSectionSchema,
   updateCustomSection,
-  updateCustomSectionSchema,
   findAllCustomField,
   deleteCustomFields,
   getcustomfieldsSchema,
   getAllCustomSections,
   customUserSectionSchema,
-  customGetUserSectionSchema 
 } from "../controllers/custom.controller";
 import { validateQuery } from "../middlewares/custom.zod";
 import { validate } from "../middlewares/auth";

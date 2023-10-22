@@ -67,7 +67,8 @@ export const validateSectionId = (sectionId: any, res: Response) => {
 
 const createSection = async (
   req: Request<{}, {}, ISection, {}>,
-  res: Response
+  res: Response,
+  next: NextFunction
 ) => {
   try {
     console.log(req.body.name);
@@ -84,11 +85,11 @@ const createSection = async (
     return success(res, newRecord, "Success");
   } catch (err) {
     console.log(err);
-    return error(res, "An error occurred", 500);
+    return next(err);
   }
 };
 
-const getSection = async (req: Request, res: Response) => {
+const getSection = async (req: Request, res: Response, next: NextFunction) => {
   const { page, pageSize, name } = req.query;
   const parsedPage = parseInt(page as string) || 1;
   const parsedPageSize = parseInt(pageSize as string) || 10;
@@ -119,13 +120,14 @@ const getSection = async (req: Request, res: Response) => {
     return success(res, response, "Success");
   } catch (err) {
     console.log(err);
-    return error(res, "An error occurred", 500);
+    return next(err);
   }
 };
 
 const getSingleSection = async (
   req: Request<IGetSingleSection, {}, {}, {}>,
-  res: Response
+  res: Response,
+  next: NextFunction
 ) => {
   const { id } = req.params;
   try {
@@ -136,13 +138,14 @@ const getSingleSection = async (
     return success(res, section, "Success");
   } catch (err) {
     console.log(err);
-    return error(res, "An error occurred", 500);
+    return next(err);
   }
 };
 
 const UpdateSection = async (
   req: Request<{ id: string }, {}, IUpdateSection, {}>,
-  res: Response
+  res: Response,
+  next: NextFunction
 ) => {
   const { id } = req.params;
   try {
@@ -164,13 +167,14 @@ const UpdateSection = async (
     return success(res, newsection, "Success");
   } catch (err) {
     console.log(err);
-    return error(res, "An error occurred", 500);
+    return next(err);
   }
 };
 
 const deleteSection = async (
   req: Request<IGetSingleSection, {}, {}, {}>,
-  res: Response
+  res: Response,
+  next: NextFunction
 ) => {
   const { id } = req.params;
   try {
@@ -182,14 +186,15 @@ const deleteSection = async (
     return success(res, true, "Success");
   } catch (err) {
     console.log(err);
-    return error(res, "An error occurred", 500);
+    return next(err);
   }
 };
 
 // Custom
 const create = async (
   req: Request<{}, {}, ICustomSection, {}>,
-  res: Response
+  res: Response,
+  next: NextFunction
 ) => {
   try {
     const section = await sectionRepository.findOne({
@@ -209,14 +214,18 @@ const create = async (
     return success(res, record, "Success");
   } catch (err) {
     console.log(err);
-    return error(res, "An error occurred", 500);
+    return next(err);
   }
 };
 
-export const getAllCustomSections = async (req: Request, res: Response) => {
+export const getAllCustomSections = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   const { id } = req.params;
   const page = parseInt(req.query.page as string) || 1;
-  const pageSize = parseInt(req.query.pageSize as string) || 10; // Set a default page size
+  const pageSize = parseInt(req.query.pageSize as string) || 10; 
 
   try {
     const user = await userRepository.findOne({
@@ -224,11 +233,8 @@ export const getAllCustomSections = async (req: Request, res: Response) => {
     });
 
     if (!user) return error(res, "User not found", 400);
-
-    // Calculate the skip value based on the page and pageSize
     const skip = (page - 1) * pageSize;
 
-    // Query for a limited number of records based on pagination parameters
     const [records, totalRecords] = await customRepository.findAndCount({
       where: { user: { id } },
       relations: ["customFields"],
@@ -236,13 +242,10 @@ export const getAllCustomSections = async (req: Request, res: Response) => {
       take: pageSize,
     });
 
-    // Calculate pagination details
     const total_pages = Math.ceil(totalRecords / pageSize);
     const current_page = page;
     const previous_page = current_page > 1 ? current_page - 1 : null;
     const next_page = current_page < total_pages ? current_page + 1 : null;
-
-    // Create a response object that includes pagination information and data
     const response = {
       current_page,
       total_pages,
@@ -254,32 +257,26 @@ export const getAllCustomSections = async (req: Request, res: Response) => {
     return success(res, response, "Success");
   } catch (err) {
     console.log(err);
-    return error(res, "An error occurred", 500);
+    return next(err);
   }
 };
 
-const findAll = async (req: Request, res: Response) => {
+const findAll = async (req: Request, res: Response, next: NextFunction) => {
   const page = parseInt(req.query.page as string) || 1;
-  const pageSize = parseInt(req.query.pageSize as string) || 10; // Set a default page size
+  const pageSize = parseInt(req.query.pageSize as string) || 10;
 
   try {
-    // Calculate the skip value based on the page and pageSize
     const skip = (page - 1) * pageSize;
 
-    // Query for a limited number of records based on pagination parameters
     const [records, totalRecords] = await customRepository.findAndCount({
       relations: ["customFields", "section"],
       skip,
       take: pageSize,
     });
-
-    // Calculate pagination details
     const total_pages = Math.ceil(totalRecords / pageSize);
     const current_page = page;
     const previous_page = current_page > 1 ? current_page - 1 : null;
     const next_page = current_page < total_pages ? current_page + 1 : null;
-
-    // Create a response object that includes pagination information and data
     const response = {
       current_page,
       total_pages,
@@ -291,11 +288,11 @@ const findAll = async (req: Request, res: Response) => {
     return success(res, response, "Success");
   } catch (err) {
     console.log(err);
-    return error(res, "An error occurred", 500);
+    return next(err);
   }
 };
 
-const findOne = async (req: Request, res: Response) => {
+const findOne = async (req: Request, res: Response, next: NextFunction) => {
   const { id } = req.params;
   try {
     const sectionId = parseInt(req.params.id);
@@ -311,6 +308,7 @@ const findOne = async (req: Request, res: Response) => {
       : error(res, "record not found", 400);
   } catch (err) {
     console.log(err);
+    return next(err);
   }
 };
 
@@ -426,7 +424,8 @@ export const deleteCustomSection = async (
 
 const createCustomField = async (
   req: Request<{}, {}, IField, {}>,
-  res: Response
+  res: Response,
+  next: NextFunction
 ) => {
   try {
     const customSection = await customRepository.findOne({
@@ -445,7 +444,7 @@ const createCustomField = async (
     return success(res, newRecords, "Success");
   } catch (err) {
     console.error(err);
-    return error(res, "An error occurred", 500);
+    return next(err);
   }
 };
 
