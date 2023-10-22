@@ -213,7 +213,7 @@ const getPortfolioDetails = async (
 
       const track = tracks?.track;
 
-      return success(res,{
+      return success(res, {
         user,
         portfolio,
         education,
