@@ -3,6 +3,8 @@ import { connectionSource } from "../database/data-source";
 import { Tracks, UserTrack, User } from "../database/entities";
 import { error, success } from "../utils";
 import { NotFoundError, BadRequestError } from "../middlewares";
+import { userIdSchema } from "../middlewares/interests.zod";
+import { ZodError } from "zod";
 
 const trackRepository = connectionSource.getRepository(Tracks);
 const userTrackRepository = connectionSource.getRepository(UserTrack);
@@ -43,6 +45,18 @@ export const createUserTrack = async (
 ) => {
   try {
     const { user_id, track_id } = req.body;
+
+    if(!req.body) {
+      throw new BadRequestError("Request Body is missing")
+    }
+
+    try {
+      userIdSchema.parse(user_id)
+    } catch (err){
+
+      const { errors } = err as ZodError;
+      return error(res, errors[0].message, 400)
+    }
     if (!user_id || !track_id) {
       throw new BadRequestError("User id or Track id is missing");
     }
