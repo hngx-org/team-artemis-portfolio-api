@@ -305,6 +305,12 @@ export const updateProfileController = async (
       where: { user: { id: user.id } },
       relations: ["track"],
     });
+
+    if(portfolio?.user) {
+      delete portfolio.user.password;
+      delete portfolio.user.email
+    }
+
     return success(
       res,
       { portfolio: portfolio, track: userTrack?.track },
