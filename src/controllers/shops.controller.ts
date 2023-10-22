@@ -7,6 +7,9 @@ import {
     User,
 } from "../database/entities";
 import { NotFoundError, BadRequestError } from "../middlewares";
+import { success, error } from '../utils/response.util';
+import { getShopService } from "../services/shop.service";
+
 
 const userRepository = connectionSource.getRepository(User);
 const sectionRepository = connectionSource.getRepository(Section);
@@ -36,26 +39,7 @@ export const createShopSection = async (req: Request, res: Response, next: NextF
             throw new NotFoundError("Section does not exist");
         }
 
-        //check if user has a shop
-        const shopIds = await connectionSource.manager.query(
-            `SELECT
-                id AS shop_id
-                FROM shop
-                WHERE shop.merchant_id = '${user.id}';`);
-
-        if (shopIds.length < 1) {
-            throw new NotFoundError("User does not have a shop");
-        }
-        const userShopDetails = await connectionSource.manager.query(
-            `SELECT
-                shop.id AS shop_id,
-                shop.name AS shop_name,
-                ARRAY_AGG(product_image.url) AS product_images
-                FROM shop
-                INNER JOIN product ON shop.id = product.shop_id
-                INNER JOIN product_image ON product.id = product_image.product_id
-                WHERE shop.merchant_id = '${user.id}'
-                GROUP BY shop.id, shop.name;`);
+        const userShopDetails = await getShopService(user.id)
 
         if (userShopDetails.length < 1) {
             throw new NotFoundError("User does not have a products or product images");
@@ -91,4 +75,29 @@ export const createShopSection = async (req: Request, res: Response, next: NextF
     }
 
 };
+
+export const getUserShopSection = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { user_slug } = req.params;
+
+        const user = await userRepository.findOne({ where: { slug: user_slug } });
+        if (!user) {
+            throw new NotFoundError("User does not exist");
+        }
+
+        const section = await customUserSectionRepository.findOne({
+            where: { user: { id: user.id } },
+        });
+
+        if (!section) {
+            throw new NotFoundError("Section does not exist");
+        }
+
+        const userShopDetails = await getShopService(user.id)
+
+        res.status(200).json({ message: "Custom Section retrieved", userShopDetails });
+    } catch (error) {
+        return next(error);
+    }
+}
 

@@ -54,6 +54,7 @@ const addLanguage: RequestHandler = async (req: Request, res: Response) => {
 
     const oldLangs = await languageDetailRepository.find({
       where: { user: { id: userId } },
+	  relations: ['language', 'user']
     });
 
     for (const lang of oldLangs) await languageDetailRepository.remove(lang);
@@ -71,7 +72,13 @@ const addLanguage: RequestHandler = async (req: Request, res: Response) => {
         });
 
         let toAdd = await languageDetailRepository.save(addedLang);
-        return toAdd.language.name.toLowerCase();
+
+        return {
+          id: toAdd.id,
+          userId: toAdd.user.id,
+          language: toAdd.language.name,
+          section: 24,
+        };
       })
     );
 
@@ -101,10 +108,15 @@ const getUserLanguages: RequestHandler = async (
       where: {
         user: { id: userId },
       },
-      relations: ['language'],
+      relations: ['language', 'user'],
     });
 
-    const userLanguages = allLanguageDetails.map((v) => v.language.name);
+    const userLanguages = allLanguageDetails.map((v) => ({
+      id: v.id,
+      userId: v.user.id,
+      language: v.language.name,
+      section: 24,
+    }));
 
     return responseHandler.success(res, userLanguages);
   } catch (error) {
