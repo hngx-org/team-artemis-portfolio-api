@@ -22,7 +22,10 @@ const CreateAwardDataSchema = z.object({
     .min(3)
     .regex(charRegex, { message: 'Title cannot contain special characters' }),
   year: z.string().min(3),
-  presented_by: z.string().min(3, { message: 'field cannot be empty' }).regex(charRegex, { message: 'Title cannot contain special characters' }),
+  presented_by: z
+    .string()
+    .min(3, { message: 'field cannot be empty' })
+    .regex(charRegex, { message: 'Title cannot contain special characters' }),
   url: z
     .string()
     .min(3, { message: 'field cannot be empty' })
@@ -45,10 +48,30 @@ const CreateAwardDataSchema = z.object({
 })
 
 export const UpdateAwardDataSchema = z.object({
-  title: z.string(),
-  year: z.string(),
-  presented_by: z.string(),
-  url: z.string().optional(),
+  title: z
+    .string()
+    .min(3)
+    .regex(charRegex, { message: 'Title cannot contain special characters' })
+    .optional(),
+  year: z.string().min(3),
+  presented_by: z
+    .string()
+    .min(3, { message: 'field cannot be empty' })
+    .regex(charRegex, { message: 'Title cannot contain special characters' })
+    .optional(),
+  url: z
+    .string()
+    .min(3, { message: 'field cannot be empty' })
+    .optional()
+    .refine(
+      (value) => {
+        if (value) {
+          return urlRegex.test(value)
+        }
+        return true
+      },
+      { message: 'Invalid URL format' }
+    ),
   userId: z.string().refine((value) => isUUID(value), {
     message: 'userId has to be a valid UUID',
   }),
