@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { connectionSource } from "../database/data-source";
 import { AnyZodObject, z } from "zod";
+import { QueryFailedError } from "typeorm";
 import {
   CustomUserSection,
   CustomField,
@@ -85,7 +86,29 @@ const createSection = async (
     return success(res, newRecord, "Success");
   } catch (err) {
     console.log(err);
-    return next(err);
+    if (err instanceof QueryFailedError) {
+      if (err.message.includes("violates foreign key constraint")) {
+        return next(
+          new Error(
+            "Foreign key constraint violation. Check your name."
+          )
+        );
+      } else if (err.message.includes("unique constraint")) {
+        return next(
+          new Error(
+            "A unique constraint violation occurred. Check your data for duplicates."
+          )
+        );
+      } else {
+        return next(
+          new Error(
+            "A database error occurred. Please contact the administrator."
+          )
+        );
+      }
+    } else {
+      return next(err);
+    }
   }
 };
 
@@ -120,9 +143,11 @@ const getSection = async (req: Request, res: Response, next: NextFunction) => {
     return success(res, response, "Success");
   } catch (err) {
     console.log(err);
-    return next(err);
+    if (err instanceof QueryFailedError)
+      return next(new Error("A database error occurred. Please contact the administrator."))
+    else return next(err);
   }
-};
+}
 
 const getSingleSection = async (
   req: Request<IGetSingleSection, {}, {}, {}>,
@@ -138,7 +163,9 @@ const getSingleSection = async (
     return success(res, section, "Success");
   } catch (err) {
     console.log(err);
-    return next(err);
+     if (err instanceof QueryFailedError) 
+        return next( new Error("A database error occurred. Please contact the administrator."))
+    else return next(err);
   }
 };
 
@@ -186,7 +213,13 @@ const deleteSection = async (
     return success(res, true, "Success");
   } catch (err) {
     console.log(err);
-    return next(err);
+    if (err instanceof QueryFailedError)
+      return next(
+        new Error(
+          "A database error occurred. Please contact the administrator."
+        )
+      );
+    else return next(err);
   }
 };
 
@@ -214,7 +247,27 @@ const create = async (
     return success(res, record, "Success");
   } catch (err) {
     console.log(err);
-    return next(err);
+     if (err instanceof QueryFailedError) {
+       if (err.message.includes("violates foreign key constraint")) {
+         return next(
+           new Error("Foreign key constraint violation. Check your userId, sectionId or title.")
+         );
+       } else if (err.message.includes("unique constraint")) {
+         return next(
+           new Error(
+             "A unique constraint violation occurred. Check your data for duplicates."
+           )
+         );
+       } else {
+         return next(
+           new Error(
+             "A database error occurred. Please contact the administrator."
+           )
+         );
+       }
+     } else {
+       return next(err);
+     }
   }
 };
 
@@ -225,7 +278,7 @@ export const getAllCustomSections = async (
 ) => {
   const { id } = req.params;
   const page = parseInt(req.query.page as string) || 1;
-  const pageSize = parseInt(req.query.pageSize as string) || 10; 
+  const pageSize = parseInt(req.query.pageSize as string) || 10;
 
   try {
     const user = await userRepository.findOne({
@@ -257,7 +310,13 @@ export const getAllCustomSections = async (
     return success(res, response, "Success");
   } catch (err) {
     console.log(err);
-    return next(err);
+     if (err instanceof QueryFailedError)
+       return next(
+         new Error(
+           "A database error occurred. Please contact the administrator."
+         )
+       );
+     else return next(err);
   }
 };
 
@@ -288,7 +347,13 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
     return success(res, response, "Success");
   } catch (err) {
     console.log(err);
-    return next(err);
+    if (err instanceof QueryFailedError)
+      return next(
+        new Error(
+          "A database error occurred. Please contact the administrator."
+        )
+      );
+    else return next(err);
   }
 };
 
@@ -308,7 +373,13 @@ const findOne = async (req: Request, res: Response, next: NextFunction) => {
       : error(res, "record not found", 400);
   } catch (err) {
     console.log(err);
-    return next(err);
+    if (err instanceof QueryFailedError)
+      return next(
+        new Error(
+          "A database error occurred. Please contact the administrator."
+        )
+      );
+    else return next(err);
   }
 };
 
@@ -468,7 +539,7 @@ export const findAllCustomField = async (
   }
 };
 
-const findOneCustomField = async (req: Request, res: Response) => {
+const findOneCustomField = async (req: Request, res: Response, next:NextFunction) => {
   const { id } = req.params;
 
   try {
@@ -504,11 +575,13 @@ const findOneCustomField = async (req: Request, res: Response) => {
       });
     } else {
       console.error(error);
-      return res.status(500).json({
-        successful: false,
-        message: "An error occurred",
-        data: null,
-      });
+       if (error instanceof QueryFailedError)
+         return next(
+           new Error(
+             "A database error occurred. Please contact the administrator."
+           )
+         );
+       else return next(error);
     }
   }
 };
