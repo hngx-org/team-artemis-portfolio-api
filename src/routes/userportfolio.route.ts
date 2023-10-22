@@ -64,7 +64,7 @@ router.get("/portfolio/:slug", getPortfolioDetails);
 
 /**
  * @swagger
- * /api/portfolioDetails:
+ * /api/v1/portfolioDetails:
  *   get:
  *     summary: Get all portfolio details
  *     description: Retrieve a list of all users' portfolio details.
@@ -84,7 +84,7 @@ router.get("/portfolioDetails", getAllPortfolioDetails);
 
 /**
  * @swagger
- * /api/update-profile-details/{userId}:
+ * /api/v1/update-profile-details/{userId}:
  *   put:
  *     summary: Update User's Profile Portfolio Details
  *     description: Update a user's portfolio details by providing its ID and the required data in json format in the body of the request.
@@ -177,7 +177,7 @@ router.get("/portfolioDetails", getAllPortfolioDetails);
 
 /**
  * @swagger
- * /api/profile-details/{id}:
+ * /api/v1/profile-details/{id}:
  *   delete:
  *     summary: Delete a Portfolio Profile details
  *     description: Delete a user's Portfolio Profile details by providing its ID.
