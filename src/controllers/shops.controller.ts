@@ -9,6 +9,7 @@ import {
 import { NotFoundError, BadRequestError } from "../middlewares";
 import { success, error } from '../utils/response.util';
 import { getShopService } from "../services/shop.service";
+import { ZodError, z } from "zod";
 
 
 const userRepository = connectionSource.getRepository(User);
@@ -18,12 +19,25 @@ const customUserSectionRepository = connectionSource.getRepository(
 );
 const customFieldRepository = connectionSource.getRepository(CustomField);
 
+const slugSchema = z.string({
+    required_error: "user_slug is not present in params",
+    invalid_type_error: "user_slug must be a string"
+})
+.trim()
+.min(0, "user_slug cannot be an empty string")
 
 //create a custom Sectionname shop
 export const createShopSection = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const sectionName = "shop";
         const { user_slug } = req.params;
+
+        try {
+            slugSchema.parse(user_slug)
+        } catch(err) {
+            const { errors } = err as ZodError;
+            throw new BadRequestError(errors[0].message)
+        }
 
         const user = await userRepository.findOne({ where: { slug: user_slug } });
         if (!user) {
@@ -65,8 +79,8 @@ export const createShopSection = async (req: Request, res: Response, next: NextF
         customUserSection.customFields = [shopNameField];
 
         await customUserSectionRepository.save(customUserSection);
-        res.status(201).json({ message: "Shop Section retrieved with Details from your Shop", ...customUserSection, userShopDetails });
-
+        //res.status(201).json({ message: "Shop Section retrieved with Details from your Shop", ...customUserSection, userShopDetails });
+        return success(res, { ...customUserSection, userShopDetails }, "Shop Section retrieved with Details from your Shop")
 
         // await customUserSectionRepository.save(customUserSection);
         // res.status(200).json({ message: "Custom Section retrieved", userShopDetails });
@@ -79,6 +93,13 @@ export const createShopSection = async (req: Request, res: Response, next: NextF
 export const getUserShopSection = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { user_slug } = req.params;
+
+        try {
+            slugSchema.parse(user_slug)
+        } catch(err) {
+            const { errors } = err as ZodError;
+            throw new BadRequestError(errors[0].message)
+        }
 
         const user = await userRepository.findOne({ where: { slug: user_slug } });
         if (!user) {
@@ -95,7 +116,8 @@ export const getUserShopSection = async (req: Request, res: Response, next: Next
 
         const userShopDetails = await getShopService(user.id)
 
-        res.status(200).json({ message: "Custom Section retrieved", userShopDetails });
+        //res.status(200).json({ message: "Custom Section retrieved", userShopDetails });
+        return success(res, userShopDetails, "Custom Section retrieved")
     } catch (error) {
         return next(error);
     }
