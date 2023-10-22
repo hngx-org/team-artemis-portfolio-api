@@ -183,13 +183,13 @@ const UpdateSection = async (
       where: { id: Number(id) },
     });
     if (!section) return error(res, "Section not found", 404);
-    if (req.body.position) {
-      const positionExists = await sectionRepository.findOne({
-        // where: { position: req.body.position },
-      });
-      if (positionExists)
-        return error(res, "A section with this position already exist", 400);
-    }
+    // if (req.body.position) {
+    //   const positionExists = await sectionRepository.findOne({
+    //     // where: { position: req.body.position },
+    //   });
+    //   if (positionExists)
+    //     return error(res, "A section with this position already exist", 400);
+    // }
     await sectionRepository.update(id, req.body);
     const newsection = await sectionRepository.findOne({
       where: { id: Number(id) },
@@ -467,7 +467,7 @@ const customUserSectionSchema = z.object({
   title: z
     .string()
     .min(3, { message: "title must have at least three characters " })
-    .refine((value) => /^[A-Za-z]+$/.test(value), {
+    .refine((value) => /^[A-Za-z\s]+$/.test(value), {
       message: "title must contain only letters (A-Z, a-z)",
     }),
   userId: z.string().uuid().min(3),
@@ -481,13 +481,13 @@ const customFieldSchema = z.object({
   fieldType: z
     .string()
     .min(3, { message: "fieldType must have at least three characters " })
-    .refine((value) => /^[A-Za-z]+$/.test(value), {
+    .refine((value) => /^[A-Za-z\s]+$/.test(value), {
       message: "Field must contain only letters (A-Z, a-z)",
     }),
   fieldName: z
     .string()
     .min(3, { message: "fieldName must have at least three characters " })
-    .refine((value) => /^[A-Za-z]+$/.test(value), {
+    .refine((value) => /^[A-Za-z\s]+$/.test(value), {
       message: "Field must contain only letters (A-Z, a-z)",
     }),
   value: z.string().nullable(),
