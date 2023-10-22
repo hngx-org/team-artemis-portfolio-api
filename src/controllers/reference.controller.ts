@@ -161,6 +161,7 @@ export const updateReference = async (req: Request, res: Response) => {
       return error(res, "Cannot send an empty request body");
     }
     const { id }: any = req.params;
+    
     await connectionSource
       .createQueryBuilder()
       .update(ReferenceDetail)

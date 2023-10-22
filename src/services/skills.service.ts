@@ -58,7 +58,8 @@ export const updateSkillsService = async (
       return { successful: false, message: "skill not found" };
     }
     if (updatedSkillData.skills) {
-      skillToUpdate.skills = updatedSkillData.skills;
+      const skills = updatedSkillData['skills'].trim().toLowerCase();
+      skillToUpdate.skills = skills;
     }
     if (updatedSkillData.sectionId) {
       skillToUpdate.section = await sectionRepository.findOneBy({ id: updatedSkillData.sectionId });

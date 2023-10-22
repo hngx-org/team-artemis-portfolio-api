@@ -111,6 +111,7 @@ const getCertificateById = async (
   next: NextFunction
 ) => {
   const id = Number(req.params.certId);
+  const userId = req.params.userId;
 
   if (!id) {
     const err = new NotFoundError("Please provide a valid certificate ID");
@@ -123,6 +124,9 @@ const getCertificateById = async (
     const certificate = await certificateRepository.findOne({
       where: {
         id,
+        user: {
+          id: userId,
+        },
       },
       relations: {
         section: true,
@@ -140,14 +144,53 @@ const getCertificateById = async (
   }
 };
 
-const deleteCertificate = async (req: Request, res: Response) => {
-  const id = req.params.certId;
+const isUUID = (value: string) => {
+  // Regular expression to match UUID format (8-4-4-12)
+  const uuidPattern =
+    /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
+  return uuidPattern.test(value);
+};
+
+const deleteCertificate = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const { certId, userId } = req.params;
+
+  // Validate userId is a UUID
+  if (!isUUID(userId)) {
+    const err = new BadRequestError("Provide a valid userid in UUID format");
+    return errorHandler(err, req, res, next);
+  }
+
+  // Validate certId is an integer
+  if (!Number.isInteger(Number(certId))) {
+    const err = new BadRequestError(
+      "Provide a valid certId. It must be an integer"
+    );
+    return errorHandler(err, req, res, next);
+  }
+
   const certificateRepository = dataSource.getRepository(Certificate);
 
   try {
+    // Check if the user with userId exists
+    const user = await userRepository
+      .createQueryBuilder()
+      .where("id = :id", { id: userId })
+      .getOne();
+
+    if (!user) {
+      const err = new NotFoundError(
+        "User not found. Please provide a valid User ID"
+      );
+      return errorHandler(err, req, res, next);
+    }
+
     const certificate = await certificateRepository
       .createQueryBuilder()
-      .where("id = :id", { id })
+      .where("id = :id", { id: certId })
       .getOne();
 
     if (certificate) {
@@ -156,15 +199,17 @@ const deleteCertificate = async (req: Request, res: Response) => {
       // Fetch the updated list of certificates
       const updatedCertificates = await certificateRepository.find();
 
-      res.json({
+      return success(res, {
         message: "Certificate deleted successfully",
         certificates: updatedCertificates,
       });
     } else {
-      res.status(404).json({ error: "Certificate not found" });
+      const err = new NotFoundError("Certificate not found");
+      return errorHandler(err, req, res, next);
     }
-  } catch (error) {
-    res.status(500).json({ error: "Internal Server Error" });
+  } catch (err) {
+    errorHandler(err, req, res, next);
+    // (error);
   }
 };
 

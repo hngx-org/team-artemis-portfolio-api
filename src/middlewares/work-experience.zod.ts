@@ -74,6 +74,7 @@ function convertMonthToLongForm(month: string) {
 
 // Helper function to convert a month to title case and validate it
 function processAndValidateMonth(data, key, errors) {
+  data[key] = data[key].toString();
   if (data[key]) {
     // Convert to title case
     data[key] = data[key]
@@ -93,6 +94,7 @@ function processAndValidateMonth(data, key, errors) {
 
 // Helper function to validate date format
 function validateDate(data, key, errors) {
+
   if (data[key] && !validateDateYYMMDD(data[key])) {
     errors.push(`Invalid '${key}' date format`);
   }
@@ -123,7 +125,7 @@ async function validateWorkExperience(
           }
 
           if (text[0] && text[0].match(/\d/)) {
-            errors.push(`Invalid input for ${field}`);
+            errors.push(`Only Letters, - , & allowed for ${field} `);
           }
         }
       });
@@ -134,8 +136,11 @@ async function validateWorkExperience(
 
     // Check if endMonth and endYear are not empty
     if (data.endMonth !== "" && data.endYear !== "") {
-      processAndValidateMonth(data, "endMonth", errors);
-      validateDate(data, "endYear", errors);
+      console.log(data.endMonth)
+      if(data.endYear.toLocaleLowerCase()!=="present"){
+        processAndValidateMonth(data, "endMonth", errors);
+        validateDate(data, "endYear", errors);
+      }
     }
 
     if (!data.isEmployee && (!data.endMonth || !data.endYear)) {

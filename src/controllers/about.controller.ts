@@ -10,6 +10,8 @@ import { NotFoundError, BadRequestError } from "../middlewares";
 import {
   ValidateCreateAbout,
   ValidateUpdateAbout,
+  validateAboutId,
+  validateUserId,
 } from "../middlewares/about.zod";
 
 // endpoint to create about details
@@ -24,6 +26,8 @@ export const createAbout: RequestHandler = async (
     const { bio, section_id } = req.body;
 
     const payload = { bio, section_id };
+
+    await validateUserId(userId)
 
     const isValid = await ValidateCreateAbout(payload);
     if (!isValid) {
@@ -59,6 +63,8 @@ export const updateAbout: RequestHandler = async (
       section_id,
     };
 
+    await validateAboutId(id)
+
     const isValid = await ValidateUpdateAbout(data);
     if (!isValid) {
       throw new BadRequestError("dd");
@@ -85,8 +91,9 @@ export const getAboutByID = async (
   next: NextFunction
 ) => {
   try {
-    const id = parseInt(req.params.id);
-    const about = await getAboutByIdService(id);
+    const userId = req.params.userId;
+    await validateUserId(userId);
+    const about = await getAboutByIdService(userId);
 
     return res.status(200).json({
       message: "About details successfully retrieved.",
@@ -109,6 +116,7 @@ export const deleteAbout: RequestHandler = async (
   console.log("q");
   try {
     const id = parseInt(req.params.id);
+    await validateAboutId(id);
     const result = await deleteAboutService(id);
 
     return res.status(200).json({

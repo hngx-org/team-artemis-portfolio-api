@@ -27,7 +27,7 @@ import {
 const customRepository = connectionSource.getRepository(CustomUserSection);
 const customFieldRepository = connectionSource.getRepository(CustomField);
 const sectionRepository = connectionSource.getRepository(Section);
-const userRepositoy = connectionSource.getRepository(User);
+const userRepository = connectionSource.getRepository(User);
 
 const MAX_ID_LENGTH = 10;
 
@@ -43,13 +43,13 @@ const sectionIdSchema = z
 
 export const validateSectionId = (sectionId: any, res: Response) => {
   try {
-    const parsedSectionId = parseInt(sectionId);
+    const parsedSectionId = parseInt(sectionId); 
 
     if (isNaN(parsedSectionId) || !Number.isInteger(parsedSectionId)) {
       throw new Error("Invalid section ID. Must be a valid integer.");
     }
 
-    sectionIdSchema.parse(parsedSectionId);
+    sectionIdSchema.parse(parsedSectionId); 
 
     if (parsedSectionId.toString().length > MAX_ID_LENGTH) {
       throw new Error(`Section ID must have at most ${MAX_ID_LENGTH} digits`);
@@ -65,68 +65,14 @@ export const validateSectionId = (sectionId: any, res: Response) => {
   }
 };
 
-// export const deleteCustomSection = async (req: Request, res: Response) => {
-//   try {
-//     const customSectionId = parseInt(req.params.id);
-//     const { userId } = req.body;
-
-//     // validator for the custom section Id
-//     const customSectionIdValidator = z
-//       .number({
-//         required_error: "id is required",
-//         invalid_type_error: "id must be a number",
-//       })
-//       .int({ message: "id must be an integer" })
-//       .positive({ message: "must be a positive integer" });
-
-//     // validator for user ID
-//     const userIdValidator = z
-//       .string({
-//         required_error: "userId is required",
-//         invalid_type_error: "userId must be uuid",
-//       })
-//       .uuid({ message: "userId must be of type uuid" });
-
-//     const userIdValidate = userIdValidator.safeParse(userId);
-//     const customSectionIdValidate =
-//       customSectionIdValidator.safeParse(customSectionId);
-
-//     if (customSectionIdValidate.success === false) {
-//       const err = new BadRequestError(customSectionIdValidate.error.message);
-//       return res
-//         .status(err.statusCode)
-//         .json({ err: JSON.parse(err.message)[0].message });
-//     }
-
-//     if (userIdValidate.success === false) {
-//       const err = new BadRequestError(userIdValidate.error.message);
-//       return res
-//         .status(err.statusCode)
-//         .json({ err: JSON.parse(err.message)[0].message });
-//     }
-
-//     const data = await deleteCustomSectionService(customSectionId, userId);
-
-//     if (data.successful) {
-//       return success(res, data);
-//     } else {
-//       const err = new NotFoundError(data.message);
-//       return res.status(err.statusCode).json({ err: err.message });
-//     }
-//   } catch (error: any) {
-//     const err = new InternalServerError(error.message);
-//     return res.status(err.statusCode).json({ err: err.message });
-//   }
-// };
-
 const createSection = async (
-  req: Request<{}, {}, ISection, {}>,
+  req: Request<{}, {}, ISection, {}>, 
   res: Response
 ) => {
   try {
-    console.log(req.body.name);
+    console.log(req.body.name); 
     const sectionExists = await sectionRepository.findOne({
-      where: { name: req.body.name },
+      where: { name: req.body.name }, 
     });
     if (sectionExists)
       return error(
@@ -134,7 +80,7 @@ const createSection = async (
         "A section with this name has already been created",
         400
       );
-    const newRecord = await sectionRepository.save(req.body);
+    const newRecord = await sectionRepository.save(req.body); 
     return success(res, newRecord, "Success");
   } catch (err) {
     console.log(err);
@@ -143,16 +89,16 @@ const createSection = async (
 };
 
 const getSection = async (
-  req: Request<{}, {}, {}, IGetSection>,
+  req: Request<{}, {}, {}, IGetSection>,  
   res: Response
 ) => {
-  const filter = req.query.name ? { where: { name: req.query.name } } : {};
+  const filter = req.query.name ? { where: { name: req.query.name } } : {}; 
   try {
     const section = await sectionRepository.find(filter);
     return success(res, section, "Success");
   } catch (err) {
     console.log(err);
-    return error(res, "An error occurred", 500);
+    return error(res, "An error occurred", 500); 
   }
 };
 
@@ -165,11 +111,11 @@ const getSingleSection = async (
     const section = await sectionRepository.findOne({
       where: { id },
     });
-    if (!section) return error(res, "Section not found", 404);
-    return success(res, section, "Success");
+    if (!section) return error(res, "Section not found", 404);  
+    return success(res, section, "Success");  
   } catch (err) {
     console.log(err);
-    return error(res, "An error occurred", 500);
+    return error(res, "An error occurred", 500);  
   }
 };
 
@@ -177,27 +123,27 @@ const UpdateSection = async (
   req: Request<{ id: string }, {}, IUpdateSection, {}>,
   res: Response
 ) => {
-  const { id } = req.params;
+  const { id } = req.params; 
   try {
     const section = await sectionRepository.findOne({
       where: { id: Number(id) },
     });
-    if (!section) return error(res, "Section not found", 404);
+    if (!section) return error(res, "Section not found", 404); 
     if (req.body.position) {
       const positionExists = await sectionRepository.findOne({
         // where: { position: req.body.position },
       });
       if (positionExists)
-        return error(res, "A section with this position already exist", 400);
+        return error(res, "A section with this position already exist", 400);  
     }
-    await sectionRepository.update(id, req.body);
+    await sectionRepository.update(id, req.body); 
     const newsection = await sectionRepository.findOne({
       where: { id: Number(id) },
     });
-    return success(res, newsection, "Success");
+    return success(res, newsection, "Success"); 
   } catch (err) {
     console.log(err);
-    return error(res, "An error occurred", 500);
+    return error(res, "An error occurred", 500); 
   }
 };
 
@@ -210,44 +156,54 @@ const deleteSection = async (
     const section = await sectionRepository.findOne({
       where: { id },
     });
-    if (!section) return error(res, "Section not found", 404);
-    await sectionRepository.delete(id);
-    return success(res, true, "Success");
+    if (!section) return error(res, "Section not found", 404);  
+    await sectionRepository.delete(id);  
+    return success(res, true, "Success");  
   } catch (err) {
     console.log(err);
-    return error(res, "An error occurred", 500);
+    return error(res, "An error occurred", 500); 
   }
 };
 
+// Custom
 const create = async (
   req: Request<{}, {}, ICustomSection, {}>,
   res: Response
 ) => {
   try {
-    // const { user_id, section_id } = req.body as any;
     const section = await sectionRepository.findOne({
       where: { id: req.body.sectionId },
     });
     if (!section) return error(res, "SectionId does not exist", 400);
-    const user = await userRepositoy.findOne({
+    const user = await userRepository.findOne({
       where: { id: req.body.userId },
     });
-    if (!user) return error(res, "Invalid User", 400);
-    const alreadyCreated = await customRepository.findOne({
-      where: { user },
-    });
-    if (alreadyCreated)
-      return error(
-        res,
-        "A custom section for this user has already been created",
-        400
-      );
+    if (!user) return error(res, "User not found", 400);
     const newRecord = new CustomUserSection();
     newRecord.user = user;
     newRecord.section = section;
+    newRecord.title = req.body.title;
+    const record = await customRepository.save(newRecord);
+    delete record.user.password;
+    return success(res, record, "Success"); 
+  } catch (err) {
+    console.log(err);
+    return error(res, "An error occurred", 500); 
+  }
+};
 
-    await customRepository.save(newRecord);
-    return success(res, newRecord, "Success");
+export const getAllCustomSections = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  try {
+    const user = await userRepository.findOne({
+      where: { id },
+    });
+    if (!user) return error(res, "User not found", 400);
+    const records = await customRepository.find({
+      where: { user: { id } },
+      relations: ["customFields"],
+    });
+    return success(res, records, "Success");
   } catch (err) {
     console.log(err);
     return error(res, "An error occurred", 500);
@@ -257,7 +213,7 @@ const create = async (
 const findAll = async (req: Request, res: Response) => {
   try {
     const records = await customRepository.find({
-      relations: ["customFields", "section", "user"],
+      relations: ["customFields", "section"],
     });
     return success(res, records, "Success");
   } catch (err) {
@@ -270,54 +226,77 @@ const findOne = async (req: Request, res: Response) => {
   try {
     const sectionId = parseInt(req.params.id);
     if (!validateSectionId(sectionId, res)) {
-      return;
+      return;  
     }
     const record = await customRepository.findOne({
       where: { id: Number(id) },
-      relations: ["customFields", "section", "user"],
+      relations: ["customFields", "section"],
     });
     return record
-      ? success(res, record, "Success")
-      : error(res, "record not found", 400);
+      ? success(res, record, "Success") 
+      : error(res, "record not found", 400);  
   } catch (err) {
-    console.log(err);
+    console.log(err);  
   }
 };
 
 export const updateCustomSection = async (
-  req: Request<{ id: string }, {}, { userId: string; sectionId: number }, {}>,
-  res: Response
+  req: Request<
+    { id: string },
+    {},
+    { userId: string; sectionId: number; title: string },
+    {}
+  >,
+  res: Response,
+  next: NextFunction
 ) => {
-  const { id } = req.params;
   try {
+    const id = parseInt(req.params.id);
+
+    const updateCustomSectionSchema: any = z.object({
+      sectionId: z.number().positive().int().optional(),
+
+      title: z
+        .string()
+        .min(3)
+        .refine((value) => !/^\s*$/.test(value), {
+          message: "The title must not be empty or consist of only spaces",
+        })
+        .optional(),
+    });
+    updateCustomSectionSchema.parse(req.body);
+
+    const idValidator = z
+      .number({
+        required_error: "id is required",
+        invalid_type_error: "id must be a number",
+      })
+      .int({ message: "id must be an integer" })
+      .positive({ message: "id must be a positive integer" });
+
+    const idValidate = idValidator.safeParse(id);
+
+    if (idValidate.success === false) {
+      const err = new BadRequestError(idValidate.error.message);
+      return res
+        .status(err.statusCode)
+        .json({ err: JSON.parse(err.message)[0].message });
+    }
+
     const section = await customRepository.findOne({
       where: { id: Number(id) },
     });
     if (!section) return error(res, "Custom section not found", 404);
     const newRecord = new CustomUserSection();
-    if (req.body.userId) {
-      const user = await userRepositoy.findOne({
-        where: { id: req.body.userId },
-      });
-      if (!user) return error(res, "Invalid User", 400);
-      const alreadyCreated = await customRepository.findOne({
-        where: { user },
-      });
-      if (alreadyCreated)
-        return error(
-          res,
-          "A custom section for this user has already been created",
-          400
-        );
-      newRecord.user = user;
-    }
-
     if (req.body.sectionId) {
       const section = await sectionRepository.findOne({
         where: { id: req.body.sectionId },
       });
       if (!section) return error(res, "Section does not exist", 400);
       newRecord.section = section;
+      if (req.body.title) {
+        newRecord.title = req.body.title;
+      }
     }
     await customRepository.update(id, newRecord);
     const custom = await customRepository.findOne({
@@ -325,18 +304,36 @@ export const updateCustomSection = async (
       relations: ["customFields", "section", "user"],
     });
     return success(res, custom, "Success");
-  } catch (err) {
-    console.log(err);
-    return error(res, "An error occurred", 500);
+  } catch (err: any) {
+    if (err instanceof z.ZodError) {
+      const errorMessages = err.issues.map(
+        (issue) => `${issue.path}: ${issue.message}`
+      );
+      const errors = errorMessages.join("; ");
+      next(new BadRequestError(errors));
+    }
+    next(new InternalServerError(err.message));
   }
 };
 
 export const deleteCustomSection = async (
   req: Request<IGetSingleSection, {}, {}, {}>,
-  res: Response
+  res: Response,
+  next: NextFunction
 ) => {
-  const { id } = req.params;
   try {
+    const { id } = req.params;
+
+    const idValidator = z
+      .number({
+        required_error: "id is required",
+        invalid_type_error: "id must be a number",
+      })
+      .int({ message: "id must be an integer" })
+      .positive({ message: "id must be a positive integer" });
+
+    idValidator.parse(parseInt(id as any));
+
     const section = await customRepository.findOne({
       where: { id },
     });
@@ -344,8 +341,12 @@ export const deleteCustomSection = async (
     await customRepository.delete(id);
     return success(res, true, "Success");
   } catch (err) {
-    console.log(err);
-    return error(res, "An error occurred", 500);
+    if (err instanceof z.ZodError) {
+      const errorMessages = err.issues.map((issue) => issue.message);
+      const errors = errorMessages.join("; ");
+      next(new BadRequestError(errors));
+    }
+    next(new InternalServerError(err.message));
   }
 };
 
@@ -353,33 +354,20 @@ const createCustomField = async (
   req: Request<{}, {}, IField, {}>,
   res: Response
 ) => {
-  const errors = [];
   try {
+    const customSection = await customRepository.findOne({
+      where: { id: req.body.customUserSectionId },
+    });
+    if (!customSection) return error(res, "Custom section not found", 404);
+
     const newRecords = await Promise.all(
       req.body.fields.map(async (field) => {
-        const section = await sectionRepository.findOne({
-          where: { id: field.customSectionId },
+        return customFieldRepository.save({
+          ...field,
+          customSection,
         });
-        const customUserSection = await customRepository.findOne({
-          where: { id: field.customUserSectionId },
-        });
-
-        if (!section) {
-          errors.push(`Invalid customSectionId for field: ${field.fieldName}`);
-          return;
-        }
-        if (!customUserSection) {
-          errors.push(
-            `Invalid customUserSectionId for field: ${field.fieldName}`
-          );
-          return;
-        }
-
-        return customFieldRepository.save(field);
       })
     );
-
-    if (errors.length > 0) return error(res, errors.join("\n"), 400);
     return success(res, newRecords, "Success");
   } catch (err) {
     console.error(err);
@@ -387,12 +375,23 @@ const createCustomField = async (
   }
 };
 
-export const findAllCustomField = async (req: Request, res: Response) => {
+export const findAllCustomField = async (
+  req: Request<{}, {}, {}, { customSection?: number }>,
+  res: Response,
+  next: NextFunction
+) => {
   try {
-    const records = await customFieldRepository.find();
+    const filter: any = {};
+    if (req.query.customSection)
+      filter.customSection = { id: req.query.customSection };
+    const records = await customFieldRepository.find({
+      where: filter,
+      relations: ["customSection"],
+    });
     return success(res, records, "Success");
   } catch (err) {
     console.log(err);
+    next(new InternalServerError(err.message));
   }
 };
 
@@ -443,39 +442,68 @@ const findOneCustomField = async (req: Request, res: Response) => {
 
 export const deleteCustomFields = async (
   req: Request<IGetSingleSection, {}, {}, {}>,
-  res: Response
+  res: Response,
+  next: NextFunction
 ) => {
-  const { id } = req.params;
   try {
+    const { id } = req.params;
+    const idValidator = z
+      .number({
+        required_error: "id is required",
+        invalid_type_error: "id must be a number",
+      })
+      .int({ message: "id must be an integer" })
+      .positive({ message: "id must be a positive integer" });
+
+    idValidator.parse(parseInt(id as any));
     const field = await customFieldRepository.findOne({
       where: { id },
     });
-    if (!field) return error(res, "Custom section not found", 404);
+    if (!field) throw new NotFoundError("Custom field not found");
     await customFieldRepository.delete(id);
-    return success(res, true, "Success");
+    return success(res, undefined, "custom field deleted successfully");
   } catch (err) {
-    console.log(err);
-    return error(res, "An error occurred", 500);
+    if (err instanceof z.ZodError) {
+      const errorMessages = err.issues.map((issue) => issue.message);
+      const errors = errorMessages.join("; ");
+      next(new BadRequestError(errors));
+    }
+    next(new InternalServerError(err.message));
   }
 };
 const customUserSectionSchema = z.object({
-  userId: z.string().uuid(),
   sectionId: z.number(),
+  title: z
+    .string()
+    .min(3, { message: "title must have at least three characters " })
+    .refine((value) => /^[A-Za-z]+$/.test(value), {
+      message: "title must contain only letters (A-Z, a-z)",
+    }),
+  userId: z.string().uuid().min(3),
+});
+
+const customGetUserSectionSchema = z.object({
+  userId: z.string().uuid().min(3),
 });
 
 const customFieldSchema = z.object({
   fieldType: z
     .string()
-    .min(3, { message: "fieldType must have at least three characters " }),
+    .min(3, { message: "fieldType must have at least three characters " })
+    .refine((value) => /^[A-Za-z]+$/.test(value), {
+      message: "Field must contain only letters (A-Z, a-z)",
+    }),
   fieldName: z
     .string()
-    .min(3, { message: "fieldName must have at least three characters " }),
-  customSectionId: z.number(),
-  customUserSectionId: z.number(),
+    .min(3, { message: "fieldName must have at least three characters " })
+    .refine((value) => /^[A-Za-z]+$/.test(value), {
+      message: "Field must contain only letters (A-Z, a-z)",
+    }),
   value: z.string().nullable(),
 });
 
 const fieldsSchema = z.object({
+  customUserSectionId: z.number(),
   fields: z
     .array(customFieldSchema)
     .min(1, { message: "At least one custom field is required" }),
@@ -484,9 +512,24 @@ const fieldsSchema = z.object({
 const sectionSchema = z.object({
   name: z
     .string()
-    .min(3, { message: "name must have at least three characters " }),
-  description: z.string().optional(),
-  meta: z.string().optional(),
+    .min(3, { message: "name must have at least three characters " })
+    .refine((value) => /^[A-Za-z]+$/.test(value), {
+      message: "Field must contain only letters (A-Z, a-z)",
+    }),
+  description: z
+    .string()
+    .min(3, { message: "description must have at least three characters " })
+    .optional()
+    .refine((value) => /^[A-Za-z]+$/.test(value), {
+      message: "Field must contain only letters (A-Z, a-z)",
+    }),
+  meta: z
+    .string()
+    .min(3, { message: "meta must have at least three characters " })
+    .optional()
+    .refine((value) => /^[A-Za-z]+$/.test(value), {
+      message: "Field must contain only letters (A-Z, a-z)",
+    }),
 });
 
 const updateSectionSchema: any = z
@@ -497,15 +540,13 @@ const updateSectionSchema: any = z
       .optional(),
     description: z.string().optional(),
     meta: z.string().optional(),
-    position: z.number().positive().optional(),
   })
   .refine(
     (data) => {
       return (
         data.name !== undefined ||
         data.description !== undefined ||
-        data.meta !== undefined ||
-        data.position !== undefined
+        data.meta !== undefined
       );
     },
     {
@@ -514,22 +555,12 @@ const updateSectionSchema: any = z
     }
   );
 
-const updateCustomSectionSchema: any = z
-  .object({
-    userId: z.string().uuid().optional(),
-    sectionId: z.number().optional(),
-  })
-  .refine(
-    (data) => {
-      return data.userId !== undefined || data.sectionId !== undefined;
-    },
-    {
-      message: "At least one of the fields (userId, sectionId) is required",
-    }
-  );
-
 const getSectionSchema = z.object({
   name: z.string().optional(),
+});
+
+export const getcustomfieldsSchema: any = z.object({
+  customSection: z.string().optional(),
 });
 
 const validateSchema =
@@ -551,27 +582,40 @@ const validateSchema =
   };
 
 // updated customsection field
-const updateCustomField = async (req: Request, res: Response) => {
+const updateCustomField = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const id = parseInt(req.params.id);
 
     const customFieldSchema = z.object({
-      fieldType: z.string({ invalid_type_error: "fieldType must be a string" }),
-      fieldName: z.string({ invalid_type_error: "fieldName must be a string" }),
-      customSectionId: z
-        .number()
-        .int({ message: "customSectionId must be an integer" }),
-      value: z.string({ invalid_type_error: "value must be a string" }),
+      fieldType: z
+        .string()
+        .min(3)
+        .refine((value) => !/^\s*$/.test(value), {
+          message: "The string must not be empty or consist of only spaces",
+        })
+        .optional(),
+      fieldName: z
+        .string()
+        .min(3)
+        .refine((value) => !/^\s*$/.test(value), {
+          message: "The string must not be empty or consist of only spaces",
+        })
+        .optional(),
+      customSectionId: z.number().int().optional(),
+      value: z
+        .string()
+        .min(3)
+        .refine((value) => !/^\s*$/.test(value), {
+          message: "The string must not be empty or consist of only spaces",
+        })
+        .optional(),
     });
 
-    const data = customFieldSchema.safeParse(req.body);
-
-    if (data.success === false) {
-      const err = new BadRequestError(data.error.message);
-      return res
-        .status(err.statusCode)
-        .json({ err: JSON.parse(err.message)[0].message });
-    }
+    customFieldSchema.parse(req.body);
 
     // validator for idValidator
     const idValidator = z
@@ -582,14 +626,8 @@ const updateCustomField = async (req: Request, res: Response) => {
       .int({ message: "id must be an integer" })
       .positive({ message: "id must be a positive integer" });
 
-    const idValidate = idValidator.safeParse(id);
+    idValidator.parse(id);
 
-    if (idValidate.success === false) {
-      const err = new BadRequestError(idValidate.error.message);
-      return res
-        .status(err.statusCode)
-        .json({ err: JSON.parse(err.message)[0].message });
-    }
     const { customSectionId } = req.body;
     const existingRecord = await customFieldRepository.findOne({
       where: { id: Number(id) },
@@ -606,10 +644,16 @@ const updateCustomField = async (req: Request, res: Response) => {
     existingRecord.customSection = currCustomUserSection;
     existingRecord.value = req.body.value;
     const updatedRecord = await customFieldRepository.save(existingRecord);
-    return success(res, updatedRecord, "Success");
-  } catch (error: any) {
-    const err = new InternalServerError(error.message);
-    return res.status(err.statusCode).json({ err: err.message });
+    return success(res, updatedRecord, "field updated successfully");
+  } catch (err: any) {
+    if (err instanceof z.ZodError) {
+      const errorMessages = err.issues.map(
+        (issue) => `${issue.path}: ${issue.message}`
+      );
+      const errors = errorMessages.join("; ");
+      next(new BadRequestError(errors));
+    }
+    next(new InternalServerError(err.message));
   }
 };
 
@@ -633,5 +677,6 @@ export {
   UpdateSection,
   deleteSection,
   updateSectionSchema,
-  updateCustomSectionSchema,
+  // updateCustomSectionSchema,
+  customGetUserSectionSchema,
 };

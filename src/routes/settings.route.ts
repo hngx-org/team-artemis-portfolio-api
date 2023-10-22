@@ -12,7 +12,7 @@ const router = Router();
 
 /**
  * @swagger
- * /api/update-user-account-settings:
+ * /api/v1/update-user-account-settings:
  *   patch:
  *     summary: Update account settings
  *     description: Update user account password settings.
@@ -63,7 +63,7 @@ router.patch(
 
 /**
  * @swagger
- * /api/set-notification-settings/{userId}:
+ * /api/v1/set-notification-settings/{userId}:
  *   post:
  *     summary: Create notification settings by User ID
  *     description: Create user notification settings by providing the User ID.
@@ -118,7 +118,7 @@ router.post(
 
 /**
  * @swagger
- * /api/delete-user-account/{userId}:
+ * /api/v1/delete-user-account/{userId}:
  *   delete:
  *     summary: Delete user account by ID
  *     description: Delete user account by providing the User ID.
@@ -156,7 +156,7 @@ router.delete(
 
 /**
  * @swagger
- * /api/update-notification-settings/{userId}:
+ * /api/v1/update-notification-settings/{userId}:
  *   patch:
  *     summary: Update Notification Settings
  *     description: Update user notification settings for a specified user.
@@ -233,7 +233,7 @@ router.patch(
 
 /**
  * @swagger
- * /api/get-notification-settings/{userId}:
+ * /api/v1/get-notification-settings/{userId}:
  *   get:
  *     summary: Get User Notification Settings
  *     description: Get user notification settings for a specific user.
