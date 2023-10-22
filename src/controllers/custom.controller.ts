@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { connectionSource } from "../database/data-source";
 import { AnyZodObject, z } from "zod";
+import { QueryFailedError } from "typeorm";
 import {
   CustomUserSection,
   CustomField,
@@ -41,18 +42,6 @@ const sectionIdSchema = z
     return true;
   });
 
-const updateCustomSectionSchema: any = z.object({
-  sectionId: z.number().positive().int().optional(),
-
-  title: z
-    .string()
-    .min(3)
-    .refine((value) => !/^\s*$/.test(value), {
-      message: "The title must not be empty or consist of only spaces",
-    })
-    .optional(),
-});
-
 export const validateSectionId = (sectionId: any, res: Response) => {
   try {
     const parsedSectionId = parseInt(sectionId);
@@ -79,7 +68,8 @@ export const validateSectionId = (sectionId: any, res: Response) => {
 
 const createSection = async (
   req: Request<{}, {}, ISection, {}>,
-  res: Response
+  res: Response,
+  next: NextFunction
 ) => {
   try {
     console.log(req.body.name);
@@ -96,27 +86,75 @@ const createSection = async (
     return success(res, newRecord, "Success");
   } catch (err) {
     console.log(err);
-    return error(res, "An error occurred", 500);
+    if (err instanceof QueryFailedError) {
+      if (err.message.includes("violates foreign key constraint")) {
+        return next(
+          new Error("Foreign key constraint violation. Check your name.")
+        );
+      } else if (err.message.includes("unique constraint")) {
+        return next(
+          new Error(
+            "A unique constraint violation occurred. Check your data for duplicates."
+          )
+        );
+      } else {
+        return next(
+          new Error(
+            "A database error occurred. Please contact the administrator."
+          )
+        );
+      }
+    } else {
+      return next(err);
+    }
   }
 };
 
-const getSection = async (
-  req: Request<{}, {}, {}, IGetSection>,
-  res: Response
-) => {
-  const filter = req.query.name ? { where: { name: req.query.name } } : {};
+const getSection = async (req: Request, res: Response, next: NextFunction) => {
+  const { page, pageSize, name } = req.query;
+  const parsedPage = parseInt(page as string) || 1;
+  const parsedPageSize = parseInt(pageSize as string) || 10;
+  const filter = name ? { name: String(name) } : {};
+
   try {
-    const section = await sectionRepository.find(filter);
-    return success(res, section, "Success");
+    const skip = (parsedPage - 1) * parsedPageSize;
+
+    const [sections, totalSections] = await sectionRepository.findAndCount({
+      where: filter,
+      skip,
+      take: parsedPageSize,
+    });
+
+    const total_pages = Math.ceil(totalSections / parsedPageSize);
+    const current_page = parsedPage;
+    const previous_page = current_page > 1 ? current_page - 1 : null;
+    const next_page = current_page < total_pages ? current_page + 1 : null;
+
+    const response = {
+      current_page,
+      total_pages,
+      previous_page,
+      next_page,
+      data: sections,
+    };
+
+    return success(res, response, "Success");
   } catch (err) {
     console.log(err);
-    return error(res, "An error occurred", 500);
+    if (err instanceof QueryFailedError)
+      return next(
+        new Error(
+          "A database error occurred. Please contact the administrator."
+        )
+      );
+    else return next(err);
   }
 };
 
 const getSingleSection = async (
   req: Request<IGetSingleSection, {}, {}, {}>,
-  res: Response
+  res: Response,
+  next: NextFunction
 ) => {
   const { id } = req.params;
   try {
@@ -127,13 +165,20 @@ const getSingleSection = async (
     return success(res, section, "Success");
   } catch (err) {
     console.log(err);
-    return error(res, "An error occurred", 500);
+    if (err instanceof QueryFailedError)
+      return next(
+        new Error(
+          "A database error occurred. Please contact the administrator."
+        )
+      );
+    else return next(err);
   }
 };
 
 const UpdateSection = async (
   req: Request<{ id: string }, {}, IUpdateSection, {}>,
-  res: Response
+  res: Response,
+  next: NextFunction
 ) => {
   const { id } = req.params;
   try {
@@ -155,13 +200,14 @@ const UpdateSection = async (
     return success(res, newsection, "Success");
   } catch (err) {
     console.log(err);
-    return error(res, "An error occurred", 500);
+    return next(err);
   }
 };
 
 const deleteSection = async (
   req: Request<IGetSingleSection, {}, {}, {}>,
-  res: Response
+  res: Response,
+  next: NextFunction
 ) => {
   const { id } = req.params;
   try {
@@ -173,14 +219,21 @@ const deleteSection = async (
     return success(res, true, "Success");
   } catch (err) {
     console.log(err);
-    return error(res, "An error occurred", 500);
+    if (err instanceof QueryFailedError)
+      return next(
+        new Error(
+          "A database error occurred. Please contact the administrator."
+        )
+      );
+    else return next(err);
   }
 };
 
 // Custom
 const create = async (
   req: Request<{}, {}, ICustomSection, {}>,
-  res: Response
+  res: Response,
+  next: NextFunction
 ) => {
   try {
     const section = await sectionRepository.findOne({
@@ -200,40 +253,119 @@ const create = async (
     return success(res, record, "Success");
   } catch (err) {
     console.log(err);
-    return error(res, "An error occurred", 500);
+    if (err instanceof QueryFailedError) {
+      if (err.message.includes("violates foreign key constraint")) {
+        return next(
+          new Error(
+            "Foreign key constraint violation. Check your userId, sectionId or title."
+          )
+        );
+      } else if (err.message.includes("unique constraint")) {
+        return next(
+          new Error(
+            "A unique constraint violation occurred. Check your data for duplicates."
+          )
+        );
+      } else {
+        return next(
+          new Error(
+            "A database error occurred. Please contact the administrator."
+          )
+        );
+      }
+    } else {
+      return next(err);
+    }
   }
 };
 
-export const getAllCustomSections = async (req: Request, res: Response) => {
+export const getAllCustomSections = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   const { id } = req.params;
+  const page = parseInt(req.query.page as string) || 1;
+  const pageSize = parseInt(req.query.pageSize as string) || 10;
+
   try {
     const user = await userRepository.findOne({
       where: { id },
     });
+
     if (!user) return error(res, "User not found", 400);
-    const records = await customRepository.find({
+    const skip = (page - 1) * pageSize;
+
+    const [records, totalRecords] = await customRepository.findAndCount({
       where: { user: { id } },
       relations: ["customFields"],
+      skip,
+      take: pageSize,
     });
-    return success(res, records, "Success");
+
+    const total_pages = Math.ceil(totalRecords / pageSize);
+    const current_page = page;
+    const previous_page = current_page > 1 ? current_page - 1 : null;
+    const next_page = current_page < total_pages ? current_page + 1 : null;
+    const response = {
+      current_page,
+      total_pages,
+      previous_page,
+      next_page,
+      data: records,
+    };
+
+    return success(res, response, "Success");
   } catch (err) {
     console.log(err);
-    return error(res, "An error occurred", 500);
+    if (err instanceof QueryFailedError)
+      return next(
+        new Error(
+          "A database error occurred. Please contact the administrator."
+        )
+      );
+    else return next(err);
   }
 };
 
-const findAll = async (req: Request, res: Response) => {
+const findAll = async (req: Request, res: Response, next: NextFunction) => {
+  const page = parseInt(req.query.page as string) || 1;
+  const pageSize = parseInt(req.query.pageSize as string) || 10;
+
   try {
-    const records = await customRepository.find({
+    const skip = (page - 1) * pageSize;
+
+    const [records, totalRecords] = await customRepository.findAndCount({
       relations: ["customFields", "section"],
+      skip,
+      take: pageSize,
     });
-    return success(res, records, "Success");
+    const total_pages = Math.ceil(totalRecords / pageSize);
+    const current_page = page;
+    const previous_page = current_page > 1 ? current_page - 1 : null;
+    const next_page = current_page < total_pages ? current_page + 1 : null;
+    const response = {
+      current_page,
+      total_pages,
+      previous_page,
+      next_page,
+      data: records,
+    };
+
+    return success(res, response, "Success");
   } catch (err) {
     console.log(err);
+    if (err instanceof QueryFailedError)
+      return next(
+        new Error(
+          "A database error occurred. Please contact the administrator."
+        )
+      );
+    else return next(err);
   }
 };
 
-const findOne = async (req: Request, res: Response) => {
+const findOne = async (req: Request, res: Response, next: NextFunction) => {
   const { id } = req.params;
   try {
     const sectionId = parseInt(req.params.id);
@@ -249,6 +381,13 @@ const findOne = async (req: Request, res: Response) => {
       : error(res, "record not found", 400);
   } catch (err) {
     console.log(err);
+    if (err instanceof QueryFailedError)
+      return next(
+        new Error(
+          "A database error occurred. Please contact the administrator."
+        )
+      );
+    else return next(err);
   }
 };
 
@@ -265,6 +404,17 @@ export const updateCustomSection = async (
   try {
     const id = parseInt(req.params.id);
 
+    const updateCustomSectionSchema: any = z.object({
+      sectionId: z.number().positive().int().optional(),
+
+      title: z
+        .string()
+        .min(3)
+        .refine((value) => !/^\s*$/.test(value), {
+          message: "The title must not be empty or consist of only spaces",
+        })
+        .optional(),
+    });
     updateCustomSectionSchema.parse(req.body);
 
     const idValidator = z
@@ -353,7 +503,8 @@ export const deleteCustomSection = async (
 
 const createCustomField = async (
   req: Request<{}, {}, IField, {}>,
-  res: Response
+  res: Response,
+  next: NextFunction
 ) => {
   try {
     const customSection = await customRepository.findOne({
@@ -372,31 +523,62 @@ const createCustomField = async (
     return success(res, newRecords, "Success");
   } catch (err) {
     console.error(err);
-    return error(res, "An error occurred", 500);
+    return next(err);
   }
 };
 
 export const findAllCustomField = async (
-  req: Request<{}, {}, {}, { customSection?: number }>,
+  req: Request<
+    {},
+    {},
+    {},
+    { customSection?: number; page?: string; pageSize?: string }
+  >,
   res: Response,
   next: NextFunction
 ) => {
+  const { customSection, page, pageSize } = req.query;
+
   try {
     const filter: any = {};
-    if (req.query.customSection)
-      filter.customSection = { id: req.query.customSection };
-    const records = await customFieldRepository.find({
+    if (customSection) filter.customSection = { id: customSection };
+
+    const parsedPage = parseInt(page) || 1;
+    const parsedPageSize = parseInt(pageSize) || 10;
+    const skip = (parsedPage - 1) * parsedPageSize;
+
+    const [records, totalRecords] = await customFieldRepository.findAndCount({
       where: filter,
       relations: ["customSection"],
+      skip,
+      take: parsedPageSize,
     });
-    return success(res, records, "Success");
+
+    const total_pages = Math.ceil(totalRecords / parsedPageSize);
+    const current_page = parsedPage;
+    const previous_page = current_page > 1 ? current_page - 1 : null;
+    const next_page = current_page < total_pages ? current_page + 1 : null;
+
+    const response = {
+      current_page,
+      total_pages,
+      previous_page,
+      next_page,
+      data: records,
+    };
+
+    return success(res, response, "Success");
   } catch (err) {
     console.log(err);
     next(new InternalServerError(err.message));
   }
 };
 
-const findOneCustomField = async (req: Request, res: Response) => {
+const findOneCustomField = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   const { id } = req.params;
 
   try {
@@ -432,11 +614,13 @@ const findOneCustomField = async (req: Request, res: Response) => {
       });
     } else {
       console.error(error);
-      return res.status(500).json({
-        successful: false,
-        message: "An error occurred",
-        data: null,
-      });
+      if (error instanceof QueryFailedError)
+        return next(
+          new Error(
+            "A database error occurred. Please contact the administrator."
+          )
+        );
+      else return next(error);
     }
   }
 };
@@ -477,7 +661,7 @@ const customUserSectionSchema = z.object({
   title: z
     .string()
     .min(3, { message: "title must have at least three characters " })
-    .refine((value) => /^[A-Za-z]+$/.test(value), {
+    .refine((value) => /^[A-Za-z\s]+$/.test(value), {
       message: "title must contain only letters (A-Z, a-z)",
     }),
   userId: z.string().uuid().min(3),
@@ -491,13 +675,13 @@ const customFieldSchema = z.object({
   fieldType: z
     .string()
     .min(3, { message: "fieldType must have at least three characters " })
-    .refine((value) => /^[A-Za-z]+$/.test(value), {
+    .refine((value) => /^[A-Za-z\s]+$/.test(value), {
       message: "Field must contain only letters (A-Z, a-z)",
     }),
   fieldName: z
     .string()
     .min(3, { message: "fieldName must have at least three characters " })
-    .refine((value) => /^[A-Za-z]+$/.test(value), {
+    .refine((value) => /^[A-Za-z\s]+$/.test(value), {
       message: "Field must contain only letters (A-Z, a-z)",
     }),
   value: z.string().nullable(),
@@ -514,21 +698,21 @@ const sectionSchema = z.object({
   name: z
     .string()
     .min(3, { message: "name must have at least three characters " })
-    .refine((value) => /^[A-Za-z]+$/.test(value), {
+    .refine((value) => /^[A-Za-z\s]+$/.test(value), {
       message: "Field must contain only letters (A-Z, a-z)",
     }),
   description: z
     .string()
     .min(3, { message: "description must have at least three characters " })
     .optional()
-    .refine((value) => /^[A-Za-z]+$/.test(value), {
+    .refine((value) => /^[A-Za-z\s]+$/.test(value), {
       message: "Field must contain only letters (A-Z, a-z)",
     }),
   meta: z
     .string()
     .min(3, { message: "meta must have at least three characters " })
     .optional()
-    .refine((value) => /^[A-Za-z]+$/.test(value), {
+    .refine((value) => /^[A-Za-z\s]+$/.test(value), {
       message: "Field must contain only letters (A-Z, a-z)",
     }),
 });
@@ -669,6 +853,7 @@ export {
   customUserSectionSchema,
   customFieldSchema,
   createSection,
+  // updateCustomSection,
   sectionSchema,
   fieldsSchema,
   getSection,
@@ -677,6 +862,6 @@ export {
   UpdateSection,
   deleteSection,
   updateSectionSchema,
-  updateCustomSectionSchema,
+  // updateCustomSectionSchema,
   customGetUserSectionSchema,
 };
