@@ -63,24 +63,43 @@ const createAwardController = async (
   }
 };
 
+
 // Get award by Id
 const getAwardController = async (req: Request, res: Response) => {
-  const awardRepo = connectionSource.getRepository(Award);
-  const userRepo = connectionSource.getRepository(User);
-  try {
-    const id = req.params.id
-    const user = await userRepo.findOne({ where: { id } });
-    const award = await awardRepo.findOne({ where: { user } });
+  const awardRepo = connectionSource.getRepository(Award)
 
+  try {
+    const id = parseInt(req.params.id)
+    const data = await awardRepo.findOne({
+      where: { id },
+      relations: ['user'],
+    })
+
+    if (!data) {
+      return res.status(404).json({ message: 'Award not found' })
+    }
+    const { id: userId, firstName, lastName } = data.user
+    const award = {
+      title: data.title,
+      year: data.year,
+      presented_by: data.presented_by,
+      url: data.url,
+      description: data.description,
+      user: {
+        userId,
+        firstName,
+        lastName,
+      },
+    }
     res.status(200).json({
-      message: "Award retrieved successfully",
+      message: 'Award retrieved successfully',
       award,
-    });
+    })
   } catch (error) {
     console.error("Error getting award", error);
     res.status(500).json({ message: "Error getting awards" });
   }
-};
+}
 
 // get all awards
 const getAllAwardsController = async (req: Request, res: Response) => {
@@ -115,8 +134,8 @@ const deleteAwardController = async (req: Request, res: Response) => {
     await awardRepo.remove(award);
 
     res.status(200).json({
-      message: "Award deleted successfully",
-      award,
+      message: "Award deleted successfully"
+    
     });
   } catch (error) {
     console.error("Error deleting award", error);
