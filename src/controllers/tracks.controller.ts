@@ -4,11 +4,19 @@ import { Tracks, UserTrack, User } from "../database/entities";
 import { error, success } from "../utils";
 import { NotFoundError, BadRequestError } from "../middlewares";
 import { userIdSchema } from "../middlewares/interests.zod";
-import { ZodError } from "zod";
+import { ZodError, z } from "zod";
 
 const trackRepository = connectionSource.getRepository(Tracks);
 const userTrackRepository = connectionSource.getRepository(UserTrack);
 const userRepository = connectionSource.getRepository(User);
+
+const trackSchema = z.object({
+  userId: userIdSchema,
+  trackId: z.number({
+    required_error: "track_id is required in request body",
+    invalid_type_error: "track_id must be a number"
+  }).int()
+})
 
 export const getAllTracks = async (req: Request, res: Response) => {
   try {
@@ -51,7 +59,7 @@ export const createUserTrack = async (
     }
 
     try {
-      userIdSchema.parse(user_id)
+      trackSchema.parse({ userId: user_id, trackId: track_id })
     } catch (err){
 
       const { errors } = err as ZodError;
