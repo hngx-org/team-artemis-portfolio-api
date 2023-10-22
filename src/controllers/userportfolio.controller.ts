@@ -24,7 +24,8 @@ import {
   ProjectsImage,
 } from '../database/entities';
 import { NotFoundError, BadRequestError } from '../middlewares/index';
-import { success } from '../utils';
+import { error, success } from '../utils';
+import { validateSlug } from '../services/shop.service';
 
 const portfolioDetailsRepository =
   connectionSource.getRepository(PortfolioDetail);
@@ -58,6 +59,11 @@ const getPortfolioDetails = async (
   try {
     // const { userId } = req.params;
     const { slug } = req.params;
+
+    if(slug.trim().length < 1) {
+      return error(res, "slug cannot be an empty string", 400)
+    }
+
     // if (!userId || !isValidUUID(`${userId}`)) {
     //   throw new BadRequestError(`${userId} is not a valid UUID`);
     // }
