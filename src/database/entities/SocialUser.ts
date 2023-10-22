@@ -9,6 +9,7 @@ import {
 import { SocialMedia } from "./SocialMedia"; // Import the SocialMedia entity
 import { User } from "./User"; // Import the User entity
 @Entity("social_user", { schema: "public" })
+//bugfix on table name
 export class SocialUser {
   @PrimaryGeneratedColumn({ type: "integer", name: "Id" })
   Id: number;
