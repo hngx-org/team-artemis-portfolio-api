@@ -126,7 +126,7 @@ export const createContacts = async (
   const socialsRepo = dataSource.getRepository(SocialMedia);
 
   try {
-    let social = await socialsRepo.find({ where: { Id: social_media_id } });
+    let social = await socialsRepo.find({ where: { id: social_media_id } });
     console.log(social);
 
     if (social.length < 1) {
@@ -329,7 +329,7 @@ export const updateContactController = async (req: Request, res: Response) => {
     const socialsRepo = dataSource.getRepository(SocialMedia);
 
     try {
-      let social = await socialsRepo.find({ where: { Id: socialMediaId } });
+      let social = await socialsRepo.find({ where: { id: socialMediaId } });
       console.log(social);
 
       if (social.length < 1) {
