@@ -1,16 +1,16 @@
 import { Request, Response, NextFunction } from "express";
 import { success, error } from "../utils";
 import { ZodError } from "zod";
-import { NotificationSetting, UserTrack } from "../database/entity/model";
 import { connectionSource } from "../database/data-source";
-import { User } from "../database/entity/user";
 import {
   accountSettingSchema,
   hashPassword,
-  notificationSettingSchema,
+  validateNotificataionSettingsData,
   verifyPassword,
 } from "../services/settings.service";
 import { NotificationSettings } from "../interfaces/settings.interface";
+import { NotificationSetting, User } from "../database/entities";
+import { NotFoundError, errorHandler } from "../middlewares";
 const userRespository = connectionSource.getRepository(User);
 
 export const updateUserAccountSettingController = async (
@@ -117,62 +117,86 @@ export const createNotificationSettingController = async (
     const notificationSettingRepository =
       connectionSource.getRepository(NotificationSetting);
 
-    const error = notificationSettingSchema.parse({
-      communityUpdate,
-      emailSummary,
-      newMessages,
-      followUpdate,
-      specialOffers,
-    });
-
-    if (error instanceof ZodError) {
-      return res.status(404).json({
-        status: `error`,
-        message: error.errors,
-        success: false,
-      });
-    }
-
     const isExistingUser = await userRespository.findOneBy({
       id: userId,
     });
 
     if (!isExistingUser) {
-      return res.status(404).json({
-        status: `error`,
-        message: `User does not exist`,
-        success: false,
-      });
+      throw new NotFoundError(`User does not exist`);
     }
 
-    const notificationSetting: NotificationSettings = new NotificationSetting();
-    notificationSetting.userId = userId;
+    const hasExistingNotificationPreferences =
+      await notificationSettingRepository.find({
+        where: { user: { id: userId } },
+      });
+
+    if (hasExistingNotificationPreferences.length > 0) {
+      const isValidData = await validateNotificataionSettingsData(
+        req,
+        res,
+        true
+      );
+      if (!isValidData) {
+        return;
+      }
+
+      const updateNotification =
+        hasExistingNotificationPreferences.slice(-1)?.[0];
+
+      updateNotification.communityUpdate =
+        communityUpdate || updateNotification.communityUpdate;
+      updateNotification.emailSummary =
+        emailSummary || updateNotification.emailSummary;
+      updateNotification.newMessages =
+        newMessages || updateNotification.newMessages;
+      updateNotification.followUpdate =
+        followUpdate || updateNotification.followUpdate;
+      updateNotification.specialOffers =
+        specialOffers || updateNotification.specialOffers;
+
+      const updatedNotification = await notificationSettingRepository.save(
+        updateNotification
+      );
+
+      return success(
+        res,
+        updatedNotification,
+        `Notification updated successfully`
+      );
+    }
+
+    const hasPassedValidation = await validateNotificataionSettingsData(
+      req,
+      res
+    );
+    if (!hasPassedValidation) {
+      return;
+    }
+
+    const notificationSetting = new NotificationSetting();
     notificationSetting.communityUpdate = communityUpdate || false;
     notificationSetting.emailSummary = emailSummary || false;
     notificationSetting.newMessages = newMessages || false;
     notificationSetting.followUpdate = followUpdate || false;
     notificationSetting.specialOffers = specialOffers || false;
+    notificationSetting.user = isExistingUser;
 
     const notificationInfo = await notificationSettingRepository.save(
       notificationSetting
     );
 
     if (!notificationInfo) {
-      res.status(404).json({
-        status: `error`,
-        message: `Notification settings not activated`,
-        success: false,
-      });
+      throw new NotFoundError(
+        "Notification not found. Ensure you are passing a valid User ID"
+      );
     }
+
+    // Remove the user property from the response object
+    Reflect.deleteProperty(notificationInfo, "user");
 
     success(res, notificationInfo, `activated notification`);
   } catch (error) {
-    console.log(error),
-      res.status(500).json({
-        status: `error`,
-        message: `Internet error`,
-        success: false,
-      });
+    console.log(error), errorHandler(error, req, res, next);
   }
 };
 
@@ -255,7 +279,9 @@ export const updateNotificationSettings = async (
       return error(res, "Please provide a valid User ID", 400);
     }
 
-    const user = await userRespository.findOneBy({ id: userId });
+    const user = await userRespository.findOne({
+      where: { id: userId },
+    });
 
     if (!user) {
       return error(res, "User does not exist", 400);
@@ -264,37 +290,43 @@ export const updateNotificationSettings = async (
     const notificationModel =
       connectionSource.getRepository(NotificationSetting);
 
-    const notification = await notificationModel.findOneBy({
-      userId,
+    const notification = await notificationModel.find({
+      where: {
+        user: {
+          id: userId,
+        },
+      },
+      order: { id: "DESC" },
+      take: 1,
     });
 
     if (!notification) {
       return error(
         res,
-        "Cannot find notification. Please provide a valid Notification ID",
+        "Cannot find notification. Please provide a valid User ID",
         400
       );
     }
 
-    notification.emailSummary = emailSummary;
-    notification.specialOffers = specialOffers;
-    notification.communityUpdate = communityUpdate;
-    notification.followUpdate = followUpdate;
-    notification.newMessages = newMessages;
-    notification.userId = userId;
+    const latestNotification = notification[0];
 
-    const notificationId = notification.id;
+    latestNotification.emailSummary = emailSummary;
+    latestNotification.specialOffers = specialOffers;
+    latestNotification.communityUpdate = communityUpdate;
+    latestNotification.followUpdate = followUpdate;
+    latestNotification.newMessages = newMessages;
 
-    const updateNotification = await notificationModel.update(
-      notificationId,
-      notification
-    );
+    const updateNotification = await notificationModel.save(latestNotification);
 
     if (!updateNotification) {
       return error(res, "Error updating notification", 400);
     }
 
-    return success(res, notification, "Notification updated successfully");
+    return success(
+      res,
+      updateNotification,
+      "Notification updated successfully"
+    );
   } catch (err) {
     console.log("error", err?.message);
     return error(res, err?.message);
@@ -307,14 +339,27 @@ export const getUserNotificationSettings = async (
 ) => {
   try {
     const userId = req.params.userId;
-    if (!userId) {
+
+    const user = await userRespository.findOne({
+      where: { id: userId },
+    });
+
+    if (!user) {
       return error(res, "Please provide a valid User ID", 400);
     }
 
     const notificationModel =
       connectionSource.getRepository(NotificationSetting);
 
-    const notifications = await notificationModel.findBy({ userId });
+    const notifications = await notificationModel.find({
+      where: {
+        user: {
+          id: userId,
+        },
+      },
+      order: { id: "DESC" },
+      take: 1,
+    });
 
     return success(res, notifications, "Notifications fetched successfully");
   } catch (err) {

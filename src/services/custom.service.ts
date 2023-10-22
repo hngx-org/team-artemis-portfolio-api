@@ -1,5 +1,5 @@
 import { connectionSource } from "../database/data-source";
-import { CustomUserSection } from "../database/entity/model";
+import { CustomUserSection } from "../database/entities";
 import { ICustomSection } from "../interfaces"
 
 export const deleteCustomSectionService = async (
@@ -11,7 +11,7 @@ export const deleteCustomSectionService = async (
       connectionSource.getRepository(CustomUserSection);
 
     const sectionToBeDeleted = await customSectionRepository.findOne({
-      where: { id: customSectionId, userId: userId },
+      where: { id: customSectionId },
     });
 
     if (!sectionToBeDeleted) {

@@ -1,7 +1,7 @@
 import express from "express";
 import multer from "multer";
 import {
-  createProfileController,
+  updateProfileController,
   getAllUsers,
   getUserById,
   uploadImageController,
@@ -34,7 +34,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /api/users:
+ * /api/v1/users:
  *   get:
  *     summary: Get all users
  *     description: Retrieve a list of all users' portfolio details.
@@ -54,7 +54,7 @@ router.get("/users", getAllUsers);
 
 /**
  * @swagger
- * /api/users/{userId}:
+ * /api/v1/users/{userId}:
  *   get:
  *     summary: Get user details by ID
  *     description: Retrieve a user's portfolio details by providing their ID.
@@ -83,7 +83,7 @@ router.get("/users/:userId", getUserById);
 
 /**
  * @swagger
- * /api/profile/{userId}:
+ * /api/v1/profile/{userId}:
  *   post:
  *     summary: Create Portfolio profile
  *     description: Create a portfolio.
@@ -129,15 +129,14 @@ router.get("/users/:userId", getUserById);
  *                 error:
  *                   type: string
  */
-router.post(
-  "/profile/:userId",
-  validateCreatePortfolioDetails(createPorfolioDataSchema),
-  createProfileController
+router.put(
+  "/users/:userId",
+  updateProfileController
 );
 
 /**
  * @swagger
- * /api/profile/cover/upload:
+ * /api/v1/profile/cover/upload:
  *   post:
  *     summary: Upload user cover photo
  *     description: Upload multiple cover photos using a POST request.
@@ -179,7 +178,7 @@ router.post("/profile/cover/upload", uploadHandler, uploadProfileCoverController
 
 /**
  * @swagger
- * /api/profile/image/upload:
+ * /api/v1/profile/image/upload:
  *   post:
  *     summary: Upload a profile image
  *     description: Upload a user's profile image using a POST request.
@@ -223,6 +222,47 @@ router.post("/profile/image/upload", uploadHandler, uploadProfileImageController
 
 
 
+/**
+ * @swagger
+ * /api/v1/update/details/{userId}:
+ *   delete:
+ *     summary: Delete a user section
+ *     description: Delete all entries of a particular section for a user.
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         description: The ID of the user whose section is to be deleted.
+ *         type: uuid
+ *         example: "d290f1ee-6c54-4b01-90e6-d701748f0851"
+ *       - in: body
+ *         name: body
+ *         required: true
+ *         description: Body of request takes a section name
+ *         schema:
+ *           type: object
+ *           properties:
+ *             section:
+ *               type: string
+ *               example: "about"
+ *     responses:
+ *       200:
+ *         description: Successful response
+ *         schema:
+ *           type: object
+ *           properties:
+ *             message:
+ *               type: string
+ *       400:
+ *         description: Bad request
+ *         schema:
+ *           type: object
+ *           properties:
+ *             error:
+ *               type: string
+ *     tags:
+ *       - Settings
+ */
 
 router.delete("/profile/details/:userId", deleteAllSectionEntries);
 

@@ -24,11 +24,12 @@ import {
   createProject,
   updateProjectById,
   deleteProjectController,
+  getAllProjectsForUser,
 } from "../controllers/projects.controller";
 
 /**
  * @swagger
- * /api/projects:
+ * /api/v1/projects:
  *   get:
  *     summary: Get all projects
  *     description: Retrieve a list of all projects.
@@ -53,7 +54,7 @@ import {
 router.get("/projects", getAllProjects);
 /**
  * @swagger
- * /api/projects/{id}:
+ * /api/v1/projects/{id}:
  *   get:
  *     summary: Get project by ID
  *     description: Retrieve a project by its ID.
@@ -84,7 +85,7 @@ router.get("/projects", getAllProjects);
 router.get("/projects/:id", getProjectById);
 /**
  * @swagger
- * /api/projects:
+ * /api/v1/projects:
  *   post:
  *     summary: Create a new project
  *     description: Create a new project with images and project details.
@@ -135,7 +136,7 @@ router.post("/projects", uploadHandler, createProject);
 
 /**
  * @swagger
- * /api/projects/{id}:
+ * /api/v1/projects/{id}:
  *   delete:
  *     summary: Delete project by ID
  *     description: Delete a project by its ID.
@@ -166,7 +167,7 @@ router.delete("/projects/:id", deleteProjectController);
 
 /**
  * @swagger
- * /api/update-project/{project_id}:
+ * /api/v1/update-project/{project_id}:
  *   put:
  *     summary: Update a project
  *     description: Update an existing project with images and project details.
@@ -254,6 +255,39 @@ router.delete("/projects/:id", deleteProjectController);
  *       - Project
  */
 
-router.put("/update-project/:project_id", uploadHandler, updateProjectById);
+router.put("/projects/:project_id", uploadHandler, updateProjectById);
+
+
+/**
+ * @swagger
+ * /api/v1/users/{id}/projects:
+ *   get:
+ *     summary: Get project by ID
+ *     description: Retrieve a project by its ID.
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: The ID of the project to retrieve.
+ *         schema:
+ *           type: string
+ *     responses:
+ *       '200':
+ *         description: Successfully retrieved the project
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *       '404':
+ *         description: Project not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *     tags:
+ *       - Project
+ */
+
+router.get("/users/:user_id/projects", getAllProjectsForUser);
 
 module.exports = router;

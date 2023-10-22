@@ -1,52 +1,35 @@
 import { Request, Response, NextFunction } from "express";
 
 class CustomError extends Error {
-  statusCode: number; // Define the statusCode property
+  statusCode: number;
 
-  constructor(message: string, statusCode?: number) {
+  constructor(name: string, message: string, statusCode?: number) {
     super(message);
-    this.name = this.constructor.name;
+    this.name = name;
     this.statusCode = statusCode || 500;
     Error.captureStackTrace(this, this.constructor);
   }
 }
 
-class NotFoundError extends CustomError {
-  constructor(message: string) {
-    super(message, 404);
-    this.name = this.constructor.name;
-  }
+function createCustomError(name: string, statusCode: number = 500) {
+  return class extends CustomError {
+    constructor(message: string) {
+      super(name, message, statusCode);
+    }
+  };
 }
 
-class BadRequestError extends CustomError {
-  constructor(message: string) {
-    super(message, 400);
-  }
-}
-
-class UnauthorizedError extends CustomError {
-  constructor(message: string) {
-    super(message, 401);
-  }
-}
-
-class ForbiddenError extends CustomError {
-  constructor(message: string) {
-    super(message, 403);
-  }
-}
-
-class InternalServerError extends CustomError {
-  constructor(message: string) {
-    super(message, 500);
-  }
-}
-
-class MethodNotAllowedError extends CustomError {
-  constructor(message: string) {
-    super(message, 405);
-  }
-}
+const NotFoundError = createCustomError("NotFound Error", 404);
+const BadRequestError = createCustomError("BadRequest Error", 400);
+const UnauthorizedError = createCustomError("Unauthorized Error", 401);
+const ForbiddenError = createCustomError("Forbidden Error", 403);
+const InternalServerError = createCustomError("Internal ServerError", 500);
+const MethodNotAllowedError = createCustomError("MethodNotAllowed Error", 405);
+const ConflictError = createCustomError("Conflict Error", 409);
+const UnprocessableEntityError = createCustomError(
+  "Unprocessable Entity Error",
+  422
+);
 
 const errorHandler = (
   err: CustomError,
@@ -59,44 +42,20 @@ const errorHandler = (
   if (res.headersSent) {
     return next(err);
   }
-  res.setHeader("Content-Type", "application/json");
 
-  if (err instanceof SyntaxError) {
-    res.status(400).json({ message: err.message });
-  }
+  const errorResponse = {
+    timestamp: new Date().toISOString(),
+    status: err.statusCode || 500,
+    error: err.name || "Internal Server Error",
+    message: err.message || "Something went wrong",
+    path: req.path,
+    success: false,
+  };
 
-  if (err instanceof NotFoundError) {
-    return res.status(err.statusCode).json({ message: err.message });
-  }
-
-  if (err instanceof BadRequestError) {
-    return res.status(err.statusCode).json({ message: err.message });
-  }
-
-  if (err instanceof UnauthorizedError) {
-    res.status(err.statusCode).json({ message: err.message });
-  }
-  if (err instanceof ForbiddenError) {
-    res.status(err.statusCode).json({ message: err.message });
-  }
-
-  if (err instanceof InternalServerError) {
-    return res.status(err.statusCode).json({ message: err.message });
-  }
-
-  if (err instanceof MethodNotAllowedError) {
-    res.status(err.statusCode).json({ message: err.message });
-  }
-
-  if (err instanceof CustomError) {
-    return res.status(err.statusCode).json({ message: err.message });
-  }
-  res.status(err.statusCode || 500).json({ message: err.message });
-
+  res.status(errorResponse.status).json(errorResponse);
 };
 
 export {
-  errorHandler,
   CustomError,
   NotFoundError,
   BadRequestError,
@@ -104,4 +63,7 @@ export {
   ForbiddenError,
   InternalServerError,
   MethodNotAllowedError,
+  UnprocessableEntityError,
+  ConflictError,
+  errorHandler,
 };
