@@ -65,60 +65,6 @@ export const validateSectionId = (sectionId: any, res: Response) => {
   }
 };
 
-// export const deleteCustomSection = async (req: Request, res: Response) => {
-//   try {
-//     const customSectionId = parseInt(req.params.id);
-//     const { userId } = req.body;
-
-//     // validator for the custom section Id
-//     const customSectionIdValidator = z
-//       .number({
-//         required_error: "id is required",
-//         invalid_type_error: "id must be a number",
-//       })
-//       .int({ message: "id must be an integer" })
-//       .positive({ message: "must be a positive integer" });
-
-//     // validator for user ID
-//     const userIdValidator = z
-//       .string({
-//         required_error: "userId is required",
-//         invalid_type_error: "userId must be uuid",
-//       })
-//       .uuid({ message: "userId must be of type uuid" });
-
-//     const userIdValidate = userIdValidator.safeParse(userId);
-//     const customSectionIdValidate =
-//       customSectionIdValidator.safeParse(customSectionId);
-
-//     if (customSectionIdValidate.success === false) {
-//       const err = new BadRequestError(customSectionIdValidate.error.message);
-//       return res
-//         .status(err.statusCode)
-//         .json({ err: JSON.parse(err.message)[0].message });
-//     }
-
-//     if (userIdValidate.success === false) {
-//       const err = new BadRequestError(userIdValidate.error.message);
-//       return res
-//         .status(err.statusCode)
-//         .json({ err: JSON.parse(err.message)[0].message });
-//     }
-
-//     const data = await deleteCustomSectionService(customSectionId, userId);
-
-//     if (data.successful) {
-//       return success(res, data);
-//     } else {
-//       const err = new NotFoundError(data.message);
-//       return res.status(err.statusCode).json({ err: err.message });
-//     }
-//   } catch (error: any) {
-//     const err = new InternalServerError(error.message);
-//     return res.status(err.statusCode).json({ err: err.message });
-//   }
-// };
-
 const createSection = async (
   req: Request<{}, {}, ISection, {}>,
   res: Response
@@ -142,14 +88,35 @@ const createSection = async (
   }
 };
 
-const getSection = async (
-  req: Request<{}, {}, {}, IGetSection>,
-  res: Response
-) => {
-  const filter = req.query.name ? { where: { name: req.query.name } } : {};
+const getSection = async (req: Request, res: Response) => {
+  const { page, pageSize, name } = req.query;
+  const parsedPage = parseInt(page as string) || 1;
+  const parsedPageSize = parseInt(pageSize as string) || 10;
+  const filter = name ? { name: String(name) } : {};
+
   try {
-    const section = await sectionRepository.find(filter);
-    return success(res, section, "Success");
+    const skip = (parsedPage - 1) * parsedPageSize;
+
+    const [sections, totalSections] = await sectionRepository.findAndCount({
+      where: filter,
+      skip,
+      take: parsedPageSize,
+    });
+
+    const total_pages = Math.ceil(totalSections / parsedPageSize);
+    const current_page = parsedPage;
+    const previous_page = current_page > 1 ? current_page - 1 : null;
+    const next_page = current_page < total_pages ? current_page + 1 : null;
+
+    const response = {
+      current_page,
+      total_pages,
+      previous_page,
+      next_page,
+      data: sections,
+    };
+
+    return success(res, response, "Success");
   } catch (err) {
     console.log(err);
     return error(res, "An error occurred", 500);
@@ -183,13 +150,13 @@ const UpdateSection = async (
       where: { id: Number(id) },
     });
     if (!section) return error(res, "Section not found", 404);
-    // if (req.body.position) {
-    //   const positionExists = await sectionRepository.findOne({
-    //     // where: { position: req.body.position },
-    //   });
-    //   if (positionExists)
-    //     return error(res, "A section with this position already exist", 400);
-    // }
+    if (req.body.position) {
+      const positionExists = await sectionRepository.findOne({
+        // where: { position: req.body.position },
+      });
+      if (positionExists)
+        return error(res, "A section with this position already exist", 400);
+    }
     await sectionRepository.update(id, req.body);
     const newsection = await sectionRepository.findOne({
       where: { id: Number(id) },
@@ -219,6 +186,7 @@ const deleteSection = async (
   }
 };
 
+// Custom
 const create = async (
   req: Request<{}, {}, ICustomSection, {}>,
   res: Response
@@ -247,16 +215,43 @@ const create = async (
 
 export const getAllCustomSections = async (req: Request, res: Response) => {
   const { id } = req.params;
+  const page = parseInt(req.query.page as string) || 1;
+  const pageSize = parseInt(req.query.pageSize as string) || 10; // Set a default page size
+
   try {
     const user = await userRepository.findOne({
       where: { id },
     });
+
     if (!user) return error(res, "User not found", 400);
-    const records = await customRepository.find({
+
+    // Calculate the skip value based on the page and pageSize
+    const skip = (page - 1) * pageSize;
+
+    // Query for a limited number of records based on pagination parameters
+    const [records, totalRecords] = await customRepository.findAndCount({
       where: { user: { id } },
       relations: ["customFields"],
+      skip,
+      take: pageSize,
     });
-    return success(res, records, "Success");
+
+    // Calculate pagination details
+    const total_pages = Math.ceil(totalRecords / pageSize);
+    const current_page = page;
+    const previous_page = current_page > 1 ? current_page - 1 : null;
+    const next_page = current_page < total_pages ? current_page + 1 : null;
+
+    // Create a response object that includes pagination information and data
+    const response = {
+      current_page,
+      total_pages,
+      previous_page,
+      next_page,
+      data: records,
+    };
+
+    return success(res, response, "Success");
   } catch (err) {
     console.log(err);
     return error(res, "An error occurred", 500);
@@ -264,13 +259,39 @@ export const getAllCustomSections = async (req: Request, res: Response) => {
 };
 
 const findAll = async (req: Request, res: Response) => {
+  const page = parseInt(req.query.page as string) || 1;
+  const pageSize = parseInt(req.query.pageSize as string) || 10; // Set a default page size
+
   try {
-    const records = await customRepository.find({
+    // Calculate the skip value based on the page and pageSize
+    const skip = (page - 1) * pageSize;
+
+    // Query for a limited number of records based on pagination parameters
+    const [records, totalRecords] = await customRepository.findAndCount({
       relations: ["customFields", "section"],
+      skip,
+      take: pageSize,
     });
-    return success(res, records, "Success");
+
+    // Calculate pagination details
+    const total_pages = Math.ceil(totalRecords / pageSize);
+    const current_page = page;
+    const previous_page = current_page > 1 ? current_page - 1 : null;
+    const next_page = current_page < total_pages ? current_page + 1 : null;
+
+    // Create a response object that includes pagination information and data
+    const response = {
+      current_page,
+      total_pages,
+      previous_page,
+      next_page,
+      data: records,
+    };
+
+    return success(res, response, "Success");
   } catch (err) {
     console.log(err);
+    return error(res, "An error occurred", 500);
   }
 };
 
@@ -294,11 +315,48 @@ const findOne = async (req: Request, res: Response) => {
 };
 
 export const updateCustomSection = async (
-  req: Request<{ id: string }, {}, { userId: string; sectionId: number }, {}>,
-  res: Response
+  req: Request<
+    { id: string },
+    {},
+    { userId: string; sectionId: number; title: string },
+    {}
+  >,
+  res: Response,
+  next: NextFunction
 ) => {
-  const { id } = req.params;
   try {
+    const id = parseInt(req.params.id);
+
+    const updateCustomSectionSchema: any = z.object({
+      sectionId: z.number().positive().int().optional(),
+
+      title: z
+        .string()
+        .min(3)
+        .refine((value) => !/^\s*$/.test(value), {
+          message: "The title must not be empty or consist of only spaces",
+        })
+        .optional(),
+    });
+    updateCustomSectionSchema.parse(req.body);
+
+    const idValidator = z
+      .number({
+        required_error: "id is required",
+        invalid_type_error: "id must be a number",
+      })
+      .int({ message: "id must be an integer" })
+      .positive({ message: "id must be a positive integer" });
+
+    const idValidate = idValidator.safeParse(id);
+
+    if (idValidate.success === false) {
+      const err = new BadRequestError(idValidate.error.message);
+      return res
+        .status(err.statusCode)
+        .json({ err: JSON.parse(err.message)[0].message });
+    }
+
     const section = await customRepository.findOne({
       where: { id: Number(id) },
     });
@@ -310,6 +368,9 @@ export const updateCustomSection = async (
       });
       if (!section) return error(res, "Section does not exist", 400);
       newRecord.section = section;
+      if (req.body.title) {
+        newRecord.title = req.body.title;
+      }
     }
     await customRepository.update(id, newRecord);
     const custom = await customRepository.findOne({
@@ -317,18 +378,36 @@ export const updateCustomSection = async (
       relations: ["customFields", "section", "user"],
     });
     return success(res, custom, "Success");
-  } catch (err) {
-    console.log(err);
-    return error(res, "An error occurred", 500);
+  } catch (err: any) {
+    if (err instanceof z.ZodError) {
+      const errorMessages = err.issues.map(
+        (issue) => `${issue.path}: ${issue.message}`
+      );
+      const errors = errorMessages.join("; ");
+      next(new BadRequestError(errors));
+    }
+    next(new InternalServerError(err.message));
   }
 };
 
 export const deleteCustomSection = async (
   req: Request<IGetSingleSection, {}, {}, {}>,
-  res: Response
+  res: Response,
+  next: NextFunction
 ) => {
-  const { id } = req.params;
   try {
+    const { id } = req.params;
+
+    const idValidator = z
+      .number({
+        required_error: "id is required",
+        invalid_type_error: "id must be a number",
+      })
+      .int({ message: "id must be an integer" })
+      .positive({ message: "id must be a positive integer" });
+
+    idValidator.parse(parseInt(id as any));
+
     const section = await customRepository.findOne({
       where: { id },
     });
@@ -336,8 +415,12 @@ export const deleteCustomSection = async (
     await customRepository.delete(id);
     return success(res, true, "Success");
   } catch (err) {
-    console.log(err);
-    return error(res, "An error occurred", 500);
+    if (err instanceof z.ZodError) {
+      const errorMessages = err.issues.map((issue) => issue.message);
+      const errors = errorMessages.join("; ");
+      next(new BadRequestError(errors));
+    }
+    next(new InternalServerError(err.message));
   }
 };
 
@@ -546,10 +629,6 @@ const updateSectionSchema: any = z
     }
   );
 
-const updateCustomSectionSchema: any = z.object({
-  sectionId: z.number().positive(),
-});
-
 const getSectionSchema = z.object({
   name: z.string().optional(),
 });
@@ -557,14 +636,6 @@ const getSectionSchema = z.object({
 export const getcustomfieldsSchema: any = z.object({
   customSection: z.string().optional(),
 });
-// .refine(
-//   (data) => {
-//     return Number(data) > 0;
-//   },
-//   {
-//     message: "Number must be greater than 0",
-//   }
-// );
 
 const validateSchema =
   (schema: AnyZodObject) => async (req: Request, res: Response, next: any) => {
@@ -680,6 +751,6 @@ export {
   UpdateSection,
   deleteSection,
   updateSectionSchema,
-  updateCustomSectionSchema,
+  // updateCustomSectionSchema,
   customGetUserSectionSchema,
 };

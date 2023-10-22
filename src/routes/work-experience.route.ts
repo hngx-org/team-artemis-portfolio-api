@@ -132,7 +132,7 @@ router.delete("/experience/:id", deleteWorkExperience);
 
 /**
  * @swagger
- * /api/experience:
+ * /api/v1/work-experience:
  *   get:
  *     summary: Get all work experience sections.
  *     description: Get all work experience sections from Database.
