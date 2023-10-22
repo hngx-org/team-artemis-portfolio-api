@@ -125,12 +125,7 @@ const getCertificateById = async (
 ) => {
   const id = Number(req.params.certId);
   const userId = req.params.userId;
-
-  if (!id) {
-    const err = new NotFoundError("Please provide a valid certificate ID");
-    return errorHandler(err, req, res, next);
-  }
-
+  
   try {
     certificate.parse({ id, userId })
   } catch (err) {
@@ -138,6 +133,12 @@ const getCertificateById = async (
 
     return error(res, errors[0].message, 400)
   }
+
+  if (!id) {
+    const err = new NotFoundError("Please provide a valid certificate ID");
+    return errorHandler(err, req, res, next);
+  }
+
 
   const certificateRepository = dataSource.getRepository(Certificate);
 
