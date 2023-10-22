@@ -1,3 +1,4 @@
+import { v4 as uuidv4, validate as isUUID } from "uuid";
 import { connectionSource } from "../database/data-source";
 import { ReferenceDetail, Section, User } from "../database/entities";
 import { IReference } from "../interfaces";
@@ -17,7 +18,13 @@ export const createReferenceService = async (
       throw new BadRequestError("User ID is required");
     }
 
-    const user = await userRepository.findOne({ where: { id: user_id } });
+    let user: User;
+
+    if (isUUID(user_id)) {
+      user = await userRepository.findOne({ where: { id: user_id } });
+    } else {
+      user = await userRepository.findOne({ where: { slug: user_id } });
+    }
 
     if (!user) {
       const error = new NotFoundError("A user with this ID does not exist");
@@ -79,10 +86,24 @@ export const getAllUserReferenceService = async (
   userId: string
 ): Promise<{ successful: boolean; data: any; message: string }> => {
   try {
-    let user = await userRepository.findOne({
-      where: { id: userId },
-      relations: ["references"],
-    });
+    let user: User;
+
+    if (isUUID(userId)) {
+      user = await userRepository.findOne({
+        where: { id: userId },
+        relations: ["references"],
+      });
+    } else {
+      user = await userRepository.findOne({
+        where: { slug: userId },
+        relations: ["references"],
+      });
+    }
+
+    // let user = await userRepository.findOne({
+    //   where: { id: userId },
+    //   relations: ["references"],
+    // });
 
     if (!user) {
       return { successful: false, message: "User not found", data: null }; // User not found.

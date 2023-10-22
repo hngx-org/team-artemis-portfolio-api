@@ -31,7 +31,7 @@ export const CreateEducationDetailDataSchema = z.object({
   to: z
     .string()
     .min(4, "Please Select a valid year")
-    .max(4, "please select a valid year"),
+    .max(7, "please select a valid year"),
   user_id: z.string().refine((value) => isUUID(value), {
     message: "userId has to be a valid UUID",
   }),
