@@ -81,7 +81,7 @@ const getPortfolioDetails = async (
     });
 
     if (!user) {
-      throw new NotFoundError("User not found");
+      throw new NotFoundError('User not found');
     }
 
     const allBadges = await connectionSource.manager.query(
@@ -89,12 +89,13 @@ const getPortfolioDetails = async (
     );
     let badges = [];
     if (allBadges.length > 0) {
-      const badgeIds = allBadges?.map(badge => badge.badge_id) || [];
+      const badgeIds = allBadges?.map((badge) => badge.badge_id) || [];
 
       badges = await connectionSource.manager.query(
-        `SELECT id, name, badge_image  FROM "skill_badge" WHERE "id" IN (${badgeIds.join(',')})`
+        `SELECT id, name, badge_image  FROM "skill_badge" WHERE "id" IN (${badgeIds.join(
+          ','
+        )})`
       );
-
     }
 
     const educationPromise = connectionSource.manager.find(EducationDetail, {
@@ -153,9 +154,14 @@ const getPortfolioDetails = async (
 
     const languageObject = await connectionSource.manager.find(LanguageDetail, {
       where: { user: { id: user.id } },
-      relations: ['language'],
+      relations: ['language', 'user'],
     });
-    const languages = languageObject.map((language) => language.language.name);
+    const languages = languageObject.map((language) => ({
+      id: language.id,
+      userId: language.user.id,
+      language: language.language.name,
+      section: 24,
+    }));
 
     try {
       const [
@@ -230,7 +236,7 @@ const getPortfolioDetails = async (
         reference,
         languages,
         contacts,
-        badges
+        badges,
       });
     } catch (error) {
       return next(error);

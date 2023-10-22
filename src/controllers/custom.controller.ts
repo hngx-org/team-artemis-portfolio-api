@@ -41,6 +41,18 @@ const sectionIdSchema = z
     return true;
   });
 
+const updateCustomSectionSchema: any = z.object({
+  sectionId: z.number().positive().int().optional(),
+
+  title: z
+    .string()
+    .min(3)
+    .refine((value) => !/^\s*$/.test(value), {
+      message: "The title must not be empty or consist of only spaces",
+    })
+    .optional(),
+});
+
 export const validateSectionId = (sectionId: any, res: Response) => {
   try {
     const parsedSectionId = parseInt(sectionId);
@@ -64,60 +76,6 @@ export const validateSectionId = (sectionId: any, res: Response) => {
     });
   }
 };
-
-// export const deleteCustomSection = async (req: Request, res: Response) => {
-//   try {
-//     const customSectionId = parseInt(req.params.id);
-//     const { userId } = req.body;
-
-//     // validator for the custom section Id
-//     const customSectionIdValidator = z
-//       .number({
-//         required_error: "id is required",
-//         invalid_type_error: "id must be a number",
-//       })
-//       .int({ message: "id must be an integer" })
-//       .positive({ message: "must be a positive integer" });
-
-//     // validator for user ID
-//     const userIdValidator = z
-//       .string({
-//         required_error: "userId is required",
-//         invalid_type_error: "userId must be uuid",
-//       })
-//       .uuid({ message: "userId must be of type uuid" });
-
-//     const userIdValidate = userIdValidator.safeParse(userId);
-//     const customSectionIdValidate =
-//       customSectionIdValidator.safeParse(customSectionId);
-
-//     if (customSectionIdValidate.success === false) {
-//       const err = new BadRequestError(customSectionIdValidate.error.message);
-//       return res
-//         .status(err.statusCode)
-//         .json({ err: JSON.parse(err.message)[0].message });
-//     }
-
-//     if (userIdValidate.success === false) {
-//       const err = new BadRequestError(userIdValidate.error.message);
-//       return res
-//         .status(err.statusCode)
-//         .json({ err: JSON.parse(err.message)[0].message });
-//     }
-
-//     const data = await deleteCustomSectionService(customSectionId, userId);
-
-//     if (data.successful) {
-//       return success(res, data);
-//     } else {
-//       const err = new NotFoundError(data.message);
-//       return res.status(err.statusCode).json({ err: err.message });
-//     }
-//   } catch (error: any) {
-//     const err = new InternalServerError(error.message);
-//     return res.status(err.statusCode).json({ err: err.message });
-//   }
-// };
 
 const createSection = async (
   req: Request<{}, {}, ISection, {}>,
@@ -219,6 +177,7 @@ const deleteSection = async (
   }
 };
 
+// Custom
 const create = async (
   req: Request<{}, {}, ICustomSection, {}>,
   res: Response
@@ -294,11 +253,37 @@ const findOne = async (req: Request, res: Response) => {
 };
 
 export const updateCustomSection = async (
-  req: Request<{ id: string }, {}, { userId: string; sectionId: number }, {}>,
-  res: Response
+  req: Request<
+    { id: string },
+    {},
+    { userId: string; sectionId: number; title: string },
+    {}
+  >,
+  res: Response,
+  next: NextFunction
 ) => {
-  const { id } = req.params;
   try {
+    const id = parseInt(req.params.id);
+
+    updateCustomSectionSchema.parse(req.body);
+
+    const idValidator = z
+      .number({
+        required_error: "id is required",
+        invalid_type_error: "id must be a number",
+      })
+      .int({ message: "id must be an integer" })
+      .positive({ message: "id must be a positive integer" });
+
+    const idValidate = idValidator.safeParse(id);
+
+    if (idValidate.success === false) {
+      const err = new BadRequestError(idValidate.error.message);
+      return res
+        .status(err.statusCode)
+        .json({ err: JSON.parse(err.message)[0].message });
+    }
+
     const section = await customRepository.findOne({
       where: { id: Number(id) },
     });
@@ -310,6 +295,9 @@ export const updateCustomSection = async (
       });
       if (!section) return error(res, "Section does not exist", 400);
       newRecord.section = section;
+      if (req.body.title) {
+        newRecord.title = req.body.title;
+      }
     }
     await customRepository.update(id, newRecord);
     const custom = await customRepository.findOne({
@@ -317,18 +305,36 @@ export const updateCustomSection = async (
       relations: ["customFields", "section", "user"],
     });
     return success(res, custom, "Success");
-  } catch (err) {
-    console.log(err);
-    return error(res, "An error occurred", 500);
+  } catch (err: any) {
+    if (err instanceof z.ZodError) {
+      const errorMessages = err.issues.map(
+        (issue) => `${issue.path}: ${issue.message}`
+      );
+      const errors = errorMessages.join("; ");
+      next(new BadRequestError(errors));
+    }
+    next(new InternalServerError(err.message));
   }
 };
 
 export const deleteCustomSection = async (
   req: Request<IGetSingleSection, {}, {}, {}>,
-  res: Response
+  res: Response,
+  next: NextFunction
 ) => {
-  const { id } = req.params;
   try {
+    const { id } = req.params;
+
+    const idValidator = z
+      .number({
+        required_error: "id is required",
+        invalid_type_error: "id must be a number",
+      })
+      .int({ message: "id must be an integer" })
+      .positive({ message: "id must be a positive integer" });
+
+    idValidator.parse(parseInt(id as any));
+
     const section = await customRepository.findOne({
       where: { id },
     });
@@ -336,8 +342,12 @@ export const deleteCustomSection = async (
     await customRepository.delete(id);
     return success(res, true, "Success");
   } catch (err) {
-    console.log(err);
-    return error(res, "An error occurred", 500);
+    if (err instanceof z.ZodError) {
+      const errorMessages = err.issues.map((issue) => issue.message);
+      const errors = errorMessages.join("; ");
+      next(new BadRequestError(errors));
+    }
+    next(new InternalServerError(err.message));
   }
 };
 
@@ -546,10 +556,6 @@ const updateSectionSchema: any = z
     }
   );
 
-const updateCustomSectionSchema: any = z.object({
-  sectionId: z.number().positive(),
-});
-
 const getSectionSchema = z.object({
   name: z.string().optional(),
 });
@@ -557,14 +563,6 @@ const getSectionSchema = z.object({
 export const getcustomfieldsSchema: any = z.object({
   customSection: z.string().optional(),
 });
-// .refine(
-//   (data) => {
-//     return Number(data) > 0;
-//   },
-//   {
-//     message: "Number must be greater than 0",
-//   }
-// );
 
 const validateSchema =
   (schema: AnyZodObject) => async (req: Request, res: Response, next: any) => {
@@ -671,7 +669,6 @@ export {
   customUserSectionSchema,
   customFieldSchema,
   createSection,
-  // updateCustomSection,
   sectionSchema,
   fieldsSchema,
   getSection,
