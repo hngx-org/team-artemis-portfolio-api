@@ -1,3 +1,4 @@
+import { number, object, string } from 'zod'
 import { connectionSource } from '../database/data-source'
 import { Section, User } from '../database/entities'
 import { Certificate }  from '../database/entities/Certificate'
@@ -6,6 +7,27 @@ import { UpdateCertificateInterface } from '../interfaces/certification.interfac
 const certificationRepository = connectionSource.getRepository(Certificate)
 const userRepository = connectionSource.getRepository(User)
 const sectionRepository = connectionSource.getRepository(Section)
+
+const userIdSchema = string({ 
+   required_error: "userId must be present",
+   invalid_type_error: "userId must be a string" 
+})
+.trim()
+.uuid("userId must be in UUID format")
+
+export const certificate = object({
+   id: number({
+      required_error: "certId must be present",
+      invalid_type_error: "certId must be a number" 
+   })
+   .int("certId must be a number"),
+   userId: string({ 
+      required_error: "userId must be present",
+      invalid_type_error: "userId must be a string" 
+   })
+   .trim()
+   .uuid("userId must be in UUID format")
+})
 
 export const updateACertificate = async (
    id: number,
