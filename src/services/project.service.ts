@@ -20,7 +20,7 @@ export const updateProjectService = async (
         throw new NotFoundError("Project not found!!");
     }
     if (JSON.stringify(data) === '{}') {
-        throw new CustomError("No data to update", 400);
+        throw new CustomError("No data to update", "400");
     }
 
     await projectRepository.update(id, data);
@@ -40,7 +40,7 @@ export const updateProjectService = async (
                 await projectsImageRepository.save(projectImage);
             }
         } else {
-            throw new CustomError(message, 400);
+            throw new CustomError(message, "400");
         }
     }
     const newProject = await projectRepository.findOne({

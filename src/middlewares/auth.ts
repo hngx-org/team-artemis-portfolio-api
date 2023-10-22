@@ -7,6 +7,7 @@ export const authMiddleWare = async (
   res: Response,
   next: NextFunction
 ) => {
+  if (!req.headers.authorization) return error(res, "no token", 400);
   let response = await validateUser(
     req.headers.authorization,
     req.headers?.action
@@ -50,6 +51,23 @@ export const validateUser = async (authHeader: any, permission: any) => {
 
     return responseData.data;
   } catch (error) {
+    console.log(error);
     throw new Error();
+  }
+};
+export const validate = async (req: any, res: Response, next: NextFunction) => {
+  try {
+    const token = req.headers.authorization?.split(" ")[1];
+    if (!token) return error(res, "no token", 400);
+    const response = await axios.get(
+      `https://staging.zuri.team/api/auth/api/auth/revalidate-login/${token}`
+    );
+    if (response.status !== 200) return error(res, "invalid token", 500);
+    req.user = response.data.data.user;
+    next();
+  } catch (error) {
+    next(error);
+    console.log(error);
+    return error(res, "An error occurred", 500);
   }
 };

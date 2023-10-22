@@ -13,7 +13,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /api/contacts/{user_id}:
+ * /api/v1/contacts/{user_id}:
  *   get:
  *     summary: Get contacts by user ID
  *     description: Retrieve contacts for a specific user by their ID.
@@ -27,24 +27,56 @@ const router = express.Router();
  *       200:
  *         description: Contacts retrieved successfully.
  *         schema:
- *           type: array
- *           items:
- *             type: object
- *             properties:
- *               name:
- *                 type: string
- *               email:
- *                 type: string
- *         example:
- *           - name: "John Doe"
- *             email: "john@example.com"
+ *            type: object
+ *            properties:
+ *                statusCode:
+ *                   type: string
+ *                message:
+ *                   type: string
+ *                success:
+ *                   type: boolean
+ *                payload:
+ *                   type: array
+ *                   items:
+ *                      type: object
+ *                      properties:
+ *                          email:
+ *                             type: string
  *       404:
- *         description: Contacts not found for the specified user.
+ *         description:  user does not exist.
  *         schema:
  *           type: object
  *           properties:
  *             message:
  *               type: string
+ *             timestamp:
+ *               type: string
+ *             status:
+ *               type: number
+ *             error:
+ *               type: string
+ *             path:
+ *               type: string
+ *             success:
+ *               type: boolean
+ *       400:
+ *         description: Bad request .
+ *         schema:
+ *           type: object
+ *           properties:
+ *             message:
+ *               type: string
+ *             timestamp:
+ *               type: string
+ *             status:
+ *               type: number
+ *             error:
+ *               type: string
+ *             path:
+ *               type: string
+ *             success:
+ *               type: boolean
+ *
  *       500:
  *         description: Internal server error.
  *         schema:
@@ -52,6 +84,16 @@ const router = express.Router();
  *           properties:
  *             message:
  *               type: string
+ *             timestamp:
+ *               type: string
+ *             status:
+ *               type: number
+ *             error:
+ *               type: string
+ *             path:
+ *               type: string
+ *             success:
+ *               type: boolean
  *     tags:
  *       - Contacts
  */
@@ -59,7 +101,7 @@ router.get("/contacts/:user_id", getContacts);
 
 /**
  * @swagger
- * /api/contacts:
+ * /api/v1/contacts:
  *   post:
  *     summary: Create a new contact
  *     description: Create a new contact for a user.
@@ -81,37 +123,28 @@ router.get("/contacts/:user_id", getContacts);
  *     responses:
  *       201:
  *         description: Resource created successfully.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 successful:
+ *         schema:
+ *            type: object
+ *            properties:
+ *                 success:
  *                   type: boolean
  *                 message:
  *                   type: string
- *                 data:
- *                   type: object
- *                   properties:
- *                     successful:
- *                       type: boolean
- *                     message:
- *                       type: string
+ *                 statusCode:
+ *                   type: number
  *       400:
- *         description: Failed to create contact.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 successful:
- *                   type: boolean
- *                   example: false
- *                 message:
- *                   type: string
- *                   example: "Failed to create contact"
- *                 data:
- *                   type: null
+ *         description: bad request error.
+ *         schema:
+ *           type: object
+ *           properties:
+ *             message:
+ *               type: string
+ *             statusCode:
+ *               type: number
+ *             error:
+ *               type: string
+ *             success:
+ *               type: boolean
  *     tags:
  *       - Contacts
  */
@@ -120,7 +153,7 @@ router.post("/contacts/", createContacts);
 
 /**
  * @swagger
- * /api/contacts/{id}:
+ * /api/v1/contacts/{id}:
  *   delete:
  *     summary: Delete a contact by ID
  *     description: Delete a contact by providing its ID.
@@ -154,7 +187,7 @@ router.delete("/contacts/:id", deleteContact);
 
 /**
  * @swagger
- * /api/socials:
+ * /api/v1/socials:
  *   post:
  *     summary: Create a new social media type
  *     description: Create a new social media type.
@@ -190,9 +223,9 @@ router.post("/socials", createSocials);
 
 /**
  * @swagger
- * /api/socials:
+ * /api/v1/socials:
  *   get:
- *     summary: fetches all social media types 
+ *     summary: fetches all social media types
  *     description: Create a new social media type.
  *     responses:
  *       200:
@@ -217,11 +250,11 @@ router.post("/socials", createSocials);
  *       - Contacts
  */
 
-router.get('/socials/', getSocials)
+router.get("/socials/", getSocials);
 
 /**
  * @swagger
- * /api/contact/{Id}:
+ * /api/v1/contact/{Id}:
  *   patch:
  *     summary: Update a contact by ID
  *     description: Update a contact by providing its ID.
@@ -259,8 +292,16 @@ router.get('/socials/', getSocials)
  *           properties:
  *             message:
  *               type: string
- *         example:
- *           message: "Invalid input data"
+ *             timestamp:
+ *               type: string
+ *             status:
+ *               type: number
+ *             error:
+ *               type: string
+ *             path:
+ *               type: string
+ *             success:
+ *               type: boolean
  *       404:
  *         description: User not found or contact update failed.
  *         schema:
@@ -268,8 +309,16 @@ router.get('/socials/', getSocials)
  *           properties:
  *             message:
  *               type: string
- *         example:
- *           message: "User not found or contact update failed"
+ *             timestamp:
+ *               type: string
+ *             status:
+ *               type: number
+ *             error:
+ *               type: string
+ *             path:
+ *               type: string
+ *             success:
+ *               type: boolean
  *       500:
  *         description: Internal server error.
  *         schema:
@@ -277,8 +326,16 @@ router.get('/socials/', getSocials)
  *           properties:
  *             message:
  *               type: string
- *         example:
- *           message: "Internal server error"
+ *             timestamp:
+ *               type: string
+ *             status:
+ *               type: number
+ *             error:
+ *               type: string
+ *             path:
+ *               type: string
+ *             success:
+ *               type: boolean
  *     tags:
  *       - Contacts
  */

@@ -9,7 +9,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /api/language:
+ * /api/v1/languages:
  *   post:
  *     summary: Create a new language for user
  *     description: Adds a language as one of the user languages
@@ -34,74 +34,22 @@ const router = express.Router();
  *     responses:
  *       200:
  *         description: Successful response
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 status:
- *                   type: integer
- *                   example: 200
- *                 message:
- *                   type: string
- *                   example: success
- *                 data:
- *                   type: string
  *       404:
  *         description: Not found
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 status:
- *                   type: integer
- *                   example: 404
- *                 message:
- *                   type: string
- *                   example: Not found
- *                 data:
- *                   type: object
  *       400:
  *         description: Bad request
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 status:
- *                   type: integer
- *                   example: 400
- *                 message:
- *                   type: string
- *                   example: Bad Request
- *                 data:
- *                   type: object
  *       500:
  *         description: Internal server error
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 status:
- *                   type: integer
- *                   example: 500
- *                 message:
- *                   type: string
- *                   example: Internal server error
- *                 data:
- *                   type: object
  */
 router.post(
-  '/language',
+  '/languages',
   validateSchema(postLanguageSchema),
   languageController.addLanguage
 );
 
 /**
  * @swagger
- * /api/language/{userId}:
+ * /api/v1/languages/{userId}:
  *   get:
  *     summary: Get all languages owned by the user
  *     description: Get all the languages the requesting user owns
@@ -118,70 +66,18 @@ router.post(
  *     responses:
  *       200:
  *         description: Successful response
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 status:
- *                   type: integer
- *                   example: 200
- *                 message:
- *                   type: string
- *                   example: success
- *                 data:
- *                   type: string
  *       404:
  *         description: Not found
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 status:
- *                   type: integer
- *                   example: 404
- *                 message:
- *                   type: string
- *                   example: Not found
- *                 data:
- *                   type: object
  *       400:
  *         description: Bad request
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 status:
- *                   type: integer
- *                   example: 400
- *                 message:
- *                   type: string
- *                   example: Bad Request
- *                 data:
- *                   type: object
  *       500:
  *         description: Internal server error
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 status:
- *                   type: integer
- *                   example: 500
- *                 message:
- *                   type: string
- *                   example: Internal server error
- *                 data:
- *                   type: object
  */
-router.get('/language/:userId', languageController.getUserLanguages);
+router.get('/languages/:userId', languageController.getUserLanguages);
 
 /**
  * @swagger
- * /api/language/{userId}:
+ * /api/v1/languages/{userId}:
  *   delete:
  *     summary: delete all languages owned by the user
  *     description: delete all the languages the requesting user owns
@@ -198,65 +94,51 @@ router.get('/language/:userId', languageController.getUserLanguages);
  *     responses:
  *       200:
  *         description: Successful response
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 status:
- *                   type: integer
- *                   example: 200
- *                 message:
- *                   type: string
- *                   example: success
- *                 data:
- *                   type: string
  *       404:
  *         description: Not found
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 status:
- *                   type: integer
- *                   example: 404
- *                 message:
- *                   type: string
- *                   example: Not found
- *                 data:
- *                   type: object
  *       400:
  *         description: Bad request
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 status:
- *                   type: integer
- *                   example: 400
- *                 message:
- *                   type: string
- *                   example: Bad Request
- *                 data:
- *                   type: object
  *       500:
  *         description: Internal server error
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 status:
- *                   type: integer
- *                   example: 500
- *                 message:
- *                   type: string
- *                   example: Internal server error
- *                 data:
- *                   type: object
  */
-router.delete('/language/:userId', languageController.deleteAllUserLanguages);
+router.delete('/languages/:userId', languageController.deleteAllUserLanguages);
+
+/**
+ * @swagger
+ * /api/v1/languages:
+ *   get:
+ *     summary: Get all languages that can be chosen
+ *     description: Get all the languages that will be shown on the frontend dropdown
+ *     tags: [Language]
+ *     responses:
+ *       200:
+ *         description: Successful response
+ *       404:
+ *         description: Not found
+ *       400:
+ *         description: Bad request
+ *       500:
+ *         description: Internal server error
+ */
+router.get('/languages', languageController.getProgrammingLanguages);
+
+/**
+ * @swagger
+ * /api/v1/programmingLanguage:
+ *   post:
+ *     summary: Add programming Languages
+ *     description: Admin role to add programming languages that can be selected
+ *     tags: [Language]
+ *     responses:
+ *       200:
+ *         description: Successful response
+ *       404:
+ *         description: Not found
+ *       400:
+ *         description: Bad request
+ *       500:
+ *         description: Internal server error
+ */
+router.post('/programmingLanguage', languageController.addProgrammingLanguages);
 
 module.exports = router;

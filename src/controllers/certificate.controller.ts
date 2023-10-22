@@ -1,36 +1,39 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { connectionSource as dataSource } from "../database/data-source";
 import { success, error } from "../utils";
-import { updateACertificate } from "../services/certificate.service";
-import { UpdateCertificateInterface } from "../interfaces/certification.interface";
 import { Certificate, Section } from "../database/entities";
 import { User } from "../database/entities";
 import { validateCertificateData } from "../middlewares/certificate.zod";
+import { BadRequestError, NotFoundError, errorHandler } from "../middlewares";
 
 const certificateRepo = dataSource.getRepository(Certificate);
 const userRepository = dataSource.getRepository(User);
 const sectionRepository = dataSource.getRepository(Section);
 
-const addCertificateController = async (req: Request, res: Response) => {
+const addCertificateController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
-    const { title, year, organization, url, description, section_id } =
-      req.body;
+    const { title, year, organization, url, description, sectionId } = req.body;
     const userId = req.params.userId;
 
-    // Check if the user with userId exists
     const user = await userRepository.findOneBy({ id: userId });
 
     if (!user) {
-      return error(res, "User not found. Please provide a valid User ID", 404);
+      const err = new NotFoundError(
+        "User not found. Please provide a valid User ID"
+      );
+      return errorHandler(err, req, res, next);
     }
 
-    const section = await sectionRepository.findOneBy({ id: section_id });
+    const section = await sectionRepository.findOneBy({ id: sectionId });
     if (!section) {
-      return error(
-        res,
-        "Section not found. Please provide a valid section ID",
-        404
+      const err = new NotFoundError(
+        "Section not found. Please provide a valid section ID"
       );
+      return errorHandler(err, req, res, next);
     }
 
     const certificateDataIsValid = await validateCertificateData(req, res);
@@ -43,84 +46,151 @@ const addCertificateController = async (req: Request, res: Response) => {
       certificate.organization = organization;
       certificate.url = url;
       certificate.description = description;
-      certificate.user = user;
       certificate.section = section;
+      certificate.user = user;
 
       // Save the certificate to the database
       const savedCertificate = await certificateRepo.save(certificate);
 
+      // Remove the user property from the saved certificate
+      Reflect.deleteProperty(savedCertificate, "user");
+
       if (!savedCertificate) {
-        return error(res, "Error creating certificate", 400);
+        const err = new BadRequestError("Error creating certificate");
+        return errorHandler(err, req, res, next);
       }
 
       return success(res, savedCertificate, "Certificate created successfully");
     }
   } catch (err) {
-    console.error("Error creating certificate:", err);
-    return error(res, (err as Error)?.message);
+    return errorHandler(err, req, res, next);
   }
 };
 
-const getAllCertificates = async (req: Request, res: Response) => {
+const getAllCertificates = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   const certificateRepository = dataSource.getRepository(Certificate);
   const userId = req.params.userId;
 
   const user = await userRepository.findOneBy({ id: userId });
 
   if (!user) {
-    return error(res, "User not found. Please provide a valid User ID", 404);
+    const err = new NotFoundError(
+      "User not found. Please provide a valid User ID"
+    );
+    return errorHandler(err, req, res, next);
   }
 
   try {
     const certificates = await certificateRepository.find({
-      where: { user: user },
-      relations: ["section", "user"],
+      where: {
+        user: {
+          id: userId,
+        },
+      },
+      relations: ["section"],
     });
 
     if (!certificates) {
-      return error(res, "Error fetching certificates", 400);
+      const err = new BadRequestError("Error fetching certificates");
+      return errorHandler(err, req, res, next);
     }
 
     return success(res, certificates, "Certificates fetched successfully");
-  } catch (error) {
-    return error(res, (error as Error)?.message ?? "Internal server error");
+  } catch (err) {
+    return errorHandler(err, req, res, next);
   }
 };
 
-const getCertificateById = async (req: Request, res: Response) => {
-  const id = req.params.certId;
+const getCertificateById = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const id = Number(req.params.certId);
+  const userId = req.params.userId;
+
+  if (!id) {
+    const err = new NotFoundError("Please provide a valid certificate ID");
+    return errorHandler(err, req, res, next);
+  }
+
   const certificateRepository = dataSource.getRepository(Certificate);
 
   try {
-    const certificate = await certificateRepository
-      .createQueryBuilder("certificate")
-      .where("certificate.id = :id", { id })
-      .leftJoinAndSelect("certificate.section", "section")
-      .leftJoinAndSelect("certificate.user", "user")
-      .getOne();
+    const certificate = await certificateRepository.findOne({
+      where: {
+        id,
+        user: {
+          id: userId,
+        },
+      },
+      relations: {
+        section: true,
+      },
+    });
 
     if (!certificate) {
-      return error(res, "Certificate not found", 404);
+      const err = new NotFoundError("Certificate not found");
+      return errorHandler(err, req, res, next);
     }
 
     return success(res, certificate, "Certificate fetched successfully");
-  } catch (error) {
-    return res
-      .status(500)
-      .json({ error: (error as Error)?.message ?? "Internal server error" });
+  } catch (err) {
+    return errorHandler(err, req, res, next);
   }
 };
 
-const deleteCertificate = async (req: Request, res: Response) => {
-  const id = req.params.certId;
+const isUUID = (value: string) => {
+  // Regular expression to match UUID format (8-4-4-12)
+  const uuidPattern =
+    /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
+  return uuidPattern.test(value);
+};
+
+const deleteCertificate = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const { certId, userId } = req.params;
+
+  // Validate userId is a UUID
+  if (!isUUID(userId)) {
+    const err = new BadRequestError("Provide a valid userid in UUID format");
+    return errorHandler(err, req, res, next);
+  }
+
+  // Validate certId is an integer
+  if (!Number.isInteger(Number(certId))) {
+    const err = new BadRequestError(
+      "Provide a valid certId. It must be an integer"
+    );
+    return errorHandler(err, req, res, next);
+  }
+
   const certificateRepository = dataSource.getRepository(Certificate);
 
-  console.log("Request received to delete certificate with certId:", id);
-
   try {
+    // Check if the user with userId exists
+    const user = await userRepository
+      .createQueryBuilder()
+      .where("id = :id", { id: userId })
+      .getOne();
+
+    if (!user) {
+      const err = new NotFoundError(
+        "User not found. Please provide a valid User ID"
+      );
+      return errorHandler(err, req, res, next);
+    }
+
     const certificate = await certificateRepository
       .createQueryBuilder()
-      .where("id = :id", { id })
+      .where("id = :id", { id: certId })
       .getOne();
 
     if (certificate) {
@@ -129,75 +199,90 @@ const deleteCertificate = async (req: Request, res: Response) => {
       // Fetch the updated list of certificates
       const updatedCertificates = await certificateRepository.find();
 
-      res.json({
+      return success(res, {
         message: "Certificate deleted successfully",
         certificates: updatedCertificates,
       });
     } else {
-      res.status(404).json({ error: "Certificate not found" });
+      const err = new NotFoundError("Certificate not found");
+      return errorHandler(err, req, res, next);
     }
-  } catch (error) {
-    res.status(500).json({ error: "Internal Server Error" });
+  } catch (err) {
+    errorHandler(err, req, res, next);
+    // (error);
   }
 };
 
-const uuidPattern =
-  /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
-
-const isValidCertificate = (
-  payload: any
-): payload is UpdateCertificateInterface => {
-  return (
-    typeof payload.title === "string" &&
-    typeof payload.year === "string" &&
-    typeof payload.organization === "string" &&
-    typeof payload.url === "string" &&
-    typeof payload.description === "string"
-  );
-};
-
-const updateCertificate = async (req: Request, res: Response) => {
+const updateCertificate = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
-    const id = parseInt(req.params.id);
+    const id = parseInt(req.params.certId);
     const user_id = req.params.userId;
-    const section_id = parseInt(req.params.section_id);
+    const sectionId = parseInt(req.body.sectionId);
     const payload = req.body;
 
-    if (
-      !id ||
-      typeof id !== "number" ||
-      !user_id ||
-      !uuidPattern.test(user_id)
-    ) {
-      return res.status(400).json({
-        success: false,
-        message:
-          "Please provide an integer id and a valid UUID user id as parameters",
-      });
+    // Validate the certificate data
+    const certificateDataIsValid = await validateCertificateData(
+      req,
+      res,
+      true
+    );
+
+    if (!certificateDataIsValid) {
+      return;
     }
 
-    if (!isValidCertificate(payload)) {
-      return res.status(400).json({
-        success: false,
-        message: "Payload should be in the format below",
-        format: {
-          title: "string",
-          year: "string",
-          organization: "string",
-          url: "string",
-          description: "string",
-        },
-      });
+    const user = await userRepository.findOneBy({ id: user_id });
+    if (!user) {
+      const err = new NotFoundError(
+        "User not found. Please provide a valid User ID"
+      );
+      return errorHandler(err, req, res, next);
     }
 
-    const data = await updateACertificate(id, user_id, section_id, payload);
-    if (data.successful) {
-      success(res, data.data[0], "Certificate updated successfully");
-    } else {
-      error(res, data.message);
+    const certificate = await certificateRepo.findOne({
+      where: {
+        id: id,
+        user: { id: user_id },
+      },
+    });
+
+    if (!certificate) {
+      const err = new NotFoundError("Certificate not found");
+      return errorHandler(err, req, res, next);
     }
-  } catch (error: any) {
-    return error(res, error.message);
+
+    const section = await sectionRepository.findOneBy({ id: sectionId });
+
+    if (!section) {
+      return new NotFoundError("Section not found");
+    }
+
+    // Update certificate properties
+    certificate.title = payload.title;
+    certificate.year = payload.year;
+    certificate.organization = payload.organization;
+    certificate.url = payload.url;
+    certificate.description = payload.description;
+    certificate.section = section;
+    certificate.user = user;
+
+    const updatedCertificate = await certificateRepo.save(certificate);
+
+    if (!updatedCertificate) {
+      const err = new BadRequestError("Error updating certificate");
+      return errorHandler(err, req, res, next);
+    }
+
+    // Remove the user property from the updated certificate
+    Reflect.deleteProperty(updatedCertificate, "user");
+
+    return success(res, updatedCertificate, "Certificate updated successfully");
+  } catch (err) {
+    return errorHandler(err, req, res, next);
   }
 };
 

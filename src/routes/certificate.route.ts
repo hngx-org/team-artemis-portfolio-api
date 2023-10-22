@@ -1,16 +1,17 @@
 import express from "express";
-import { 
-   addCertificateController, 
-   deleteCertificate, 
-   getAllCertificates,
-   getCertificateById, 
+import {
+  addCertificateController,
+  deleteCertificate,
+  getAllCertificates,
+  getCertificateById,
+  updateCertificate,
 } from "../controllers/certificate.controller";
 
 const router = express.Router();
 
 /**
  * @swagger
- * /api/add-certificate/{userId}:
+ * /api/v1/certificates/{userId}:
  *   post:
  *     summary: Create certificate details for a user with a specified ID.
  *     description: Create certificate details for a user.
@@ -93,11 +94,11 @@ const router = express.Router();
  *                 data:
  *                   type: null
  */
-router.post("/add-certificate/:userId", addCertificateController);
+router.post("/certificates/:userId", addCertificateController);
 
 /**
  * @swagger
- * /api/certificates/{userId}:
+ * /api/v1/certificates/{userId}:
  *   get:
  *     summary: Get all certificates for a specific user.
  *     description: Retrieve a list of all available certificates for a specific user.
@@ -159,15 +160,20 @@ router.post("/add-certificate/:userId", addCertificateController);
  */
 router.get("/certificates/:userId", getAllCertificates);
 
-
 /**
  * @swagger
- * /api/certificates/{certId}:
+ * /api/v1/certificates/{userId}/{certId}:
  *   delete:
  *     summary: Delete a certificate by ID.
  *     description: Delete a certificate by its unique certificate ID.
  *     tags: [Certificates]
  *     parameters:
+ *       - in: path
+ *         name: userId  
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The ID of the user who owns the certificate.
  *       - in: path
  *         name: certId
  *         required: true
@@ -208,12 +214,11 @@ router.get("/certificates/:userId", getAllCertificates);
  *                 error:
  *                   type: string
  */
-router.delete("/certificates/:certId", deleteCertificate);
-
+router.delete("/certificates/:userId/:certId", deleteCertificate);
 
 /**
  * @swagger
- * /api/certificates/{certId}:
+ * /api/v1/certificates/{certId}:
  *   get:
  *     summary: Get a certificate by ID.
  *     description: Retrieve a certificate by its unique certificate ID.
@@ -271,6 +276,96 @@ router.delete("/certificates/:certId", deleteCertificate);
  *                 error:
  *                   type: string
  */
-router.get("/certificates/:certId", getCertificateById);
+router.get("/certificates/:userId/:certId", getCertificateById);
+
+/**
+ * @swagger
+ * /api/v1/certificates/{userId}/{certId}:
+ *   put:
+ *     summary: Update certificate details for a user with a specified certificate ID.
+ *     description: Update certificate details for a user.
+ *     tags:
+ *       - Certificates
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The ID of the user associated with the certificate.
+ *       - in: path
+ *         name: certId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: The ID of the certificate to be updated.
+ *       - in: body
+ *         name: certificateDetails
+ *         description: The data for the certificate details to be updated.
+ *         required: true
+ *         schema:
+ *           type: object
+ *           properties:
+ *             title:
+ *               type: string
+ *             year:
+ *               type: string
+ *             organization:
+ *               type: string
+ *             url:
+ *               type: string
+ *             description:
+ *               type: string
+ *             sectionId:
+ *               type: number
+ *         example:
+ *           title: "Updated Certificate Title"
+ *           year: "2024"
+ *           organization: "Updated Certificate Organization"
+ *           url: "https://example-updated.com"
+ *           description: "Updated Certificate Description"
+ *           sectionId: 3
+ *     responses:
+ *       200:
+ *         description: Certificate details successfully updated. Returns the updated certificate.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 successful:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   type: object
+ *       400:
+ *         description: Error updating certificate details.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 successful:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   type: null
+ *       404:
+ *         description: Certificate or User not found. Please provide valid IDs.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 successful:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   type: null
+ */
+router.put("/certificates/:userId/:certId", updateCertificate);
 
 module.exports = router;

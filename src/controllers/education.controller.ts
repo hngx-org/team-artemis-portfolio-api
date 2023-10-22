@@ -1,7 +1,12 @@
 import { Request, RequestHandler, Response, NextFunction } from "express";
+import { v4 as uuidv4, validate as isUUID } from "uuid";
+
 import { connectionSource } from "../database/data-source";
 import { Degree, EducationDetail, Section, User } from "../database/entities";
-import { createEducationDetail } from "../services/education.service";
+import {
+  createEducationDetail,
+  updateEducationDetailID,
+} from "../services/education.service";
 import { EducationDetailData } from "../interfaces/education.interface";
 
 import {
@@ -13,12 +18,13 @@ import {
   InternalServerError,
   MethodNotAllowedError,
   errorHandler,
+  UnprocessableEntityError,
 } from "../middlewares";
+
 import {
   CreateEducationDetailDataSchema,
   validateCreateData,
 } from "../middlewares/education.zod";
-import { z } from "zod";
 
 const educationDetailRepository =
   connectionSource.getRepository(EducationDetail);
@@ -42,7 +48,13 @@ const fetchUserEducationDetail: RequestHandler = async (req, res, next) => {
       throw new BadRequestError("User ID is required");
     }
 
-    const user = await userRepository.findOne({ where: { id: user_id } });
+    let user: User;
+
+    if (isUUID(user_id)) {
+      user = await userRepository.findOne({ where: { id: user_id } });
+    } else {
+      user = await userRepository.findOne({ where: { slug: user_id } });
+    }
 
     if (!user) {
       const error = new NotFoundError("A user with this ID does not exist");
@@ -50,7 +62,8 @@ const fetchUserEducationDetail: RequestHandler = async (req, res, next) => {
     }
 
     const educationDetails = await educationDetailRepository.find({
-      where: { user: { id: user_id } }, relations: ["degree"]
+      where: { user: { id: user.id } },
+      relations: ["degree"],
     });
 
     if (!educationDetails) {
@@ -94,8 +107,6 @@ const createEducationDetailController = async (
       section_id,
     } = req.body as EducationDetailData;
 
-    console.log("req.body", req.body);
-
     const data = {
       degree_id,
       fieldOfStudy,
@@ -108,18 +119,51 @@ const createEducationDetailController = async (
 
     // Validate date strings in "yy-mm-dd" format
     if (data.from && !validateYear(data.from)) {
-      return res.status(400).json({ errors: "Invalid 'from' date format" });
-      // throw new BadRequestError("Invalid 'from' date format")
+      // return res.status(400).json({ errors: "Invalid 'from' date format" });
+      throw new BadRequestError("Invalid 'from' date format");
+    }
+    
+      if (data.to && !validateYear(data.to) && data.to.toLocaleLowerCase() !=='present') {
+        throw new BadRequestError("Invalid 'to' date format");
+        // return res.status(400).json({ errors: "Invalid 'to' date format" });
+      }
+
+    
+
+    await validateCreateData(data, user_id, res, next);
+
+    if (!isNaN(Number(fieldOfStudy))) {
+      throw new UnprocessableEntityError("field Of Study should be a string");
     }
 
-    if (data.to && !validateYear(data.to)) {
-      // throw new BadRequestError("Invalid 'to' date format")
-      return res.status(400).json({ errors: "Invalid 'to' date format" });
+    if (!isNaN(Number(school))) {
+      throw new UnprocessableEntityError("school should be a string");
     }
-    await validateCreateData(data, user_id, res);
+
+    if (!isNaN(Number(description))) {
+      throw new UnprocessableEntityError("description should be a string");
+    }
+
+    const pattern = /^[a-zA-Z0-9 ,.]+$/;
+
+    if (!pattern.test(fieldOfStudy)) {
+      throw new UnprocessableEntityError(
+        "field Of Study should not contain sepecial characters"
+      );
+    }
+    if (!pattern.test(school)) {
+      throw new UnprocessableEntityError(
+        "school should not contain sepecial characters"
+      );
+    }
+    if (!pattern.test(description)) {
+      throw new UnprocessableEntityError(
+        "description should not contain sepecial characters"
+      );
+    }
 
     // check if the from date is less than the to date
-    if (data.from && data.to) {
+    if (data.from && data.to && (data.to.toLocaleLowerCase() !== 'present')) {
       const fromDate = parseInt(data.from);
       const toDate = parseInt(data.to);
       if (fromDate > toDate) {
@@ -129,7 +173,6 @@ const createEducationDetailController = async (
       }
     }
 
-    console.log("validated");
     // Define an array of required fields
     const requiredFields = [
       "degree_id",
@@ -145,48 +188,43 @@ const createEducationDetailController = async (
     const missingFields = requiredFields.filter((field) => !req.body[field]);
 
     if (missingFields.length > 0) {
-      // Create a CustomError with a 400 status code
-      throw new CustomError(`Missing fields: ${missingFields.join(", ")}`);
+      throw new BadRequestError(`Missing fields: ${missingFields.join(", ")}`);
     }
 
     // Get the user by userId
     const userRepository = connectionSource.getRepository(User);
-    const user = await userRepository.findOne({ where: { id: user_id } });
+
+    let user: User;
+
+    if (isUUID(user_id)) {
+      user = await userRepository.findOne({ where: { id: user_id } });
+    } else {
+      user = await userRepository.findOne({ where: { slug: user_id } });
+    }
 
     const sectionRepository = connectionSource.getRepository(Section);
     const degreeRepository = connectionSource.getRepository(Degree);
+
     const section = await sectionRepository.findOne({
       where: { id: section_id },
     });
     const degree = await degreeRepository.findOne({ where: { id: degree_id } });
 
-    console.log("gone past");
     if (!user) {
-      // Create a CustomError with a 404 status code
       throw new NotFoundError(
         "Error creating education detail: User not found"
       );
     }
     if (!section) {
-      // Create a CustomError with a 404 status code
       throw new NotFoundError(
         "Error creating education detail: Section not found"
       );
     }
     if (!degree) {
-      // Create a CustomError with a 404 status code
       throw new NotFoundError(
         "Error creating education detail: Degree not found"
       );
     }
-
-    console.log("creating");
-    console.log(degree);
-    console.log(section);
-    console.log(user);
-    console.log(degree_id);
-    console.log(section_id);
-    console.log(user_id);
 
     // Call the service function to create an education detail
     const educationDetail = await createEducationDetail({
@@ -278,13 +316,16 @@ const updateEducationDetail = async (
     }
 
     // Save the updated education detail
-    await educationDetailRepository.save(educationDetail);
-
-    console.log("Education detail updated successfully");
+    const result = await updateEducationDetailID(
+      educationDetail.id,
+      updateData,
+      next
+    );
 
     res.status(200).json({
       message: "Education detail updated successfully",
-      educationDetail,
+      educationDetail: result,
+      success: true,
     });
   } catch (error) {
     console.error("Error updating education detail:", error.message);
