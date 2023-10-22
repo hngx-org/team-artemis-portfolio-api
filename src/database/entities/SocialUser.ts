@@ -13,6 +13,8 @@ import { User } from "./User";
 @Entity("social_user", { schema: "public" })
 export class SocialUser {
   @PrimaryGeneratedColumn({ type: "integer", name: "id" })
+
+  //bugfix
   id: number;
 
   @Column("text", { name: "url", nullable: true })
