@@ -139,7 +139,7 @@ router.post("/section", validateSchema(sectionSchema), createSection);
  *                 data:
  *                   type: null
  */
-router.post("/custom",  validateSchema(customUserSectionSchema), create);
+router.post("/custom", validateSchema(customUserSectionSchema), create);
 
 /**
  * @swagger
@@ -854,6 +854,6 @@ router.put("/section/:id", validateSchema(updateSectionSchema), UpdateSection);
  *                 data:
  *                   type: null
  */
-router.put("/custom/:id",updateCustomSection);
+router.put("/custom/:id", updateCustomSection);
 
 module.exports = router;

@@ -89,9 +89,7 @@ const createSection = async (
     if (err instanceof QueryFailedError) {
       if (err.message.includes("violates foreign key constraint")) {
         return next(
-          new Error(
-            "Foreign key constraint violation. Check your name."
-          )
+          new Error("Foreign key constraint violation. Check your name.")
         );
       } else if (err.message.includes("unique constraint")) {
         return next(
@@ -144,10 +142,14 @@ const getSection = async (req: Request, res: Response, next: NextFunction) => {
   } catch (err) {
     console.log(err);
     if (err instanceof QueryFailedError)
-      return next(new Error("A database error occurred. Please contact the administrator."))
+      return next(
+        new Error(
+          "A database error occurred. Please contact the administrator."
+        )
+      );
     else return next(err);
   }
-}
+};
 
 const getSingleSection = async (
   req: Request<IGetSingleSection, {}, {}, {}>,
@@ -163,8 +165,12 @@ const getSingleSection = async (
     return success(res, section, "Success");
   } catch (err) {
     console.log(err);
-     if (err instanceof QueryFailedError) 
-        return next( new Error("A database error occurred. Please contact the administrator."))
+    if (err instanceof QueryFailedError)
+      return next(
+        new Error(
+          "A database error occurred. Please contact the administrator."
+        )
+      );
     else return next(err);
   }
 };
@@ -247,27 +253,29 @@ const create = async (
     return success(res, record, "Success");
   } catch (err) {
     console.log(err);
-     if (err instanceof QueryFailedError) {
-       if (err.message.includes("violates foreign key constraint")) {
-         return next(
-           new Error("Foreign key constraint violation. Check your userId, sectionId or title.")
-         );
-       } else if (err.message.includes("unique constraint")) {
-         return next(
-           new Error(
-             "A unique constraint violation occurred. Check your data for duplicates."
-           )
-         );
-       } else {
-         return next(
-           new Error(
-             "A database error occurred. Please contact the administrator."
-           )
-         );
-       }
-     } else {
-       return next(err);
-     }
+    if (err instanceof QueryFailedError) {
+      if (err.message.includes("violates foreign key constraint")) {
+        return next(
+          new Error(
+            "Foreign key constraint violation. Check your userId, sectionId or title."
+          )
+        );
+      } else if (err.message.includes("unique constraint")) {
+        return next(
+          new Error(
+            "A unique constraint violation occurred. Check your data for duplicates."
+          )
+        );
+      } else {
+        return next(
+          new Error(
+            "A database error occurred. Please contact the administrator."
+          )
+        );
+      }
+    } else {
+      return next(err);
+    }
   }
 };
 
@@ -310,13 +318,13 @@ export const getAllCustomSections = async (
     return success(res, response, "Success");
   } catch (err) {
     console.log(err);
-     if (err instanceof QueryFailedError)
-       return next(
-         new Error(
-           "A database error occurred. Please contact the administrator."
-         )
-       );
-     else return next(err);
+    if (err instanceof QueryFailedError)
+      return next(
+        new Error(
+          "A database error occurred. Please contact the administrator."
+        )
+      );
+    else return next(err);
   }
 };
 
@@ -566,8 +574,11 @@ export const findAllCustomField = async (
   }
 };
 
-
-const findOneCustomField = async (req: Request, res: Response, next:NextFunction) => {
+const findOneCustomField = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   const { id } = req.params;
 
   try {
@@ -603,13 +614,13 @@ const findOneCustomField = async (req: Request, res: Response, next:NextFunction
       });
     } else {
       console.error(error);
-       if (error instanceof QueryFailedError)
-         return next(
-           new Error(
-             "A database error occurred. Please contact the administrator."
-           )
-         );
-       else return next(error);
+      if (error instanceof QueryFailedError)
+        return next(
+          new Error(
+            "A database error occurred. Please contact the administrator."
+          )
+        );
+      else return next(error);
     }
   }
 };
