@@ -61,7 +61,6 @@ export const createUserTrack = async (
     try {
       trackSchema.parse({ userId: user_id, trackId: track_id })
     } catch (err){
-
       const { errors } = err as ZodError;
       return error(res, errors[0].message, 400)
     }
