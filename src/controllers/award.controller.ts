@@ -65,7 +65,7 @@ const createAwardController = async (
 };
 
 // Get award by Id
-const getAwardController = async (req: Request, res: Response) => {
+const getAwardController = async (req: Request, res: Response, next: any) => {
   const awardRepo = connectionSource.getRepository(Award);
   const userRepo = connectionSource.getRepository(User);
   try {
@@ -74,12 +74,13 @@ const getAwardController = async (req: Request, res: Response) => {
     const user = await userRepo.findOne({ where: { id } });
     const award = await awardRepo.findOne({ where: { user } });
 
-    res.status(200).json({
+    return res.status(200).json({
       message: "Award retrieved successfully",
       award,
+      successful: true
     });
   } catch (error) {
-    console.error("Error getting award", error);
+    next(error)
     res.status(500).json({ message: "Error getting awards" });
   }
 };
