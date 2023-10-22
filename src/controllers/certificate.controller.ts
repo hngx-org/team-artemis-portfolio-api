@@ -5,6 +5,10 @@ import { Certificate, Section } from "../database/entities";
 import { User } from "../database/entities";
 import { validateCertificateData } from "../middlewares/certificate.zod";
 import { BadRequestError, NotFoundError, errorHandler } from "../middlewares";
+import { certificate, validateUserId } from "../services";
+import { userIdSchema } from "../middlewares/interests.zod";
+import { ZodError } from "zod";
+
 
 const certificateRepo = dataSource.getRepository(Certificate);
 const userRepository = dataSource.getRepository(User);
@@ -75,6 +79,15 @@ const getAllCertificates = async (
   const certificateRepository = dataSource.getRepository(Certificate);
   const userId = req.params.userId;
 
+  
+  try {
+    userIdSchema.parse(userId)
+  } catch (err) {
+    const { errors } = err  as ZodError;
+    return error(res, errors[0].message, 400)
+  }
+
+
   const user = await userRepository.findOneBy({ id: userId });
 
   if (!user) {
@@ -116,6 +129,14 @@ const getCertificateById = async (
   if (!id) {
     const err = new NotFoundError("Please provide a valid certificate ID");
     return errorHandler(err, req, res, next);
+  }
+
+  try {
+    certificate.parse({ id, userId })
+  } catch (err) {
+    const { errors } = err  as ZodError;
+
+    return error(res, errors[0].message, 400)
   }
 
   const certificateRepository = dataSource.getRepository(Certificate);
