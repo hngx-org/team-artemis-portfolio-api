@@ -144,15 +144,15 @@ export const createNotificationSettingController = async (
         hasExistingNotificationPreferences.slice(-1)?.[0];
 
       updateNotification.communityUpdate =
-        communityUpdate || updateNotification.communityUpdate;
+        communityUpdate ?? updateNotification.communityUpdate;
       updateNotification.emailSummary =
-        emailSummary || updateNotification.emailSummary;
+        emailSummary ?? updateNotification.emailSummary;
       updateNotification.newMessages =
-        newMessages || updateNotification.newMessages;
+        newMessages ?? updateNotification.newMessages;
       updateNotification.followUpdate =
-        followUpdate || updateNotification.followUpdate;
+        followUpdate ?? updateNotification.followUpdate;
       updateNotification.specialOffers =
-        specialOffers || updateNotification.specialOffers;
+        specialOffers ?? updateNotification.specialOffers;
 
       const updatedNotification = await notificationSettingRepository.save(
         updateNotification
@@ -196,7 +196,8 @@ export const createNotificationSettingController = async (
 
     success(res, notificationInfo, `activated notification`);
   } catch (error) {
-    console.log(error), errorHandler(error, req, res, next);
+    console.log(error);
+    return errorHandler(error, req, res, next);
   }
 };
 
@@ -335,7 +336,8 @@ export const updateNotificationSettings = async (
 
 export const getUserNotificationSettings = async (
   req: Request,
-  res: Response
+  res: Response,
+  next: NextFunction
 ) => {
   try {
     const userId = req.params.userId;
@@ -345,7 +347,7 @@ export const getUserNotificationSettings = async (
     });
 
     if (!user) {
-      return error(res, "Please provide a valid User ID", 400);
+      throw new NotFoundError("Please provide a valid User ID");
     }
 
     const notificationModel =
@@ -364,6 +366,6 @@ export const getUserNotificationSettings = async (
     return success(res, notifications, "Notifications fetched successfully");
   } catch (err) {
     console.log("error", err?.message);
-    return error(res, (err as Error)?.message);
+    return errorHandler(err, req, res, next);
   }
 };
