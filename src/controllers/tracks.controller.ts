@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import { connectionSource } from "../database/data-source";
 import { Tracks, UserTrack, User } from "../database/entities";
 import { error, success } from "../utils";
-import { NotFoundError, BadRequestError } from "../middlewares";
+import { NotFoundError, errorHandler, BadRequestError } from "../middlewares";
 
 const trackRepository = connectionSource.getRepository(Tracks);
 const userTrackRepository = connectionSource.getRepository(UserTrack);
@@ -14,25 +14,42 @@ export const getAllTracks = async (req: Request, res: Response) => {
 
     const tracks = await trackRepository.find();
 
-    return success(res, tracks, "Succesfully Fetched Tracks");
+    return success(res, tracks, "Successfully Fetched Tracks");
   } catch (err) {
     return error(res, err.message);
   }
 };
 
-export const getTrackById = async (req: Request, res: Response) => {
+export const getTrackById = async (req: Request, res: Response, next: NextFunction) => {
   try {
+
+    if (!Number.isInteger(Number(req.params.id))) {
+      const err = new BadRequestError(
+        "Provide a valid Id. It must be an integer"
+      );
+      return errorHandler(err, req, res, next);
+    }
+
     const track = await trackRepository.findOne({
       where: { id: +req.params.id },
     });
 
     if (!track) {
-      return error(res, "Track not found");
+      const err = new NotFoundError("Track not found");
+      return errorHandler(err, req, res, next);
     }
 
-    return success(res, track, "Succesfully Fetched Track");
+    // check if id is a valid integer
+    if (!Number.isInteger(Number(req.params.id))) {
+      const err = new BadRequestError(
+        "Provide a valid Id. It must be an integer"
+      );
+      return errorHandler(err, req, res, next);
+    }
+
+    return success(res, track, "Successfully Fetched Track");
   } catch (err) {
-    return error(res, err.message);
+    errorHandler(err, req, res, next);
   }
 };
 
