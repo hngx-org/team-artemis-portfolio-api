@@ -6,6 +6,7 @@ import { DegreeData } from "../interfaces";
 import { getDegree, updateDegree } from "../services/degree.service";
 import { z } from "zod";
 import { NotFoundError } from "../middlewares/index";
+import { success } from "../utils";
 // Controller function to create a degree
 const createDegreeController = async (
   req: Request,
@@ -80,7 +81,7 @@ export const fetchAllDegree = async (
     }
     res
       .status(200)
-      .json({ message: "degrees gotten successfully!", data: degrees });
+      .json({ message: "Degrees gotten successfully!", data: degrees, successful: true });
   } catch (error) {
     next(error);
   }
@@ -146,13 +147,9 @@ const deleteDegree = async (
 
     await degreeRepository.remove(degree);
 
-    const response = {
-      message: "Degree deleted successfully",
-      status: "Success",
-    };
-    return res.status(200).json(response);
+    return success(res, null, "Degree deleted successfully")
   } catch (error) {
-    next(error);
+    return next(error);
   }
 };
 export { createDegreeController, deleteDegree };
